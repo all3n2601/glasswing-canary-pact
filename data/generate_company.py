@@ -1,4 +1,4 @@
-"""Generate the Halcyon Freight company twin — conformant to Merged Schema v2.0.0.
+"""Generate the Halcyon Freight company twin — conformant to Merged Schema v2.1.0.
 
 Deterministic, standard-library only. Emits ``data/synthetic_company.json`` as a full
 v2 ``Twin``: schema_version, version, organization, department_profiles, entities, edges,
@@ -30,8 +30,9 @@ import json
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = "2.0.0"
+SCHEMA_VERSION = "2.1.0"
 CREATED_AT = "2026-09-26T12:00:00Z"
+AS_OF_DATE = "2026-09-26"
 
 REVENUE_USD = 40_000_000
 TOTAL_BUDGET_USD = 8_000_000            # == sum of department budgets (rule 16)
@@ -410,15 +411,15 @@ doc("doc_soc2_register", "SOC 2 control register", "audit_report",
     department_id="dept_compliance", status="current",
     covers=["ctl_soc2_audit_logging", "ctl_access_control", "wf_soc2_evidence"],
     summary="Mapping of SOC 2 controls to their evidence sources.", framework_refs=["SOC2"])
-evi("ev_soc2_register_intro", "audit_report", "doc_soc2_register",
+evi("ev_soc2_register_intro", "policy", "doc_soc2_register",
     "CC7.2 requires continuous audit-log evidence retained for 12 months.")
-evi("ev_identity_access", "audit_report", "doc_soc2_register",
+evi("ev_identity_access", "policy", "doc_soc2_register",
     "SSO via IdentityHub is the sole enforcement point for SOC 2 CC6.1 logical access.")
 
 doc("doc_migration_charter", "Warehouse migration charter", "strategy_memo",
     department_id="dept_product", status="current", covers=["proj_warehouse_migration"],
     summary="Migration decommissions warehouse-legacy; halting mid-flight keeps ~$400K/yr running.")
-evi("ev_migration_carry", "strategy_memo", "doc_migration_charter",
+evi("ev_migration_carry", "finance_forecast", "doc_migration_charter",
     "warehouse-legacy carries ~$400K/yr; retired only on migration completion.")
 
 doc("doc_finance_forecast", "FY forecast", "financial_forecast",
@@ -651,7 +652,7 @@ def build() -> dict[str, Any]:
         "version": {
             "twin_version": "twin_halcyon_v2", "settings_version": 1,
             "prompt_version": "p1", "model_id": "configurable",
-            "engine_version": "e1", "created_at": CREATED_AT,
+            "engine_version": "e1", "created_at": CREATED_AT, "as_of_date": AS_OF_DATE,
         },
         "organization": {
             "id": "org_halcyon", "legal_name": "Halcyon Freight Inc.", "display_name": "Halcyon Freight",

@@ -99,6 +99,7 @@ class VersionInfo(BaseModel):
     model_id: str
     engine_version: str
     created_at: str
+    as_of_date: str  # added in schema v2.1.0
 
 
 class Entity(BaseModel):
