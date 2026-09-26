@@ -1,3 +1,4 @@
+from contracts_py.common import SCHEMA_VERSION
 from datetime import datetime, timezone
 
 import pytest
@@ -285,7 +286,7 @@ def test_organization_profile_view(organization: Organization) -> None:
         departments=[OrganizationDepartmentSummary.model_validate(department)],
         settings=OrganizationSettings(organization_id=organization.id),
     )
-    assert view.schema_version == "2.1.0"
+    assert view.schema_version == SCHEMA_VERSION
     with pytest.raises(ValidationError):
         OrganizationDepartmentSummary.model_validate({**department, "maturity_level": 6})
     with pytest.raises(ValidationError):
