@@ -37,20 +37,20 @@ class ValidationReport:
 def validate_twin(twin: Twin) -> ValidationReport:
     r = ValidationReport()
     ents = {e.id: e for e in twin.entities}
-    depts = {e.id for e in twin.entities if e.type == EntityType.DEPARTMENT}
-    roles = {e.id for e in twin.entities if e.type == EntityType.ROLE}
-    person_tokens = {e.id for e in twin.entities if e.type == EntityType.PERSON_TOKEN}
+    depts = {e.id for e in twin.entities if e.type == EntityType.department}
+    roles = {e.id for e in twin.entities if e.type == EntityType.role}
+    person_tokens = {e.id for e in twin.entities if e.type == EntityType.person_token}
     org = twin.organization
 
     # --- rule 16: organization totals equal the sums ---
-    dept_budget = sum(e.annual_cost_usd or 0 for e in twin.entities if e.type == EntityType.DEPARTMENT)
+    dept_budget = sum(e.annual_cost_usd or 0 for e in twin.entities if e.type == EntityType.department)
     if org.total_annual_budget_usd != dept_budget:
         r.err(f"org.total_annual_budget_usd ({org.total_annual_budget_usd:,}) != sum dept budgets ({dept_budget:,})")
     fte = sum(p.staffing.actual_fte + p.staffing.contractors_fte for p in twin.department_profiles)
     if org.total_headcount_fte != fte:
         r.err(f"org.total_headcount_fte ({org.total_headcount_fte}) != sum profile FTE ({fte})")
     for fw in org.regulatory_frameworks:
-        if not any(e.framework == fw for e in twin.entities if e.type == EntityType.CONTROL):
+        if not any(e.framework == fw for e in twin.entities if e.type == EntityType.control):
             r.err(f"regulatory framework {fw} has no control entity")
 
     # --- rule 17: department profiles consistent with their entities ---
@@ -97,7 +97,7 @@ def validate_twin(twin: Twin) -> ValidationReport:
     # --- acceptance: every critical workflow has an owner OR is a flagged knowledge risk ---
     owned = {e.target for e in twin.edges if e.relation == Relation.OWNS}
     for e in twin.entities:
-        if e.type == EntityType.WORKFLOW and e.criticality.value in ("high", "critical"):
+        if e.type == EntityType.workflow and e.criticality.value in ("high", "critical"):
             flagged_risk = (e.min_qualified_owners or 0) >= 1 and (e.documented_pct is not None)
             if e.id not in owned and not flagged_risk:
                 r.warn(f"critical workflow {e.id} has no OWNS edge and is not flagged as a knowledge risk")

@@ -19,22 +19,22 @@ import networkx as nx
 
 from .graph import affected_departments, build_graph
 from .loader import default_fixture_path, load_company_twin
-from .models import EntityType, Relation, Twin
+from .models import EntityType, Relation, Twin, entity_map
 
 
 def knowledge_map(twin: Twin) -> dict:
-    ents = twin.entity_map()
+    ents = entity_map(twin)
     knows: dict[str, list[str]] = {}
     for e in twin.edges:
         if e.relation == Relation.KNOWS:
             knows.setdefault(e.target, []).append(e.source)  # knowledge -> [person tokens]
     supports_wf: dict[str, list[str]] = {}
     for e in twin.edges:
-        if e.relation == Relation.SUPPORTS and ents.get(e.target) and ents[e.target].type == EntityType.WORKFLOW:
+        if e.relation == Relation.SUPPORTS and ents.get(e.target) and ents[e.target].type == EntityType.workflow:
             supports_wf.setdefault(e.source, []).append(e.target)  # knowledge -> [workflows]
     rows = []
     for k in twin.entities:
-        if k.type != EntityType.KNOWLEDGE_ASSET:
+        if k.type != EntityType.knowledge_asset:
             continue
         holders = knows.get(k.id, [])
         rows.append({
@@ -54,7 +54,7 @@ def knowledge_map(twin: Twin) -> dict:
             owners.setdefault(e.target, []).append(e.source)
     workflows = []
     for w in twin.entities:
-        if w.type != EntityType.WORKFLOW:
+        if w.type != EntityType.workflow:
             continue
         o = owners.get(w.id, [])
         has_named_owners = len(o) > 0
@@ -93,7 +93,7 @@ def vendor_report(twin: Twin) -> dict:
     without adding non-schema fields to the vendor entity.
     """
     g = build_graph(twin)
-    ents = twin.entity_map()
+    ents = entity_map(twin)
     subs = {  # possible replacements declared via SUBSTITUTES_FOR
     }
     for e in twin.edges:
@@ -101,7 +101,7 @@ def vendor_report(twin: Twin) -> dict:
             subs.setdefault(e.target, []).append(e.source)
     rows = []
     for v in twin.entities:
-        if v.type != EntityType.VENDOR:
+        if v.type != EntityType.vendor:
             continue
         out_edges = [e for e in twin.edges if e.source == v.id]
         consumers = [e.target for e in out_edges]
