@@ -1,0 +1,76 @@
+{
+  "$defs": {
+    "UserPublic": {
+      "additionalProperties": false,
+      "properties": {
+        "user_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "User Id",
+          "type": "string"
+        },
+        "email": {
+          "title": "Email",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/$defs/UserRole"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id",
+        "email",
+        "display_name",
+        "role",
+        "created_at"
+      ],
+      "title": "UserPublic",
+      "type": "object"
+    },
+    "UserRole": {
+      "enum": [
+        "viewer",
+        "approver"
+      ],
+      "title": "UserRole",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "access_token": {
+      "title": "Access Token",
+      "type": "string"
+    },
+    "token_type": {
+      "const": "bearer",
+      "default": "bearer",
+      "title": "Token Type",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "title": "Expires At",
+      "type": "string"
+    },
+    "user": {
+      "$ref": "#/$defs/UserPublic"
+    }
+  },
+  "required": [
+    "access_token",
+    "expires_at",
+    "user"
+  ],
+  "title": "AuthToken",
+  "type": "object"
+}

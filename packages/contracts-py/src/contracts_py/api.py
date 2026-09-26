@@ -1,3 +1,5 @@
+from datetime import datetime
+from enum import StrEnum
 from typing import Literal
 
 from pydantic import Field
@@ -74,3 +76,38 @@ class OrganizationProfileView(Strict):
     organization: Organization
     departments: list[OrganizationDepartmentSummary]
     settings: OrganizationSettings
+
+
+EMAIL_PATTERN = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+
+
+class UserRole(StrEnum):
+    viewer = "viewer"
+    approver = "approver"
+
+
+class SignupRequest(Strict):
+    email: str = Field(pattern=EMAIL_PATTERN, max_length=254)
+    password: str = Field(min_length=8, max_length=256)
+    display_name: str = Field(min_length=1, max_length=120)
+    role: UserRole = UserRole.viewer
+
+
+class LoginRequest(Strict):
+    email: str = Field(pattern=EMAIL_PATTERN, max_length=254)
+    password: str = Field(max_length=256)
+
+
+class UserPublic(Strict):
+    user_id: ID
+    email: str
+    display_name: str
+    role: UserRole
+    created_at: datetime
+
+
+class AuthToken(Strict):
+    access_token: str
+    token_type: Literal["bearer"] = "bearer"
+    expires_at: datetime
+    user: UserPublic
