@@ -71,7 +71,9 @@ def _unique(items: list[str]) -> list[str]:
 class _Run:
     def __init__(self, brief: DecisionBrief, twin: Twin, engine: EnginePort, settings: OrganizationSettings,
                  llm: LLMClient, emit: Emit, run_id: str, clock: Callable[[], datetime],
-                 should_stop: Callable[[], bool] | None = None) -> None:
+                 should_stop: Callable[[], bool] | None = None, *, challenger: bool = True,
+                 agent_evidence: bool = True, feedback: bool = True) -> None:
+        self.challenger, self.agent_evidence, self.feedback = challenger, agent_evidence, feedback
         self.brief, self.twin, self.engine, self.settings = brief, twin, engine, settings
         self.llm, self.emit, self.run_id, self.clock = llm, emit, run_id, clock
         self.status = RunStatus.created
@@ -151,6 +153,8 @@ class _Run:
                                 engine=self.engine, act_now=results[Future.act_now],
                                 inaction=results[Future.inaction], settings=self.settings,
                                 known_impact_summaries=summaries)
+        if not self.agent_evidence:
+            context = context.model_copy(update={"view": context.view.model_copy(update={"evidence": []})})
         prompt = assemble(agent_id, context)
         self.stop_if_requested(f"the {agent_id} agent call")
         result = self.llm.call(agent_id, prompt.messages, prompt.output_model, prompt_version=PROMPT_VERSION,
@@ -258,7 +262,7 @@ class _Run:
                     self.publish(EventType.dependency_validated,
                                  DependencyValidated(assessment_id=outcome.assessment.assessment_id, edge=edge),
                                  actor=outcome.assessment.agent_id)
-            if not new:
+            if not new or not self.feedback:
                 return {}
             twin = self.engine.clone_with_edges(state["twin"], new)
             act_now = self.simulate(twin, Future.act_now, state["plan"])
@@ -376,6 +380,8 @@ class _Run:
             "comparing_futures": self.comparing_futures,
             "generating_package": self.generating_package,
         }
+        if not self.challenger:
+            del nodes["challenging"], nodes["propagating_challenge"]
         for name, node in nodes.items():
             graph.add_node(name, node)
         graph.add_edge(START, "validating")
@@ -384,9 +390,13 @@ class _Run:
         graph.add_edge("optimizing", "running_agents")
         graph.add_conditional_edges("running_agents", self.fan_out, ["agent"])
         graph.add_edge("agent", "propagating_first_pass")
-        graph.add_edge("propagating_first_pass", "challenging")
-        graph.add_edge("challenging", "propagating_challenge")
-        graph.add_conditional_edges("propagating_challenge", self.after_challenge, ["reoptimizing", "comparing_futures"])
+        targets = ["reoptimizing", "comparing_futures"]
+        if self.challenger:
+            graph.add_edge("propagating_first_pass", "challenging")
+            graph.add_edge("challenging", "propagating_challenge")
+            graph.add_conditional_edges("propagating_challenge", self.after_challenge, targets)
+        else:
+            graph.add_conditional_edges("propagating_first_pass", self.after_challenge, targets)
         graph.add_edge("reoptimizing", "comparing_futures")
         graph.add_edge("comparing_futures", "generating_package")
         graph.add_edge("generating_package", END)
@@ -396,9 +406,15 @@ class _Run:
 def run_decision(brief: DecisionBrief, *, engine: EnginePort, settings: OrganizationSettings, llm: LLMClient,
                  emit: Emit, run_id: str, twin: Twin,
                  clock: Callable[[], datetime] = lambda: datetime.now(timezone.utc),
-                 should_stop: Callable[[], bool] | None = None) -> DecisionPackage:
-    """Raises RunCancelled, with no further events and no package, once should_stop returns True."""
-    run = _Run(brief, twin, engine, settings, llm, emit, run_id, clock, should_stop)
+                 should_stop: Callable[[], bool] | None = None, challenger: bool = True,
+                 agent_evidence: bool = True, feedback: bool = True) -> DecisionPackage:
+    """Raises RunCancelled, with no further events and no package, once should_stop returns True.
+
+    The last three flags exist for evaluation ablations: skip the challenger, hide evidence from agent views,
+    or report validated edges without feeding them back into the engine.
+    """
+    run = _Run(brief, twin, engine, settings, llm, emit, run_id, clock, should_stop, challenger=challenger,
+               agent_evidence=agent_evidence, feedback=feedback)
     run.stop_if_requested("run_created")
     run.publish(EventType.run_created, brief)
     try:
