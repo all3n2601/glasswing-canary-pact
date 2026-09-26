@@ -1,5 +1,5 @@
-from .graph import build_graph, downstream_paths
-from .loader import load_company_twin
+from .graph import build_graph, downstream_paths, list_dependencies
+from .loader import load_company_twin, load_twin
 from .models import (
     CompanyTwin,
     Edge,
@@ -12,6 +12,7 @@ from .models import (
     Twin,
     entity_map,
 )
+from .validate import validate_twin
 
 __all__ = [
     "CompanyTwin",
@@ -26,5 +27,8 @@ __all__ = [
     "entity_map",
     "build_graph",
     "downstream_paths",
+    "list_dependencies",
     "load_company_twin",
+    "load_twin",
+    "validate_twin",
 ]

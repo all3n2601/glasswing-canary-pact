@@ -1,6 +1,8 @@
+from typing import Literal
+
 import networkx as nx
 
-from .models import Twin
+from .models import Edge, Twin
 
 
 def build_graph(twin: Twin) -> nx.DiGraph:
@@ -49,6 +51,30 @@ def blast_set(graph: nx.DiGraph, entity_id: str, max_depth: int = 4) -> dict[str
         kind = graph.nodes[node].get("type", "unknown")
         out.setdefault(kind, []).append(node)
     return out
+
+
+def list_dependencies(
+    twin: Twin,
+    entity_id: str,
+    direction: Literal["in", "out", "both"],
+    max_depth: int = 1,
+) -> list[Edge]:
+    """Edges within ``max_depth`` hops of ``entity_id`` (plan B-02; schema v2.2.0
+    section 7.13). ``direction`` follows edges forward ("out", what it depends
+    on downstream), backward ("in", what depends on it), or both.
+    """
+    graph = build_graph(twin)
+    if entity_id not in graph:
+        raise KeyError(f"Unknown entity: {entity_id}")
+
+    reachable: set[str] = set()
+    if direction in ("out", "both"):
+        reachable |= set(nx.single_source_shortest_path_length(graph, entity_id, cutoff=max_depth))
+    if direction in ("in", "both"):
+        reverse = graph.reverse(copy=False)
+        reachable |= set(nx.single_source_shortest_path_length(reverse, entity_id, cutoff=max_depth))
+
+    return [e for e in twin.edges if e.source in reachable and e.target in reachable]
 
 
 def affected_departments(graph: nx.DiGraph, entity_id: str, max_depth: int = 4) -> set[str]:
