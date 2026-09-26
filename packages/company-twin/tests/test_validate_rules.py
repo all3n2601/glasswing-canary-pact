@@ -73,7 +73,7 @@ BASE_TWIN: dict[str, Any] = {
         {"id": "dept_a", "type": "department", "name": "A", "annual_cost_usd": 1000000, "capacity_fte": 1},
         {"id": "dept_b", "type": "department", "name": "B", "annual_cost_usd": 2000000, "capacity_fte": 20},
         {"id": "role_a", "type": "role", "name": "Role A", "department_id": "dept_a",
-         "annual_cost_usd": 100000, "capacity_fte": 1},
+         "annual_cost_usd": 100000, "capacity_fte": 1, "time_to_train_days": 30},
         {"id": "pt_a", "type": "person_token", "name": "PT A", "department_id": "dept_a",
          "role_id": "role_a", "sensitivity": "hr"},
         {"id": "wf_a", "type": "workflow", "name": "WF A", "department_id": "dept_a",

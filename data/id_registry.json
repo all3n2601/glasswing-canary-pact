@@ -1,6 +1,6 @@
 {
-  "schema_version": "2.1.0",
-  "description": "Every ID the Northstar Technologies fixture and both scenario briefs use, grouped by type. Frozen at S2 (plan A-01): IDs may be added, never renamed or removed. Entity descriptions start with the display name. Fields flagged 2.1.1 are not yet in contracts_py 2.1.0 (extra=\"forbid\" rejects them); the intended value is recorded here until the contracts owner publishes the change request.",
+  "schema_version": "2.1.1",
+  "description": "Every ID the Northstar Technologies fixture and both scenario briefs use, grouped by type. Frozen at S2 (plan A-01): IDs may be added, never renamed or removed. Entity descriptions start with the display name. Contracts 2.1.1 has landed and the fixture now populates its fields (vendor geographies/history_years/freshness_days/accuracy/permitted_uses/retains_history_after_termination, dataset attribute_group, role time_to_train_days/replacement_cost_usd, workflow exception_documented_pct/automation_pct/max_downtime_days); descriptions below that still say \"2.1.1 intended\" record the value now actually in data/synthetic_company.json.",
   "organization": [
     {"id": "org_northstar", "description": "Northstar Technologies: large_enterprise B2B technology_saas company (revenue, billing, and data software) in the US, EU, and APAC"}
   ],
@@ -179,7 +179,11 @@
     {"id": "doc_flux_msa", "description": "FluxBehavior master services agreement (contract)"},
     {"id": "doc_granite_msa", "description": "GraniteGeo master services agreement (contract)"},
     {"id": "doc_data_vendor_inventory", "description": "External data vendor inventory (architecture_note); vendor-to-dataset feed matrix"},
-    {"id": "doc_vendor_recon_workflow_map", "description": "Vendor reconciliation workflow map (workflow_map); holds the planted edge's evidence (A16)"}
+    {"id": "doc_vendor_recon_workflow_map", "description": "Vendor reconciliation workflow map (workflow_map); holds the planted edge's evidence (A16)"},
+    {"id": "doc_incident_response_runbook", "description": "Incident response runbook (runbook, current); added so wf_incident_mgmt has current runbook/sop coverage (task item 3)"},
+    {"id": "doc_soc2_evidence_sop", "description": "SOC 2 evidence collection SOP (sop, current); added so wf_soc2_evidence has current runbook/sop coverage (task item 3)"},
+    {"id": "doc_vendor_recon_sop", "description": "Vendor reconciliation SOP (sop, current); added so wf_vendor_reconciliation has current runbook/sop coverage (task item 3)"},
+    {"id": "doc_risk_monitoring_runbook", "description": "Risk monitoring runbook (runbook, current); added so wf_risk_monitoring has current runbook/sop coverage (task item 3)"}
   ],
   "evidence": [
     {"id": "ev_department_map_v1", "document_id": "doc_department_map", "description": "the 25 department channels, their labels and kinds"},
@@ -207,7 +211,11 @@
     {"id": "ev_echo_history_retention", "document_id": "doc_echo_msa", "description": "the termination section does not say whether EchoMarket history is retained after exit (planted unknown, V-11)"},
     {"id": "ev_vendor_dataset_matrix", "document_id": "doc_data_vendor_inventory", "description": "vendor-to-dataset feed matrix with attribute groups and consuming workflows"},
     {"id": "ev_vendor_recon_inputs", "document_id": "doc_vendor_recon_workflow_map", "description": "vendor reconciliation inputs include the internal audit-log dataset"},
-    {"id": "ev_echo_account_intel_feed", "document_id": "doc_vendor_recon_workflow_map", "description": "PLANTED (A16): names both endpoints by display name - \"the Account intelligence dataset also feeds the Vendor reconciliation workflow each month\". Evidence for the edge deliberately left out of edges[]"}
+    {"id": "ev_echo_account_intel_feed", "document_id": "doc_vendor_recon_workflow_map", "description": "PLANTED (A16): names both endpoints by display name - \"the Account intelligence dataset also feeds the Vendor reconciliation workflow each month\". Evidence for the edge deliberately left out of edges[]"},
+    {"id": "ev_incident_response_runbook_steps", "document_id": "doc_incident_response_runbook", "description": "PLACEHOLDER snippet (task item 3); final wording is Mithuna's (data/artifacts/snippets.json)"},
+    {"id": "ev_soc2_evidence_sop_steps", "document_id": "doc_soc2_evidence_sop", "description": "PLACEHOLDER snippet (task item 3); final wording is Mithuna's (data/artifacts/snippets.json)"},
+    {"id": "ev_vendor_recon_sop_steps", "document_id": "doc_vendor_recon_sop", "description": "PLACEHOLDER snippet (task item 3); final wording is Mithuna's (data/artifacts/snippets.json)"},
+    {"id": "ev_risk_monitoring_runbook_steps", "document_id": "doc_risk_monitoring_runbook", "description": "PLACEHOLDER snippet (task item 3); final wording is Mithuna's (data/artifacts/snippets.json)"}
   ],
   "pressures": [
     {"id": "pr_apex_renewal", "description": "renewal_step: Apex auto-renews at +8% on day 60 (dec_vendor_reduction)"},
@@ -304,6 +312,6 @@
     {"id": "c_sales", "decision_ids": ["dec_vendor_reduction"], "description": "hard: revenue_impact_pct <= 3, scope kpi_pipeline"},
     {"id": "c_customer", "decision_ids": ["dec_vendor_reduction", "dec_workforce_knowledge"], "description": "hard: customer_impact_pct <= 2"},
     {"id": "c_stranded", "decision_ids": ["dec_vendor_reduction", "dec_workforce_knowledge"], "description": "stranded_workflows == 0 (soft in the vendor brief, hard in the workforce brief)"},
-    {"id": "c_coverage", "decision_ids": ["dec_vendor_reduction"], "description": "Intended once 2.1.1 lands (CR1): hard, critical_coverage_pct >= 100. Not yet in the vendor brief."}
+    {"id": "c_coverage", "decision_ids": ["dec_vendor_reduction"], "description": "2.1.1 (CR1) landed: hard, critical_coverage_pct >= 100. Now in data/vendor_scenario.json's constraints."}
   ]
 }

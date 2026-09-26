@@ -489,7 +489,7 @@
       "id": "vendor_echo",
       "type": "vendor",
       "name": "EchoMarket",
-      "department_id": "dept_product",
+      "department_id": "dept_marketing",
       "criticality": "medium"
     },
     {
@@ -790,7 +790,7 @@
       "id": "kpi_net_retention",
       "type": "kpi",
       "name": "Net revenue retention",
-      "department_id": "dept_sales",
+      "department_id": "dept_customer_success",
       "criticality": "medium"
     },
     {

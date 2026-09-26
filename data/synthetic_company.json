@@ -1,5 +1,5 @@
 {
-  "schema_version": "2.1.0",
+  "schema_version": "2.1.1",
   "version": {
     "twin_version": "twin_northstar_v1",
     "settings_version": 1,
@@ -740,6 +740,8 @@
       "department_id": "dept_engineering",
       "annual_cost_usd": 205000,
       "capacity_fte": 20.0,
+      "time_to_train_days": 61,
+      "replacement_cost_usd": 226000,
       "tags": [],
       "evidence_refs": []
     },
@@ -752,6 +754,8 @@
       "department_id": "dept_engineering",
       "annual_cost_usd": 190000,
       "capacity_fte": 8.0,
+      "time_to_train_days": 57,
+      "replacement_cost_usd": 209000,
       "tags": [],
       "evidence_refs": []
     },
@@ -764,6 +768,8 @@
       "department_id": "dept_engineering",
       "annual_cost_usd": 210000,
       "capacity_fte": 6.0,
+      "time_to_train_days": 63,
+      "replacement_cost_usd": 231000,
       "tags": [],
       "evidence_refs": []
     },
@@ -776,6 +782,8 @@
       "department_id": "dept_engineering",
       "annual_cost_usd": 150000,
       "capacity_fte": 8.0,
+      "time_to_train_days": 45,
+      "replacement_cost_usd": 165000,
       "tags": [],
       "evidence_refs": []
     },
@@ -788,6 +796,8 @@
       "department_id": "dept_operations",
       "annual_cost_usd": 190000,
       "capacity_fte": 3.0,
+      "time_to_train_days": 90,
+      "replacement_cost_usd": 180000,
       "tags": [],
       "evidence_refs": []
     },
@@ -800,6 +810,8 @@
       "department_id": "dept_operations",
       "annual_cost_usd": 175000,
       "capacity_fte": 12.0,
+      "time_to_train_days": 52,
+      "replacement_cost_usd": 193000,
       "tags": [],
       "evidence_refs": []
     },
@@ -812,6 +824,8 @@
       "department_id": "dept_operations",
       "annual_cost_usd": 165000,
       "capacity_fte": 8.0,
+      "time_to_train_days": 50,
+      "replacement_cost_usd": 182000,
       "tags": [],
       "evidence_refs": []
     },
@@ -824,6 +838,8 @@
       "department_id": "dept_ai_data",
       "annual_cost_usd": 220000,
       "capacity_fte": 4.0,
+      "time_to_train_days": 66,
+      "replacement_cost_usd": 242000,
       "tags": [],
       "evidence_refs": []
     },
@@ -836,6 +852,8 @@
       "department_id": "dept_ai_data",
       "annual_cost_usd": 180000,
       "capacity_fte": 9.0,
+      "time_to_train_days": 54,
+      "replacement_cost_usd": 198000,
       "tags": [],
       "evidence_refs": []
     },
@@ -848,6 +866,8 @@
       "department_id": "dept_ai_data",
       "annual_cost_usd": 165000,
       "capacity_fte": 6.0,
+      "time_to_train_days": 50,
+      "replacement_cost_usd": 182000,
       "tags": [],
       "evidence_refs": []
     },
@@ -860,6 +880,8 @@
       "department_id": "dept_product",
       "annual_cost_usd": 175000,
       "capacity_fte": 8.0,
+      "time_to_train_days": 52,
+      "replacement_cost_usd": 193000,
       "tags": [],
       "evidence_refs": []
     },
@@ -872,6 +894,8 @@
       "department_id": "dept_product",
       "annual_cost_usd": 195000,
       "capacity_fte": 3.0,
+      "time_to_train_days": 58,
+      "replacement_cost_usd": 215000,
       "tags": [],
       "evidence_refs": []
     },
@@ -884,6 +908,8 @@
       "department_id": "dept_product",
       "annual_cost_usd": 150000,
       "capacity_fte": 5.0,
+      "time_to_train_days": 45,
+      "replacement_cost_usd": 165000,
       "tags": [],
       "evidence_refs": []
     },
@@ -896,6 +922,8 @@
       "department_id": "dept_sales",
       "annual_cost_usd": 160000,
       "capacity_fte": 20.0,
+      "time_to_train_days": 48,
+      "replacement_cost_usd": 176000,
       "tags": [],
       "evidence_refs": []
     },
@@ -908,6 +936,8 @@
       "department_id": "dept_sales",
       "annual_cost_usd": 175000,
       "capacity_fte": 8.0,
+      "time_to_train_days": 52,
+      "replacement_cost_usd": 193000,
       "tags": [],
       "evidence_refs": []
     },
@@ -920,6 +950,8 @@
       "department_id": "dept_sales",
       "annual_cost_usd": 110000,
       "capacity_fte": 12.0,
+      "time_to_train_days": 33,
+      "replacement_cost_usd": 121000,
       "tags": [],
       "evidence_refs": []
     },
@@ -932,6 +964,8 @@
       "department_id": "dept_marketing",
       "annual_cost_usd": 150000,
       "capacity_fte": 8.0,
+      "time_to_train_days": 45,
+      "replacement_cost_usd": 165000,
       "tags": [],
       "evidence_refs": []
     },
@@ -944,6 +978,8 @@
       "department_id": "dept_marketing",
       "annual_cost_usd": 150000,
       "capacity_fte": 6.0,
+      "time_to_train_days": 45,
+      "replacement_cost_usd": 165000,
       "tags": [],
       "evidence_refs": []
     },
@@ -956,6 +992,8 @@
       "department_id": "dept_marketing",
       "annual_cost_usd": 140000,
       "capacity_fte": 4.0,
+      "time_to_train_days": 42,
+      "replacement_cost_usd": 154000,
       "tags": [],
       "evidence_refs": []
     },
@@ -968,6 +1006,8 @@
       "department_id": "dept_customer_success",
       "annual_cost_usd": 140000,
       "capacity_fte": 18.0,
+      "time_to_train_days": 42,
+      "replacement_cost_usd": 154000,
       "tags": [],
       "evidence_refs": []
     },
@@ -980,6 +1020,8 @@
       "department_id": "dept_customer_success",
       "annual_cost_usd": 130000,
       "capacity_fte": 10.0,
+      "time_to_train_days": 39,
+      "replacement_cost_usd": 143000,
       "tags": [],
       "evidence_refs": []
     },
@@ -992,6 +1034,8 @@
       "department_id": "dept_customer_success",
       "annual_cost_usd": 120000,
       "capacity_fte": 12.0,
+      "time_to_train_days": 36,
+      "replacement_cost_usd": 132000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1004,6 +1048,8 @@
       "department_id": "dept_finance",
       "annual_cost_usd": 150000,
       "capacity_fte": 9.0,
+      "time_to_train_days": 45,
+      "replacement_cost_usd": 165000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1016,6 +1062,8 @@
       "department_id": "dept_finance",
       "annual_cost_usd": 150000,
       "capacity_fte": 3.0,
+      "time_to_train_days": 45,
+      "replacement_cost_usd": 165000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1028,6 +1076,8 @@
       "department_id": "dept_finance",
       "annual_cost_usd": 175000,
       "capacity_fte": 4.0,
+      "time_to_train_days": 52,
+      "replacement_cost_usd": 193000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1040,6 +1090,8 @@
       "department_id": "dept_compliance",
       "annual_cost_usd": 170000,
       "capacity_fte": 3.0,
+      "time_to_train_days": 51,
+      "replacement_cost_usd": 187000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1052,6 +1104,8 @@
       "department_id": "dept_compliance",
       "annual_cost_usd": 175000,
       "capacity_fte": 3.0,
+      "time_to_train_days": 52,
+      "replacement_cost_usd": 193000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1064,6 +1118,8 @@
       "department_id": "dept_finance",
       "annual_cost_usd": 145000,
       "capacity_fte": 4.0,
+      "time_to_train_days": 44,
+      "replacement_cost_usd": 160000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1076,6 +1132,8 @@
       "department_id": "dept_finance",
       "annual_cost_usd": 120000,
       "capacity_fte": 5.0,
+      "time_to_train_days": 36,
+      "replacement_cost_usd": 132000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1088,6 +1146,8 @@
       "department_id": "dept_finance",
       "annual_cost_usd": 110000,
       "capacity_fte": 3.0,
+      "time_to_train_days": 33,
+      "replacement_cost_usd": 121000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1100,6 +1160,8 @@
       "department_id": "dept_ai_data",
       "annual_cost_usd": 195000,
       "capacity_fte": 2.0,
+      "time_to_train_days": 120,
+      "replacement_cost_usd": 220000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1112,6 +1174,8 @@
       "department_id": "dept_operations",
       "annual_cost_usd": 95000,
       "capacity_fte": 6.0,
+      "time_to_train_days": 28,
+      "replacement_cost_usd": 105000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1124,6 +1188,8 @@
       "department_id": "dept_finance",
       "annual_cost_usd": 130000,
       "capacity_fte": 4.0,
+      "time_to_train_days": 39,
+      "replacement_cost_usd": 143000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1136,6 +1202,8 @@
       "department_id": "dept_finance",
       "annual_cost_usd": 85000,
       "capacity_fte": 8.0,
+      "time_to_train_days": 26,
+      "replacement_cost_usd": 94000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1653,6 +1721,9 @@
       "customer_facing": false,
       "migration_cost_usd": 1520000,
       "tags": [],
+      "aliases": [
+        "sys_warehouse_new"
+      ],
       "evidence_refs": []
     },
     {
@@ -1676,6 +1747,7 @@
       "criticality": "critical",
       "sensitivity": "general",
       "department_id": "dept_compliance",
+      "attribute_group": "audit",
       "tags": [],
       "evidence_refs": []
     },
@@ -1686,6 +1758,7 @@
       "criticality": "medium",
       "sensitivity": "general",
       "department_id": "dept_sales",
+      "attribute_group": "firmographics",
       "tags": [],
       "evidence_refs": []
     },
@@ -1696,6 +1769,7 @@
       "criticality": "medium",
       "sensitivity": "general",
       "department_id": "dept_sales",
+      "attribute_group": "firmographics",
       "tags": [],
       "evidence_refs": []
     },
@@ -1706,6 +1780,7 @@
       "criticality": "critical",
       "sensitivity": "general",
       "department_id": "dept_compliance",
+      "attribute_group": "firmographics",
       "tags": [],
       "evidence_refs": []
     },
@@ -1716,6 +1791,7 @@
       "criticality": "medium",
       "sensitivity": "general",
       "department_id": "dept_marketing",
+      "attribute_group": "intent",
       "tags": [],
       "evidence_refs": []
     },
@@ -1726,6 +1802,7 @@
       "criticality": "critical",
       "sensitivity": "general",
       "department_id": "dept_compliance",
+      "attribute_group": "identity",
       "tags": [],
       "evidence_refs": []
     },
@@ -1736,6 +1813,7 @@
       "criticality": "medium",
       "sensitivity": "general",
       "department_id": "dept_marketing",
+      "attribute_group": "market_intel",
       "tags": [],
       "evidence_refs": []
     },
@@ -1746,6 +1824,7 @@
       "criticality": "medium",
       "sensitivity": "general",
       "department_id": "dept_sales",
+      "attribute_group": "market_intel",
       "tags": [],
       "evidence_refs": []
     },
@@ -1756,6 +1835,7 @@
       "criticality": "medium",
       "sensitivity": "general",
       "department_id": "dept_product",
+      "attribute_group": "behavioral",
       "tags": [],
       "evidence_refs": []
     },
@@ -1766,6 +1846,7 @@
       "criticality": "medium",
       "sensitivity": "general",
       "department_id": "dept_operations",
+      "attribute_group": "geo_risk",
       "tags": [],
       "evidence_refs": []
     },
@@ -1779,8 +1860,21 @@
       "annual_cost_usd": 1600000000,
       "one_time_exit_cost_usd": 60000000,
       "migration_cost_usd": 100000000,
+      "geographies": [
+        "US",
+        "EU"
+      ],
+      "history_years": 7,
+      "freshness_days": 1,
+      "accuracy": 0.97,
+      "permitted_uses": [
+        "sales_prospecting",
+        "kyc",
+        "model_training"
+      ],
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [],
+      "retains_history_after_termination": false
     },
     {
       "id": "vendor_beacon",
@@ -1792,8 +1886,20 @@
       "annual_cost_usd": 1200000000,
       "one_time_exit_cost_usd": 40000000,
       "migration_cost_usd": 55000000,
+      "geographies": [
+        "US",
+        "EU"
+      ],
+      "history_years": 5,
+      "freshness_days": 2,
+      "accuracy": 0.94,
+      "permitted_uses": [
+        "sales_prospecting",
+        "model_training"
+      ],
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [],
+      "retains_history_after_termination": true
     },
     {
       "id": "vendor_cinder",
@@ -1805,8 +1911,19 @@
       "annual_cost_usd": 1400000000,
       "one_time_exit_cost_usd": 50000000,
       "migration_cost_usd": 90000000,
+      "geographies": [
+        "US"
+      ],
+      "history_years": 3,
+      "freshness_days": 1,
+      "accuracy": 0.9,
+      "permitted_uses": [
+        "campaign_targeting",
+        "model_training"
+      ],
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [],
+      "retains_history_after_termination": false
     },
     {
       "id": "vendor_delta",
@@ -1818,8 +1935,21 @@
       "annual_cost_usd": 900000000,
       "one_time_exit_cost_usd": 30000000,
       "migration_cost_usd": 50000000,
+      "geographies": [
+        "US",
+        "EU",
+        "APAC"
+      ],
+      "history_years": 10,
+      "freshness_days": 1,
+      "accuracy": 0.99,
+      "permitted_uses": [
+        "kyc",
+        "identity_verification"
+      ],
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [],
+      "retains_history_after_termination": true
     },
     {
       "id": "vendor_echo",
@@ -1827,12 +1957,25 @@
       "name": "EchoMarket",
       "criticality": "medium",
       "sensitivity": "general",
-      "department_id": "dept_product",
+      "department_id": "dept_marketing",
       "annual_cost_usd": 1100000000,
       "one_time_exit_cost_usd": 50000000,
       "migration_cost_usd": 75000000,
+      "geographies": [
+        "US",
+        "EU"
+      ],
+      "history_years": 4,
+      "freshness_days": 3,
+      "accuracy": 0.88,
+      "permitted_uses": [
+        "campaign_targeting",
+        "account_planning",
+        "model_training"
+      ],
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [],
+      "retains_history_after_termination": null
     },
     {
       "id": "vendor_flux",
@@ -1844,8 +1987,19 @@
       "annual_cost_usd": 800000000,
       "one_time_exit_cost_usd": 25000000,
       "migration_cost_usd": 40000000,
+      "geographies": [
+        "US"
+      ],
+      "history_years": 2,
+      "freshness_days": 1,
+      "accuracy": 0.85,
+      "permitted_uses": [
+        "product_analytics",
+        "model_training"
+      ],
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [],
+      "retains_history_after_termination": false
     },
     {
       "id": "vendor_granite",
@@ -1857,8 +2011,18 @@
       "annual_cost_usd": 1000000000,
       "one_time_exit_cost_usd": 35000000,
       "migration_cost_usd": 55000000,
+      "geographies": [
+        "US"
+      ],
+      "history_years": 6,
+      "freshness_days": 7,
+      "accuracy": 0.92,
+      "permitted_uses": [
+        "risk_monitoring"
+      ],
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [],
+      "retains_history_after_termination": true
     },
     {
       "id": "wf_billing_recon",
@@ -1871,6 +2035,9 @@
       "failure_cost_per_day_usd": 900000,
       "documented_pct": 0.35,
       "customer_facing": true,
+      "exception_documented_pct": 0.1,
+      "automation_pct": 0.4,
+      "max_downtime_days": 2,
       "tags": [],
       "evidence_refs": []
     },
@@ -1883,8 +2050,11 @@
       "department_id": "dept_operations",
       "min_qualified_owners": 2,
       "failure_cost_per_day_usd": 1200000,
-      "documented_pct": 0.6,
+      "documented_pct": 0.5,
       "customer_facing": true,
+      "exception_documented_pct": 0.5,
+      "automation_pct": 0.7,
+      "max_downtime_days": 2,
       "tags": [],
       "evidence_refs": []
     },
@@ -1897,8 +2067,11 @@
       "department_id": "dept_operations",
       "min_qualified_owners": 2,
       "failure_cost_per_day_usd": 600000,
-      "documented_pct": 0.7,
+      "documented_pct": 0.5,
       "customer_facing": false,
+      "exception_documented_pct": 0.6,
+      "automation_pct": 0.3,
+      "max_downtime_days": 1,
       "tags": [],
       "evidence_refs": []
     },
@@ -1911,8 +2084,11 @@
       "department_id": "dept_compliance",
       "min_qualified_owners": 1,
       "failure_cost_per_day_usd": 150000,
-      "documented_pct": 0.8,
+      "documented_pct": 0.5,
       "customer_facing": false,
+      "exception_documented_pct": 0.5,
+      "automation_pct": 0.5,
+      "max_downtime_days": 5,
       "tags": [],
       "evidence_refs": []
     },
@@ -1927,6 +2103,9 @@
       "failure_cost_per_day_usd": 300000,
       "documented_pct": 0.5,
       "customer_facing": true,
+      "exception_documented_pct": 0.4,
+      "automation_pct": 0.5,
+      "max_downtime_days": 3,
       "tags": [],
       "evidence_refs": []
     },
@@ -1939,8 +2118,11 @@
       "department_id": "dept_ai_data",
       "min_qualified_owners": 2,
       "failure_cost_per_day_usd": 400000,
-      "documented_pct": 0.6,
+      "documented_pct": 0.5,
       "customer_facing": false,
+      "exception_documented_pct": 0.5,
+      "automation_pct": 0.8,
+      "max_downtime_days": 1,
       "tags": [],
       "evidence_refs": []
     },
@@ -1953,8 +2135,11 @@
       "department_id": "dept_finance",
       "min_qualified_owners": 2,
       "failure_cost_per_day_usd": 250000,
-      "documented_pct": 0.6,
+      "documented_pct": 0.5,
       "customer_facing": false,
+      "exception_documented_pct": 0.3,
+      "automation_pct": 0.4,
+      "max_downtime_days": 3,
       "tags": [],
       "evidence_refs": []
     },
@@ -1969,6 +2154,9 @@
       "failure_cost_per_day_usd": 500000,
       "documented_pct": 0.7,
       "customer_facing": false,
+      "exception_documented_pct": 0.5,
+      "automation_pct": 0.7,
+      "max_downtime_days": 3,
       "tags": [],
       "evidence_refs": []
     },
@@ -1983,6 +2171,9 @@
       "failure_cost_per_day_usd": 400000,
       "documented_pct": 0.65,
       "customer_facing": false,
+      "exception_documented_pct": 0.5,
+      "automation_pct": 0.6,
+      "max_downtime_days": 3,
       "tags": [],
       "evidence_refs": []
     },
@@ -1997,6 +2188,9 @@
       "failure_cost_per_day_usd": 600000,
       "documented_pct": 0.6,
       "customer_facing": false,
+      "exception_documented_pct": 0.5,
+      "automation_pct": 0.4,
+      "max_downtime_days": 5,
       "tags": [],
       "evidence_refs": []
     },
@@ -2009,8 +2203,11 @@
       "department_id": "dept_compliance",
       "min_qualified_owners": 1,
       "failure_cost_per_day_usd": 2000000,
-      "documented_pct": 0.8,
+      "documented_pct": 0.5,
       "customer_facing": false,
+      "exception_documented_pct": 0.6,
+      "automation_pct": 0.6,
+      "max_downtime_days": 1,
       "tags": [],
       "evidence_refs": []
     },
@@ -2023,8 +2220,11 @@
       "department_id": "dept_operations",
       "min_qualified_owners": 2,
       "failure_cost_per_day_usd": 2500000,
-      "documented_pct": 0.55,
+      "documented_pct": 0.5,
       "customer_facing": false,
+      "exception_documented_pct": 0.4,
+      "automation_pct": 0.5,
+      "max_downtime_days": 3,
       "tags": [],
       "evidence_refs": []
     },
@@ -2039,6 +2239,9 @@
       "failure_cost_per_day_usd": 300000,
       "documented_pct": 0.6,
       "customer_facing": false,
+      "exception_documented_pct": 0.5,
+      "automation_pct": 0.7,
+      "max_downtime_days": 5,
       "tags": [],
       "evidence_refs": []
     },
@@ -2053,6 +2256,9 @@
       "failure_cost_per_day_usd": 800000,
       "documented_pct": 0.5,
       "customer_facing": false,
+      "exception_documented_pct": 0.4,
+      "automation_pct": 0.5,
+      "max_downtime_days": 3,
       "tags": [],
       "evidence_refs": []
     },
@@ -2368,7 +2574,7 @@
       "name": "Net revenue retention",
       "criticality": "medium",
       "sensitivity": "general",
-      "department_id": "dept_sales",
+      "department_id": "dept_customer_success",
       "kpi_baseline": 112.0,
       "kpi_unit": "percent",
       "higher_is_better": true,
@@ -5111,6 +5317,86 @@
       "synthetic": true,
       "ingested": true,
       "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_incident_response_runbook",
+      "title": "Incident response runbook",
+      "doc_type": "runbook",
+      "department_id": "dept_operations",
+      "owner_role_id": "role_sre",
+      "uri": "artifacts/doc_incident_response_runbook.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_incident_mgmt"
+      ],
+      "framework_refs": [],
+      "summary": "On-call escalation and recovery steps for incident response.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_soc2_evidence_sop",
+      "title": "SOC 2 evidence collection SOP",
+      "doc_type": "sop",
+      "department_id": "dept_compliance",
+      "owner_role_id": "role_grc_lead",
+      "uri": "artifacts/doc_soc2_evidence_sop.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_soc2_evidence"
+      ],
+      "framework_refs": [
+        "SOC2"
+      ],
+      "summary": "Standard operating procedure for collecting and filing SOC 2 audit evidence.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_vendor_recon_sop",
+      "title": "Vendor reconciliation SOP",
+      "doc_type": "sop",
+      "department_id": "dept_operations",
+      "owner_role_id": "role_billing_ops_lead",
+      "uri": "artifacts/doc_vendor_recon_sop.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_vendor_reconciliation"
+      ],
+      "framework_refs": [
+        "SOX"
+      ],
+      "summary": "Standard operating procedure for the monthly vendor reconciliation workflow.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_risk_monitoring_runbook",
+      "title": "Risk monitoring runbook",
+      "doc_type": "runbook",
+      "department_id": "dept_operations",
+      "owner_role_id": null,
+      "uri": "artifacts/doc_risk_monitoring_runbook.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_risk_monitoring"
+      ],
+      "framework_refs": [],
+      "summary": "Monitoring and response steps for geographic and macroeconomic risk signals.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
     }
   ],
   "evidence": [
@@ -5312,6 +5598,38 @@
       "document_id": "doc_vendor_recon_workflow_map",
       "location": "section 3.4",
       "snippet": "The Account intelligence dataset also feeds the Vendor reconciliation workflow each month.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_incident_response_runbook_steps",
+      "source_type": "runbook",
+      "document_id": "doc_incident_response_runbook",
+      "location": null,
+      "snippet": "PLACEHOLDER: final wording pending - incident response on-call escalation and recovery steps.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_soc2_evidence_sop_steps",
+      "source_type": "policy",
+      "document_id": "doc_soc2_evidence_sop",
+      "location": null,
+      "snippet": "PLACEHOLDER: final wording pending - SOC 2 evidence collection and filing steps.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_vendor_recon_sop_steps",
+      "source_type": "workflow_map",
+      "document_id": "doc_vendor_recon_sop",
+      "location": null,
+      "snippet": "PLACEHOLDER: final wording pending - monthly vendor reconciliation procedure steps.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_risk_monitoring_runbook_steps",
+      "source_type": "runbook",
+      "document_id": "doc_risk_monitoring_runbook",
+      "location": null,
+      "snippet": "PLACEHOLDER: final wording pending - risk monitoring detection and response steps.",
       "synthetic": true
     },
     {

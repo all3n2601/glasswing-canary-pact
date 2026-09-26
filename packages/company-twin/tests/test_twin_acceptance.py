@@ -214,6 +214,32 @@ def test_version_has_as_of_date():
     assert str(TWIN.version.as_of_date) == "2026-09-26"  # contracts_py coerces to date
 
 
+# ---- documentation coverage (task item 3): every critical workflow has current runbook/sop
+# coverage, except the two deliberate story gaps -----------------------------
+def test_every_critical_workflow_has_current_runbook_or_sop_except_the_story_gaps():
+    # wf_billing_recon: its only covering document (doc_billing_recon_runbook) is deliberately
+    # outdated (W-3). kn_warehouse_lineage, the other story gap, is a knowledge asset behind
+    # wf_financial_close, not a workflow-level doc gap, so wf_financial_close itself (documented
+    # via doc_sop_financial_close) is not exempted here.
+    story_gap_workflows = {"wf_billing_recon"}
+    current_doc_types_by_entity: dict[str, set[str]] = {}
+    for d in TWIN.documents:
+        if d.status.value == "current":
+            for cid in d.covers_entity_ids:
+                current_doc_types_by_entity.setdefault(cid, set()).add(d.doc_type.value)
+
+    critical_workflows = [
+        e for e in TWIN.entities
+        if e.type == EntityType.workflow and e.criticality.value in ("high", "critical")
+    ]
+    assert critical_workflows
+    for w in critical_workflows:
+        if w.id in story_gap_workflows:
+            continue
+        covering = current_doc_types_by_entity.get(w.id, set())
+        assert covering & {"runbook", "sop"}, f"{w.id} has no current runbook or sop"
+
+
 # ---- A-01: frozen ID registry -----------------------------------------------
 ID_REGEX = re.compile(r"^[a-z][a-z0-9_]*$")
 

@@ -1,5 +1,5 @@
 {
-  "schema_version": "2.1.0",
+  "schema_version": "2.1.1",
   "decision_id": "dec_vendor_reduction",
   "decision_type": "vendor_consolidation",
   "title": "Consolidate external data vendors",
@@ -20,7 +20,8 @@
     {"id": "c_compliance", "metric": "compliance_controls_broken", "operator": "==", "threshold": 0, "unit": "count", "hard": true, "description": "No mandatory control may break"},
     {"id": "c_sales", "metric": "revenue_impact_pct", "operator": "<=", "threshold": 3, "unit": "percent", "hard": true, "scope_entity_id": "kpi_pipeline", "description": "Sales performance falls by no more than 3%"},
     {"id": "c_customer", "metric": "customer_impact_pct", "operator": "<=", "threshold": 2, "unit": "percent", "hard": true, "description": "Customer impact within 2%"},
-    {"id": "c_stranded", "metric": "stranded_workflows", "operator": "==", "threshold": 0, "unit": "count", "hard": false, "description": "Prefer no stranded workflows"}
+    {"id": "c_stranded", "metric": "stranded_workflows", "operator": "==", "threshold": 0, "unit": "count", "hard": false, "description": "Prefer no stranded workflows"},
+    {"id": "c_coverage", "metric": "critical_coverage_pct", "operator": ">=", "threshold": 100, "unit": "percent", "hard": true, "description": "Every critical dataset keeps a provider"}
   ],
   "futures": ["act_now", "inaction", "delay"],
   "delay_days": 90,

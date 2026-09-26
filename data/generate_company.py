@@ -28,7 +28,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = "2.1.0"
+SCHEMA_VERSION = "2.1.1"
 CREATED_AT = "2026-09-26T12:00:00Z"
 AS_OF_DATE = "2026-09-26"
 
@@ -286,8 +286,15 @@ ROLES = [
     ("role_revenue_accountant", "Revenue Accountant", "dept_finance", 130_000, 4),
     ("role_ar_specialist", "Accounts Receivable Specialist", "dept_finance", 85_000, 8),
 ]
+# 2.1.1 (CR4): time_to_train_days (registry-pinned for the two knowledge-loss anchors,
+# ~30 days per $100k of annual_cost_usd otherwise) and replacement_cost_usd (~1.1x salary).
+ROLE_TRAINING_DAYS_OVERRIDE = {"role_billing_ops_lead": 90, "role_data_platform_lead": 120}
+ROLE_REPLACEMENT_COST_OVERRIDE = {"role_billing_ops_lead": 180_000, "role_data_platform_lead": 220_000}
 for rid, name, did, salary, fte in ROLES:
-    ent(rid, "role", name, department_id=did, annual_cost_usd=salary, capacity_fte=float(fte))
+    ttd = ROLE_TRAINING_DAYS_OVERRIDE.get(rid, max(20, min(150, round(salary / 100_000 * 30))))
+    repl = ROLE_REPLACEMENT_COST_OVERRIDE.get(rid, round(salary * 1.1 / 1000) * 1000)
+    ent(rid, "role", name, department_id=did, annual_cost_usd=salary, capacity_fte=float(fte),
+        time_to_train_days=ttd, replacement_cost_usd=repl)
 
 # Every workforce role that eliminating strands a workflow (goal target = exact sum, ADHI_BRIEF 13.1).
 WORKFORCE_ROLE_IDS = [
@@ -317,36 +324,43 @@ SYSTEMS = [
     ("sys_data_warehouse", "data-warehouse", "dept_ai_data", "medium", 3_800_000, 300_000, False, []),
     ("sys_crm", "crm", "dept_sales", "high", 5_000_000, 1_200_000, False, []),
 ]
+SYSTEM_ALIASES = {"sys_data_warehouse": ["sys_warehouse_new"]}
 for sid, name, did, crit, cost, fail, cust, tags in SYSTEMS:
     ent(sid, "system", name, department_id=did, criticality=crit,
         annual_cost_usd=cost, failure_cost_per_day_usd=fail, customer_facing=cust,
-        migration_cost_usd=round(cost * 0.4), tags=tags)
+        migration_cost_usd=round(cost * 0.4), tags=tags,
+        aliases=SYSTEM_ALIASES.get(sid))
 
 # =========================================================================== DATASETS
 # ds_audit_log is internal (produced by sys_audit_service, not vendor-provided).
+# attribute_group is the 2.1.1 (CR3) field the id_registry pins per dataset.
 DATASETS = [
-    ("ds_audit_log", "Audit-log event stream", "dept_compliance", "critical"),
-    ("ds_firmographics", "Firmographics", "dept_sales", "medium"),
-    ("ds_contact_data", "Contact data", "dept_sales", "medium"),
-    ("ds_corporate_linkage", "Corporate linkage", "dept_compliance", "critical"),
-    ("ds_intent_signals", "Intent signals", "dept_marketing", "medium"),
-    ("ds_identity_verification", "Identity verification", "dept_compliance", "critical"),
-    ("ds_market_intel", "Market intelligence", "dept_marketing", "medium"),
-    ("ds_account_intel", "Account intelligence", "dept_sales", "medium"),
-    ("ds_usage", "Product usage signals", "dept_product", "medium"),
-    ("ds_geo_risk", "Geographic and macroeconomic risk", "dept_operations", "medium"),
+    ("ds_audit_log", "Audit-log event stream", "dept_compliance", "critical", "audit"),
+    ("ds_firmographics", "Firmographics", "dept_sales", "medium", "firmographics"),
+    ("ds_contact_data", "Contact data", "dept_sales", "medium", "firmographics"),
+    ("ds_corporate_linkage", "Corporate linkage", "dept_compliance", "critical", "firmographics"),
+    ("ds_intent_signals", "Intent signals", "dept_marketing", "medium", "intent"),
+    ("ds_identity_verification", "Identity verification", "dept_compliance", "critical", "identity"),
+    ("ds_market_intel", "Market intelligence", "dept_marketing", "medium", "market_intel"),
+    ("ds_account_intel", "Account intelligence", "dept_sales", "medium", "market_intel"),
+    ("ds_usage", "Product usage signals", "dept_product", "medium", "behavioral"),
+    ("ds_geo_risk", "Geographic and macroeconomic risk", "dept_operations", "medium", "geo_risk"),
 ]
-for dsid, name, did, crit in DATASETS:
-    ent(dsid, "dataset", name, department_id=did, criticality=crit)
+for dsid, name, did, crit, attr_group in DATASETS:
+    ent(dsid, "dataset", name, department_id=did, criticality=crit, attribute_group=attr_group)
 
 # =========================================================================== VENDORS (plan section 4.1)
-# id, name, dept (main consumer), cost, exit_cost, migration_cost, criticality
+# id, name, dept (main consumer; vendor_echo moved product -> marketing, R3), cost, exit_cost,
+# migration_cost, criticality. vendor_echo is dept_marketing: it's the department that actually
+# owns its EchoMarket-fed datasets (ds_intent_signals, ds_market_intel), which fixes two of the
+# rule-3 warnings (R3) without adding a channel; its other feeds (firmographics, account_intel)
+# already reach dept_sales through the existing ch_marketing_sales_qualified channel.
 VENDORS = [
     ("vendor_apex", "ApexData", "dept_sales", 1_600_000_000, 60_000_000, 100_000_000, "high"),
     ("vendor_beacon", "BeaconIQ", "dept_sales", 1_200_000_000, 40_000_000, 55_000_000, "medium"),
     ("vendor_cinder", "CinderSignals", "dept_marketing", 1_400_000_000, 50_000_000, 90_000_000, "medium"),
     ("vendor_delta", "DeltaVerify", "dept_compliance", 900_000_000, 30_000_000, 50_000_000, "critical"),
-    ("vendor_echo", "EchoMarket", "dept_product", 1_100_000_000, 50_000_000, 75_000_000, "medium"),
+    ("vendor_echo", "EchoMarket", "dept_marketing", 1_100_000_000, 50_000_000, 75_000_000, "medium"),
     ("vendor_flux", "FluxBehavior", "dept_product", 800_000_000, 25_000_000, 40_000_000, "low"),
     ("vendor_granite", "GraniteGeo", "dept_operations", 1_000_000_000, 35_000_000, 55_000_000, "medium"),
 ]
@@ -354,32 +368,87 @@ assert sum(v[3] for v in VENDORS) == VENDOR_TOTAL_USD
 assert sum(v[3] for v in VENDORS if v[0] in ("vendor_beacon", "vendor_echo")) == 2_300_000_000
 assert sum(v[4] for v in VENDORS if v[0] in ("vendor_beacon", "vendor_echo")) == 90_000_000
 assert sum(v[5] for v in VENDORS if v[0] in ("vendor_beacon", "vendor_echo")) == 130_000_000
+
+# 2.1.1 (CR3): geographies from the id_registry; the rest are plausible synthetic values not
+# pinned by the registry, except vendor_echo.retains_history_after_termination, which is the
+# planted unknown and must stay null (V-11).
+VENDOR_211 = {
+    "vendor_apex": dict(geographies=["US", "EU"], history_years=7, freshness_days=1, accuracy=0.97,
+                         permitted_uses=["sales_prospecting", "kyc", "model_training"],
+                         retains_history_after_termination=False),
+    "vendor_beacon": dict(geographies=["US", "EU"], history_years=5, freshness_days=2, accuracy=0.94,
+                           permitted_uses=["sales_prospecting", "model_training"],
+                           retains_history_after_termination=True),
+    "vendor_cinder": dict(geographies=["US"], history_years=3, freshness_days=1, accuracy=0.9,
+                          permitted_uses=["campaign_targeting", "model_training"],
+                          retains_history_after_termination=False),
+    "vendor_delta": dict(geographies=["US", "EU", "APAC"], history_years=10, freshness_days=1, accuracy=0.99,
+                         permitted_uses=["kyc", "identity_verification"],
+                         retains_history_after_termination=True),
+    "vendor_echo": dict(geographies=["US", "EU"], history_years=4, freshness_days=3, accuracy=0.88,
+                        permitted_uses=["campaign_targeting", "account_planning", "model_training"],
+                        retains_history_after_termination=None),
+    "vendor_flux": dict(geographies=["US"], history_years=2, freshness_days=1, accuracy=0.85,
+                        permitted_uses=["product_analytics", "model_training"],
+                        retains_history_after_termination=False),
+    "vendor_granite": dict(geographies=["US"], history_years=6, freshness_days=7, accuracy=0.92,
+                           permitted_uses=["risk_monitoring"], retains_history_after_termination=True),
+}
 for vid, name, did, cost, exit_c, mig_c, crit in VENDORS:
+    fields = dict(VENDOR_211[vid])
+    retains = fields.pop("retains_history_after_termination")
     ent(vid, "vendor", name, department_id=did, criticality=crit,
-        annual_cost_usd=cost, one_time_exit_cost_usd=exit_c, migration_cost_usd=mig_c)
+        annual_cost_usd=cost, one_time_exit_cost_usd=exit_c, migration_cost_usd=mig_c, **fields)
+    # ent() skips None values via fields.items(); set explicitly so vendor_echo's planted
+    # unknown (V-11) is a real JSON null, not a merely-absent field.
+    entities[-1]["retains_history_after_termination"] = retains
 
 # =========================================================================== WORKFLOWS
-# id, name, dept, crit, min_owners, failure_cost_per_day, documented_pct, customer_facing
+# id, name, dept, crit, min_owners, failure_cost_per_day, documented_pct, customer_facing.
+# documented_pct is set to agree with the derived value once a current runbook/sop is added
+# below (loader._derive_documented_pct), except wf_billing_recon (kept at its under-documented
+# story value, R3/W-3: its only covering doc is deliberately outdated).
 WORKFLOWS = [
     ("wf_billing_recon", "Billing reconciliation", "dept_operations", "critical", 2, 900_000, 0.35, True),
-    ("wf_invoicing", "Invoice generation and dispatch", "dept_operations", "critical", 2, 1_200_000, 0.6, True),
-    ("wf_incident_mgmt", "Incident response and on-call", "dept_operations", "high", 2, 600_000, 0.7, False),
-    ("wf_soc2_evidence", "SOC 2 audit-evidence collection", "dept_compliance", "high", 1, 150_000, 0.8, False),
+    ("wf_invoicing", "Invoice generation and dispatch", "dept_operations", "critical", 2, 1_200_000, 0.5, True),
+    ("wf_incident_mgmt", "Incident response and on-call", "dept_operations", "high", 2, 600_000, 0.5, False),
+    ("wf_soc2_evidence", "SOC 2 audit-evidence collection", "dept_compliance", "high", 1, 150_000, 0.5, False),
     ("wf_customer_onboarding", "Customer onboarding", "dept_customer_success", "medium", 2, 300_000, 0.5, True),
-    ("wf_data_refresh", "Data pipeline refresh", "dept_ai_data", "high", 2, 400_000, 0.6, False),
-    ("wf_financial_close", "Monthly financial close", "dept_finance", "critical", 2, 250_000, 0.6, False),
+    ("wf_data_refresh", "Data pipeline refresh", "dept_ai_data", "high", 2, 400_000, 0.5, False),
+    ("wf_financial_close", "Monthly financial close", "dept_finance", "critical", 2, 250_000, 0.5, False),
     ("wf_lead_scoring", "Lead scoring", "dept_sales", "medium", 1, 500_000, 0.7, False),
     ("wf_campaign_targeting", "Campaign targeting", "dept_marketing", "medium", 1, 400_000, 0.65, False),
     ("wf_account_planning", "Account planning", "dept_sales", "medium", 1, 600_000, 0.6, False),
-    ("wf_kyc_screening", "KYC screening", "dept_compliance", "critical", 1, 2_000_000, 0.8, False),
-    ("wf_vendor_reconciliation", "Vendor reconciliation", "dept_operations", "high", 2, 2_500_000, 0.55, False),
+    ("wf_kyc_screening", "KYC screening", "dept_compliance", "critical", 1, 2_000_000, 0.5, False),
+    ("wf_vendor_reconciliation", "Vendor reconciliation", "dept_operations", "high", 2, 2_500_000, 0.5, False),
     ("wf_product_analytics", "Product analytics", "dept_product", "medium", 1, 300_000, 0.6, False),
     ("wf_risk_monitoring", "Risk monitoring", "dept_operations", "high", 1, 800_000, 0.5, False),
 ]
+# 2.1.1 (CR4): exception_documented_pct (registry-pinned ~0.1 for wf_billing_recon, plausible
+# elsewhere), automation_pct (plausible), max_downtime_days (registry-pinned 3 for
+# wf_vendor_reconciliation, plausible elsewhere).
+WORKFLOW_211 = {
+    "wf_billing_recon": (0.1, 0.4, 2),
+    "wf_invoicing": (0.5, 0.7, 2),
+    "wf_incident_mgmt": (0.6, 0.3, 1),
+    "wf_soc2_evidence": (0.5, 0.5, 5),
+    "wf_customer_onboarding": (0.4, 0.5, 3),
+    "wf_data_refresh": (0.5, 0.8, 1),
+    "wf_financial_close": (0.3, 0.4, 3),
+    "wf_lead_scoring": (0.5, 0.7, 3),
+    "wf_campaign_targeting": (0.5, 0.6, 3),
+    "wf_account_planning": (0.5, 0.4, 5),
+    "wf_kyc_screening": (0.6, 0.6, 1),
+    "wf_vendor_reconciliation": (0.4, 0.5, 3),
+    "wf_product_analytics": (0.5, 0.7, 5),
+    "wf_risk_monitoring": (0.4, 0.5, 3),
+}
 for wid, name, did, crit, minown, fail, docp, cust in WORKFLOWS:
+    exc_docp, autop, maxdown = WORKFLOW_211[wid]
     ent(wid, "workflow", name, department_id=did, criticality=crit,
         min_qualified_owners=minown, failure_cost_per_day_usd=fail,
-        documented_pct=docp, customer_facing=cust)
+        documented_pct=docp, customer_facing=cust,
+        exception_documented_pct=exc_docp, automation_pct=autop, max_downtime_days=maxdown)
 
 # =========================================================================== KNOWLEDGE
 KNOWLEDGE = [
@@ -433,7 +502,10 @@ for pid, name, did, budget, comp, cancel, exp_day in PROJECTS:
 # =========================================================================== KPIs
 KPIS = [
     ("kpi_gross_margin", "Gross margin %", "dept_finance", 62.0, "percent", True),
-    ("kpi_net_retention", "Net revenue retention", "dept_sales", 112.0, "percent", True),
+    # dept_customer_success, not dept_sales (R3): retention is CS's own mission, and it fixes a
+    # rule-3 warning (e_onboarding_retention) since sales -> CS and product -> CS already have
+    # channels, while CS -> sales did not.
+    ("kpi_net_retention", "Net revenue retention", "dept_customer_success", 112.0, "percent", True),
     ("kpi_pipeline", "Qualified pipeline", "dept_marketing", 4_500_000_000.0, "usd", True),
     ("kpi_uptime_sla", "System uptime / SLA", "dept_operations", 99.9, "percent", True),
     ("kpi_soc2_coverage", "SOC 2 compliance coverage", "dept_compliance", 100.0, "percent", True),
@@ -612,6 +684,36 @@ evi("ev_vendor_recon_inputs", "workflow_map", "doc_vendor_recon_workflow_map",
 evi("ev_echo_account_intel_feed", "workflow_map", "doc_vendor_recon_workflow_map",
     "The Account intelligence dataset also feeds the Vendor reconciliation workflow each month.",
     location="section 3.4")
+
+# --- new current runbook/sop coverage for critical workflows that had none (task item 3).
+# wf_billing_recon is deliberately excluded: its runbook stays outdated (story gap, W-3).
+# Snippet text is a placeholder for Mithuna's data/artifacts/snippets.json overlay.
+doc("doc_incident_response_runbook", "Incident response runbook", "runbook",
+    department_id="dept_operations", status="current", covers=["wf_incident_mgmt"],
+    summary="On-call escalation and recovery steps for incident response.",
+    owner_role_id="role_sre")
+evi("ev_incident_response_runbook_steps", "runbook", "doc_incident_response_runbook",
+    "PLACEHOLDER: final wording pending - incident response on-call escalation and recovery steps.")
+
+doc("doc_soc2_evidence_sop", "SOC 2 evidence collection SOP", "sop",
+    department_id="dept_compliance", status="current", covers=["wf_soc2_evidence"],
+    framework_refs=["SOC2"], owner_role_id="role_grc_lead",
+    summary="Standard operating procedure for collecting and filing SOC 2 audit evidence.")
+evi("ev_soc2_evidence_sop_steps", "policy", "doc_soc2_evidence_sop",
+    "PLACEHOLDER: final wording pending - SOC 2 evidence collection and filing steps.")
+
+doc("doc_vendor_recon_sop", "Vendor reconciliation SOP", "sop",
+    department_id="dept_operations", status="current", covers=["wf_vendor_reconciliation"],
+    framework_refs=["SOX"], owner_role_id="role_billing_ops_lead",
+    summary="Standard operating procedure for the monthly vendor reconciliation workflow.")
+evi("ev_vendor_recon_sop_steps", "workflow_map", "doc_vendor_recon_sop",
+    "PLACEHOLDER: final wording pending - monthly vendor reconciliation procedure steps.")
+
+doc("doc_risk_monitoring_runbook", "Risk monitoring runbook", "runbook",
+    department_id="dept_operations", status="current", covers=["wf_risk_monitoring"],
+    summary="Monitoring and response steps for geographic and macroeconomic risk signals.")
+evi("ev_risk_monitoring_runbook_steps", "runbook", "doc_risk_monitoring_runbook",
+    "PLACEHOLDER: final wording pending - risk monitoring detection and response steps.")
 
 
 # =========================================================================== EDGES
@@ -923,16 +1025,18 @@ evi("ev_strategy_memo_1", "policy", "doc_department_map",
 
 REQUIRED_BY_TYPE = {
     "department": ["annual_cost_usd", "capacity_fte"],
-    "vendor": ["annual_cost_usd", "one_time_exit_cost_usd", "migration_cost_usd"],
+    "vendor": ["annual_cost_usd", "one_time_exit_cost_usd", "migration_cost_usd",
+               "geographies", "history_years", "freshness_days", "accuracy", "permitted_uses"],
     "system": ["annual_cost_usd", "failure_cost_per_day_usd"],
     "project": ["annual_cost_usd", "completion_pct", "remaining_cost_usd", "expected_completion_day"],
     "workflow": ["min_qualified_owners", "failure_cost_per_day_usd"],
-    "role": ["annual_cost_usd", "capacity_fte"],
+    "role": ["annual_cost_usd", "capacity_fte", "time_to_train_days"],
     "person_token": ["role_id"],
     "knowledge_asset": ["documented_pct"],
     "control": ["mandatory"],
     "kpi": ["kpi_baseline", "kpi_unit", "higher_is_better"],
     "customer_segment": ["arr_usd"],
+    "dataset": ["attribute_group"],
 }
 
 

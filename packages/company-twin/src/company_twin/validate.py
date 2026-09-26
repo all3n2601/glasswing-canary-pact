@@ -17,22 +17,26 @@ from contracts_py.twin import ValidationIssue
 from .loader import load_company_twin
 from .models import EntityType, Relation, Twin
 
-# schema v2.2.0 section 5.3 "Required fields by type", 2.1.0 baseline only. The 2.1.1
-# additions (vendor geographies/history_years/..., role time_to_train_days, dataset
-# attribute_group) are not yet populated by data/generate_company.py, so they are not
-# enforced here; see the task summary.
+# schema v2.2.0 section 5.3 "Required fields by type", now including the 2.1.1 additions
+# data/generate_company.py populates: vendor geographies/history_years/freshness_days/
+# accuracy/permitted_uses, role time_to_train_days, dataset attribute_group.
+# vendor.retains_history_after_termination is intentionally NOT required: it is nullable
+# by design (vendor_echo's planted unknown, V-11), and SCHEMA 5.3's required-fields table
+# for vendor omits it for the same reason.
 REQUIRED_FIELDS_BY_TYPE: dict[EntityType, tuple[str, ...]] = {
     EntityType.department: ("annual_cost_usd", "capacity_fte"),
-    EntityType.vendor: ("annual_cost_usd", "one_time_exit_cost_usd", "migration_cost_usd"),
+    EntityType.vendor: ("annual_cost_usd", "one_time_exit_cost_usd", "migration_cost_usd",
+                        "geographies", "history_years", "freshness_days", "accuracy", "permitted_uses"),
     EntityType.system: ("annual_cost_usd", "failure_cost_per_day_usd"),
     EntityType.project: ("annual_cost_usd", "completion_pct", "remaining_cost_usd", "expected_completion_day"),
     EntityType.workflow: ("min_qualified_owners", "failure_cost_per_day_usd"),
-    EntityType.role: ("annual_cost_usd", "capacity_fte"),
+    EntityType.role: ("annual_cost_usd", "capacity_fte", "time_to_train_days"),
     EntityType.person_token: ("role_id",),
     EntityType.knowledge_asset: ("documented_pct",),
     EntityType.control: ("mandatory",),
     EntityType.kpi: ("kpi_baseline", "kpi_unit", "higher_is_better"),
     EntityType.customer_segment: ("arr_usd",),
+    EntityType.dataset: ("attribute_group",),
 }
 
 
@@ -94,7 +98,8 @@ def validate_twin(twin: Twin) -> list[ValidationIssue]:
         if e.department_id is not None and e.department_id not in depts:
             err(1, f"{e.id} department_id {e.department_id} is not a department", [e.id])
         for field in REQUIRED_FIELDS_BY_TYPE.get(e.type, ()):
-            if getattr(e, field) is None:
+            value = getattr(e, field)
+            if value is None or value == []:
                 err(1, f"{e.id} ({e.type.value}) is missing required field {field}", [e.id])
     for e in twin.edges:
         check_evidence_refs(e.id, e.evidence_refs)
@@ -117,12 +122,18 @@ def validate_twin(twin: Twin) -> list[ValidationIssue]:
                 err(2, f"edge {e.id} strength {e.strength} is outside strength_range", [e.id])
 
     # ---- rule 3: every cross-department edge matches a department channel.
-    # Kept as a warning, not an error: vendors, datasets and workflows legitimately
-    # serve a department other than the one they're assigned to (e.g. vendor_apex
-    # is assigned to dept_sales but PROVIDES the compliance-owned
-    # ds_corporate_linkage), and the 25 department channels don't enumerate every
-    # such pair. Promoting this to an error would fail the merged A0 fixture; see
-    # the task summary.
+    # Kept as a warning, not an error: after moving vendor_echo to dept_marketing and
+    # kpi_net_retention to dept_customer_success (which together resolved 3 of the original
+    # 10 warnings on the fixture without adding a channel), 7 edges still genuinely can't fit
+    # the drawn map, because the department pair they cross has no channel in either
+    # direction, or only the reverse direction is drawn, and moving either endpoint would only
+    # move the same problem onto a different edge:
+    #   e_lineage_supports_close (ai_data -> finance), e_apex_provides_corporate_linkage
+    #   (sales -> compliance), e_market_intel_consumed_ml_scoring and
+    #   e_intent_consumed_ml_scoring (marketing -> ai_data; only ai_data -> marketing is
+    #   drawn), e_risk_monitoring_margin and e_invoicing_margin (operations -> finance; only
+    #   finance -> operations is drawn), e_enterprise_margin (sales -> finance; only
+    #   finance -> sales is drawn). See the task summary.
     channel_pairs = {(e.source, e.target) for e in twin.edges if e.relation == Relation.FLOWS_TO}
     for e in twin.edges:
         if e.relation == Relation.FLOWS_TO:
