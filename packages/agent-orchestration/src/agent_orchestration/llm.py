@@ -76,10 +76,17 @@ def structured_output_mode() -> StructuredOutput:
     return mode  # type: ignore[return-value]
 
 
+RESPONSE_FORMAT_HINTS = ("response_format", "json_schema", "structured output")
+
+
 def _rejects_response_format(exc: Exception) -> bool:
+    """Only a 400 that names the response format; other 400s (bad model, context too long) are real errors."""
     import openai
 
-    return isinstance(exc, openai.APIStatusError) and exc.status_code == 400
+    if not isinstance(exc, openai.APIStatusError) or exc.status_code != 400:
+        return False
+    text = f"{exc.message} {exc.body}".lower().replace("_", " ")
+    return any(hint.replace("_", " ") in text for hint in RESPONSE_FORMAT_HINTS)
 
 
 def _structured_invoke(chat: Any, output_model: type[BaseModel], messages: Messages, method: str) -> dict[str, Any]:

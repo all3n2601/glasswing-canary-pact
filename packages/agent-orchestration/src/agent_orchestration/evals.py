@@ -7,6 +7,7 @@ The engine, twin and brief are injected so this package never imports canary_api
 import argparse
 import csv
 import json
+import os
 import statistics
 import sys
 import threading
@@ -25,6 +26,7 @@ from contracts_py.twin import OrganizationSettings, Twin
 from pydantic import BaseModel
 
 from agent_orchestration.llm import AgentLLM, LLMClient
+from agent_orchestration.merge import REJECTED_MARKER
 from agent_orchestration.orchestrator import run_decision
 from agent_orchestration.ports import EnginePort
 from agent_orchestration.prompts import PERSON_TOKEN, find_repo_root
@@ -40,6 +42,7 @@ METRIC_KEYS = [
     "planted_edge_found",
     "planted_unknown_asked",
     "planted_unknown_rank",
+    "planted_unknown_in_agent_questions",
     "perspectives_ok",
     "missing_perspectives",
     "claims_total",
@@ -51,7 +54,7 @@ METRIC_KEYS = [
     "input_tokens_total",
     "output_tokens_total",
 ]
-TABLE_KEYS = ["planted_edge_found", "planted_unknown_asked", "perspectives_ok", "missing_perspectives",
+TABLE_KEYS = ["planted_edge_found", "planted_unknown_asked", "planted_unknown_in_agent_questions", "perspectives_ok", "missing_perspectives",
               "claims_total", "claims_with_resolving_evidence_pct", "rejected_items", "pt_token_leaks",
               "wall_seconds", "agent_latency_ms_p50", "input_tokens_total", "output_tokens_total"]
 OK_STATUSES = {"ok", "replayed"}
@@ -127,6 +130,15 @@ def _planted_unknown(planted: dict[str, Any], package: DecisionPackage) -> tuple
     return int(rank is not None), rank
 
 
+def _planted_unknown_in_agent_questions(planted: dict[str, Any], assessments: list[AgentAssessment]) -> int | None:
+    target = planted.get("planted_unknown")
+    if target is None:
+        return None
+    entity_id = target["entity_id"]
+    questions = [q for a in assessments if isinstance(a.output, AgentOutput) for q in a.output.questions]
+    return int(any(entity_id in q.entity_ids or entity_id in q.text for q in questions))
+
+
 def compute_metrics(package: DecisionPackage, assessments: list[AgentAssessment], validated_edges: list[Any],
                     twin: Twin, planted: dict[str, Any]) -> dict[str, Any]:
     evidence_ids = {e.id for e in twin.evidence}
@@ -138,11 +150,13 @@ def compute_metrics(package: DecisionPackage, assessments: list[AgentAssessment]
         "planted_edge_found": _planted_edge_found(planted, validated_edges),
         "planted_unknown_asked": asked,
         "planted_unknown_rank": rank,
+        "planted_unknown_in_agent_questions": _planted_unknown_in_agent_questions(planted, assessments),
         "perspectives_ok": sum(1 for a in assessments if a.status in OK_STATUSES),
         "missing_perspectives": len(package.missing_perspectives),
         "claims_total": len(claims),
         "claims_with_resolving_evidence_pct": round(100 * resolving / len(claims), 1) if claims else None,
-        "rejected_items": sum(len(a.validation.errors) for a in assessments),
+        # Only rejected claims; cache-miss, retry and model-fallback notes are not rejections.
+        "rejected_items": sum(1 for a in assessments for e in a.validation.errors if REJECTED_MARKER in e),
         "pt_token_leaks": len(PERSON_TOKEN.findall(package.model_dump_json())),
         "agent_latency_ms_p50": statistics.median(latencies) if latencies else None,
         "input_tokens_total": sum(a.metrics.input_tokens for a in assessments),
@@ -164,6 +178,7 @@ def aggregate(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "runs": len(group),
             "failed_runs": sum(1 for row in group if row.get("error")),
             "engine_impl": group[0]["engine_impl"],
+            "twin_impl": group[0]["twin_impl"],
             "llm_mode": group[0]["llm_mode"],
             **{key: _mean([row.get(key) for row in group]) for key in METRIC_KEYS},
         })
@@ -171,7 +186,8 @@ def aggregate(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def run_eval(*, engine: EnginePort, twin: Twin, brief: DecisionBrief, settings: OrganizationSettings,
-             llm_mode: str = "mock", runs: int = 1, engine_impl: str = "unknown", cache_dir: Path | None = None,
+             llm_mode: str = "mock", runs: int = 1, engine_impl: str = "unknown", twin_impl: str = "unknown",
+             cache_dir: Path | None = None,
              planted_path: Path | None = None, configs: list[str] | None = None,
              llm_factory: Callable[[OrganizationSettings], LLMClient] | None = None) -> EvalReport:
     planted = load_planted(planted_path)
@@ -181,7 +197,8 @@ def run_eval(*, engine: EnginePort, twin: Twin, brief: DecisionBrief, settings: 
         for index in range(1, runs + 1):
             llm = llm_factory(run_settings) if llm_factory else AgentLLM(run_settings, cache_dir=cache_dir)
             recorder = _Recorder()
-            row: dict[str, Any] = {"config": config, "run": index, "engine_impl": engine_impl, "llm_mode": llm_mode}
+            row: dict[str, Any] = {"config": config, "run": index, "engine_impl": engine_impl, "twin_impl": twin_impl,
+                                   "llm_mode": llm_mode}
             started = time.perf_counter()
             try:
                 package = run_decision(brief, engine=engine, settings=run_settings, llm=llm, emit=recorder,
@@ -216,7 +233,7 @@ def write_outputs(report: EvalReport, out_dir: Path) -> list[Path]:
 
 
 def format_table(aggregates: list[dict[str, Any]]) -> str:
-    columns = ["config", "runs", "engine_impl", "llm_mode", *TABLE_KEYS]
+    columns = ["config", "runs", "engine_impl", "twin_impl", "llm_mode", *TABLE_KEYS]
     cells = [[("null" if row.get(c) is None else str(row.get(c))) for c in columns] for row in aggregates]
     widths = [max(len(c), *(len(r[i]) for r in cells)) for i, c in enumerate(columns)]
     lines = ["  ".join(c.ljust(w) for c, w in zip(columns, widths))]
@@ -233,12 +250,15 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None, *, engine: EnginePort, twin: Twin, brief: DecisionBrief,
-         settings: OrganizationSettings, engine_impl: str, cache_dir: Path | None = None) -> int:
+         settings: OrganizationSettings, engine_impl: str, twin_impl: str = "unknown",
+         cache_dir: Path | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.runs < 1:
         raise SystemExit("--runs must be at least 1")
+    if args.mode == "live" and os.environ.get("CANARY_ALLOW_LIVE", "").strip().lower() != "true":
+        raise SystemExit("--mode live is disabled; set CANARY_ALLOW_LIVE=true to allow paid model calls")
     report = run_eval(engine=engine, twin=twin, brief=brief, settings=settings, llm_mode=args.mode, runs=args.runs,
-                      engine_impl=engine_impl, cache_dir=cache_dir)
+                      engine_impl=engine_impl, twin_impl=twin_impl, cache_dir=cache_dir)
     paths = write_outputs(report, args.out or default_out_dir())
     print(format_table(report.aggregates))
     if not report.planted_keys:

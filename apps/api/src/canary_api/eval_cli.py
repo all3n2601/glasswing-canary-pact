@@ -8,7 +8,8 @@ from canary_api.stubs.twin import sample_brief
 
 def main(argv: list[str] | None = None) -> int:
     return evals.main(argv, engine=engine_port, twin=runtime.twin(), brief=sample_brief(), settings=runtime.settings(),
-                      engine_impl=engine_port.engine_impl(), cache_dir=runtime.llm_cache_dir())
+                      engine_impl=engine_port.engine_impl(), twin_impl=engine_port.twin_impl(),
+                      cache_dir=runtime.llm_cache_dir())
 
 
 if __name__ == "__main__":

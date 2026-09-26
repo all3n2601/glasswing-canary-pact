@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 import time
 
@@ -85,7 +86,7 @@ def test_perspectives_survive_an_app_restart(client, monkeypatch) -> None:
     assert client.get(f"/runs/{run_id}/perspectives").json() == before
 
 
-def test_person_tokens_are_withheld(client) -> None:
+def test_person_tokens_are_withheld(client, caplog) -> None:
     runtime.bus.create_run("run_leaky", "dec_vendor_reduction", "stub-northstar-1")
     leaky = AgentAssessment(
         assessment_id="asm_run_leaky_ops", run_id="run_leaky", agent_id="operations", pass_type="first_pass",
@@ -97,6 +98,9 @@ def test_person_tokens_are_withheld(client) -> None:
         created_at="2026-09-26T17:00:00Z",
     )
     runtime.bus.publish("run_leaky", EventType.agent_completed, leaky, actor="operations")
-    response = client.get("/runs/run_leaky/perspectives")
-    assert response.status_code == 500
+    with caplog.at_level(logging.WARNING, logger="canary_api.app"):
+        response = client.get("/runs/run_leaky/perspectives")
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Perspectives withheld: person tokens found in agent output"
     assert not PERSON_TOKEN.search(response.text)
+    assert "run_leaky" in caplog.text and not PERSON_TOKEN.search(caplog.text)
