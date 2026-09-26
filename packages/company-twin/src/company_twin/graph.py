@@ -90,3 +90,22 @@ def affected_departments(graph: nx.DiGraph, entity_id: str, max_depth: int = 4) 
         if graph.nodes[node].get("type") == "department":
             depts.add(node)
     return depts
+
+
+def reachable_departments(twin: Twin, source_entity_ids: list[str], max_hops: int = 4) -> list[str]:
+    """Departments reachable within ``max_hops`` of any of ``source_entity_ids`` (schema
+    v2.2.0 section 7.13). Used by agent routing: a department is in scope when it owns a
+    source entity outright (0 hops) or is touched downstream of one (plan section 8.1).
+    """
+    graph = build_graph(twin)
+    depts: set[str] = set()
+    for entity_id in source_entity_ids:
+        if entity_id not in graph:
+            raise KeyError(f"Unknown entity: {entity_id}")
+        own_dept = graph.nodes[entity_id].get("department_id")
+        if own_dept:
+            depts.add(own_dept)
+        if graph.nodes[entity_id].get("type") == "department":
+            depts.add(entity_id)
+        depts |= affected_departments(graph, entity_id, max_depth=max_hops)
+    return sorted(depts)
