@@ -3,10 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "uv run uvicorn canary_api.app:app --reload --host 0.0.0.0 --port 8000",
+    "dev": "uv run uvicorn canary_api.app:app --reload --env-file ../../.env --host 0.0.0.0 --port 8000",
     "build": "uv run python -m compileall -q src",
     "typecheck": "uv run pyright src",
     "test": "uv run pytest"
   }
 }
-

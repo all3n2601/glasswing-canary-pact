@@ -25,6 +25,8 @@ export interface DepartmentSimulationView {
   dependencyPath: string[];
   evidence: string[];
   mitigation: string;
+  findings?: string[];
+  questions?: string[];
 }
 
 type ScenarioOverride = Omit<DepartmentSimulationView, keyof DepartmentProfile | "departmentId" | "name" | "mission" | "headcount" | "annualBudgetUsd" | "utilisation" | "maturityLevel" | "position">;

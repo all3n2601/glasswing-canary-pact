@@ -1,6 +1,6 @@
 from hashlib import sha256
 
-from company_twin import CompanyTwin, EntityKind, build_graph, downstream_paths
+from company_twin import CompanyTwin, build_graph, downstream_paths, entity_map
 
 from .models import Impact, ImpactLevel, ScenarioRequest, ScenarioResult, Severity
 
@@ -18,7 +18,7 @@ def _severity(importance: float, substitutability: float) -> Severity:
 
 def simulate(twin: CompanyTwin, request: ScenarioRequest) -> ScenarioResult:
     graph = build_graph(twin)
-    entities = twin.entity_map()
+    entities = entity_map(twin)
     impacts: list[Impact] = []
     violations: list[str] = []
     gross_savings = 0.0
@@ -30,9 +30,11 @@ def simulate(twin: CompanyTwin, request: ScenarioRequest) -> ScenarioResult:
             violations.append(f"Unknown resource: {entity_id}")
             continue
 
-        gross_savings += entity.annual_cost or 0
-        transition_cost += float(entity.metadata.get("transition_cost", 0))
-        if entity.metadata.get("critical"):
+        gross_savings += entity.annual_cost_usd or 0
+        transition_cost += float(
+            (entity.one_time_exit_cost_usd or 0) + (entity.migration_cost_usd or 0)
+        )
+        if entity.criticality.value == "critical":
             violations.append(f"{entity.name} is marked as a critical resource")
 
         for target_id, path in downstream_paths(graph, entity_id).items():
@@ -54,7 +56,7 @@ def simulate(twin: CompanyTwin, request: ScenarioRequest) -> ScenarioResult:
                     description=f"Removing {entity.name} affects {target.name}",
                     level=level,
                     severity=_severity(
-                        float(first_edge["importance"]),
+                        float(first_edge["strength"]),
                         float(first_edge["substitutability"]),
                     ),
                     confidence=float(first_edge["confidence"]),
@@ -90,4 +92,3 @@ def simulate(twin: CompanyTwin, request: ScenarioRequest) -> ScenarioResult:
         violations=violations,
         recommendation=recommendation,
     )
-

@@ -31,7 +31,7 @@ export function DepartmentMetricsSidebar({ departments, department, scenarioStar
     >
       <header className="flex items-start justify-between gap-4 border-b border-zinc-100 p-5">
         <div className="min-w-0">
-          <Badge className="border-0 bg-zinc-100 text-[9px] uppercase tracking-[.12em] text-zinc-500">Sample scenario data</Badge>
+          <Badge className="border-0 bg-zinc-100 text-[9px] uppercase tracking-[.12em] text-zinc-500">{scenarioStarted ? "Backend scenario result" : "Organization baseline"}</Badge>
           <h2 className="mt-3 truncate text-2xl font-semibold tracking-[-.04em]">{department.name}</h2>
           <p className="mt-1 text-[11px] leading-5 text-zinc-500">{department.mission}</p>
         </div>
@@ -67,6 +67,10 @@ export function DepartmentMetricsSidebar({ departments, department, scenarioStar
         {scenarioStarted && department.kpis.length ? <section><h3 className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">KPIs</h3><div className="mt-3 grid grid-cols-2 gap-2">{department.kpis.map((kpi) => <div key={kpi.label} className="rounded-xl border border-zinc-200 p-3"><strong className="block text-base">{kpi.value}</strong><span className="text-[9px] text-zinc-500">{kpi.label}</span></div>)}</div></section> : null}
 
         {scenarioStarted && department.workflows.length ? <section><h3 className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">Affected workflows</h3><div className="mt-3 flex flex-wrap gap-2">{department.workflows.map((workflow) => <span key={workflow} className="rounded-full border border-zinc-200 px-2.5 py-1.5 text-[9px] font-medium text-zinc-600">{workflow}</span>)}</div></section> : null}
+
+        {scenarioStarted && department.findings?.length ? <section><h3 className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">Agent findings</h3><ul className="mt-3 space-y-2">{department.findings.map((finding) => <li key={finding} className="rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-[10px] leading-4 text-amber-950/75">{finding}</li>)}</ul></section> : null}
+
+        {scenarioStarted && department.questions?.length ? <section><h3 className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">Open questions</h3><ul className="mt-3 space-y-2">{department.questions.map((question) => <li key={question} className="text-[10px] leading-4 text-zinc-500">• {question}</li>)}</ul></section> : null}
 
         {scenarioStarted ? <section><h3 className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400"><GitBranch className="size-3.5" />Dependency path</h3><ol className="mt-3 space-y-2">{department.dependencyPath.map((node, index) => <li key={`${node}-${index}`} className="flex items-center gap-2 text-[10px] text-zinc-600"><span className="grid size-5 shrink-0 place-items-center rounded-full bg-zinc-950 text-[8px] text-white">{index + 1}</span>{node}</li>)}</ol></section> : null}
 
