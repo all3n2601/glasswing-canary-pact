@@ -54,7 +54,7 @@ def wait_for_status(client, run_id: str, status: RunStatus, timeout: float = 5.0
         ("/departments/dept_operations", DepartmentDetail),
         ("/documents", list[Document]),
         ("/documents?department_id=dept_operations&doc_type=runbook&status=outdated", list[Document]),
-        ("/documents/doc_runbook_billing_recon", Document),
+        ("/documents/doc_billing_recon_runbook", Document),
         ("/replays", list[ReplayInfo]),
     ],
 )
@@ -67,19 +67,27 @@ def test_stub_twin_shape(client) -> None:
     departments = [e for e in twin.entities if e.type == "department"]
     assert len(departments) == 9
     assert len(twin.department_profiles) == 9
-    assert {p.id for p in twin.pressures} == {"pr_cloud_growth", "pr_auditlog_renewal", "pr_billing_recon_hazard"}
-    assert len(twin.documents) == 2
+    assert twin.organization.id == "org_northstar"
+    assert {p.id for p in twin.pressures} == {
+        "pr_apex_renewal", "pr_echo_renewal", "pr_flux_usage_growth", "pr_vendor_recon_hazard",
+        "pr_billing_recon_hazard", "pr_lineage_holder_attrition", "pr_contractor_cost_growth",
+    }
+    vendors = {e.id: e.annual_cost_usd for e in twin.entities if e.type == "vendor"}
+    assert len(vendors) == 7 and sum(vendors.values()) == 8_000_000_000
+    assert len([e for e in twin.edges if e.id.startswith("ch_")]) == 25
+    assert {e.document_id for e in twin.evidence} <= {d.id for d in twin.documents}
+    assert all(e.type != "person_token" for e in twin.entities)
 
 
 def test_settings_are_contract_defaults(client) -> None:
     settings = validate(OrganizationSettings, client.get("/organization/settings"))
-    defaults = OrganizationSettings(organization_id="org_novacorp")
+    defaults = OrganizationSettings(organization_id="org_northstar")
     assert settings.model_dump(exclude={"updated_at"}) == defaults.model_dump(exclude={"updated_at"})
 
 
 def test_missing_ids_are_404(client) -> None:
     assert client.get("/departments/dept_nope").status_code == 404
-    assert client.get("/departments/vendor_auditlog").status_code == 404
+    assert client.get("/departments/vendor_apex").status_code == 404
     assert client.get("/documents/doc_nope").status_code == 404
     assert client.get("/runs/run_nope").status_code == 404
     assert client.post("/replays/nope/play").status_code == 404
@@ -88,7 +96,7 @@ def test_missing_ids_are_404(client) -> None:
 
 def test_simulate_endpoints_match_contracts(client, brief_json) -> None:
     validate(SimulationResult, client.post("/simulate/quick", json={"brief": brief_json}))
-    validate(SimulationResult, client.post("/simulate/quick", json={"brief": brief_json, "intervention_ids": ["i_eng"]}))
+    validate(SimulationResult, client.post("/simulate/quick", json={"brief": brief_json, "intervention_ids": ["remove_beacon"]}))
     validate(FutureComparison, client.post("/simulate/futures", json={"brief": brief_json}))
     validate(PortfolioComparison, client.post("/simulate/optimize", json={"brief": brief_json}))
     assert client.post("/simulate/quick", json={"brief": brief_json, "intervention_ids": ["i_nope"]}).status_code == 422
@@ -131,12 +139,12 @@ def test_decision_brief_gets_settings_defaults(client, brief_json) -> None:
 
 
 def test_invalid_brief_is_rejected(client, brief_json) -> None:
-    brief_json["candidate_interventions"][0]["target_entity_id"] = "ctl_soc2_audit_logging"
+    brief_json["protected_entity_ids"] = [brief_json["candidate_interventions"][0]["target_entity_id"]]
     assert client.post("/decisions", headers=auth_headers(client), json=brief_json).status_code == 422
 
 
 def test_package_before_ready_is_409(client) -> None:
-    runtime.bus.create_run("run_empty", "dec_cut_2m", "stub-twin-1")
+    runtime.bus.create_run("run_empty", "dec_vendor_reduction", "stub-northstar-1")
     assert client.get("/runs/run_empty/package").status_code == 409
     assert client.post("/runs/run_empty/decision", headers=auth_headers(client),
                        json={"decision": "approve", "decided_by": "x", "package_hash": "0" * 64}).status_code == 409
@@ -159,7 +167,7 @@ def test_organization_profile_lists_all_departments(client) -> None:
     assert len(profile.departments) == 9
     operations = next(d for d in profile.departments if d.department_id == "dept_operations")
     assert (operations.name, operations.actual_fte, operations.annual_budget_usd, operations.utilisation) == (
-        "Operations", 58, 3_100_000, 1.12
+        "Operations", 5_200, 6_000_000_000, 1.12
     )
     assert all(d.enabled for d in profile.departments)
     assert profile.settings.organization_id == twin.organization.id
@@ -221,7 +229,7 @@ def test_bad_run_ids_are_404_before_disk(client, run_id, monkeypatch) -> None:
         assert client.get(path).status_code == 404
     assert decide(client, run_id, "approve", "0" * 64).status_code == 404
     with pytest.raises(ValueError):
-        runtime.bus.create_run(run_id, "dec_cut_2m", "stub-twin-1")
+        runtime.bus.create_run(run_id, "dec_vendor_reduction", "stub-northstar-1")
 
 
 def test_bad_run_id_websocket_is_refused(client) -> None:

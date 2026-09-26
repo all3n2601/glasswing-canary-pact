@@ -60,7 +60,7 @@ def test_thread_emitter_publishes_on_the_loop_in_order(monkeypatch) -> None:
     monkeypatch.setattr(runtime.bus, "publish", tracking_publish)
 
     async def scenario() -> int:
-        runtime.bus.create_run("run_threads", "dec_cut_2m", "stub-twin-1")
+        runtime.bus.create_run("run_threads", "dec_vendor_reduction", "stub-northstar-1")
         emit = runs.ThreadEmitter("run_threads", asyncio.get_running_loop(), runtime.twin())
 
         def worker(n: int) -> None:
@@ -163,7 +163,7 @@ PERSON_TOKEN = re.compile(r"\bpt_[a-z0-9_]+")
 
 
 def test_failed_publish_marks_the_run_failed() -> None:
-    runtime.bus.create_run("run_publish_fails", "dec_cut_2m", "stub-twin-1")
+    runtime.bus.create_run("run_publish_fails", "dec_vendor_reduction", "stub-northstar-1")
     twin = runtime.twin()
     runs._publish("run_publish_fails", EventType.agent_started, AgentStarted(agent_id="finance"), "finance", None,
                   None, twin, [])

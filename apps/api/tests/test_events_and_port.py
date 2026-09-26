@@ -63,7 +63,7 @@ def test_stream_drops_live_events_already_sent_as_history() -> None:
 
     async def scenario() -> list[int]:
         bus = runtime.bus
-        bus.create_run("run_dedupe", "dec_cut_2m", "stub-twin-1")
+        bus.create_run("run_dedupe", "dec_vendor_reduction", "stub-northstar-1")
         events = sample_run().root
         for event in events[:3]:
             bus.publish("run_dedupe", event.type, event.payload.model_dump(mode="json"), actor=event.actor)
@@ -141,7 +141,7 @@ def test_replay_rewrites_only_run_id_fields() -> None:
     package = package_event.payload.model_copy(update={"open_questions": [note]})
     edited = [e.model_copy(update={"payload": package}) if e is package_event else e for e in events]
 
-    runtime.bus.create_run("run_rewrite", "dec_cut_2m", "stub-twin-1")
+    runtime.bus.create_run("run_rewrite", "dec_vendor_reduction", "stub-northstar-1")
     asyncio.run(runs.play("run_rewrite", edited, 0))
 
     replayed = runtime.bus.runs["run_rewrite"]
