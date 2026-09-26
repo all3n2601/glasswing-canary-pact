@@ -740,8 +740,8 @@
       "department_id": "dept_engineering",
       "annual_cost_usd": 205000,
       "capacity_fte": 20.0,
-      "time_to_train_days": 61,
-      "replacement_cost_usd": 226000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -754,8 +754,8 @@
       "department_id": "dept_engineering",
       "annual_cost_usd": 190000,
       "capacity_fte": 8.0,
-      "time_to_train_days": 57,
-      "replacement_cost_usd": 209000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -768,8 +768,8 @@
       "department_id": "dept_engineering",
       "annual_cost_usd": 210000,
       "capacity_fte": 6.0,
-      "time_to_train_days": 63,
-      "replacement_cost_usd": 231000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -782,8 +782,8 @@
       "department_id": "dept_engineering",
       "annual_cost_usd": 150000,
       "capacity_fte": 8.0,
-      "time_to_train_days": 45,
-      "replacement_cost_usd": 165000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -796,8 +796,8 @@
       "department_id": "dept_operations",
       "annual_cost_usd": 190000,
       "capacity_fte": 3.0,
-      "time_to_train_days": 90,
-      "replacement_cost_usd": 180000,
+      "time_to_train_days": 120,
+      "replacement_cost_usd": 100000,
       "tags": [],
       "evidence_refs": []
     },
@@ -810,8 +810,8 @@
       "department_id": "dept_operations",
       "annual_cost_usd": 175000,
       "capacity_fte": 12.0,
-      "time_to_train_days": 52,
-      "replacement_cost_usd": 193000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -824,8 +824,8 @@
       "department_id": "dept_operations",
       "annual_cost_usd": 165000,
       "capacity_fte": 8.0,
-      "time_to_train_days": 50,
-      "replacement_cost_usd": 182000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -838,8 +838,8 @@
       "department_id": "dept_ai_data",
       "annual_cost_usd": 220000,
       "capacity_fte": 4.0,
-      "time_to_train_days": 66,
-      "replacement_cost_usd": 242000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -852,8 +852,8 @@
       "department_id": "dept_ai_data",
       "annual_cost_usd": 180000,
       "capacity_fte": 9.0,
-      "time_to_train_days": 54,
-      "replacement_cost_usd": 198000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -866,8 +866,8 @@
       "department_id": "dept_ai_data",
       "annual_cost_usd": 165000,
       "capacity_fte": 6.0,
-      "time_to_train_days": 50,
-      "replacement_cost_usd": 182000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -880,8 +880,8 @@
       "department_id": "dept_product",
       "annual_cost_usd": 175000,
       "capacity_fte": 8.0,
-      "time_to_train_days": 52,
-      "replacement_cost_usd": 193000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -894,8 +894,8 @@
       "department_id": "dept_product",
       "annual_cost_usd": 195000,
       "capacity_fte": 3.0,
-      "time_to_train_days": 58,
-      "replacement_cost_usd": 215000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -908,8 +908,8 @@
       "department_id": "dept_product",
       "annual_cost_usd": 150000,
       "capacity_fte": 5.0,
-      "time_to_train_days": 45,
-      "replacement_cost_usd": 165000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -922,8 +922,8 @@
       "department_id": "dept_sales",
       "annual_cost_usd": 160000,
       "capacity_fte": 20.0,
-      "time_to_train_days": 48,
-      "replacement_cost_usd": 176000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -936,8 +936,8 @@
       "department_id": "dept_sales",
       "annual_cost_usd": 175000,
       "capacity_fte": 8.0,
-      "time_to_train_days": 52,
-      "replacement_cost_usd": 193000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -950,8 +950,8 @@
       "department_id": "dept_sales",
       "annual_cost_usd": 110000,
       "capacity_fte": 12.0,
-      "time_to_train_days": 33,
-      "replacement_cost_usd": 121000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -964,8 +964,8 @@
       "department_id": "dept_marketing",
       "annual_cost_usd": 150000,
       "capacity_fte": 8.0,
-      "time_to_train_days": 45,
-      "replacement_cost_usd": 165000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -978,8 +978,8 @@
       "department_id": "dept_marketing",
       "annual_cost_usd": 150000,
       "capacity_fte": 6.0,
-      "time_to_train_days": 45,
-      "replacement_cost_usd": 165000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -992,8 +992,8 @@
       "department_id": "dept_marketing",
       "annual_cost_usd": 140000,
       "capacity_fte": 4.0,
-      "time_to_train_days": 42,
-      "replacement_cost_usd": 154000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1006,8 +1006,8 @@
       "department_id": "dept_customer_success",
       "annual_cost_usd": 140000,
       "capacity_fte": 18.0,
-      "time_to_train_days": 42,
-      "replacement_cost_usd": 154000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1020,8 +1020,8 @@
       "department_id": "dept_customer_success",
       "annual_cost_usd": 130000,
       "capacity_fte": 10.0,
-      "time_to_train_days": 39,
-      "replacement_cost_usd": 143000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1034,8 +1034,8 @@
       "department_id": "dept_customer_success",
       "annual_cost_usd": 120000,
       "capacity_fte": 12.0,
-      "time_to_train_days": 36,
-      "replacement_cost_usd": 132000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1048,8 +1048,8 @@
       "department_id": "dept_finance",
       "annual_cost_usd": 150000,
       "capacity_fte": 9.0,
-      "time_to_train_days": 45,
-      "replacement_cost_usd": 165000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1062,8 +1062,8 @@
       "department_id": "dept_finance",
       "annual_cost_usd": 150000,
       "capacity_fte": 3.0,
-      "time_to_train_days": 45,
-      "replacement_cost_usd": 165000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1076,8 +1076,8 @@
       "department_id": "dept_finance",
       "annual_cost_usd": 175000,
       "capacity_fte": 4.0,
-      "time_to_train_days": 52,
-      "replacement_cost_usd": 193000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1090,8 +1090,8 @@
       "department_id": "dept_compliance",
       "annual_cost_usd": 170000,
       "capacity_fte": 3.0,
-      "time_to_train_days": 51,
-      "replacement_cost_usd": 187000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1104,8 +1104,8 @@
       "department_id": "dept_compliance",
       "annual_cost_usd": 175000,
       "capacity_fte": 3.0,
-      "time_to_train_days": 52,
-      "replacement_cost_usd": 193000,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1118,8 +1118,8 @@
       "department_id": "dept_finance",
       "annual_cost_usd": 145000,
       "capacity_fte": 4.0,
-      "time_to_train_days": 44,
-      "replacement_cost_usd": 160000,
+      "time_to_train_days": 120,
+      "replacement_cost_usd": 90000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1132,8 +1132,8 @@
       "department_id": "dept_finance",
       "annual_cost_usd": 120000,
       "capacity_fte": 5.0,
-      "time_to_train_days": 36,
-      "replacement_cost_usd": 132000,
+      "time_to_train_days": 90,
+      "replacement_cost_usd": 70000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1146,8 +1146,8 @@
       "department_id": "dept_finance",
       "annual_cost_usd": 110000,
       "capacity_fte": 3.0,
-      "time_to_train_days": 33,
-      "replacement_cost_usd": 121000,
+      "time_to_train_days": 75,
+      "replacement_cost_usd": 60000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1160,8 +1160,8 @@
       "department_id": "dept_ai_data",
       "annual_cost_usd": 195000,
       "capacity_fte": 2.0,
-      "time_to_train_days": 120,
-      "replacement_cost_usd": 220000,
+      "time_to_train_days": 150,
+      "replacement_cost_usd": 120000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1174,8 +1174,8 @@
       "department_id": "dept_operations",
       "annual_cost_usd": 95000,
       "capacity_fte": 6.0,
-      "time_to_train_days": 28,
-      "replacement_cost_usd": 105000,
+      "time_to_train_days": 90,
+      "replacement_cost_usd": 70000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1188,8 +1188,8 @@
       "department_id": "dept_finance",
       "annual_cost_usd": 130000,
       "capacity_fte": 4.0,
-      "time_to_train_days": 39,
-      "replacement_cost_usd": 143000,
+      "time_to_train_days": 90,
+      "replacement_cost_usd": 75000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1202,8 +1202,8 @@
       "department_id": "dept_finance",
       "annual_cost_usd": 85000,
       "capacity_fte": 8.0,
-      "time_to_train_days": 26,
-      "replacement_cost_usd": 94000,
+      "time_to_train_days": 60,
+      "replacement_cost_usd": 55000,
       "tags": [],
       "evidence_refs": []
     },
@@ -1747,7 +1747,7 @@
       "criticality": "critical",
       "sensitivity": "general",
       "department_id": "dept_compliance",
-      "attribute_group": "audit",
+      "attribute_group": "audit_log",
       "tags": [],
       "evidence_refs": []
     },
@@ -1769,7 +1769,7 @@
       "criticality": "medium",
       "sensitivity": "general",
       "department_id": "dept_sales",
-      "attribute_group": "firmographics",
+      "attribute_group": "contact",
       "tags": [],
       "evidence_refs": []
     },
@@ -1780,7 +1780,7 @@
       "criticality": "critical",
       "sensitivity": "general",
       "department_id": "dept_compliance",
-      "attribute_group": "firmographics",
+      "attribute_group": "corporate_linkage",
       "tags": [],
       "evidence_refs": []
     },
@@ -1824,7 +1824,7 @@
       "criticality": "medium",
       "sensitivity": "general",
       "department_id": "dept_sales",
-      "attribute_group": "market_intel",
+      "attribute_group": "account_intel",
       "tags": [],
       "evidence_refs": []
     },
@@ -1835,7 +1835,7 @@
       "criticality": "medium",
       "sensitivity": "general",
       "department_id": "dept_product",
-      "attribute_group": "behavioral",
+      "attribute_group": "usage",
       "tags": [],
       "evidence_refs": []
     },
@@ -1861,20 +1861,22 @@
       "one_time_exit_cost_usd": 60000000,
       "migration_cost_usd": 100000000,
       "geographies": [
-        "US",
-        "EU"
+        "NA",
+        "EU",
+        "APAC",
+        "LATAM"
       ],
-      "history_years": 7,
-      "freshness_days": 1,
-      "accuracy": 0.97,
+      "history_years": 15,
+      "freshness_days": 7,
+      "accuracy": 0.93,
       "permitted_uses": [
         "sales_prospecting",
-        "kyc",
+        "marketing",
         "model_training"
       ],
       "tags": [],
       "evidence_refs": [],
-      "retains_history_after_termination": false
+      "retains_history_after_termination": true
     },
     {
       "id": "vendor_beacon",
@@ -1887,15 +1889,14 @@
       "one_time_exit_cost_usd": 40000000,
       "migration_cost_usd": 55000000,
       "geographies": [
-        "US",
+        "NA",
         "EU"
       ],
-      "history_years": 5,
-      "freshness_days": 2,
-      "accuracy": 0.94,
+      "history_years": 8,
+      "freshness_days": 14,
+      "accuracy": 0.87,
       "permitted_uses": [
-        "sales_prospecting",
-        "model_training"
+        "sales_prospecting"
       ],
       "tags": [],
       "evidence_refs": [],
@@ -1912,18 +1913,20 @@
       "one_time_exit_cost_usd": 50000000,
       "migration_cost_usd": 90000000,
       "geographies": [
-        "US"
+        "NA",
+        "EU",
+        "APAC"
       ],
-      "history_years": 3,
-      "freshness_days": 1,
-      "accuracy": 0.9,
+      "history_years": 5,
+      "freshness_days": 2,
+      "accuracy": 0.85,
       "permitted_uses": [
-        "campaign_targeting",
-        "model_training"
+        "marketing",
+        "sales_prospecting"
       ],
       "tags": [],
       "evidence_refs": [],
-      "retains_history_after_termination": false
+      "retains_history_after_termination": true
     },
     {
       "id": "vendor_delta",
@@ -1936,16 +1939,17 @@
       "one_time_exit_cost_usd": 30000000,
       "migration_cost_usd": 50000000,
       "geographies": [
-        "US",
+        "NA",
         "EU",
-        "APAC"
+        "APAC",
+        "LATAM"
       ],
-      "history_years": 10,
-      "freshness_days": 1,
-      "accuracy": 0.99,
+      "history_years": 12,
+      "freshness_days": 3,
+      "accuracy": 0.97,
       "permitted_uses": [
         "kyc",
-        "identity_verification"
+        "compliance"
       ],
       "tags": [],
       "evidence_refs": [],
@@ -1962,16 +1966,15 @@
       "one_time_exit_cost_usd": 50000000,
       "migration_cost_usd": 75000000,
       "geographies": [
-        "US",
+        "NA",
         "EU"
       ],
-      "history_years": 4,
-      "freshness_days": 3,
-      "accuracy": 0.88,
+      "history_years": 6,
+      "freshness_days": 21,
+      "accuracy": 0.82,
       "permitted_uses": [
-        "campaign_targeting",
-        "account_planning",
-        "model_training"
+        "marketing",
+        "strategy"
       ],
       "tags": [],
       "evidence_refs": [],
@@ -1988,18 +1991,20 @@
       "one_time_exit_cost_usd": 25000000,
       "migration_cost_usd": 40000000,
       "geographies": [
-        "US"
+        "NA",
+        "EU",
+        "APAC"
       ],
-      "history_years": 2,
+      "history_years": 4,
       "freshness_days": 1,
-      "accuracy": 0.85,
+      "accuracy": 0.9,
       "permitted_uses": [
         "product_analytics",
         "model_training"
       ],
       "tags": [],
       "evidence_refs": [],
-      "retains_history_after_termination": false
+      "retains_history_after_termination": true
     },
     {
       "id": "vendor_granite",
@@ -2012,13 +2017,17 @@
       "one_time_exit_cost_usd": 35000000,
       "migration_cost_usd": 55000000,
       "geographies": [
-        "US"
+        "NA",
+        "EU",
+        "APAC",
+        "LATAM"
       ],
-      "history_years": 6,
-      "freshness_days": 7,
-      "accuracy": 0.92,
+      "history_years": 20,
+      "freshness_days": 30,
+      "accuracy": 0.9,
       "permitted_uses": [
-        "risk_monitoring"
+        "risk",
+        "operations"
       ],
       "tags": [],
       "evidence_refs": [],
@@ -2035,8 +2044,8 @@
       "failure_cost_per_day_usd": 900000,
       "documented_pct": 0.35,
       "customer_facing": true,
-      "exception_documented_pct": 0.1,
-      "automation_pct": 0.4,
+      "exception_documented_pct": 0.2,
+      "automation_pct": 0.3,
       "max_downtime_days": 2,
       "tags": [],
       "evidence_refs": []
@@ -2052,8 +2061,8 @@
       "failure_cost_per_day_usd": 1200000,
       "documented_pct": 0.5,
       "customer_facing": true,
-      "exception_documented_pct": 0.5,
-      "automation_pct": 0.7,
+      "exception_documented_pct": 0.55,
+      "automation_pct": 0.6,
       "max_downtime_days": 2,
       "tags": [],
       "evidence_refs": []
@@ -2070,8 +2079,8 @@
       "documented_pct": 0.5,
       "customer_facing": false,
       "exception_documented_pct": 0.6,
-      "automation_pct": 0.3,
-      "max_downtime_days": 1,
+      "automation_pct": 0.5,
+      "max_downtime_days": 7,
       "tags": [],
       "evidence_refs": []
     },
@@ -2086,9 +2095,9 @@
       "failure_cost_per_day_usd": 150000,
       "documented_pct": 0.5,
       "customer_facing": false,
-      "exception_documented_pct": 0.5,
+      "exception_documented_pct": 0.6,
       "automation_pct": 0.5,
-      "max_downtime_days": 5,
+      "max_downtime_days": 7,
       "tags": [],
       "evidence_refs": []
     },
@@ -2103,9 +2112,9 @@
       "failure_cost_per_day_usd": 300000,
       "documented_pct": 0.5,
       "customer_facing": true,
-      "exception_documented_pct": 0.4,
+      "exception_documented_pct": 0.6,
       "automation_pct": 0.5,
-      "max_downtime_days": 3,
+      "max_downtime_days": 7,
       "tags": [],
       "evidence_refs": []
     },
@@ -2120,9 +2129,9 @@
       "failure_cost_per_day_usd": 400000,
       "documented_pct": 0.5,
       "customer_facing": false,
-      "exception_documented_pct": 0.5,
-      "automation_pct": 0.8,
-      "max_downtime_days": 1,
+      "exception_documented_pct": 0.6,
+      "automation_pct": 0.5,
+      "max_downtime_days": 7,
       "tags": [],
       "evidence_refs": []
     },
@@ -2137,7 +2146,7 @@
       "failure_cost_per_day_usd": 250000,
       "documented_pct": 0.5,
       "customer_facing": false,
-      "exception_documented_pct": 0.3,
+      "exception_documented_pct": 0.25,
       "automation_pct": 0.4,
       "max_downtime_days": 3,
       "tags": [],
@@ -2154,9 +2163,9 @@
       "failure_cost_per_day_usd": 500000,
       "documented_pct": 0.7,
       "customer_facing": false,
-      "exception_documented_pct": 0.5,
-      "automation_pct": 0.7,
-      "max_downtime_days": 3,
+      "exception_documented_pct": 0.6,
+      "automation_pct": 0.5,
+      "max_downtime_days": 7,
       "tags": [],
       "evidence_refs": []
     },
@@ -2171,9 +2180,9 @@
       "failure_cost_per_day_usd": 400000,
       "documented_pct": 0.65,
       "customer_facing": false,
-      "exception_documented_pct": 0.5,
-      "automation_pct": 0.6,
-      "max_downtime_days": 3,
+      "exception_documented_pct": 0.6,
+      "automation_pct": 0.5,
+      "max_downtime_days": 7,
       "tags": [],
       "evidence_refs": []
     },
@@ -2188,9 +2197,9 @@
       "failure_cost_per_day_usd": 600000,
       "documented_pct": 0.6,
       "customer_facing": false,
-      "exception_documented_pct": 0.5,
-      "automation_pct": 0.4,
-      "max_downtime_days": 5,
+      "exception_documented_pct": 0.6,
+      "automation_pct": 0.5,
+      "max_downtime_days": 7,
       "tags": [],
       "evidence_refs": []
     },
@@ -2205,7 +2214,7 @@
       "failure_cost_per_day_usd": 2000000,
       "documented_pct": 0.5,
       "customer_facing": false,
-      "exception_documented_pct": 0.6,
+      "exception_documented_pct": 0.7,
       "automation_pct": 0.6,
       "max_downtime_days": 1,
       "tags": [],
@@ -2223,8 +2232,8 @@
       "documented_pct": 0.5,
       "customer_facing": false,
       "exception_documented_pct": 0.4,
-      "automation_pct": 0.5,
-      "max_downtime_days": 3,
+      "automation_pct": 0.45,
+      "max_downtime_days": 5,
       "tags": [],
       "evidence_refs": []
     },
@@ -2239,9 +2248,9 @@
       "failure_cost_per_day_usd": 300000,
       "documented_pct": 0.6,
       "customer_facing": false,
-      "exception_documented_pct": 0.5,
-      "automation_pct": 0.7,
-      "max_downtime_days": 5,
+      "exception_documented_pct": 0.6,
+      "automation_pct": 0.5,
+      "max_downtime_days": 7,
       "tags": [],
       "evidence_refs": []
     },
@@ -2256,9 +2265,9 @@
       "failure_cost_per_day_usd": 800000,
       "documented_pct": 0.5,
       "customer_facing": false,
-      "exception_documented_pct": 0.4,
+      "exception_documented_pct": 0.6,
       "automation_pct": 0.5,
-      "max_downtime_days": 3,
+      "max_downtime_days": 7,
       "tags": [],
       "evidence_refs": []
     },
