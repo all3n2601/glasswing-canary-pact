@@ -1,0 +1,68 @@
+{
+  "base": "base.txt",
+  "challenger_base": "base_challenger.txt",
+  "skills_dir": "docs/skillfiles",
+  "skill_include": "whole_file_without_title",
+  "assembly_order": [
+    "base",
+    "department_knowledge",
+    "agent_context"
+  ],
+  "agents": {
+    "finance": {
+      "display_name": "Finance",
+      "skill": "docs/skillfiles/finance.md",
+      "fallback": "fallback/finance.txt"
+    },
+    "engineering": {
+      "display_name": "Engineering",
+      "skill": "docs/skillfiles/engineering.md",
+      "fallback": "fallback/engineering.txt"
+    },
+    "ai_data": {
+      "display_name": "AI and Data",
+      "skill": "docs/skillfiles/ai_data.md",
+      "fallback": "fallback/ai_data.txt"
+    },
+    "operations": {
+      "display_name": "Operations",
+      "skill": "docs/skillfiles/operations.md",
+      "fallback": "fallback/operations.txt"
+    },
+    "product": {
+      "display_name": "Product",
+      "skill": "docs/skillfiles/product.md",
+      "fallback": "fallback/product.txt"
+    },
+    "marketing": {
+      "display_name": "Marketing",
+      "skill": "docs/skillfiles/marketing.md",
+      "fallback": "fallback/marketing.txt"
+    },
+    "sales": {
+      "display_name": "Sales",
+      "skill": "docs/skillfiles/sales.md",
+      "fallback": "fallback/sales.txt"
+    },
+    "customer_success": {
+      "display_name": "Customer Success",
+      "skill": "docs/skillfiles/customer_success.md",
+      "fallback": "fallback/customer_success.txt"
+    },
+    "compliance": {
+      "display_name": "Compliance",
+      "skill": "docs/skillfiles/compliance.md",
+      "fallback": "fallback/compliance.txt"
+    },
+    "people_knowledge": {
+      "display_name": "People and Knowledge",
+      "skill": "docs/skillfiles/people_knowledge.md",
+      "fallback": "fallback/people_knowledge.txt"
+    },
+    "challenger": {
+      "display_name": "Challenger",
+      "skill": "docs/skillfiles/challenger.md",
+      "fallback": "fallback/challenger.txt"
+    }
+  }
+}
