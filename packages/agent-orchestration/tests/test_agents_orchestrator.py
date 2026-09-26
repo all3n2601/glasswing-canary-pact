@@ -223,7 +223,7 @@ def live_run(brief, twin, tmp_path, monkeypatch, **env):
         monkeypatch.setenv(name, value)
     used: list[tuple[str, str]] = []
 
-    def live(model_id, messages, output_model, *, timeout, temperature):
+    def live(model_id, messages, output_model, *, timeout, temperature, structured_output="auto"):
         used.append((output_model.__name__, model_id))
         if output_model is ChallengerOutput:
             return LiveReply({"confidence": 0.5})
