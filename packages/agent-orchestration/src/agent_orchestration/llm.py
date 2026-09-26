@@ -76,7 +76,7 @@ def sciforium_call(model_id: str, messages: Messages, output_model: type[BaseMod
         temperature=temperature,
         max_retries=0,
     )
-    structured = chat.with_structured_output(output_model, method="function_calling", include_raw=True)
+    structured = chat.with_structured_output(output_model, method="json_schema", include_raw=True, strict=False)
     reply = structured.invoke([(m["role"], m["content"]) for m in messages])
     if reply["parsing_error"] is not None:
         raise OutputInvalid(str(reply["parsing_error"]))
