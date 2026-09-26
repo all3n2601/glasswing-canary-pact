@@ -286,8 +286,22 @@ ROLES = [
     ("role_revenue_accountant", "Revenue Accountant", "dept_finance", 130_000, 4),
     ("role_ar_specialist", "Accounts Receivable Specialist", "dept_finance", 85_000, 8),
 ]
+# Role training/replacement inputs (2.1.1 CR4). The 8 workforce roles are low-replaceability
+# (long to train, costly to backfill), which is what makes their removal strand the two workflows.
+ROLE_TRAINING = {
+    "role_close_accountant": dict(time_to_train_days=120, replacement_cost_usd=90_000),
+    "role_gl_accountant": dict(time_to_train_days=90, replacement_cost_usd=70_000),
+    "role_reporting_analyst": dict(time_to_train_days=75, replacement_cost_usd=60_000),
+    "role_data_platform_lead": dict(time_to_train_days=150, replacement_cost_usd=120_000),
+    "role_billing_ops_lead": dict(time_to_train_days=120, replacement_cost_usd=100_000),
+    "role_billing_specialist": dict(time_to_train_days=90, replacement_cost_usd=70_000),
+    "role_revenue_accountant": dict(time_to_train_days=90, replacement_cost_usd=75_000),
+    "role_ar_specialist": dict(time_to_train_days=60, replacement_cost_usd=55_000),
+}
+_ROLE_TRAIN_DEFAULT = dict(time_to_train_days=30, replacement_cost_usd=40_000)
 for rid, name, did, salary, fte in ROLES:
-    ent(rid, "role", name, department_id=did, annual_cost_usd=salary, capacity_fte=float(fte))
+    ent(rid, "role", name, department_id=did, annual_cost_usd=salary, capacity_fte=float(fte),
+        **ROLE_TRAINING.get(rid, _ROLE_TRAIN_DEFAULT))
 
 # Every workforce role that eliminating strands a workflow (goal target = exact sum, ADHI_BRIEF 13.1).
 WORKFORCE_ROLE_IDS = [
@@ -336,8 +350,16 @@ DATASETS = [
     ("ds_usage", "Product usage signals", "dept_product", "medium"),
     ("ds_geo_risk", "Geographic and macroeconomic risk", "dept_operations", "medium"),
 ]
+# attribute_group per dataset (2.1.1 CR3) - drives the engine's attribute_coverage overlap
+DATASET_GROUP = {
+    "ds_audit_log": "audit_log", "ds_firmographics": "firmographics", "ds_contact_data": "contact",
+    "ds_corporate_linkage": "corporate_linkage", "ds_intent_signals": "intent",
+    "ds_identity_verification": "identity", "ds_market_intel": "market_intel",
+    "ds_account_intel": "account_intel", "ds_usage": "usage", "ds_geo_risk": "geo_risk",
+}
 for dsid, name, did, crit in DATASETS:
-    ent(dsid, "dataset", name, department_id=did, criticality=crit)
+    ent(dsid, "dataset", name, department_id=did, criticality=crit,
+        attribute_group=DATASET_GROUP[dsid])
 
 # =========================================================================== VENDORS (plan section 4.1)
 # id, name, dept (main consumer), cost, exit_cost, migration_cost, criticality
@@ -354,9 +376,37 @@ assert sum(v[3] for v in VENDORS) == VENDOR_TOTAL_USD
 assert sum(v[3] for v in VENDORS if v[0] in ("vendor_beacon", "vendor_echo")) == 2_300_000_000
 assert sum(v[4] for v in VENDORS if v[0] in ("vendor_beacon", "vendor_echo")) == 90_000_000
 assert sum(v[5] for v in VENDORS if v[0] in ("vendor_beacon", "vendor_echo")) == 130_000_000
+# Vendor overlap inputs (2.1.1 CR3). The engine computes VendorOverlap across the 11 dimensions
+# from these; tuned so BeaconIQ is dominated by ApexData (fewer geos, older, less fresh, less
+# accurate, narrower permitted use) and EchoMarket is redundant except for ds_account_intel.
+# vendor_echo.retains_history_after_termination is left unset (null) as the planted E-06 unknown.
+VENDOR_ATTRS = {
+    "vendor_apex": dict(geographies=["NA", "EU", "APAC", "LATAM"], history_years=15, freshness_days=7,
+                        accuracy=0.93, permitted_uses=["sales_prospecting", "marketing", "model_training"],
+                        retains_history_after_termination=True),
+    "vendor_beacon": dict(geographies=["NA", "EU"], history_years=8, freshness_days=14,
+                          accuracy=0.87, permitted_uses=["sales_prospecting"],
+                          retains_history_after_termination=True),
+    "vendor_cinder": dict(geographies=["NA", "EU", "APAC"], history_years=5, freshness_days=2,
+                          accuracy=0.85, permitted_uses=["marketing", "sales_prospecting"],
+                          retains_history_after_termination=True),
+    "vendor_delta": dict(geographies=["NA", "EU", "APAC", "LATAM"], history_years=12, freshness_days=3,
+                         accuracy=0.97, permitted_uses=["kyc", "compliance"],
+                         retains_history_after_termination=True),
+    "vendor_echo": dict(geographies=["NA", "EU"], history_years=6, freshness_days=21,
+                        accuracy=0.82, permitted_uses=["marketing", "strategy"],
+                        retains_history_after_termination=None),  # planted unknown (E-06)
+    "vendor_flux": dict(geographies=["NA", "EU", "APAC"], history_years=4, freshness_days=1,
+                        accuracy=0.90, permitted_uses=["product_analytics", "model_training"],
+                        retains_history_after_termination=True),
+    "vendor_granite": dict(geographies=["NA", "EU", "APAC", "LATAM"], history_years=20, freshness_days=30,
+                           accuracy=0.90, permitted_uses=["risk", "operations"],
+                           retains_history_after_termination=True),
+}
 for vid, name, did, cost, exit_c, mig_c, crit in VENDORS:
     ent(vid, "vendor", name, department_id=did, criticality=crit,
-        annual_cost_usd=cost, one_time_exit_cost_usd=exit_c, migration_cost_usd=mig_c)
+        annual_cost_usd=cost, one_time_exit_cost_usd=exit_c, migration_cost_usd=mig_c,
+        **VENDOR_ATTRS[vid])
 
 # =========================================================================== WORKFLOWS
 # id, name, dept, crit, min_owners, failure_cost_per_day, documented_pct, customer_facing
@@ -376,10 +426,20 @@ WORKFLOWS = [
     ("wf_product_analytics", "Product analytics", "dept_product", "medium", 1, 300_000, 0.6, False),
     ("wf_risk_monitoring", "Risk monitoring", "dept_operations", "high", 1, 800_000, 0.5, False),
 ]
+# Workflow knowledge-risk inputs (2.1.1 CR4). The two stranding workflows have thin exception
+# docs and low automation, so removing their owners strands them until a runbook is written.
+WORKFLOW_RISK = {
+    "wf_billing_recon": dict(exception_documented_pct=0.20, automation_pct=0.30, max_downtime_days=2),
+    "wf_financial_close": dict(exception_documented_pct=0.25, automation_pct=0.40, max_downtime_days=3),
+    "wf_invoicing": dict(exception_documented_pct=0.55, automation_pct=0.6, max_downtime_days=2),
+    "wf_vendor_reconciliation": dict(exception_documented_pct=0.4, automation_pct=0.45, max_downtime_days=5),
+    "wf_kyc_screening": dict(exception_documented_pct=0.7, automation_pct=0.6, max_downtime_days=1),
+}
+_WF_RISK_DEFAULT = dict(exception_documented_pct=0.6, automation_pct=0.5, max_downtime_days=7)
 for wid, name, did, crit, minown, fail, docp, cust in WORKFLOWS:
     ent(wid, "workflow", name, department_id=did, criticality=crit,
         min_qualified_owners=minown, failure_cost_per_day_usd=fail,
-        documented_pct=docp, customer_facing=cust)
+        documented_pct=docp, customer_facing=cust, **WORKFLOW_RISK.get(wid, _WF_RISK_DEFAULT))
 
 # =========================================================================== KNOWLEDGE
 KNOWLEDGE = [
