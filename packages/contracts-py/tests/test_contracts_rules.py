@@ -3,10 +3,10 @@ from datetime import datetime, timezone
 import pytest
 from pydantic import ValidationError
 
-from contracts_py.agents import AgentOutput
+from contracts_py.agents import AgentOutput, ProposedDependency
 from contracts_py.decision import DecisionBrief, Intervention, Scenario
 from contracts_py.engine import ValueBreakdown
-from contracts_py.enums import Future
+from contracts_py.enums import Direction, Future, ImpactCategory, ImpactLevel, Polarity, Relation
 from contracts_py.events import Event, EventType, PhaseChanged
 from contracts_py.package import DecisionPackage, find_person_tokens
 from contracts_py.twin import Organization
@@ -215,3 +215,54 @@ def test_event_payload_resolved_by_type() -> None:
         }
     )
     assert event.type is EventType.phase_changed and isinstance(event.payload, PhaseChanged)
+
+
+def test_future_view_summary_truncated_to_40_words() -> None:
+    words = [f"w{i}" for i in range(55)]
+    view = AgentOutput.model_validate(
+        {"act_now_view": {"summary": " ".join(words)}, "inaction_view": future_view(), "confidence": 0.5}
+    ).act_now_view
+    assert view.summary.split() == words[:40]
+
+
+def test_agent_enums_accept_any_casing() -> None:
+    output = AgentOutput.model_validate(
+        {
+            "act_now_view": future_view()
+            | {
+                "proposed_impacts": [
+                    {
+                        "affected_entity": "wf_billing_recon",
+                        "metric": "owners",
+                        "direction": " Increase ",
+                        "polarity": "HARM",
+                        "category": "Ownership",
+                        "level": " DIRECT",
+                        "severity": 4,
+                        "rationale": "Only owner leaves.",
+                        "confidence": 0.7,
+                    }
+                ]
+            },
+            "inaction_view": future_view(),
+            "proposed_dependencies": [
+                {"source": "role_billing_ops_lead", "target": "wf_billing_recon", "relation": "owns",
+                 "rationale": "Runbook names the lead.", "confidence": 0.6}
+            ],
+            "confidence": 0.5,
+        }
+    )
+    impact = output.act_now_view.proposed_impacts[0]
+    assert (impact.direction, impact.polarity, impact.category, impact.level) == (
+        Direction.increase, Polarity.harm, ImpactCategory.ownership, ImpactLevel.direct
+    )
+    assert output.proposed_dependencies[0].relation is Relation.OWNS
+    with pytest.raises(ValidationError):
+        ProposedDependency.model_validate(
+            {"source": "a", "target": "b", "relation": " owned by ", "rationale": "x", "confidence": 0.5}
+        )
+
+
+def test_strict_models_keep_exact_enums() -> None:
+    with pytest.raises(ValidationError):
+        Intervention(id="i_x", kind="ACTION", type="remove_vendor", target_entity_id="vendor_auditlog", rationale="x")

@@ -1,9 +1,10 @@
 from datetime import datetime
+from enum import StrEnum
 from typing import Annotated, Any, Literal
 
-from pydantic import Field
+from pydantic import BeforeValidator, Field
 
-from contracts_py.common import ID, SCHEMA_VERSION, Lenient, SchemaVersion, Severity, Strict, max_words
+from contracts_py.common import ID, SCHEMA_VERSION, Lenient, SchemaVersion, Severity, Strict
 from contracts_py.decision import CandidatePlan, DecisionBrief
 from contracts_py.engine import Impact
 from contracts_py.enums import (
@@ -21,6 +22,34 @@ from contracts_py.twin import AgentView
 
 # Agent confidences are clamped by the merge step, so the models accept any float.
 RawConfidence = float
+
+
+def loose_enum(enum: type[StrEnum]) -> Any:
+    upper = all(member.value.isupper() for member in enum)
+
+    def normalise(value: Any) -> Any:
+        if isinstance(value, str):
+            value = value.strip()
+            return value.upper() if upper else value.lower()
+        return value
+
+    return Annotated[enum, BeforeValidator(normalise)]
+
+
+def truncate_words(limit: int) -> BeforeValidator:
+    def truncate(value: Any) -> Any:
+        if isinstance(value, str) and len(value.split()) > limit:
+            return " ".join(value.split()[:limit])
+        return value
+
+    return BeforeValidator(truncate)
+
+
+LooseDirection = loose_enum(Direction)
+LoosePolarity = loose_enum(Polarity)
+LooseImpactCategory = loose_enum(ImpactCategory)
+LooseImpactLevel = loose_enum(ImpactLevel)
+LooseRelation = loose_enum(Relation)
 
 
 class AgentSpec(Strict):
@@ -66,10 +95,10 @@ class Finding(Lenient):
 class ProposedImpact(Lenient):
     affected_entity: str
     metric: str
-    direction: Direction
-    polarity: Polarity
-    category: ImpactCategory
-    level: ImpactLevel
+    direction: LooseDirection
+    polarity: LoosePolarity
+    category: LooseImpactCategory
+    level: LooseImpactLevel
     estimated_magnitude: float | None = None
     unit: str | None = None
     first_effect_day: int | None = None
@@ -81,7 +110,7 @@ class ProposedImpact(Lenient):
 
 
 class FutureView(Lenient):
-    summary: Annotated[str, max_words(40)]
+    summary: Annotated[str, truncate_words(40)]
     failure_modes: list[Finding] = Field(default_factory=list)
     edge_cases: list[Finding] = Field(default_factory=list)
     proposed_impacts: list[ProposedImpact] = Field(default_factory=list)
@@ -90,7 +119,7 @@ class FutureView(Lenient):
 class ProposedDependency(Lenient):
     source: str
     target: str
-    relation: Relation
+    relation: LooseRelation
     rationale: str
     evidence_refs: list[str] = Field(default_factory=list)
     confidence: RawConfidence
