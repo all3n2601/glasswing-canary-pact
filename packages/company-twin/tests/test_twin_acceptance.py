@@ -1,0 +1,214 @@
+"""Person 1 acceptance tests - every requirement, and a few beyond.
+
+Covers the work-division Person-1 acceptance checks, merged-schema v2 section 12,
+the four planted decision traps, the planted challenger dependency, and the derived
+exports. Runs under the repo toolchain:  uv run pytest
+"""
+
+from __future__ import annotations
+
+import json
+
+import networkx as nx
+
+from company_twin.export import graph_snapshot, knowledge_map, vendor_report
+from company_twin.graph import affected_departments, build_graph
+from company_twin.loader import default_fixture_path, load_company_twin
+from company_twin.models import EntityType, Relation, entity_map
+from company_twin.validate import validate_twin
+
+TWIN = load_company_twin()
+G = build_graph(TWIN)
+IDS = {e.id for e in TWIN.entities}
+DATA_DIR = default_fixture_path().parent
+
+
+# ---- work-division section 4 acceptance ------------------------------------
+def test_every_edge_has_valid_endpoints():
+    for e in TWIN.edges:
+        assert e.source in IDS and e.target in IDS, e.id
+
+
+def test_every_vendor_has_cost_consumers_and_replacement_info():
+    rep = {v["vendor_id"]: v for v in vendor_report(TWIN)["vendors"]}
+    vendors = [e for e in TWIN.entities if e.type == EntityType.vendor]
+    assert vendors
+    for v in vendors:
+        r = rep[v.id]
+        assert v.annual_cost_usd and v.annual_cost_usd > 0
+        assert r["consumers"]
+        assert "min_substitutability" in r and "replaceable" in r
+        assert r["coverage"] >= 1
+
+
+def test_every_critical_workflow_has_owner_or_is_flagged_knowledge_risk():
+    owned = {e.target for e in TWIN.edges if e.relation == Relation.OWNS}
+    for w in TWIN.entities:
+        if w.type == EntityType.workflow and w.criticality.value in ("high", "critical"):
+            flagged = (w.min_qualified_owners or 0) >= 1 and w.documented_pct is not None
+            assert w.id in owned or flagged, w.id
+
+
+def test_removing_a_node_finds_downstream_departments_and_kpis():
+    depts = affected_departments(G, "vendor_auditlog")
+    assert "dept_compliance" in depts
+    assert nx.has_path(G, "vendor_auditlog", "kpi_soc2_coverage")
+
+
+def test_fixture_validates_without_manual_correction():
+    issues = validate_twin(TWIN)
+    errors = [i for i in issues if i.severity == "error"]
+    assert not errors, errors
+
+
+# ---- schema v2 structural / cross-field ------------------------------------
+def test_money_is_integer_usd():
+    for e in TWIN.entities:
+        for field in ("annual_cost_usd", "one_time_exit_cost_usd", "arr_usd", "failure_cost_per_day_usd"):
+            val = getattr(e, field, None)
+            if val is not None:
+                assert isinstance(val, int), (e.id, field)
+
+
+def test_org_totals_reconcile():
+    dept_budget = sum(e.annual_cost_usd or 0 for e in TWIN.entities if e.type == EntityType.department)
+    assert TWIN.organization.total_annual_budget_usd == dept_budget == 8_000_000
+    fte = sum(p.staffing.actual_fte + p.staffing.contractors_fte for p in TWIN.department_profiles)
+    assert TWIN.organization.total_headcount_fte == fte == 420
+
+
+def test_person_tokens_are_anonymised_and_not_in_strengths():
+    tokens = {e.id for e in TWIN.entities if e.type == EntityType.person_token}
+    for t in tokens:
+        assert t.startswith("pt_")
+    for p in TWIN.department_profiles:
+        for s in p.strengths:
+            assert not (set(s.key_role_ids) & tokens), s.id
+
+
+# ---- "skills at every level" -----------------------------------------------
+def test_every_department_has_roles_strengths_knowledge_and_a_document():
+    from collections import defaultdict
+    roles: dict = defaultdict(int)
+    know: dict = defaultdict(int)
+    docs: dict = defaultdict(int)
+    for e in TWIN.entities:
+        if e.type == EntityType.role:
+            roles[e.department_id] += 1
+        if e.type == EntityType.knowledge_asset:
+            know[e.department_id] += 1
+    for d in TWIN.documents:
+        if d.status == "current" and d.department_id:
+            docs[d.department_id] += 1
+    prof = {p.department_id: p for p in TWIN.department_profiles}
+    for de in [e for e in TWIN.entities if e.type == EntityType.department]:
+        assert roles[de.id] >= 2, f"{de.id} roles"
+        assert know[de.id] >= 1, f"{de.id} knowledge"
+        assert len(prof[de.id].strengths) >= 2, f"{de.id} strengths"
+        assert docs[de.id] >= 1, f"{de.id} current document"
+
+
+# ---- the four planted decision traps + planted challenger find --------------
+def _reaches(a, b):
+    return nx.has_path(G, a, b)
+
+
+def test_trap_1_platform_ops_billing_stranding():
+    assert _reaches("pt_billing_01", "kn_billing_exception")
+    assert _reaches("wf_billing_recon", "wf_invoicing")
+    wf = entity_map(TWIN)["wf_billing_recon"]
+    owners = [e.source for e in TWIN.edges if e.target == "wf_billing_recon" and e.relation == Relation.OWNS]
+    assert len(owners) == wf.min_qualified_owners == 2 and wf.documented_pct < 0.5
+
+
+def test_trap_2_cancel_auditlog_breaks_soc2():
+    assert _reaches("vendor_auditlog", "ds_audit_log")
+    assert _reaches("vendor_auditlog", "kpi_soc2_coverage")  # full chain through the control
+    assert entity_map(TWIN)["ctl_soc2_audit_logging"].mandatory is True
+
+
+def test_trap_3_stop_migration_carry_cost():
+    proj = entity_map(TWIN)["proj_warehouse_migration"]
+    assert proj.retires_entity_ids == ["sys_warehouse_legacy"]
+    assert entity_map(TWIN)["sys_warehouse_legacy"].annual_cost_usd == 400_000
+
+
+def test_trap_4_reduce_engineering_hits_uptime():
+    assert _reaches("sys_core_api", "kpi_uptime_sla")
+
+
+def test_planted_challenger_dependency_identity_access():
+    manifest = json.loads((DATA_DIR / "planted_items.json").read_text())
+    chain = manifest["missed_dependency"]["chain"]
+    for a, b in zip(chain, chain[1:]):
+        assert _reaches(a, b), (a, b)
+    ev_ids = {v.id for v in TWIN.evidence}
+    assert set(manifest["missed_dependency"]["evidence_refs"]) <= ev_ids
+
+
+# ---- derived exports well-formed -------------------------------------------
+def test_exports_are_wellformed():
+    km = knowledge_map(TWIN)
+    assert any(k["single_point_of_failure"] for k in km["knowledge_assets"])
+    assert any(w["stranded_if_owners_removed"] for w in km["workflows"])
+    gs = graph_snapshot(TWIN)
+    non_tokens = [e for e in TWIN.entities if e.type != EntityType.person_token]
+    assert len(gs["nodes"]) == len(non_tokens)          # person tokens mapped to roles
+    assert 0 < len(gs["edges"]) <= len(TWIN.edges)      # remapped, self-loops/dupes dropped
+    # no person tokens leak to the frontend
+    node_ids = {n["id"] for n in gs["nodes"]}
+    assert not any(n.startswith("pt_") for n in node_ids)
+    for e in gs["edges"]:
+        assert not e["source"].startswith("pt_") and not e["target"].startswith("pt_")
+    vr = vendor_report(TWIN)
+    auditlog = next(v for v in vr["vendors"] if v["vendor_id"] == "vendor_auditlog")
+    assert auditlog["irreplaceable_flag"] is True
+
+
+# ---- derived DepartmentProfile fields (computed in the loader) --------------
+def test_department_profile_derived_fields_are_populated():
+    ents = entity_map(TWIN)
+    for p in TWIN.department_profiles:
+        did = p.department_id
+        # owned = every entity with this department_id
+        assert set(p.owned_entity_ids) == {e.id for e in TWIN.entities if e.department_id == did}
+        # critical workflows subset of owned, all high/critical workflows
+        for wid in p.critical_workflow_ids:
+            assert ents[wid].type == EntityType.workflow
+            assert ents[wid].criticality.value in ("high", "critical")
+        assert set(p.kpi_ids) == {e.id for e in TWIN.entities
+                                  if e.department_id == did and e.type == EntityType.kpi}
+        assert 0.0 <= p.documentation_coverage <= 1.0
+
+
+# ---- project entity fields the engine needs --------------------------------
+def test_projects_have_remaining_cost_and_expected_completion():
+    projects = [e for e in TWIN.entities if e.type == EntityType.project]
+    assert projects
+    for pr in projects:
+        assert pr.remaining_cost_usd is not None and pr.remaining_cost_usd >= 0
+        assert pr.expected_completion_day is not None and pr.expected_completion_day > 0
+    mig = entity_map(TWIN)["proj_warehouse_migration"]
+    assert mig.remaining_cost_usd == round(mig.annual_cost_usd * (1 - mig.completion_pct))
+
+
+def test_version_has_as_of_date():
+    assert str(TWIN.version.as_of_date) == "2026-09-26"  # contracts_py coerces to date
+
+
+# ---- companion historical data ---------------------------------------------
+def test_history_is_consistent_with_twin():
+    h = json.loads((DATA_DIR / "history.json").read_text())
+    twin_kpis = {e.id: e for e in TWIN.entities if e.type == EntityType.kpi}
+    assert h["kpi_history"], "no kpi history"
+    for row in h["kpi_history"]:
+        assert row["kpi_id"] in twin_kpis, row["kpi_id"]
+        # last historical point must equal the current twin baseline
+        assert row["values"][-1] == twin_kpis[row["kpi_id"]].kpi_baseline, row["kpi_id"]
+        assert len(row["values"]) == len(row["quarters"])
+    spend = h["monthly_controllable_spend_usd"]
+    assert len(spend["values"]) == len(spend["months"]) == 12
+    wf_ids = {e.id for e in TWIN.entities if e.type == EntityType.workflow}
+    for inc in h["incident_log"]:
+        assert inc["workflow_id"] in wf_ids, inc["workflow_id"]
+    assert h["prior_cost_programs"][0]["realized_usd"] < h["prior_cost_programs"][0]["target_usd"]

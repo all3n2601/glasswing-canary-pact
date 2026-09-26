@@ -1,0 +1,1390 @@
+{
+  "company": "Halcyon Freight",
+  "twin_version": "twin_halcyon_v2",
+  "nodes": [
+    {
+      "id": "dept_engineering",
+      "type": "department",
+      "name": "Engineering",
+      "department_id": null,
+      "criticality": "high"
+    },
+    {
+      "id": "dept_operations",
+      "type": "department",
+      "name": "Operations",
+      "department_id": null,
+      "criticality": "high"
+    },
+    {
+      "id": "dept_ai_data",
+      "type": "department",
+      "name": "AI and Data",
+      "department_id": null,
+      "criticality": "high"
+    },
+    {
+      "id": "dept_product",
+      "type": "department",
+      "name": "Product",
+      "department_id": null,
+      "criticality": "high"
+    },
+    {
+      "id": "dept_sales",
+      "type": "department",
+      "name": "Sales",
+      "department_id": null,
+      "criticality": "high"
+    },
+    {
+      "id": "dept_marketing",
+      "type": "department",
+      "name": "Marketing",
+      "department_id": null,
+      "criticality": "high"
+    },
+    {
+      "id": "dept_customer_success",
+      "type": "department",
+      "name": "Customer Success",
+      "department_id": null,
+      "criticality": "high"
+    },
+    {
+      "id": "dept_finance",
+      "type": "department",
+      "name": "Finance",
+      "department_id": null,
+      "criticality": "high"
+    },
+    {
+      "id": "dept_compliance",
+      "type": "department",
+      "name": "Compliance",
+      "department_id": null,
+      "criticality": "high"
+    },
+    {
+      "id": "kpi_company",
+      "type": "kpi",
+      "name": "Company KPIs",
+      "department_id": null,
+      "criticality": "medium"
+    },
+    {
+      "id": "role_billing_ops_lead",
+      "type": "role",
+      "name": "Billing Operations Lead",
+      "department_id": "dept_operations",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_sre",
+      "type": "role",
+      "name": "Site Reliability Engineer",
+      "department_id": "dept_operations",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_platform_eng",
+      "type": "role",
+      "name": "Platform Engineer",
+      "department_id": "dept_operations",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_staff_eng",
+      "type": "role",
+      "name": "Staff Software Engineer",
+      "department_id": "dept_engineering",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_security_eng",
+      "type": "role",
+      "name": "Security Engineer",
+      "department_id": "dept_engineering",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_data_lead",
+      "type": "role",
+      "name": "Data Platform Lead",
+      "department_id": "dept_ai_data",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_ml_eng",
+      "type": "role",
+      "name": "ML Engineer",
+      "department_id": "dept_ai_data",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_pm",
+      "type": "role",
+      "name": "Product Manager",
+      "department_id": "dept_product",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_ae",
+      "type": "role",
+      "name": "Account Executive",
+      "department_id": "dept_sales",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_pmm",
+      "type": "role",
+      "name": "Product Marketing Manager",
+      "department_id": "dept_marketing",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_csm",
+      "type": "role",
+      "name": "Customer Success Manager",
+      "department_id": "dept_customer_success",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_finance_analyst",
+      "type": "role",
+      "name": "Finance Analyst",
+      "department_id": "dept_finance",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_grc_lead",
+      "type": "role",
+      "name": "GRC Lead",
+      "department_id": "dept_compliance",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_eng_manager",
+      "type": "role",
+      "name": "Engineering Manager",
+      "department_id": "dept_engineering",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_qa_eng",
+      "type": "role",
+      "name": "QA Engineer",
+      "department_id": "dept_engineering",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_analytics_eng",
+      "type": "role",
+      "name": "Analytics Engineer",
+      "department_id": "dept_ai_data",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_product_lead",
+      "type": "role",
+      "name": "Group Product Manager",
+      "department_id": "dept_product",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_ux",
+      "type": "role",
+      "name": "UX Designer",
+      "department_id": "dept_product",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_sales_eng",
+      "type": "role",
+      "name": "Solutions Engineer",
+      "department_id": "dept_sales",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_sdr",
+      "type": "role",
+      "name": "Sales Development Rep",
+      "department_id": "dept_sales",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_demand_gen",
+      "type": "role",
+      "name": "Demand Gen Manager",
+      "department_id": "dept_marketing",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_brand",
+      "type": "role",
+      "name": "Brand & Comms Manager",
+      "department_id": "dept_marketing",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_support_lead",
+      "type": "role",
+      "name": "Support Team Lead",
+      "department_id": "dept_customer_success",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_onboarding",
+      "type": "role",
+      "name": "Onboarding Specialist",
+      "department_id": "dept_customer_success",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_procurement",
+      "type": "role",
+      "name": "Procurement Manager",
+      "department_id": "dept_finance",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_controller",
+      "type": "role",
+      "name": "Controller",
+      "department_id": "dept_finance",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_privacy_counsel",
+      "type": "role",
+      "name": "Privacy Counsel",
+      "department_id": "dept_compliance",
+      "criticality": "medium"
+    },
+    {
+      "id": "sys_core_api",
+      "type": "system",
+      "name": "core-api",
+      "department_id": "dept_engineering",
+      "criticality": "critical"
+    },
+    {
+      "id": "sys_customer_portal",
+      "type": "system",
+      "name": "customer-portal",
+      "department_id": "dept_engineering",
+      "criticality": "high"
+    },
+    {
+      "id": "sys_dispatch_engine",
+      "type": "system",
+      "name": "dispatch-engine",
+      "department_id": "dept_engineering",
+      "criticality": "high"
+    },
+    {
+      "id": "sys_billing_platform",
+      "type": "system",
+      "name": "billing-platform",
+      "department_id": "dept_operations",
+      "criticality": "critical"
+    },
+    {
+      "id": "sys_invoicing",
+      "type": "system",
+      "name": "invoicing-service",
+      "department_id": "dept_operations",
+      "criticality": "critical"
+    },
+    {
+      "id": "sys_cloud_platform",
+      "type": "system",
+      "name": "cloud-platform",
+      "department_id": "dept_operations",
+      "criticality": "critical"
+    },
+    {
+      "id": "sys_sso_gateway",
+      "type": "system",
+      "name": "sso-gateway",
+      "department_id": "dept_operations",
+      "criticality": "high"
+    },
+    {
+      "id": "sys_warehouse_legacy",
+      "type": "system",
+      "name": "warehouse-legacy",
+      "department_id": "dept_operations",
+      "criticality": "medium"
+    },
+    {
+      "id": "sys_warehouse_new",
+      "type": "system",
+      "name": "warehouse-new",
+      "department_id": "dept_ai_data",
+      "criticality": "medium"
+    },
+    {
+      "id": "sys_data_pipeline",
+      "type": "system",
+      "name": "data-pipeline",
+      "department_id": "dept_ai_data",
+      "criticality": "high"
+    },
+    {
+      "id": "sys_ml_scoring",
+      "type": "system",
+      "name": "ml-scoring-service",
+      "department_id": "dept_ai_data",
+      "criticality": "medium"
+    },
+    {
+      "id": "sys_audit_service",
+      "type": "system",
+      "name": "audit-log-service",
+      "department_id": "dept_compliance",
+      "criticality": "high"
+    },
+    {
+      "id": "ds_audit_log",
+      "type": "dataset",
+      "name": "Audit-log event stream",
+      "department_id": "dept_compliance",
+      "criticality": "critical"
+    },
+    {
+      "id": "ds_telematics",
+      "type": "dataset",
+      "name": "Telematics / GPS feed",
+      "department_id": "dept_ai_data",
+      "criticality": "high"
+    },
+    {
+      "id": "ds_enrichment",
+      "type": "dataset",
+      "name": "Account enrichment data",
+      "department_id": "dept_ai_data",
+      "criticality": "low"
+    },
+    {
+      "id": "ds_usage",
+      "type": "dataset",
+      "name": "Customer usage events",
+      "department_id": "dept_ai_data",
+      "criticality": "medium"
+    },
+    {
+      "id": "ds_shipments",
+      "type": "dataset",
+      "name": "Shipment & dispatch records",
+      "department_id": "dept_ai_data",
+      "criticality": "high"
+    },
+    {
+      "id": "vendor_auditlog",
+      "type": "vendor",
+      "name": "SentinelAudit (audit logging)",
+      "department_id": "dept_finance",
+      "criticality": "critical"
+    },
+    {
+      "id": "vendor_cloud",
+      "type": "vendor",
+      "name": "CloudScale (cloud infra)",
+      "department_id": "dept_finance",
+      "criticality": "high"
+    },
+    {
+      "id": "vendor_telematics",
+      "type": "vendor",
+      "name": "Telemetrix (telematics)",
+      "department_id": "dept_finance",
+      "criticality": "high"
+    },
+    {
+      "id": "vendor_enrichiq",
+      "type": "vendor",
+      "name": "EnrichIQ (enrichment)",
+      "department_id": "dept_finance",
+      "criticality": "low"
+    },
+    {
+      "id": "vendor_observability",
+      "type": "vendor",
+      "name": "ObserveNow (observability)",
+      "department_id": "dept_finance",
+      "criticality": "medium"
+    },
+    {
+      "id": "vendor_identity",
+      "type": "vendor",
+      "name": "IdentityHub (SSO)",
+      "department_id": "dept_finance",
+      "criticality": "high"
+    },
+    {
+      "id": "wf_billing_recon",
+      "type": "workflow",
+      "name": "Billing reconciliation",
+      "department_id": "dept_operations",
+      "criticality": "critical"
+    },
+    {
+      "id": "wf_invoicing",
+      "type": "workflow",
+      "name": "Invoice generation & dispatch",
+      "department_id": "dept_operations",
+      "criticality": "critical"
+    },
+    {
+      "id": "wf_incident_mgmt",
+      "type": "workflow",
+      "name": "Incident response / on-call",
+      "department_id": "dept_operations",
+      "criticality": "high"
+    },
+    {
+      "id": "wf_dispatch_opt",
+      "type": "workflow",
+      "name": "Dispatch optimisation",
+      "department_id": "dept_engineering",
+      "criticality": "high"
+    },
+    {
+      "id": "wf_soc2_evidence",
+      "type": "workflow",
+      "name": "SOC 2 audit-evidence collection",
+      "department_id": "dept_compliance",
+      "criticality": "high"
+    },
+    {
+      "id": "wf_customer_onboarding",
+      "type": "workflow",
+      "name": "Customer onboarding",
+      "department_id": "dept_customer_success",
+      "criticality": "medium"
+    },
+    {
+      "id": "wf_data_refresh",
+      "type": "workflow",
+      "name": "Data pipeline refresh",
+      "department_id": "dept_ai_data",
+      "criticality": "high"
+    },
+    {
+      "id": "wf_financial_close",
+      "type": "workflow",
+      "name": "Monthly financial close",
+      "department_id": "dept_finance",
+      "criticality": "medium"
+    },
+    {
+      "id": "kn_billing_exception",
+      "type": "knowledge_asset",
+      "name": "Billing-recon exception handling",
+      "department_id": "dept_operations",
+      "criticality": "critical"
+    },
+    {
+      "id": "kn_warehouse_cutover",
+      "type": "knowledge_asset",
+      "name": "Warehouse migration cutover plan",
+      "department_id": "dept_ai_data",
+      "criticality": "high"
+    },
+    {
+      "id": "kn_soc2_mapping",
+      "type": "knowledge_asset",
+      "name": "SOC 2 control-to-evidence mapping",
+      "department_id": "dept_compliance",
+      "criticality": "high"
+    },
+    {
+      "id": "kn_data_format",
+      "type": "knowledge_asset",
+      "name": "Upstream data-format quirk handling",
+      "department_id": "dept_ai_data",
+      "criticality": "high"
+    },
+    {
+      "id": "kn_oncall",
+      "type": "knowledge_asset",
+      "name": "On-call escalation & recovery",
+      "department_id": "dept_operations",
+      "criticality": "medium"
+    },
+    {
+      "id": "kn_core_arch",
+      "type": "knowledge_asset",
+      "name": "Core-API architecture knowledge",
+      "department_id": "dept_engineering",
+      "criticality": "medium"
+    },
+    {
+      "id": "kn_release_eng",
+      "type": "knowledge_asset",
+      "name": "Release & deploy engineering",
+      "department_id": "dept_engineering",
+      "criticality": "medium"
+    },
+    {
+      "id": "kn_ml_modeling",
+      "type": "knowledge_asset",
+      "name": "Dispatch ML modeling",
+      "department_id": "dept_ai_data",
+      "criticality": "medium"
+    },
+    {
+      "id": "kn_roadmap_context",
+      "type": "knowledge_asset",
+      "name": "Product roadmap & customer context",
+      "department_id": "dept_product",
+      "criticality": "medium"
+    },
+    {
+      "id": "kn_enterprise_deals",
+      "type": "knowledge_asset",
+      "name": "Enterprise deal & pricing know-how",
+      "department_id": "dept_sales",
+      "criticality": "medium"
+    },
+    {
+      "id": "kn_segmentation",
+      "type": "knowledge_asset",
+      "name": "Audience segmentation & attribution",
+      "department_id": "dept_marketing",
+      "criticality": "medium"
+    },
+    {
+      "id": "kn_onboarding_playbook",
+      "type": "knowledge_asset",
+      "name": "Customer onboarding playbook",
+      "department_id": "dept_customer_success",
+      "criticality": "medium"
+    },
+    {
+      "id": "kn_cs_escalation",
+      "type": "knowledge_asset",
+      "name": "CS escalation handling",
+      "department_id": "dept_customer_success",
+      "criticality": "medium"
+    },
+    {
+      "id": "kn_vendor_contracts",
+      "type": "knowledge_asset",
+      "name": "Vendor contract & renewal know-how",
+      "department_id": "dept_finance",
+      "criticality": "medium"
+    },
+    {
+      "id": "kn_privacy_program",
+      "type": "knowledge_asset",
+      "name": "Privacy program operation",
+      "department_id": "dept_compliance",
+      "criticality": "medium"
+    },
+    {
+      "id": "ctl_soc2_audit_logging",
+      "type": "control",
+      "name": "SOC 2 CC7.2 - audit logging",
+      "department_id": "dept_compliance",
+      "criticality": "critical"
+    },
+    {
+      "id": "ctl_access_control",
+      "type": "control",
+      "name": "SOC 2 CC6.1 - logical access",
+      "department_id": "dept_compliance",
+      "criticality": "high"
+    },
+    {
+      "id": "ctl_data_retention",
+      "type": "control",
+      "name": "GDPR data retention",
+      "department_id": "dept_compliance",
+      "criticality": "high"
+    },
+    {
+      "id": "ctl_change_mgmt",
+      "type": "control",
+      "name": "Change management",
+      "department_id": "dept_compliance",
+      "criticality": "medium"
+    },
+    {
+      "id": "ctl_incident_mgmt",
+      "type": "control",
+      "name": "Incident management",
+      "department_id": "dept_compliance",
+      "criticality": "high"
+    },
+    {
+      "id": "ctl_pci_carddata",
+      "type": "control",
+      "name": "PCI DSS cardholder data",
+      "department_id": "dept_compliance",
+      "criticality": "high"
+    },
+    {
+      "id": "proj_warehouse_migration",
+      "type": "project",
+      "name": "Warehouse Migration",
+      "department_id": "dept_product",
+      "criticality": "medium"
+    },
+    {
+      "id": "proj_billing_modernization",
+      "type": "project",
+      "name": "Billing Modernization",
+      "department_id": "dept_product",
+      "criticality": "medium"
+    },
+    {
+      "id": "proj_ml_dispatch",
+      "type": "project",
+      "name": "ML Dispatch Optimization",
+      "department_id": "dept_product",
+      "criticality": "medium"
+    },
+    {
+      "id": "proj_soc2_type2",
+      "type": "project",
+      "name": "SOC 2 Type II Certification",
+      "department_id": "dept_product",
+      "criticality": "medium"
+    },
+    {
+      "id": "kpi_gross_margin",
+      "type": "kpi",
+      "name": "Gross margin %",
+      "department_id": "dept_finance",
+      "criticality": "medium"
+    },
+    {
+      "id": "kpi_on_time_delivery",
+      "type": "kpi",
+      "name": "On-time delivery %",
+      "department_id": "dept_customer_success",
+      "criticality": "medium"
+    },
+    {
+      "id": "kpi_net_retention",
+      "type": "kpi",
+      "name": "Net revenue retention",
+      "department_id": "dept_sales",
+      "criticality": "medium"
+    },
+    {
+      "id": "kpi_pipeline",
+      "type": "kpi",
+      "name": "Qualified pipeline",
+      "department_id": "dept_marketing",
+      "criticality": "medium"
+    },
+    {
+      "id": "kpi_soc2_coverage",
+      "type": "kpi",
+      "name": "SOC 2 compliance coverage",
+      "department_id": "dept_compliance",
+      "criticality": "medium"
+    },
+    {
+      "id": "kpi_uptime_sla",
+      "type": "kpi",
+      "name": "System uptime / SLA",
+      "department_id": "dept_operations",
+      "criticality": "medium"
+    },
+    {
+      "id": "seg_enterprise",
+      "type": "customer_segment",
+      "name": "Enterprise accounts",
+      "department_id": "dept_sales",
+      "criticality": "critical"
+    },
+    {
+      "id": "seg_midmarket",
+      "type": "customer_segment",
+      "name": "Mid-market accounts",
+      "department_id": "dept_sales",
+      "criticality": "high"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_pt_billing01_owns",
+      "source": "role_billing_ops_lead",
+      "target": "wf_billing_recon",
+      "relation": "OWNS",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_pt_billing01_knows",
+      "source": "role_billing_ops_lead",
+      "target": "kn_billing_exception",
+      "relation": "KNOWS",
+      "label": null,
+      "strength": 0.95,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_pt_grc_knows",
+      "source": "role_grc_lead",
+      "target": "kn_soc2_mapping",
+      "relation": "KNOWS",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "high"
+    },
+    {
+      "id": "e_pt_data_knows_cutover",
+      "source": "role_data_lead",
+      "target": "kn_warehouse_cutover",
+      "relation": "KNOWS",
+      "label": null,
+      "strength": 0.85,
+      "criticality": "high"
+    },
+    {
+      "id": "e_pt_data_knows_format",
+      "source": "role_data_lead",
+      "target": "kn_data_format",
+      "relation": "KNOWS",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "high"
+    },
+    {
+      "id": "e_pt_sre_owns_incident",
+      "source": "role_sre",
+      "target": "wf_incident_mgmt",
+      "relation": "OWNS",
+      "label": null,
+      "strength": 0.7,
+      "criticality": "high"
+    },
+    {
+      "id": "e_kn_billing_supports",
+      "source": "kn_billing_exception",
+      "target": "wf_billing_recon",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_kn_soc2_supports",
+      "source": "kn_soc2_mapping",
+      "target": "wf_soc2_evidence",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.85,
+      "criticality": "high"
+    },
+    {
+      "id": "e_kn_cutover_supports",
+      "source": "kn_warehouse_cutover",
+      "target": "proj_warehouse_migration",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.7,
+      "criticality": "high"
+    },
+    {
+      "id": "e_kn_format_supports",
+      "source": "kn_data_format",
+      "target": "wf_data_refresh",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.8,
+      "criticality": "high"
+    },
+    {
+      "id": "e_billing_platform_recon",
+      "source": "sys_billing_platform",
+      "target": "wf_billing_recon",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.85,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_recon_invoicing",
+      "source": "wf_billing_recon",
+      "target": "wf_invoicing",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_sso_portal",
+      "source": "sys_sso_gateway",
+      "target": "sys_customer_portal",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.7,
+      "criticality": "high"
+    },
+    {
+      "id": "e_cloud_core",
+      "source": "sys_cloud_platform",
+      "target": "sys_core_api",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.8,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_telematics_dispatch",
+      "source": "sys_data_pipeline",
+      "target": "sys_dispatch_engine",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.6,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_pipeline_ml",
+      "source": "sys_data_pipeline",
+      "target": "sys_ml_scoring",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.65,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_core_dispatchwf",
+      "source": "sys_dispatch_engine",
+      "target": "wf_dispatch_opt",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "high"
+    },
+    {
+      "id": "e_auditlog_provides",
+      "source": "vendor_auditlog",
+      "target": "ds_audit_log",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.95,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_cloud_provides",
+      "source": "vendor_cloud",
+      "target": "sys_cloud_platform",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_telemetrix_provides",
+      "source": "vendor_telematics",
+      "target": "ds_telematics",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.85,
+      "criticality": "high"
+    },
+    {
+      "id": "e_enrichiq_provides",
+      "source": "vendor_enrichiq",
+      "target": "ds_enrichment",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.4,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_identity_provides",
+      "source": "vendor_identity",
+      "target": "sys_sso_gateway",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "high"
+    },
+    {
+      "id": "e_observe_supports",
+      "source": "vendor_observability",
+      "target": "sys_core_api",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.4,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_auditds_service",
+      "source": "ds_audit_log",
+      "target": "sys_audit_service",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.95,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_telematics_ingest",
+      "source": "ds_telematics",
+      "target": "sys_dispatch_engine",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.7,
+      "criticality": "high"
+    },
+    {
+      "id": "e_shipments_pipeline",
+      "source": "ds_shipments",
+      "target": "sys_data_pipeline",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.6,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_ctl_cc72_auditsvc",
+      "source": "sys_audit_service",
+      "target": "ctl_soc2_audit_logging",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.95,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_ctl_cc72_auditds",
+      "source": "ds_audit_log",
+      "target": "ctl_soc2_audit_logging",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 1.0,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_ctl_access_sso",
+      "source": "sys_sso_gateway",
+      "target": "ctl_access_control",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "high"
+    },
+    {
+      "id": "e_access_soc2_coverage",
+      "source": "ctl_access_control",
+      "target": "kpi_soc2_coverage",
+      "relation": "CONTRIBUTES_TO",
+      "label": null,
+      "strength": 0.8,
+      "criticality": "high"
+    },
+    {
+      "id": "e_ctl_incident_wf",
+      "source": "wf_incident_mgmt",
+      "target": "ctl_incident_mgmt",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.85,
+      "criticality": "high"
+    },
+    {
+      "id": "e_ctl_pci_billing",
+      "source": "sys_billing_platform",
+      "target": "ctl_pci_carddata",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.8,
+      "criticality": "high"
+    },
+    {
+      "id": "e_soc2evidence_coverage",
+      "source": "wf_soc2_evidence",
+      "target": "kpi_soc2_coverage",
+      "relation": "CONTRIBUTES_TO",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "high"
+    },
+    {
+      "id": "e_cc72_coverage",
+      "source": "ctl_soc2_audit_logging",
+      "target": "kpi_soc2_coverage",
+      "relation": "CONTRIBUTES_TO",
+      "label": null,
+      "strength": 1.0,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_migration_replaces_legacy",
+      "source": "proj_warehouse_migration",
+      "target": "sys_warehouse_legacy",
+      "relation": "SUBSTITUTES_FOR",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "high"
+    },
+    {
+      "id": "e_invoicing_margin",
+      "source": "wf_invoicing",
+      "target": "kpi_gross_margin",
+      "relation": "CONTRIBUTES_TO",
+      "label": null,
+      "strength": 0.8,
+      "criticality": "high"
+    },
+    {
+      "id": "e_dispatch_ontime",
+      "source": "wf_dispatch_opt",
+      "target": "kpi_on_time_delivery",
+      "relation": "CONTRIBUTES_TO",
+      "label": null,
+      "strength": 0.85,
+      "criticality": "high"
+    },
+    {
+      "id": "e_core_uptime",
+      "source": "sys_core_api",
+      "target": "kpi_uptime_sla",
+      "relation": "CONTRIBUTES_TO",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_onboarding_retention",
+      "source": "wf_customer_onboarding",
+      "target": "kpi_net_retention",
+      "relation": "CONTRIBUTES_TO",
+      "label": null,
+      "strength": 0.6,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_enterprise_margin",
+      "source": "seg_enterprise",
+      "target": "kpi_gross_margin",
+      "relation": "CONTRIBUTES_TO",
+      "label": null,
+      "strength": 0.7,
+      "criticality": "high"
+    },
+    {
+      "id": "e_kn_core_arch",
+      "source": "kn_core_arch",
+      "target": "sys_core_api",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_kn_release",
+      "source": "kn_release_eng",
+      "target": "sys_core_api",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.4,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_kn_mlmodel",
+      "source": "kn_ml_modeling",
+      "target": "sys_ml_scoring",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_kn_roadmap",
+      "source": "kn_roadmap_context",
+      "target": "proj_billing_modernization",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.4,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_kn_deals",
+      "source": "kn_enterprise_deals",
+      "target": "seg_enterprise",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.4,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_kn_segmentation",
+      "source": "kn_segmentation",
+      "target": "kpi_pipeline",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.4,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_kn_onboarding",
+      "source": "kn_onboarding_playbook",
+      "target": "wf_customer_onboarding",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_kn_cs_escalation",
+      "source": "kn_cs_escalation",
+      "target": "wf_customer_onboarding",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.4,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_kn_vendorcontracts",
+      "source": "kn_vendor_contracts",
+      "target": "vendor_cloud",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.4,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_kn_privacy",
+      "source": "kn_privacy_program",
+      "target": "ctl_data_retention",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_finance_engineering_budget",
+      "source": "dept_finance",
+      "target": "dept_engineering",
+      "relation": "FLOWS_TO",
+      "label": "budget limits",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_finance_marketing_budget",
+      "source": "dept_finance",
+      "target": "dept_marketing",
+      "relation": "FLOWS_TO",
+      "label": "budget limits",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_finance_operations_cost",
+      "source": "dept_finance",
+      "target": "dept_operations",
+      "relation": "FLOWS_TO",
+      "label": "cost targets",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_finance_sales_revenue",
+      "source": "dept_finance",
+      "target": "dept_sales",
+      "relation": "FLOWS_TO",
+      "label": "revenue targets",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_ai_data_engineering_models",
+      "source": "dept_ai_data",
+      "target": "dept_engineering",
+      "relation": "FLOWS_TO",
+      "label": "models and data",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_ai_data_marketing_scores",
+      "source": "dept_ai_data",
+      "target": "dept_marketing",
+      "relation": "FLOWS_TO",
+      "label": "scores and segments",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_engineering_product_features",
+      "source": "dept_engineering",
+      "target": "dept_product",
+      "relation": "FLOWS_TO",
+      "label": "features and platforms",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_engineering_operations_automation",
+      "source": "dept_engineering",
+      "target": "dept_operations",
+      "relation": "FLOWS_TO",
+      "label": "automation",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_operations_engineering_incidents",
+      "source": "dept_operations",
+      "target": "dept_engineering",
+      "relation": "FLOWS_TO",
+      "label": "incidents and capacity",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_product_sales_roadmap",
+      "source": "dept_product",
+      "target": "dept_sales",
+      "relation": "FLOWS_TO",
+      "label": "roadmap and releases",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_product_cs_product",
+      "source": "dept_product",
+      "target": "dept_customer_success",
+      "relation": "FLOWS_TO",
+      "label": "product changes",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_marketing_sales_qualified",
+      "source": "dept_marketing",
+      "target": "dept_sales",
+      "relation": "FLOWS_TO",
+      "label": "qualified leads",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_sales_product_customer",
+      "source": "dept_sales",
+      "target": "dept_product",
+      "relation": "FLOWS_TO",
+      "label": "customer demand",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_sales_cs_commitments",
+      "source": "dept_sales",
+      "target": "dept_customer_success",
+      "relation": "FLOWS_TO",
+      "label": "commitments",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_cs_product_feedback",
+      "source": "dept_customer_success",
+      "target": "dept_product",
+      "relation": "FLOWS_TO",
+      "label": "feedback and churn signals",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_compliance_ai_data_controls",
+      "source": "dept_compliance",
+      "target": "dept_ai_data",
+      "relation": "FLOWS_TO",
+      "label": "controls",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_compliance_engineering_policies",
+      "source": "dept_compliance",
+      "target": "dept_engineering",
+      "relation": "FLOWS_TO",
+      "label": "policies",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_compliance_operations_process",
+      "source": "dept_compliance",
+      "target": "dept_operations",
+      "relation": "FLOWS_TO",
+      "label": "process controls",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_finance_kpi_profitability",
+      "source": "dept_finance",
+      "target": "kpi_company",
+      "relation": "FLOWS_TO",
+      "label": "profitability",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_marketing_kpi_acquisition",
+      "source": "dept_marketing",
+      "target": "kpi_company",
+      "relation": "FLOWS_TO",
+      "label": "acquisition cost",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_sales_kpi_pipeline",
+      "source": "dept_sales",
+      "target": "kpi_company",
+      "relation": "FLOWS_TO",
+      "label": "pipeline",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_product_kpi_delivery",
+      "source": "dept_product",
+      "target": "kpi_company",
+      "relation": "FLOWS_TO",
+      "label": "delivery",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_cs_kpi_retention",
+      "source": "dept_customer_success",
+      "target": "kpi_company",
+      "relation": "FLOWS_TO",
+      "label": "retention",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_sales_marketing_launch",
+      "source": "dept_sales",
+      "target": "dept_marketing",
+      "relation": "FLOWS_TO",
+      "label": "launch timing",
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "ch_operations_compliance_evidence",
+      "source": "dept_operations",
+      "target": "dept_compliance",
+      "relation": "FLOWS_TO",
+      "label": "control evidence",
+      "strength": 0.5,
+      "criticality": "medium"
+    }
+  ]
+}
