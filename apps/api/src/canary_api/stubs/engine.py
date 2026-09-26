@@ -16,12 +16,12 @@ from contracts_py.twin import (
 )
 
 from canary_api.stubs import results
-from canary_api.stubs.twin import stub_twin
+from canary_api.stubs.twin import VENDOR_DECISION, stub_twin
 
 
 def quick_impact(twin: Twin, interventions: list[Intervention], *, brief: DecisionBrief | None = None,
                  settings: OrganizationSettings | None = None, run_id: str = "run_adhoc") -> SimulationResult:
-    decision_id = brief.decision_id if brief else "dec_cut_2m"
+    decision_id = brief.decision_id if brief else VENDOR_DECISION
     return results.act_now_result(run_id, decision_id, mode="quick")
 
 
@@ -32,6 +32,8 @@ def simulate(twin: Twin, brief: DecisionBrief, scenario: Scenario, plan: Candida
         Future.delay: results.delay_result,
     }
     build = by_future.get(scenario.future, results.act_now_result)
+    if plan is not None and plan.plan_id == results.story(brief.decision_id).naive_plan:
+        build = results.naive_result
     return build(scenario.run_id, brief.decision_id, mode=mode)
 
 
@@ -46,7 +48,7 @@ def optimize(twin: Twin, brief: DecisionBrief, *, settings: OrganizationSettings
 
 
 def blast_radius(result: SimulationResult, twin: Twin) -> BlastRadius:
-    decision_id = result.impacts[0].decision_id if result.impacts else "dec_cut_2m"
+    decision_id = result.impacts[0].decision_id if result.impacts else VENDOR_DECISION
     if result.future is Future.inaction:
         return results.inaction_blast_radius(result.run_id, decision_id)
     return results.act_now_blast_radius(result.run_id, decision_id)
@@ -81,7 +83,7 @@ def build_agent_view(twin: Twin, *, agent_id: str, department_id: str | None, vi
 
 
 def reachable_departments(twin: Twin, source_entity_ids: list[str], max_hops: int = 4) -> list[str]:
-    return ["dept_compliance", "dept_engineering", "dept_finance", "dept_operations"]
+    return ["dept_ai_data", "dept_compliance", "dept_engineering", "dept_finance", "dept_operations", "dept_sales"]
 
 
 def list_dependencies(twin: Twin, entity_id: str, direction: str = "both", max_depth: int = 1) -> list[Edge]:
