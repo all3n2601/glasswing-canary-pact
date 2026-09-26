@@ -1,0 +1,260 @@
+{
+  "knowledge_assets": [
+    {
+      "knowledge_id": "kn_billing_exception",
+      "name": "Billing-recon exception handling",
+      "department_id": "dept_operations",
+      "documented_pct": 0.35,
+      "holders": [
+        "pt_billing_01",
+        "pt_billing_02"
+      ],
+      "bus_factor": 2,
+      "enables_workflows": [
+        "wf_billing_recon"
+      ],
+      "single_point_of_failure": true
+    },
+    {
+      "knowledge_id": "kn_warehouse_cutover",
+      "name": "Warehouse migration cutover plan",
+      "department_id": "dept_ai_data",
+      "documented_pct": 0.5,
+      "holders": [
+        "pt_data_01"
+      ],
+      "bus_factor": 1,
+      "enables_workflows": [],
+      "single_point_of_failure": false
+    },
+    {
+      "knowledge_id": "kn_soc2_mapping",
+      "name": "SOC 2 control-to-evidence mapping",
+      "department_id": "dept_compliance",
+      "documented_pct": 0.4,
+      "holders": [
+        "pt_grc_01"
+      ],
+      "bus_factor": 1,
+      "enables_workflows": [
+        "wf_soc2_evidence"
+      ],
+      "single_point_of_failure": true
+    },
+    {
+      "knowledge_id": "kn_data_format",
+      "name": "Upstream data-format quirk handling",
+      "department_id": "dept_ai_data",
+      "documented_pct": 0.3,
+      "holders": [
+        "pt_data_01"
+      ],
+      "bus_factor": 1,
+      "enables_workflows": [
+        "wf_data_refresh"
+      ],
+      "single_point_of_failure": true
+    },
+    {
+      "knowledge_id": "kn_oncall",
+      "name": "On-call escalation & recovery",
+      "department_id": "dept_operations",
+      "documented_pct": 0.7,
+      "holders": [],
+      "bus_factor": null,
+      "enables_workflows": [],
+      "single_point_of_failure": false
+    },
+    {
+      "knowledge_id": "kn_core_arch",
+      "name": "Core-API architecture knowledge",
+      "department_id": "dept_engineering",
+      "documented_pct": 0.7,
+      "holders": [],
+      "bus_factor": null,
+      "enables_workflows": [],
+      "single_point_of_failure": false
+    },
+    {
+      "knowledge_id": "kn_release_eng",
+      "name": "Release & deploy engineering",
+      "department_id": "dept_engineering",
+      "documented_pct": 0.75,
+      "holders": [],
+      "bus_factor": null,
+      "enables_workflows": [],
+      "single_point_of_failure": false
+    },
+    {
+      "knowledge_id": "kn_ml_modeling",
+      "name": "Dispatch ML modeling",
+      "department_id": "dept_ai_data",
+      "documented_pct": 0.6,
+      "holders": [],
+      "bus_factor": null,
+      "enables_workflows": [],
+      "single_point_of_failure": false
+    },
+    {
+      "knowledge_id": "kn_roadmap_context",
+      "name": "Product roadmap & customer context",
+      "department_id": "dept_product",
+      "documented_pct": 0.7,
+      "holders": [],
+      "bus_factor": null,
+      "enables_workflows": [],
+      "single_point_of_failure": false
+    },
+    {
+      "knowledge_id": "kn_enterprise_deals",
+      "name": "Enterprise deal & pricing know-how",
+      "department_id": "dept_sales",
+      "documented_pct": 0.65,
+      "holders": [],
+      "bus_factor": null,
+      "enables_workflows": [],
+      "single_point_of_failure": false
+    },
+    {
+      "knowledge_id": "kn_segmentation",
+      "name": "Audience segmentation & attribution",
+      "department_id": "dept_marketing",
+      "documented_pct": 0.7,
+      "holders": [],
+      "bus_factor": null,
+      "enables_workflows": [],
+      "single_point_of_failure": false
+    },
+    {
+      "knowledge_id": "kn_onboarding_playbook",
+      "name": "Customer onboarding playbook",
+      "department_id": "dept_customer_success",
+      "documented_pct": 0.75,
+      "holders": [],
+      "bus_factor": null,
+      "enables_workflows": [
+        "wf_customer_onboarding"
+      ],
+      "single_point_of_failure": false
+    },
+    {
+      "knowledge_id": "kn_cs_escalation",
+      "name": "CS escalation handling",
+      "department_id": "dept_customer_success",
+      "documented_pct": 0.7,
+      "holders": [],
+      "bus_factor": null,
+      "enables_workflows": [
+        "wf_customer_onboarding"
+      ],
+      "single_point_of_failure": false
+    },
+    {
+      "knowledge_id": "kn_vendor_contracts",
+      "name": "Vendor contract & renewal know-how",
+      "department_id": "dept_finance",
+      "documented_pct": 0.6,
+      "holders": [],
+      "bus_factor": null,
+      "enables_workflows": [],
+      "single_point_of_failure": false
+    },
+    {
+      "knowledge_id": "kn_privacy_program",
+      "name": "Privacy program operation",
+      "department_id": "dept_compliance",
+      "documented_pct": 0.7,
+      "holders": [],
+      "bus_factor": null,
+      "enables_workflows": [],
+      "single_point_of_failure": false
+    }
+  ],
+  "workflows": [
+    {
+      "workflow_id": "wf_billing_recon",
+      "name": "Billing reconciliation",
+      "criticality": "critical",
+      "min_qualified_owners": 2,
+      "owners": [
+        "pt_billing_01",
+        "pt_billing_02"
+      ],
+      "documented_pct": 0.35,
+      "ownership_modeled": true,
+      "stranded_if_owners_removed": true
+    },
+    {
+      "workflow_id": "wf_invoicing",
+      "name": "Invoice generation & dispatch",
+      "criticality": "critical",
+      "min_qualified_owners": 2,
+      "owners": [],
+      "documented_pct": 0.6,
+      "ownership_modeled": false,
+      "stranded_if_owners_removed": false
+    },
+    {
+      "workflow_id": "wf_incident_mgmt",
+      "name": "Incident response / on-call",
+      "criticality": "high",
+      "min_qualified_owners": 2,
+      "owners": [
+        "pt_sre_01"
+      ],
+      "documented_pct": 0.7,
+      "ownership_modeled": true,
+      "stranded_if_owners_removed": true
+    },
+    {
+      "workflow_id": "wf_dispatch_opt",
+      "name": "Dispatch optimisation",
+      "criticality": "high",
+      "min_qualified_owners": 2,
+      "owners": [],
+      "documented_pct": 0.6,
+      "ownership_modeled": false,
+      "stranded_if_owners_removed": false
+    },
+    {
+      "workflow_id": "wf_soc2_evidence",
+      "name": "SOC 2 audit-evidence collection",
+      "criticality": "high",
+      "min_qualified_owners": 1,
+      "owners": [],
+      "documented_pct": 0.8,
+      "ownership_modeled": false,
+      "stranded_if_owners_removed": false
+    },
+    {
+      "workflow_id": "wf_customer_onboarding",
+      "name": "Customer onboarding",
+      "criticality": "medium",
+      "min_qualified_owners": 2,
+      "owners": [],
+      "documented_pct": 0.5,
+      "ownership_modeled": false,
+      "stranded_if_owners_removed": false
+    },
+    {
+      "workflow_id": "wf_data_refresh",
+      "name": "Data pipeline refresh",
+      "criticality": "high",
+      "min_qualified_owners": 2,
+      "owners": [],
+      "documented_pct": 0.6,
+      "ownership_modeled": false,
+      "stranded_if_owners_removed": false
+    },
+    {
+      "workflow_id": "wf_financial_close",
+      "name": "Monthly financial close",
+      "criticality": "medium",
+      "min_qualified_owners": 2,
+      "owners": [],
+      "documented_pct": 0.7,
+      "ownership_modeled": false,
+      "stranded_if_owners_removed": false
+    }
+  ]
+}

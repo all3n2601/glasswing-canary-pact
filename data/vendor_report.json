@@ -1,0 +1,112 @@
+{
+  "vendors": [
+    {
+      "vendor_id": "vendor_cloud",
+      "name": "CloudScale (cloud infra)",
+      "annual_cost_usd": 520000,
+      "one_time_exit_cost_usd": 120000,
+      "consumers": [
+        "sys_cloud_platform"
+      ],
+      "consuming_departments": [
+        "dept_engineering",
+        "dept_operations"
+      ],
+      "coverage": 3,
+      "min_substitutability": 0.5,
+      "replaceable": true,
+      "irreplaceable_flag": false,
+      "replacement_candidates": []
+    },
+    {
+      "vendor_id": "vendor_auditlog",
+      "name": "SentinelAudit (audit logging)",
+      "annual_cost_usd": 300000,
+      "one_time_exit_cost_usd": 90000,
+      "consumers": [
+        "ds_audit_log"
+      ],
+      "consuming_departments": [
+        "dept_compliance"
+      ],
+      "coverage": 4,
+      "min_substitutability": 0.1,
+      "replaceable": false,
+      "irreplaceable_flag": true,
+      "replacement_candidates": []
+    },
+    {
+      "vendor_id": "vendor_telematics",
+      "name": "Telemetrix (telematics)",
+      "annual_cost_usd": 180000,
+      "one_time_exit_cost_usd": 60000,
+      "consumers": [
+        "ds_telematics"
+      ],
+      "consuming_departments": [
+        "dept_ai_data",
+        "dept_customer_success",
+        "dept_engineering"
+      ],
+      "coverage": 4,
+      "min_substitutability": 0.4,
+      "replaceable": false,
+      "irreplaceable_flag": false,
+      "replacement_candidates": []
+    },
+    {
+      "vendor_id": "vendor_enrichiq",
+      "name": "EnrichIQ (enrichment)",
+      "annual_cost_usd": 140000,
+      "one_time_exit_cost_usd": 20000,
+      "consumers": [
+        "ds_enrichment"
+      ],
+      "consuming_departments": [
+        "dept_ai_data"
+      ],
+      "coverage": 1,
+      "min_substitutability": 0.85,
+      "replaceable": true,
+      "irreplaceable_flag": false,
+      "replacement_candidates": []
+    },
+    {
+      "vendor_id": "vendor_observability",
+      "name": "ObserveNow (observability)",
+      "annual_cost_usd": 90000,
+      "one_time_exit_cost_usd": 15000,
+      "consumers": [
+        "sys_core_api"
+      ],
+      "consuming_departments": [
+        "dept_engineering",
+        "dept_operations"
+      ],
+      "coverage": 2,
+      "min_substitutability": 0.7,
+      "replaceable": true,
+      "irreplaceable_flag": false,
+      "replacement_candidates": []
+    },
+    {
+      "vendor_id": "vendor_identity",
+      "name": "IdentityHub (SSO)",
+      "annual_cost_usd": 70000,
+      "one_time_exit_cost_usd": 40000,
+      "consumers": [
+        "sys_sso_gateway"
+      ],
+      "consuming_departments": [
+        "dept_compliance",
+        "dept_engineering",
+        "dept_operations"
+      ],
+      "coverage": 4,
+      "min_substitutability": 0.3,
+      "replaceable": false,
+      "irreplaceable_flag": false,
+      "replacement_candidates": []
+    }
+  ]
+}

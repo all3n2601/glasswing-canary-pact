@@ -1,0 +1,42 @@
+{
+  "note": "Reference for the demo + Member C AgentView filtering. Synthetic.",
+  "missed_dependency": {
+    "id": "planted_missed_dep_identity_access",
+    "chain": [
+      "vendor_identity",
+      "sys_sso_gateway",
+      "ctl_access_control",
+      "kpi_soc2_coverage"
+    ],
+    "edges": [
+      "e_identity_provides",
+      "e_ctl_access_sso",
+      "e_access_soc2_coverage"
+    ],
+    "evidence_refs": [
+      "ev_identity_access",
+      "ev_architecture_core"
+    ],
+    "why_missed": "Cross-domain: Finance owns the $70K vendor, Operations owns SSO, Compliance owns the control. No single department agent sees the whole chain, so cutting vendor_identity looks trivially cheap while it silently breaks SOC 2 CC6.1.",
+    "challenger_should_flag": true
+  },
+  "hidden_costs": [
+    {
+      "id": "hc_migration_carry",
+      "entity": "sys_warehouse_legacy",
+      "usd": 400000,
+      "trigger": "stop proj_warehouse_migration",
+      "why": "legacy warehouse keeps running; rebound cost reverses the headline saving"
+    },
+    {
+      "id": "hc_billing_hazard",
+      "pressure": "pr_billing_recon_hazard",
+      "why": "reducing Operations raises billing-failure probability (capacity_sensitivity 3.0); ~$400K/event"
+    },
+    {
+      "id": "hc_access_remediation",
+      "control": "ctl_access_control",
+      "why": "cutting vendor_identity breaks SOC 2 CC6.1 -> audit remediation + re-audit cost"
+    }
+  ]
+}

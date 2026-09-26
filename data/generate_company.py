@@ -412,6 +412,8 @@ doc("doc_soc2_register", "SOC 2 control register", "audit_report",
     summary="Mapping of SOC 2 controls to their evidence sources.", framework_refs=["SOC2"])
 evi("ev_soc2_register_intro", "audit_report", "doc_soc2_register",
     "CC7.2 requires continuous audit-log evidence retained for 12 months.")
+evi("ev_identity_access", "audit_report", "doc_soc2_register",
+    "SSO via IdentityHub is the sole enforcement point for SOC 2 CC6.1 logical access.")
 
 doc("doc_migration_charter", "Warehouse migration charter", "strategy_memo",
     department_id="dept_product", status="current", covers=["proj_warehouse_migration"],
@@ -532,7 +534,7 @@ edge("e_telemetrix_provides", "vendor_telematics", "ds_telematics", "PROVIDES", 
      criticality="high", evidence_refs=["ev_architecture_core"])
 edge("e_enrichiq_provides", "vendor_enrichiq", "ds_enrichment", "PROVIDES", strength=0.4, substitutability=0.85)
 edge("e_identity_provides", "vendor_identity", "sys_sso_gateway", "PROVIDES", strength=0.9, substitutability=0.3,
-     criticality="high", evidence_refs=["ev_architecture_core"])
+     criticality="high", evidence_refs=["ev_architecture_core", "ev_identity_access"])
 edge("e_observe_supports", "vendor_observability", "sys_core_api", "SUPPORTS", strength=0.4, substitutability=0.7)
 
 # --- datasets support systems / workflows ---
@@ -542,16 +544,18 @@ edge("e_telematics_ingest", "ds_telematics", "sys_dispatch_engine", "SUPPORTS", 
      lag_days=7, criticality="high", evidence_refs=["ev_architecture_core"])
 edge("e_shipments_pipeline", "ds_shipments", "sys_data_pipeline", "SUPPORTS", strength=0.6, substitutability=0.5)
 
-# --- controls depend on their feeds (CONTROLS relation: control governs the feed) ---
-edge("e_ctl_cc72_auditsvc", "ctl_soc2_audit_logging", "sys_audit_service", "DEPENDS_ON", strength=0.95,
+# --- feeds SUPPORT their control (propagation direction: failing feed breaks the control) ---
+edge("e_ctl_cc72_auditsvc", "sys_audit_service", "ctl_soc2_audit_logging", "SUPPORTS", strength=0.95,
      substitutability=0.05, lag_days=1, criticality="critical", evidence_refs=["ev_soc2_register_intro"])
-edge("e_ctl_cc72_auditds", "ctl_soc2_audit_logging", "ds_audit_log", "DEPENDS_ON", strength=1.0,
+edge("e_ctl_cc72_auditds", "ds_audit_log", "ctl_soc2_audit_logging", "SUPPORTS", strength=1.0,
      substitutability=0.05, lag_days=1, criticality="critical", evidence_refs=["ev_auditlog_sole_feed"])
-edge("e_ctl_access_sso", "ctl_access_control", "sys_sso_gateway", "DEPENDS_ON", strength=0.9, substitutability=0.2,
-     criticality="high", evidence_refs=["ev_architecture_core"])
-edge("e_ctl_incident_wf", "ctl_incident_mgmt", "wf_incident_mgmt", "DEPENDS_ON", strength=0.85, substitutability=0.3,
+edge("e_ctl_access_sso", "sys_sso_gateway", "ctl_access_control", "SUPPORTS", strength=0.9, substitutability=0.2,
+     criticality="high", evidence_refs=["ev_architecture_core", "ev_identity_access"])
+edge("e_access_soc2_coverage", "ctl_access_control", "kpi_soc2_coverage", "CONTRIBUTES_TO", strength=0.8,
+     substitutability=0.2, criticality="high", evidence_refs=["ev_identity_access"])
+edge("e_ctl_incident_wf", "wf_incident_mgmt", "ctl_incident_mgmt", "SUPPORTS", strength=0.85, substitutability=0.3,
      criticality="high", evidence_refs=["ev_incident_review_q2"])
-edge("e_ctl_pci_billing", "ctl_pci_carddata", "sys_billing_platform", "DEPENDS_ON", strength=0.8, substitutability=0.3,
+edge("e_ctl_pci_billing", "sys_billing_platform", "ctl_pci_carddata", "SUPPORTS", strength=0.8, substitutability=0.3,
      criticality="high", evidence_refs=["ev_architecture_core"])
 edge("e_soc2evidence_coverage", "wf_soc2_evidence", "kpi_soc2_coverage", "CONTRIBUTES_TO", strength=0.9,
      substitutability=0.1, criticality="high", evidence_refs=["ev_soc2_register_intro"])
@@ -748,11 +752,38 @@ def _self_check(twin: dict[str, Any]) -> None:
         assert any(e.get("framework") == fw for e in twin["entities"] if e["type"] == "control"), f"no control for {fw}"
 
 
+PLANTED_ITEMS = {
+    "note": "Reference for the demo + Member C AgentView filtering. Synthetic.",
+    "missed_dependency": {
+        "id": "planted_missed_dep_identity_access",
+        "chain": ["vendor_identity", "sys_sso_gateway", "ctl_access_control", "kpi_soc2_coverage"],
+        "edges": ["e_identity_provides", "e_ctl_access_sso", "e_access_soc2_coverage"],
+        "evidence_refs": ["ev_identity_access", "ev_architecture_core"],
+        "why_missed": ("Cross-domain: Finance owns the $70K vendor, Operations owns SSO, Compliance owns "
+                       "the control. No single department agent sees the whole chain, so cutting "
+                       "vendor_identity looks trivially cheap while it silently breaks SOC 2 CC6.1."),
+        "challenger_should_flag": True,
+    },
+    "hidden_costs": [
+        {"id": "hc_migration_carry", "entity": "sys_warehouse_legacy", "usd": 400000,
+         "trigger": "stop proj_warehouse_migration",
+         "why": "legacy warehouse keeps running; rebound cost reverses the headline saving"},
+        {"id": "hc_billing_hazard", "pressure": "pr_billing_recon_hazard",
+         "why": "reducing Operations raises billing-failure probability (capacity_sensitivity 3.0); ~$400K/event"},
+        {"id": "hc_access_remediation", "control": "ctl_access_control",
+         "why": "cutting vendor_identity breaks SOC 2 CC6.1 -> audit remediation + re-audit cost"},
+    ],
+}
+
+
 def main() -> None:
     twin = build()
     _self_check(twin)
-    out = Path(__file__).resolve().parent / "synthetic_company.json"
+    base = Path(__file__).resolve().parent
+    out = base / "synthetic_company.json"
     out.write_text(json.dumps(twin, indent=2) + "\n")
+    (base / "planted_items.json").write_text(json.dumps(PLANTED_ITEMS, indent=2) + "\n")
+    print(f"Wrote {base / 'planted_items.json'}")
 
     from collections import Counter
     kinds = Counter(e["type"] for e in twin["entities"])

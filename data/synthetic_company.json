@@ -2305,7 +2305,8 @@
       "criticality": "high",
       "confidence": 0.9,
       "evidence_refs": [
-        "ev_architecture_core"
+        "ev_architecture_core",
+        "ev_identity_access"
       ]
     },
     {
@@ -2378,9 +2379,9 @@
     },
     {
       "id": "e_ctl_cc72_auditsvc",
-      "source": "ctl_soc2_audit_logging",
-      "target": "sys_audit_service",
-      "relation": "DEPENDS_ON",
+      "source": "sys_audit_service",
+      "target": "ctl_soc2_audit_logging",
+      "relation": "SUPPORTS",
       "strength": 0.95,
       "strength_range": [
         0.665,
@@ -2396,9 +2397,9 @@
     },
     {
       "id": "e_ctl_cc72_auditds",
-      "source": "ctl_soc2_audit_logging",
-      "target": "ds_audit_log",
-      "relation": "DEPENDS_ON",
+      "source": "ds_audit_log",
+      "target": "ctl_soc2_audit_logging",
+      "relation": "SUPPORTS",
       "strength": 1.0,
       "strength_range": [
         0.7,
@@ -2414,9 +2415,9 @@
     },
     {
       "id": "e_ctl_access_sso",
-      "source": "ctl_access_control",
-      "target": "sys_sso_gateway",
-      "relation": "DEPENDS_ON",
+      "source": "sys_sso_gateway",
+      "target": "ctl_access_control",
+      "relation": "SUPPORTS",
       "strength": 0.9,
       "strength_range": [
         0.63,
@@ -2427,14 +2428,33 @@
       "criticality": "high",
       "confidence": 0.9,
       "evidence_refs": [
-        "ev_architecture_core"
+        "ev_architecture_core",
+        "ev_identity_access"
+      ]
+    },
+    {
+      "id": "e_access_soc2_coverage",
+      "source": "ctl_access_control",
+      "target": "kpi_soc2_coverage",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.2,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_identity_access"
       ]
     },
     {
       "id": "e_ctl_incident_wf",
-      "source": "ctl_incident_mgmt",
-      "target": "wf_incident_mgmt",
-      "relation": "DEPENDS_ON",
+      "source": "wf_incident_mgmt",
+      "target": "ctl_incident_mgmt",
+      "relation": "SUPPORTS",
       "strength": 0.85,
       "strength_range": [
         0.595,
@@ -2450,9 +2470,9 @@
     },
     {
       "id": "e_ctl_pci_billing",
-      "source": "ctl_pci_carddata",
-      "target": "sys_billing_platform",
-      "relation": "DEPENDS_ON",
+      "source": "sys_billing_platform",
+      "target": "ctl_pci_carddata",
+      "relation": "SUPPORTS",
       "strength": 0.8,
       "strength_range": [
         0.56,
@@ -3748,6 +3768,14 @@
       "document_id": "doc_soc2_register",
       "location": null,
       "snippet": "CC7.2 requires continuous audit-log evidence retained for 12 months.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_identity_access",
+      "source_type": "audit_report",
+      "document_id": "doc_soc2_register",
+      "location": null,
+      "snippet": "SSO via IdentityHub is the sole enforcement point for SOC 2 CC6.1 logical access.",
       "synthetic": true
     },
     {
