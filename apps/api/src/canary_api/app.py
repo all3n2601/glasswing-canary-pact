@@ -37,7 +37,7 @@ from contracts_py.twin import (
     Twin,
 )
 
-from canary_api import engine_port, legacy, runs, runtime
+from canary_api import engine_port, runs, runtime
 from canary_api.engine_port import EngineNotReady
 from canary_api.events import Run, utc_now
 
@@ -53,7 +53,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.include_router(legacy.router)
 
 
 @app.exception_handler(EngineNotReady)
