@@ -21,3 +21,46 @@ def downstream_paths(graph: nx.DiGraph, entity_id: str) -> dict[str, list[str]]:
         target: nx.shortest_path(graph, entity_id, target)
         for target in nx.descendants(graph, entity_id)
     }
+
+
+def upstream_paths(graph: nx.DiGraph, entity_id: str) -> dict[str, list[str]]:
+    """What this entity depends on (ancestors), with the shortest explaining path."""
+    if entity_id not in graph:
+        raise KeyError(f"Unknown entity: {entity_id}")
+    return {
+        source: nx.shortest_path(graph, source, entity_id)
+        for source in nx.ancestors(graph, entity_id)
+    }
+
+
+def blast_set(graph: nx.DiGraph, entity_id: str, max_depth: int = 4) -> dict[str, list[str]]:
+    """Downstream nodes reachable within ``max_depth`` hops, grouped by entity type.
+
+    Answers the Person-1 acceptance check: removing a node finds all downstream
+    departments, workflows and KPIs it affects.
+    """
+    if entity_id not in graph:
+        raise KeyError(f"Unknown entity: {entity_id}")
+    reachable = nx.single_source_shortest_path_length(graph, entity_id, cutoff=max_depth)
+    out: dict[str, list[str]] = {}
+    for node, depth in reachable.items():
+        if node == entity_id:
+            continue
+        kind = graph.nodes[node].get("type", "unknown")
+        out.setdefault(kind, []).append(node)
+    return out
+
+
+def affected_departments(graph: nx.DiGraph, entity_id: str, max_depth: int = 4) -> set[str]:
+    """Departments touched downstream of a change (via each node's department_id)."""
+    reachable = nx.single_source_shortest_path_length(graph, entity_id, cutoff=max_depth)
+    depts: set[str] = set()
+    for node in reachable:
+        if node == entity_id:
+            continue
+        dep = graph.nodes[node].get("department_id")
+        if dep:
+            depts.add(dep)
+        if graph.nodes[node].get("type") == "department":
+            depts.add(node)
+    return depts
