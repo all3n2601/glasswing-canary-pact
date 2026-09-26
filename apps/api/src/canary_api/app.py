@@ -2,6 +2,7 @@
 
 import asyncio
 import hashlib
+import logging
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, get_args
 
@@ -50,12 +51,15 @@ from canary_api import auth, engine_port, runs, runtime, storage
 from canary_api.engine_port import EngineNotReady
 from canary_api.events import Run, utc_now
 
+log = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     auth.signer()
     auth.seed_demo_approver()
     auth.warn_if_no_approver()
+    runtime.check_structured_output()
     try:
         yield
     finally:
@@ -203,8 +207,11 @@ async def create_decision(brief: DecisionBrief, llm_mode: runs.LlmMode | None = 
         brief = runs.apply_settings_defaults(brief, runtime.settings())
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=exc.errors(include_url=False)) from exc
-    if (llm_mode or runtime.settings().llm_mode) == "live" and not runs.live_allowed():
-        raise HTTPException(status_code=403, detail="llm_mode=live is disabled; set CANARY_ALLOW_LIVE=true to allow it")
+    if (llm_mode or runtime.settings().llm_mode) == "live":
+        if not runs.live_allowed():
+            raise HTTPException(status_code=403, detail="llm_mode=live is disabled; set CANARY_ALLOW_LIVE=true to allow it")
+        if runtime.structured_output_error:
+            raise HTTPException(status_code=503, detail=f"Live runs are disabled: {runtime.structured_output_error}")
     return DecisionCreated(run_id=runs.start_run(brief, llm_mode))
 
 
@@ -233,7 +240,8 @@ def run_perspectives(run_id: str) -> list[AgentAssessment]:
             by_id.setdefault(event.payload.assessment_id, event.payload)
     assessments = list(by_id.values())
     if find_person_tokens([a.model_dump(mode="json") for a in assessments]):
-        raise HTTPException(status_code=500, detail="Perspectives withheld: person tokens found in agent output")
+        log.warning("perspectives for run %s withheld: person tokens in agent output", run_id)
+        raise HTTPException(status_code=409, detail="Perspectives withheld: person tokens found in agent output")
     return assessments
 
 

@@ -25,6 +25,8 @@ from agent_orchestration.prompts import redact_people
 
 log = logging.getLogger(__name__)
 PERSON_ID = re.compile(r"pt_[a-z0-9_]+")
+# Every rejected claim logs one validation error containing this marker; evals count rejections by it.
+REJECTED_MARKER = " rejected: "
 
 OPPOSITE = {(Direction.increase, Direction.decrease), (Direction.decrease, Direction.increase)}
 # An agent never supplies edge numbers; validated edges start from neutral values the engine can widen.
@@ -62,7 +64,7 @@ class _Merger:
         bad = [i for i in ids if i not in self.known_ids or PERSON_ID.fullmatch(i)]
         if bad:
             self.rejected.update(bad)
-            self.report.errors.append(f"{where} rejected: unknown entity ids {bad}")
+            self.report.errors.append(f"{where}{REJECTED_MARKER}unknown entity ids {bad}")
         return bool(bad)
 
     def clamp(self, value: float, where: str) -> float:
@@ -92,7 +94,7 @@ class _Merger:
             same = engine_impact.affected_entity == proposed.affected_entity and engine_impact.metric == proposed.metric
             opposite = (engine_impact.direction, proposed.direction) in OPPOSITE or engine_impact.polarity != proposed.polarity
             if same and opposite:
-                self.report.errors.append(f"{where} rejected: contradicts engine impact {engine_impact.impact_id}")
+                self.report.errors.append(f"{where}{REJECTED_MARKER}contradicts engine impact {engine_impact.impact_id}")
                 return None
         status = ClaimStatus.validated if self.resolves(proposed.evidence_refs) else ClaimStatus.hypothesis
         if status is ClaimStatus.hypothesis:

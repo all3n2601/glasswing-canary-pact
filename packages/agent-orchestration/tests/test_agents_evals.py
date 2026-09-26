@@ -5,6 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
 from canary_api.stubs import engine as stub_engine
 from contracts_py.agents import AgentContext, AgentOutput, ChallengerOutput, ProposedDependency
 from contracts_py.events import EventType
@@ -79,6 +80,7 @@ def test_planted_keys_absent_report_null(brief, twin, settings, tmp_path) -> Non
         row = run(brief, twin, settings, tmp_path, planted_path=path, configs=["full"]).rows[0]
         assert row["planted_edge_found"] is None and row["planted_unknown_asked"] is None
         assert row["planted_unknown_rank"] is None
+        assert row["planted_unknown_in_agent_questions"] is None
 
 
 def test_planted_items_are_measured_from_the_run(brief, twin, settings, tmp_path) -> None:
@@ -88,8 +90,10 @@ def test_planted_items_are_measured_from_the_run(brief, twin, settings, tmp_path
     assert rows["full"]["planted_edge_found"] == 1 and rows["single_pass"]["planted_edge_found"] == 1
     assert rows["no_challenger"]["planted_edge_found"] == 0
     assert rows["full"]["planted_unknown_asked"] == 1 and rows["full"]["planted_unknown_rank"] == 1
+    assert rows["full"]["planted_unknown_in_agent_questions"] == 1
     plain = run(brief, twin, settings, tmp_path, planted_path=path, configs=["full"]).rows[0]
     assert (plain["planted_edge_found"], plain["planted_unknown_asked"], plain["planted_unknown_rank"]) == (0, 0, None)
+    assert plain["planted_unknown_in_agent_questions"] == 0
 
 
 def test_corrupting_an_evidence_ref_lowers_resolving_pct(brief, twin, settings) -> None:
@@ -118,7 +122,7 @@ def test_outputs_and_table(brief, twin, settings, tmp_path) -> None:
     with paths[2].open() as handle:
         assert [row["config"] for row in csv.DictReader(handle)] == list(evals.CONFIGS)
     table = evals.format_table(report.aggregates).splitlines()
-    assert table[0].split()[:4] == ["config", "runs", "engine_impl", "llm_mode"] and len(table) == 5
+    assert table[0].split()[:5] == ["config", "runs", "engine_impl", "twin_impl", "llm_mode"] and len(table) == 5
 
 
 def test_evals_does_not_import_canary_api() -> None:
@@ -131,3 +135,28 @@ def test_evals_does_not_import_canary_api() -> None:
 def test_module_entry_points_to_api_cli() -> None:
     result = subprocess.run([sys.executable, "-m", "agent_orchestration.evals"], capture_output=True, text=True)
     assert result.returncode == 2 and "canary_api.eval_cli" in result.stderr
+
+
+def test_rejected_items_counts_only_rejections(brief, twin, settings) -> None:
+    recorder = evals._Recorder()
+    package = run_decision(brief, engine=stub_engine, settings=settings, llm=evals.AgentLLM(settings), emit=recorder,
+                           run_id="run_eval_probe", twin=twin, clock=lambda: NOW)
+    first = recorder.of(EventType.agent_completed)[0]
+    errors = ["cache miss for abc; using def", "attempt 1: validation failed",
+              "strong model not configured; challenger ran on the fast model m",
+              "act_now_view.proposed_impacts[0] rejected: unknown entity ids ['wf_ghost']",
+              "act_now_view.proposed_impacts[1] rejected: contradicts engine impact imp_1"]
+    noisy = first.model_copy(update={"validation": first.validation.model_copy(update={"errors": errors})})
+    assert evals.compute_metrics(package, [noisy], [], twin, {})["rejected_items"] == 2
+
+
+def test_twin_impl_is_recorded(brief, twin, settings, tmp_path) -> None:
+    report = run(brief, twin, settings, tmp_path, configs=["full"], twin_impl="real")
+    assert report.rows[0]["twin_impl"] == "real" and report.aggregates[0]["twin_impl"] == "real"
+
+
+def test_live_mode_needs_opt_in(brief, twin, settings, monkeypatch, capsys) -> None:
+    monkeypatch.delenv("CANARY_ALLOW_LIVE", raising=False)
+    with pytest.raises(SystemExit, match="CANARY_ALLOW_LIVE=true"):
+        evals.main(["--mode", "live"], engine=stub_engine, twin=twin, brief=brief, settings=settings,
+                   engine_impl="stub")

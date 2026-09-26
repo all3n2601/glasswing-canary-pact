@@ -320,3 +320,28 @@ def test_invalid_structured_output_env_raises(fake_chat, monkeypatch, tmp_path, 
     with pytest.raises(ValueError, match="CANARY_STRUCTURED_OUTPUT"):
         call(llm, make_context(brief, twin, settings))
     assert fake_chat.methods == []
+
+
+def bad_request(message: str, body=None) -> openai.BadRequestError:
+    return openai.BadRequestError(message, response=httpx.Response(400, request=REQUEST), body=body)
+
+
+@pytest.mark.parametrize("error", [
+    bad_request("Unknown model: /deployments/x/typo"),
+    bad_request("This model's maximum context length is 32768 tokens"),
+])
+def test_auto_does_not_retry_unrelated_400s(fake_chat, error) -> None:
+    fake_chat.script = [error]
+    with pytest.raises(openai.BadRequestError):
+        live("auto")
+    assert [m for m, _ in fake_chat.methods] == ["json_schema"]
+
+
+@pytest.mark.parametrize("error", [
+    bad_request("Invalid request", body={"error": {"message": "json_schema is not supported by this model"}}),
+    bad_request("Structured output is not available for this deployment"),
+])
+def test_auto_retries_400s_that_name_the_response_format(fake_chat, error) -> None:
+    fake_chat.script = [error, reply(parsed_output())]
+    assert live("auto").output == parsed_output()
+    assert [m for m, _ in fake_chat.methods] == ["json_schema", "function_calling"]

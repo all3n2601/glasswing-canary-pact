@@ -1,15 +1,20 @@
+import logging
 import os
 from functools import cache
 from pathlib import Path
 
 from agent_orchestration import AgentLLM
+from agent_orchestration.llm import structured_output_mode
 from contracts_py.twin import OrganizationSettings, Twin
 
 from canary_api import engine_port
 from canary_api.events import EventBus
 from canary_api.paths import DATA_DIR
 
+log = logging.getLogger(__name__)
 bus = EventBus()
+# Set once at startup; live runs are refused while it holds an error, mock and replay are unaffected.
+structured_output_error: str | None = None
 _twins: dict[str, Twin] = {}
 
 
@@ -42,3 +47,14 @@ def cache_is_empty(cache_dir: Path) -> bool:
 
 def build_llm(run_settings: OrganizationSettings) -> AgentLLM:
     return AgentLLM(run_settings, cache_dir=llm_cache_dir())
+
+
+def check_structured_output() -> str | None:
+    global structured_output_error
+    try:
+        structured_output_mode()
+        structured_output_error = None
+    except ValueError as exc:
+        structured_output_error = str(exc)
+        log.error("live runs disabled: %s", exc)
+    return structured_output_error
