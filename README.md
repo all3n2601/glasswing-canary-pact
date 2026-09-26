@@ -49,6 +49,8 @@ pnpm test
 
 - [`docs/CANARY_PACT_MASTER_IMPLEMENTATION_PLAN.md`](docs/CANARY_PACT_MASTER_IMPLEMENTATION_PLAN.md) — complete product, architecture, simulation, orchestration, API, testing, and delivery plan.
 - [`docs/GLASSWING_TEAM_WORK_DIVISION.md`](docs/GLASSWING_TEAM_WORK_DIVISION.md) — non-overlapping work allocation for a four-person team, including ownership, deliverables, checkpoints, and integration rules.
+- [`AGENTS.md`](AGENTS.md) — mandatory scope, architecture, file-placement, quality, and approval rules for coding agents.
+- [`CLAUDE.md`](CLAUDE.md) — Claude entry point that enforces the same repository rules.
 
 ## Recommended starting order
 
@@ -61,4 +63,3 @@ pnpm test
 ## Product principle
 
 > Agents reason; deterministic code calculates; humans decide.
-
