@@ -5,7 +5,7 @@ import pytest
 from contracts_py.agents import AgentOutput
 from contracts_py.twin import OrganizationSettings
 
-from agent_orchestration.llm import AgentLLM, LiveReply
+from agent_orchestration.llm import DEFAULT_BASE_URL, AgentLLM, LiveReply, resolve_base_url
 from orchestration_helpers import make_context
 
 VALID = {"act_now_view": {"summary": "Billing loses its owner."}, "inaction_view": {"summary": "Hazard stays."},
@@ -110,3 +110,74 @@ def test_fallback_uses_same_decision_and_newest_mtime(tmp_path, brief, twin, set
     assert result.status == "fallback_cached" and result.output.act_now_view.summary == "new answer"
     other = brief.model_copy(update={"decision_id": "dec_unseen"})
     assert call(replay, make_context(other, twin, settings)).status == "unavailable"
+
+
+LLM_ENV = ["SCIFORIUM_API_URL", "SCIFORIUM_BASE_URL", "SCIFORIUM_MODEL", "SCIFORIUM_TEMPERATURE",
+           "SCIFORIUM_TIMEOUT_SECONDS", "CANARY_MODEL_STRONG", "CANARY_MODEL_FAST", "MODEL_STRONG", "MODEL_FAST"]
+
+
+@pytest.fixture
+def clean_env(monkeypatch):
+    for name in LLM_ENV:
+        monkeypatch.delenv(name, raising=False)
+    return monkeypatch
+
+
+@pytest.mark.parametrize("url, expected", [
+    ("https://llm.example/v1/chat/completions", "https://llm.example/v1"),
+    ("https://llm.example/v1/chat/completions/", "https://llm.example/v1"),
+    ("https://llm.example/v1", "https://llm.example/v1"),
+])
+def test_api_url_trims_chat_completions(clean_env, url, expected) -> None:
+    clean_env.setenv("SCIFORIUM_API_URL", url)
+    clean_env.setenv("SCIFORIUM_BASE_URL", "https://ignored.example/v1")
+    assert resolve_base_url() == expected
+
+
+def test_base_url_fallbacks(clean_env) -> None:
+    assert resolve_base_url() == DEFAULT_BASE_URL
+    clean_env.setenv("SCIFORIUM_BASE_URL", "https://base.example/v1")
+    assert resolve_base_url() == "https://base.example/v1"
+
+
+@pytest.mark.parametrize("fast, chain", [
+    (False, ["CANARY_MODEL_STRONG", "MODEL_STRONG", "SCIFORIUM_MODEL"]),
+    (True, ["CANARY_MODEL_FAST", "MODEL_FAST", "SCIFORIUM_MODEL"]),
+])
+def test_model_resolution_order(clean_env, fast, chain) -> None:
+    llm = AgentLLM(OrganizationSettings(llm_mode="live"))
+    assert llm.model_id(fast) is None
+    for name in reversed(chain):
+        clean_env.setenv(name, f"model-from-{name.lower()}")
+        assert llm.model_id(fast) == f"model-from-{name.lower()}"
+    field = "model_id_fast" if fast else "model_id_strong"
+    assert AgentLLM(OrganizationSettings(llm_mode="live", **{field: "from-settings"})).model_id(fast) == "from-settings"
+
+
+def test_temperature_and_timeout_from_env_unless_settings_set(tmp_path, brief, twin, settings, clean_env) -> None:
+    clean_env.setenv("SCIFORIUM_MODEL", "env-model")
+    clean_env.setenv("SCIFORIUM_TEMPERATURE", "0.1")
+    clean_env.setenv("SCIFORIUM_TIMEOUT_SECONDS", "12")
+    seen = []
+
+    def live(model_id, messages, output_model, *, timeout, temperature):
+        seen.append((model_id, timeout, temperature))
+        return LiveReply(VALID)
+
+    context = make_context(brief, twin, settings)
+    call(AgentLLM(OrganizationSettings(llm_mode="live"), cache_dir=tmp_path, live_call=live), context)
+    explicit = OrganizationSettings(llm_mode="live", temperature=0.9, agent_timeout_seconds=30)
+    call(AgentLLM(explicit, cache_dir=tmp_path, live_call=live), context)
+    assert seen == [("env-model", 12.0, 0.1), ("env-model", 30.0, 0.9)]
+    clean_env.setenv("SCIFORIUM_TEMPERATURE", "warm")
+    assert AgentLLM(OrganizationSettings(llm_mode="live")).temperature() == 0.4
+
+
+def test_api_key_never_appears_in_errors(tmp_path, brief, twin, settings, clean_env, caplog) -> None:
+    clean_env.setenv("SCIFORIUM_API_KEY", "sk-secret-value")
+    clean_env.setenv("SCIFORIUM_MODEL", "env-model")
+    llm = AgentLLM(OrganizationSettings(llm_mode="live"), cache_dir=tmp_path,
+                   live_call=FakeLive(ConnectionError("upstream refused")))
+    result = call(llm, make_context(brief, twin, settings))
+    assert result.status == "unavailable"
+    assert "sk-secret-value" not in " ".join(result.errors) + caplog.text
