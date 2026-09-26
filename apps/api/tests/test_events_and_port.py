@@ -119,6 +119,7 @@ def test_real_engine_missing_function_gives_clear_error(client, monkeypatch) -> 
     # real twin and engine packages have got.
     monkeypatch.setitem(sys.modules, "simulation_engine", types.ModuleType("simulation_engine"))
     monkeypatch.setitem(sys.modules, "company_twin", types.ModuleType("company_twin"))
+    monkeypatch.delitem(runtime._twins, "real", raising=False)
     monkeypatch.setenv("ENGINE_IMPL", "real")
     with pytest.raises(engine_port.EngineNotReady, match=r"simulation_engine\.quick_impact"):
         engine_port.quick_impact(stub_twin(), [])
