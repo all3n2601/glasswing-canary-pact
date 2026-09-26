@@ -13,5 +13,6 @@ testpaths = [
   "packages/contracts-py/tests",
   "packages/company-twin/tests",
   "packages/agent-orchestration/tests",
+  "packages/simulation-engine/tests",
 ]
 pythonpath = ["apps/api/src"]
