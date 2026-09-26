@@ -112,11 +112,12 @@ class AgentLLM:
         if self.mode == "mock":
             metrics.model_id = "mock"
             return LLMResult(mock_output(output_model, context), "ok", metrics)
+        decision_id = context.brief.decision_id
         if self.mode == "replay":
-            return self._from_cache(agent_id, digest, output_model, metrics, [])
-        return self._live(agent_id, model_id, digest, messages, output_model, metrics)
+            return self._from_cache(agent_id, decision_id, digest, output_model, metrics, [])
+        return self._live(agent_id, decision_id, model_id, digest, messages, output_model, metrics)
 
-    def _live(self, agent_id: str, model_id: str, digest: str, messages: Messages, output_model: type[BaseModel],
+    def _live(self, agent_id: str, decision_id: str, model_id: str, digest: str, messages: Messages, output_model: type[BaseModel],
               metrics: CallMetrics) -> LLMResult:
         errors: list[str] = []
         attempt_messages = list(messages)
@@ -138,33 +139,43 @@ class AgentLLM:
                 continue
             except Exception as exc:  # network, auth or timeout: fall back to the cache
                 errors.append(f"live call failed: {exc}")
-                return self._from_cache(agent_id, digest, output_model, metrics, errors, retries=attempt)
+                return self._from_cache(agent_id, decision_id, digest, output_model, metrics, errors, retries=attempt)
             metrics.latency_ms = int((time.monotonic() - started) * 1000)
             metrics.input_tokens, metrics.output_tokens = reply.input_tokens, reply.output_tokens
-            self._write_cache(agent_id, digest, model_id, metrics.prompt_version, output)
+            self._write_cache(agent_id, decision_id, digest, model_id, metrics.prompt_version, output)
             return LLMResult(output, "ok", metrics, retries=attempt, errors=errors)
         return LLMResult(None, "invalid", metrics, retries=1, errors=errors)
 
     def _agent_dir(self, agent_id: str) -> Path:
         return self.cache_dir / agent_id
 
-    def _write_cache(self, agent_id: str, digest: str, model_id: str, prompt_version: str, output: BaseModel) -> None:
+    def _write_cache(self, agent_id: str, decision_id: str, digest: str, model_id: str, prompt_version: str, output: BaseModel) -> None:
         path = self._agent_dir(agent_id) / f"{digest}.json"
         path.parent.mkdir(parents=True, exist_ok=True)
-        record = {"agent_id": agent_id, "model_id": model_id, "prompt_version": prompt_version,
+        record = {"agent_id": agent_id, "decision_id": decision_id, "model_id": model_id, "prompt_version": prompt_version,
                   "prompt_hash": digest, "output": output.model_dump(mode="json")}
         path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
-    def _from_cache(self, agent_id: str, digest: str, output_model: type[BaseModel], metrics: CallMetrics,
-                    errors: list[str], retries: int = 0) -> LLMResult:
+    def _fallback(self, agent_id: str, decision_id: str) -> Path | None:
+        folder = self._agent_dir(agent_id)
+        candidates = []
+        for path in folder.glob("*.json") if folder.is_dir() else []:
+            record = json.loads(path.read_text(encoding="utf-8"))
+            if record.get("agent_id") == agent_id and record.get("decision_id") == decision_id:
+                candidates.append(path)
+        return max(candidates, key=lambda p: p.stat().st_mtime, default=None)
+
+    def _from_cache(self, agent_id: str, decision_id: str, digest: str, output_model: type[BaseModel],
+                    metrics: CallMetrics, errors: list[str], retries: int = 0) -> LLMResult:
         exact = self._agent_dir(agent_id) / f"{digest}.json"
         if exact.is_file():
             path, status = exact, "replayed"
         else:
-            cached = sorted(self._agent_dir(agent_id).glob("*.json")) if self._agent_dir(agent_id).is_dir() else []
-            if not cached:
-                return LLMResult(None, "unavailable", metrics, retries, [*errors, "no cached answer for this agent"])
-            path, status = cached[-1], "fallback_cached"
+            fallback = self._fallback(agent_id, decision_id)
+            if fallback is None:
+                return LLMResult(None, "unavailable", metrics, retries,
+                                 [*errors, f"no cached answer for {agent_id} on {decision_id}"])
+            path, status = fallback, "fallback_cached"
             errors = [*errors, f"cache miss for {digest}; using {path.stem}"]
         record = json.loads(path.read_text(encoding="utf-8"))
         return LLMResult(output_model.model_validate(record["output"]), status, metrics, retries, errors)  # type: ignore[arg-type]

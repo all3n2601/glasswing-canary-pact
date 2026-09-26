@@ -4,7 +4,7 @@ from contracts_py.enums import ClaimStatus, Origin
 
 from agent_orchestration.llm import LLMResult
 from agent_orchestration.merge import merge
-from orchestration_helpers import NOW, make_context, metrics
+from orchestration_helpers import NOW, make_context, metrics, person_output, person_tokens
 
 SCENARIOS = {"act_now": "scn_run_test_act_now_plan_recommended", "inaction": "scn_run_test_inaction_none"}
 
@@ -50,7 +50,7 @@ def run_merge(context, result_output, status="ok", pass_type="first_pass", error
 def test_unknown_entity_rejected(context) -> None:
     outcome = run_merge(context, output(impact(affected_entity="wf_ghost"), impact(dependency_path=["pt_07"])))
     report = outcome.assessment.validation
-    assert report.rejected_entity_ids == ["pt_07", "wf_ghost"]
+    assert report.rejected_entity_ids == ["[role]", "wf_ghost"]
     assert outcome.assessment.accepted_impacts == []
     assert outcome.assessment.output.act_now_view.proposed_impacts == []
 
@@ -117,3 +117,22 @@ def test_failed_call_keeps_status_and_errors(context) -> None:
     outcome = run_merge(context, None, status="unavailable", errors=["no cached answer"])
     assert outcome.assessment.status == "unavailable" and outcome.assessment.output is None
     assert outcome.assessment.validation.errors == ["no cached answer"]
+
+
+def test_fallback_cached_claims_are_hypotheses_only(context) -> None:
+    outcome = run_merge(context, output(impact(), dependencies=[dependency()]), status="fallback_cached")
+    assert outcome.validated_edges == []
+    assert [i.status for i in outcome.assessment.accepted_impacts] == [ClaimStatus.hypothesis]
+    assert outcome.assessment.validation.downgraded_to_hypothesis == [
+        "act_now_view.proposed_impacts[0]", "proposed_dependencies[0]"
+    ]
+
+
+def test_person_tokens_rejected_even_when_visible(brief, hr_twin, settings) -> None:
+    context = make_context(brief, hr_twin, settings, agent_id="people_knowledge")
+    assert "pt_07" in {e.id for e in context.view.entities}
+    outcome = merge("people_knowledge", LLMResult(person_output(), "ok", metrics()), context=context,
+                    pass_type="first_pass", scenario_ids=SCENARIOS, created_at=NOW)
+    assert outcome.validated_edges == [] and outcome.assessment.accepted_impacts == []
+    assert "[role]" in outcome.assessment.validation.rejected_entity_ids
+    assert person_tokens(outcome.assessment.model_dump_json()) == []

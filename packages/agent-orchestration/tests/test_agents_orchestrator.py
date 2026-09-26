@@ -5,7 +5,10 @@ from contracts_py.package import DecisionPackage
 
 from agent_orchestration import AgentLLM, run_decision
 from agent_orchestration.llm import LLMResult
-from orchestration_helpers import NOW, Recorder, ScriptedLLM, SpyEngine, metrics
+from contracts_py.twin import OrganizationSettings
+
+from agent_orchestration.roster import ROSTER
+from orchestration_helpers import NOW, Recorder, ScriptedLLM, SpyEngine, metrics, person_output, person_tokens
 
 BASE_PHASES = ["validating", "building_futures", "optimizing", "running_agents", "propagating", "challenging",
                "propagating"]
@@ -52,6 +55,9 @@ def test_validated_edge_resimulates_and_reoptimizes(brief, twin, settings) -> No
     clone = names.index("clone_with_edges")
     assert "simulate" in names[clone + 1:] and "optimize" in names[clone + 1:]
     assert names.count("optimize") == 2
+    generated = [e.payload.plan_id for e in recorder.of(EventType.candidate_generated)]
+    assert len(generated) == len(set(generated)) == 2
+    assert len(recorder.of(EventType.portfolio_ranked)) == 2
     edge = recorder.of(EventType.dependency_validated)[0].payload.edge
     assert (edge.source, edge.target, edge.confidence) == ("role_billing_ops_lead", "sys_cloud_platform", 1.0)
     assert any(c.source == "agent_validated" for c in package.recommendation.claims)
@@ -72,3 +78,29 @@ def test_futures_cover_inaction_and_delay(brief, twin, settings) -> None:
     _, recorder, _ = run(brief, twin, settings, AgentLLM(settings))
     futures = {e.future for e in recorder.of(EventType.simulation_completed)}
     assert futures == {Future.act_now, Future.inaction, Future.delay}
+
+
+def test_person_tokens_never_leave_the_agent_layer(brief, hr_twin) -> None:
+    settings = OrganizationSettings(llm_mode="mock", enabled_agent_ids=list(ROSTER))
+    people = lambda context: LLMResult(person_output(), "ok", metrics("people_knowledge"))
+    package, recorder, engine = run(brief, hr_twin, settings, ScriptedLLM(settings, {"people_knowledge": people}))
+    completed = [e for e in recorder.of(EventType.agent_completed) if e.payload.agent_id == "people_knowledge"]
+    assert completed, "people_knowledge was not routed"
+    assert completed[0].payload.validation.rejected_entity_ids == ["[role]"]
+    assert person_tokens(completed[0].model_dump_json()) == []
+    assert person_tokens(package.model_dump_json()) == []
+    assert "Can someone shadow [role]?" in package.open_questions
+    assert "clone_with_edges" not in engine.names()
+
+
+def test_fallback_cached_agent_widens_uncertainty(brief, twin, settings) -> None:
+    fallback = lambda context: LLMResult(challenger_with_new_edge(context).output, "fallback_cached",
+                                         metrics("challenger"), errors=["cache miss"])
+    engineering = lambda context: LLMResult(None, "fallback_cached", metrics("engineering"))
+    llm = ScriptedLLM(settings, {"challenger": fallback, "engineering": engineering})
+    package, recorder, engine = run(brief, twin, settings, llm)
+    assert recorder.phases() == BASE_PHASES + TAIL_PHASES
+    assert "clone_with_edges" not in engine.names()
+    assert package.missing_perspectives == ["engineering", "challenger"]
+    widen = [args for name, args in engine.calls if name == "widen_uncertainty"]
+    assert widen[0][1] == ["dept_engineering"]

@@ -1,4 +1,5 @@
 import json
+import os
 
 import pytest
 from contracts_py.agents import AgentOutput
@@ -89,3 +90,23 @@ def test_mock_is_deterministic_and_cites_only_view_ids(brief, twin, settings) ->
     evidence = {e.id for e in context.view.evidence}
     assert set(first.output.affected_entities) <= view_ids
     assert set(first.output.evidence_refs) <= evidence
+
+
+def test_fallback_uses_same_decision_and_newest_mtime(tmp_path, brief, twin, settings, live_settings) -> None:
+    folder = tmp_path / "operations"
+    folder.mkdir()
+
+    def record(name: str, decision_id: str, summary: str, mtime: int) -> None:
+        output = VALID | {"act_now_view": {"summary": summary}}
+        path = folder / f"{name}.json"
+        path.write_text(json.dumps({"agent_id": "operations", "decision_id": decision_id, "output": output}))
+        os.utime(path, (mtime, mtime))
+
+    record("zzz_old", brief.decision_id, "old answer", 1_000)
+    record("aaa_new", brief.decision_id, "new answer", 2_000)
+    record("mmm_other", "dec_other", "other decision", 3_000)
+    replay = AgentLLM(live_settings.model_copy(update={"llm_mode": "replay"}), cache_dir=tmp_path)
+    result = call(replay, make_context(brief, twin, settings))
+    assert result.status == "fallback_cached" and result.output.act_now_view.summary == "new answer"
+    other = brief.model_copy(update={"decision_id": "dec_unseen"})
+    assert call(replay, make_context(other, twin, settings)).status == "unavailable"

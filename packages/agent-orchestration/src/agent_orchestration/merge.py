@@ -1,7 +1,9 @@
 import hashlib
+import logging
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from contracts_py.agents import (
     AgentAssessment,
@@ -19,6 +21,10 @@ from contracts_py.enums import ClaimStatus, Criticality, Direction, Origin
 from contracts_py.twin import Edge
 
 from agent_orchestration.llm import LLMResult
+from agent_orchestration.prompts import redact_people
+
+log = logging.getLogger(__name__)
+PERSON_ID = re.compile(r"pt_[a-z0-9_]+")
 
 OPPOSITE = {(Direction.increase, Direction.decrease), (Direction.decrease, Direction.increase)}
 # An agent never supplies edge numbers; validated edges start from neutral values the engine can widen.
@@ -34,12 +40,14 @@ class MergeOutcome:
 
 class _Merger:
     def __init__(self, agent_id: str, context: AgentContext, assessment_id: str, scenario_ids: dict[str, str],
-                 origin: Origin) -> None:
+                 origin: Origin, stale: bool) -> None:
         self.agent_id = agent_id
         self.context = context
         self.assessment_id = assessment_id
         self.scenario_ids = scenario_ids
         self.origin = origin
+        # A fallback answer was written for another prompt, so none of its claims may change numbers.
+        self.stale = stale
         view = context.view
         self.known_ids = {e.id for e in view.entities}
         self.known_evidence = {e.id for e in view.evidence}
@@ -51,7 +59,7 @@ class _Merger:
         self.edges: list[Edge] = []
 
     def unknown(self, ids: list[str], where: str) -> bool:
-        bad = [i for i in ids if i not in self.known_ids]
+        bad = [i for i in ids if i not in self.known_ids or PERSON_ID.fullmatch(i)]
         if bad:
             self.rejected.update(bad)
             self.report.errors.append(f"{where} rejected: unknown entity ids {bad}")
@@ -64,7 +72,7 @@ class _Merger:
         return min(1.0, max(0.0, value))
 
     def resolves(self, refs: list[str]) -> bool:
-        return any(r in self.known_evidence for r in refs)
+        return not self.stale and any(r in self.known_evidence for r in refs)
 
     def findings(self, items: list[Finding], where: str) -> list[Finding]:
         return [f for n, f in enumerate(items) if not self.unknown(f.entity_ids, f"{where}[{n}]")]
@@ -186,12 +194,25 @@ class _Merger:
         })
 
 
+def redact_tree(value: Any) -> tuple[Any, int]:
+    if isinstance(value, str):
+        text, found = redact_people(value)
+        return text, len(found)
+    if isinstance(value, dict):
+        pairs = [(k, redact_tree(v)) for k, v in value.items()]
+        return {k: v for k, (v, _) in pairs}, sum(n for _, (_, n) in pairs)
+    if isinstance(value, list):
+        items = [redact_tree(v) for v in value]
+        return [v for v, _ in items], sum(n for _, n in items)
+    return value, 0
+
+
 def merge(agent_id: str, result: LLMResult, *, context: AgentContext, pass_type: Literal["first_pass", "challenge"],
           scenario_ids: dict[str, str], created_at: datetime) -> MergeOutcome:
     """Applies the section 7 merge rules; scenario_ids maps "act_now" and "inaction" to scenario IDs."""
     assessment_id = f"asm_{context.run_id}_{agent_id}"
     origin = Origin.challenger if pass_type == "challenge" else Origin.agent
-    merger = _Merger(agent_id, context, assessment_id, scenario_ids, origin)
+    merger = _Merger(agent_id, context, assessment_id, scenario_ids, origin, stale=result.status == "fallback_cached")
     merger.report.errors.extend(result.errors)
     output = challenge = None
     if isinstance(result.output, AgentOutput):
@@ -214,4 +235,9 @@ def merge(agent_id: str, result: LLMResult, *, context: AgentContext, pass_type:
         metrics=result.metrics,
         created_at=created_at,
     )
+    # Person tokens were rejected as references above; this removes them from free text and log lines too.
+    redacted, count = redact_tree(assessment.model_dump(mode="json"))
+    if count:
+        log.warning("redacted %d person tokens from the %s assessment", count, agent_id)
+        assessment = AgentAssessment.model_validate(redacted)
     return MergeOutcome(assessment, merger.edges)

@@ -79,3 +79,38 @@ def make_context(brief: Any, twin: Any, settings: OrganizationSettings, agent_id
     return build_context(ROSTER[agent_id], run_id=run_id, brief=brief, plan=results.plans()[1], twin=twin,
                          engine=stub_engine, act_now=results.act_now_result(run_id, brief.decision_id),
                          inaction=results.inaction_result(run_id, brief.decision_id), settings=settings)
+
+
+def person_tokens(text: str) -> list[str]:
+    from agent_orchestration.prompts import PERSON_TOKEN
+
+    return PERSON_TOKEN.findall(text)
+
+
+def person_output() -> Any:
+    from contracts_py.agents import AgentOutput
+
+    return AgentOutput.model_validate({
+        "affected_entities": ["pt_07", "wf_billing_recon"],
+        "act_now_view": {
+            "summary": "pt_07 is the only person who reconciles billing.",
+            "failure_modes": [{"text": "Losing pt_07 strands billing.", "entity_ids": ["pt_07"], "severity": 4},
+                              {"text": "Ask pt_07 first.", "entity_ids": ["wf_billing_recon"], "severity": 3}],
+            "proposed_impacts": [{"affected_entity": "pt_07", "metric": "load", "direction": "increase",
+                                  "polarity": "harm", "category": "ownership", "level": "direct", "severity": 4,
+                                  "rationale": "pt_07 absorbs the work.", "evidence_refs": ["ev_billing_recon_matrix"],
+                                  "confidence": 0.8},
+                                 {"affected_entity": "wf_billing_recon", "metric": "owners", "direction": "decrease",
+                                  "polarity": "harm", "category": "ownership", "level": "dependent", "severity": 4,
+                                  "rationale": "Via pt_07.", "dependency_path": ["pt_07", "wf_billing_recon"],
+                                  "evidence_refs": ["ev_billing_recon_matrix"], "confidence": 0.8}],
+        },
+        "inaction_view": {"summary": "pt_07 burns out."},
+        "proposed_dependencies": [{"source": "pt_07", "target": "wf_billing_recon", "relation": "OWNS",
+                                   "rationale": "pt_07 runs it.", "evidence_refs": ["ev_billing_recon_matrix"],
+                                   "confidence": 0.9}],
+        "questions": [{"text": "Can someone shadow pt_07?", "why_it_matters": "pt_07 is a single point.",
+                       "entity_ids": ["wf_billing_recon"]}],
+        "assumptions": ["pt_07 stays until day 30."],
+        "confidence": 0.7,
+    })

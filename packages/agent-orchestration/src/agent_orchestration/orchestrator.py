@@ -32,7 +32,8 @@ from agent_orchestration.roster import CHALLENGER, PROMPT_VERSION, ROSTER
 from agent_orchestration.router import route_agents
 
 FAILED_STATUSES = {"fallback_cached", "unavailable", "invalid"}
-MISSING_STATUSES = {"unavailable", "invalid"}
+# A fallback answer came from a different prompt, so its department counts as unheard.
+MISSING_STATUSES = {"fallback_cached", "unavailable", "invalid"}
 PLAN_SOURCE = {"naive": "naive", "recommended": "optimizer", "alternative": "enumerated"}
 
 
@@ -71,6 +72,7 @@ class _Run:
         self.status = RunStatus.created
         self.scenarios: dict[tuple[Future, str | None], Scenario] = {}
         self.engine_issues: list[str] = []
+        self.emitted_plans: set[str] = set()
         self.lock = threading.Lock()
 
     def publish(self, kind: EventType, payload: BaseModel, *, actor: str = "orchestrator",
@@ -188,6 +190,9 @@ class _Run:
         self.check(portfolio, twin)
         plans = self.plans(portfolio)
         for plan, item in plans:
+            if plan.plan_id in self.emitted_plans:
+                continue
+            self.emitted_plans.add(plan.plan_id)
             self.publish(EventType.candidate_generated, plan, actor="engine")
             if not item.result.feasible:
                 reasons = item.result.rejection_reasons or [
