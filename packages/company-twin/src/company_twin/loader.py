@@ -2,6 +2,8 @@ import json
 import logging
 from pathlib import Path
 
+from contracts_py.twin import ValidationIssue
+
 from .models import CompanyTwin, EntityType, Twin
 
 log = logging.getLogger(__name__)
@@ -10,6 +12,7 @@ log = logging.getLogger(__name__)
 # (matches OrganizationSettings.required_doc_types_per_workflow's default).
 REQUIRED_DOC_TYPES_PER_WORKFLOW = ("runbook", "sop")
 DOCUMENTED_PCT_DISAGREEMENT_TOLERANCE = 0.05
+MAX_OVERLAY_SNIPPET_LENGTH = 300
 
 
 def default_fixture_path() -> Path:
@@ -73,13 +76,26 @@ def _derive_documented_pct(twin: Twin) -> None:
 
 def _overlay_snippets(twin: Twin, snippets_path: Path) -> None:
     """Overlay final snippet wording from an ev_-id-keyed JSON file onto matching
-    Evidence records (schema v2.2.0 section 5.12: text never changes a number)."""
+    Evidence records (schema v2.2.0 section 5.12: text never changes a number).
+
+    An overlaid snippet longer than ``MAX_OVERLAY_SNIPPET_LENGTH`` is applied as-is
+    (never truncated silently) but logs a ``ValidationIssue``-shaped warning, since a
+    snippet this long is more likely a pasted document than a quoted snippet.
+    """
     snippets: dict[str, str] = json.loads(snippets_path.read_text())
     by_id = {ev.id: ev for ev in twin.evidence}
     for ev_id, text in snippets.items():
         evidence = by_id.get(ev_id)
         if evidence is not None:
             evidence.snippet = text
+            if len(text) > MAX_OVERLAY_SNIPPET_LENGTH:
+                issue = ValidationIssue(
+                    rule="overlay_snippet_length",
+                    severity="warning",
+                    message=f"overlaid snippet for {ev_id} is {len(text)} chars (max {MAX_OVERLAY_SNIPPET_LENGTH})",
+                    ids=[ev_id],
+                )
+                log.warning("%s", issue.message)
 
 
 def load_company_twin(path: str | Path | None = None) -> CompanyTwin:

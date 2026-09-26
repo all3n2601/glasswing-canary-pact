@@ -4,6 +4,7 @@ v2.2.0 sections 5.7, 5.8, 7.13).
 
 from __future__ import annotations
 
+import re
 from typing import Any, TypeVar
 
 from pydantic import BaseModel
@@ -88,9 +89,17 @@ def to_role_level(obj: T, twin: Twin) -> T:
     return _replace_ids(obj, pt_to_role)
 
 
+_PT_TOKEN = re.compile(r"pt_[a-z0-9_]+")
+
+
 def _replace_ids(value: Any, pt_to_role: dict[str, str]) -> Any:
     if isinstance(value, str):
-        return pt_to_role.get(value, value)
+        if value in pt_to_role:
+            return pt_to_role[value]
+        if "pt_" not in value:
+            return value
+        # a pt_ id embedded in free text (e.g. "ask pt_07"), not the whole string
+        return _PT_TOKEN.sub(lambda m: pt_to_role.get(m.group(0), m.group(0)), value)
     if isinstance(value, BaseModel):
         updates = {name: _replace_ids(getattr(value, name), pt_to_role) for name in type(value).model_fields}
         return value.model_copy(update=updates)

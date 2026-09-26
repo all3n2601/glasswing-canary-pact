@@ -87,6 +87,7 @@ def edge_from_agent_dependency(
         criticality=Criticality.medium,
         confidence=confidence,
         evidence_refs=list(evidence_refs),
+        extraction_method="agent",
     )
 
 
@@ -105,14 +106,18 @@ def clone_with_edges(twin: Twin, edges: list[Edge], *, agent_proposed: bool = Fa
     """Deep copy ``twin`` with ``edges`` appended to the clone's edge list.
 
     Used to validate a proposed or planted dependency (schema section 7.13): the extra
-    edges live only on the clone, so the baseline's ``edges[]`` is unaffected. When
-    ``agent_proposed`` is True, every edge's strength/strength_range/substitutability is
-    replaced with its ``AGENT_EDGE_DEFAULTS`` before it is appended, regardless of what
-    placeholder values it already carried (no contracts_py field currently distinguishes
-    an agent-proposed edge from a fixture one, so the caller must say so explicitly).
+    edges live only on the clone, so the baseline's ``edges[]`` is unaffected. Every
+    edge's strength/strength_range/substitutability is replaced with its
+    ``AGENT_EDGE_DEFAULTS`` before it is appended when either ``agent_proposed`` is True
+    or the edge already self-identifies as agent-sourced (``extraction_method ==
+    "agent"``), so agent edges get relation-specific defaults even when a caller (the
+    orchestrator, engine_port) builds the edge itself and never passes the flag.
     """
     scenario = clone(twin)
-    prepared = [_apply_agent_defaults(e) if agent_proposed else e for e in edges]
+    prepared = [
+        _apply_agent_defaults(e) if agent_proposed or e.extraction_method == "agent" else e
+        for e in edges
+    ]
     scenario.edges = [*scenario.edges, *(e.model_copy(deep=True) for e in prepared)]
     return scenario
 

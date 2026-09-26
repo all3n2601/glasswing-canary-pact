@@ -191,6 +191,17 @@ def test_to_role_level_maps_pt_ids_inside_a_pydantic_model():
     assert edge.source == person_token.id
 
 
+def test_to_role_level_maps_pt_ids_embedded_in_free_text():
+    person_token = next(e for e in TWIN.entities if e.type == EntityType.person_token)
+    payload = {"note": f"ask {person_token.id} about this before Thursday"}
+
+    mapped = to_role_level(payload, TWIN)
+
+    assert person_token.id not in mapped["note"]
+    assert person_token.role_id in mapped["note"]
+    assert mapped["note"] == f"ask {person_token.role_id} about this before Thursday"
+
+
 def test_to_role_level_maps_pt_ids_inside_workflow_coverage_owners():
     pt_before, pt_after = [e for e in TWIN.entities if e.type == EntityType.person_token][:2]
     coverage = WorkflowCoverage(
@@ -259,7 +270,7 @@ def test_edge_from_agent_dependency_uses_relation_specific_defaults():
     assert edge.substitutability == defaults.substitutability
     assert edge.confidence == 0.6
     assert edge.evidence_refs == ["ev_1"]
-    assert edge.extraction_method is None
+    assert edge.extraction_method == "agent"
 
 
 def test_clone_with_edges_agent_proposed_replaces_placeholder_strength():
@@ -287,6 +298,36 @@ def test_clone_with_edges_agent_proposed_replaces_placeholder_strength():
     kept = next(e for e in unflagged.edges if e.id == placeholder.id)
     assert kept.strength == 0.5
     assert kept.substitutability == 0.5
+
+
+def test_clone_with_edges_applies_defaults_for_agent_extraction_method_without_the_flag():
+    # agent_orchestration.merge._Merger.to_edge is what the orchestrator actually calls to
+    # build these edges, but it is a private instance method that needs a full _Merger
+    # (agent_id/AgentContext/assessment_id/scenario_ids/origin/stale) to construct, so
+    # importing and driving it from a company-twin test isn't practical here. Build the
+    # equivalent Edge it produces instead: same 0.5/0.5 placeholder strength/
+    # substitutability and extraction_method="agent", nothing else about the shape
+    # depends on _Merger internals.
+    agent_edge = Edge(
+        id="e_vendor_apex_depends_on_vendor_beacon",
+        source="vendor_apex",
+        target="vendor_beacon",
+        relation=Relation.DEPENDS_ON,
+        strength=0.5,
+        substitutability=0.5,
+        lag_days=0,
+        criticality="medium",
+        confidence=0.6,
+        extraction_method="agent",
+    )
+
+    scenario = clone_with_edges(TWIN, [agent_edge])
+
+    added = next(e for e in scenario.edges if e.id == agent_edge.id)
+    defaults = AGENT_EDGE_DEFAULTS[Relation.DEPENDS_ON]
+    assert added.strength == defaults.strength
+    assert added.strength_range == defaults.strength_range
+    assert added.substitutability == defaults.substitutability
 
 
 # ---- B-05: document_is_stale -------------------------------------------------

@@ -47,6 +47,24 @@ def test_load_twin_overlay_ignores_unknown_evidence_ids(tmp_path):
     assert not any(v.id == "ev_does_not_exist" for v in twin.evidence)
 
 
+def test_load_twin_overlay_warns_but_does_not_truncate_oversized_snippets(tmp_path, caplog):
+    import logging
+
+    twin_without = load_twin(default_fixture_path())
+    some_evidence_id = twin_without.evidence[0].id
+    oversized = "x" * 301
+
+    snippets_path = tmp_path / "snippets.json"
+    snippets_path.write_text(json.dumps({some_evidence_id: oversized}))
+
+    with caplog.at_level(logging.WARNING, logger="company_twin.loader"):
+        twin_with = load_twin(default_fixture_path(), snippets_path)
+
+    overlaid = next(v for v in twin_with.evidence if v.id == some_evidence_id)
+    assert overlaid.snippet == oversized  # applied in full, not truncated
+    assert any(some_evidence_id in r.message for r in caplog.records)
+
+
 def test_load_twin_derives_documented_pct_and_warns_on_disagreement(caplog):
     import logging
 
