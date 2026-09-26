@@ -38,8 +38,6 @@ from contracts_py.enums import (
 )
 
 NonNegFloat = Annotated[float, Field(ge=0)]
-# Accepts both 0-1 and 0-100 conventions until the fixture settles on one.
-Pct = Annotated[float, Field(ge=0, le=100)]
 
 
 class Evidence(Strict):
@@ -77,10 +75,10 @@ class Entity(Strict):
     migration_cost_usd: USD | None = None
     capacity_fte: NonNegFloat | None = None
     min_qualified_owners: int | None = Field(default=None, ge=0)
-    documented_pct: Pct | None = None
+    documented_pct: Ratio | None = None
     failure_cost_per_day_usd: USD | None = None
     customer_facing: bool | None = None
-    completion_pct: Pct | None = None
+    completion_pct: Ratio | None = None
     remaining_cost_usd: USD | None = None
     expected_completion_day: Day | None = None
     retires_entity_ids: list[ID] = Field(default_factory=list)

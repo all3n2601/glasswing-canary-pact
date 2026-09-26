@@ -142,7 +142,7 @@
     "documented_pct": {
       "anyOf": [
         {
-          "maximum": 100,
+          "maximum": 1,
           "minimum": 0,
           "type": "number"
         },
@@ -180,7 +180,7 @@
     "completion_pct": {
       "anyOf": [
         {
-          "maximum": 100,
+          "maximum": 1,
           "minimum": 0,
           "type": "number"
         },

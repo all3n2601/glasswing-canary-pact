@@ -145,7 +145,7 @@ def test_cr6_workflow_coverage_optional_fields_keep_stranded_rule() -> None:
         "owners_after": [],
         "min_qualified_owners": 1,
         "backup_count_after": 0,
-        "documented_pct": 20,
+        "documented_pct": 0.2,
         "stranded": True,
         "owner_capacity_fte_before": 2.0,
         "owner_capacity_fte_after": 0.0,
@@ -155,6 +155,8 @@ def test_cr6_workflow_coverage_optional_fields_keep_stranded_rule() -> None:
         "replacement_cost_usd": 180_000,
     }
     assert WorkflowCoverage.model_validate(base).training_days_required == 45
+    with pytest.raises(ValidationError):
+        WorkflowCoverage.model_validate(base | {"documented_pct": 20})
     with pytest.raises(ValidationError, match="stranded"):
         WorkflowCoverage.model_validate(base | {"stranded": False})
 
@@ -213,3 +215,38 @@ def test_cr11_default_and_rejected_versions(brief: DecisionBrief) -> None:
     assert brief.schema_version == "2.1.1"
     with pytest.raises(ValidationError):
         DecisionBrief.model_validate(brief.model_dump() | {"schema_version": "2.0.0"})
+
+
+def test_fraction_fields_share_the_ratio_scale() -> None:
+    knowledge = Entity.model_validate(
+        {"id": "kn_billing_recon", "type": "knowledge_asset", "name": "Billing recon know-how",
+         "department_id": "dept_operations", "documented_pct": 0.35}
+    )
+    coverage = KnowledgeCoverage(
+        knowledge_id=knowledge.id,
+        holders_before=["role_billing_ops_lead"],
+        holder_capacity_fte_before=1.0,
+        holder_capacity_fte_after=1.0,
+        documented_pct=knowledge.documented_pct,  # type: ignore[arg-type]
+        lost=False,
+    )
+    assert KnowledgeCoverage.model_validate(coverage.model_dump()).documented_pct == 0.35
+    base = {"id": "proj_x", "type": "project", "name": "X", "department_id": "dept_engineering"}
+    for field in ("documented_pct", "completion_pct"):
+        assert getattr(Entity.model_validate(base | {field: 1.0}), field) == 1.0
+        with pytest.raises(ValidationError):
+            Entity.model_validate(base | {field: 35})
+
+
+def test_vendor_overlap_rejects_same_vendor() -> None:
+    with pytest.raises(ValidationError, match="must differ"):
+        VendorOverlap.model_validate(overlap().model_dump(mode="json") | {"vendor_b": "vendor_apex"})
+
+
+def test_knowledge_coverage_rejects_negative_capacity() -> None:
+    base = {"knowledge_id": "kn_x", "holder_capacity_fte_before": 1.0, "holder_capacity_fte_after": 0.0,
+            "documented_pct": 0.5, "lost": True}
+    KnowledgeCoverage.model_validate(base)
+    for field in ("holder_capacity_fte_before", "holder_capacity_fte_after"):
+        with pytest.raises(ValidationError):
+            KnowledgeCoverage.model_validate(base | {field: -0.5})

@@ -603,7 +603,7 @@
               ],
               "min_qualified_owners": 1,
               "backup_count_after": 0,
-              "documented_pct": 30.0,
+              "documented_pct": 0.3,
               "stranded": false,
               "reasons": [
                 "One qualified owner remains and has no backup."
@@ -933,7 +933,7 @@
               ],
               "min_qualified_owners": 1,
               "backup_count_after": 0,
-              "documented_pct": 30.0,
+              "documented_pct": 0.3,
               "stranded": false,
               "reasons": [
                 "One qualified owner remains and has no backup."
@@ -1723,7 +1723,7 @@
           ],
           "min_qualified_owners": 1,
           "backup_count_after": 0,
-          "documented_pct": 30.0,
+          "documented_pct": 0.3,
           "stranded": false,
           "reasons": [
             "One qualified owner remains and has no backup."
@@ -2168,7 +2168,7 @@
           ],
           "min_qualified_owners": 1,
           "backup_count_after": 0,
-          "documented_pct": 30.0,
+          "documented_pct": 0.3,
           "stranded": false,
           "reasons": [
             "One qualified owner remains and has no backup."
@@ -2424,7 +2424,7 @@
           ],
           "min_qualified_owners": 1,
           "backup_count_after": 0,
-          "documented_pct": 30.0,
+          "documented_pct": 0.3,
           "stranded": false,
           "reasons": [
             "One qualified owner remains and has no backup."
@@ -2754,7 +2754,7 @@
           ],
           "min_qualified_owners": 1,
           "backup_count_after": 0,
-          "documented_pct": 30.0,
+          "documented_pct": 0.3,
           "stranded": false,
           "reasons": [
             "One qualified owner remains and has no backup."
@@ -3833,7 +3833,7 @@
                 ],
                 "min_qualified_owners": 1,
                 "backup_count_after": 0,
-                "documented_pct": 30.0,
+                "documented_pct": 0.3,
                 "stranded": false,
                 "reasons": [
                   "One qualified owner remains and has no backup."
@@ -4163,7 +4163,7 @@
                 ],
                 "min_qualified_owners": 1,
                 "backup_count_after": 0,
-                "documented_pct": 30.0,
+                "documented_pct": 0.3,
                 "stranded": false,
                 "reasons": [
                   "One qualified owner remains and has no backup."

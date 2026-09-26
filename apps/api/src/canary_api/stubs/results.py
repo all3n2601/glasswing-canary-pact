@@ -188,7 +188,7 @@ def _coverage() -> list[WorkflowCoverage]:
             owners_after=["role_billing_ops_lead"],
             min_qualified_owners=1,
             backup_count_after=0,
-            documented_pct=30,
+            documented_pct=0.3,
             stranded=False,
             reasons=["One qualified owner remains and has no backup."],
         )

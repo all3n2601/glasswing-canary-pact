@@ -74,7 +74,7 @@ class WorkflowCoverage(Strict):
     owners_after: list[ID] = Field(default_factory=list)
     min_qualified_owners: int = Field(ge=0)
     backup_count_after: int = Field(ge=0)
-    documented_pct: float = Field(ge=0, le=100)
+    documented_pct: Ratio
     stranded: bool
     reasons: list[str] = Field(default_factory=list)
     owner_capacity_fte_before: float | None = None
@@ -95,8 +95,8 @@ class KnowledgeCoverage(Strict):
     knowledge_id: ID
     holders_before: list[ID] = Field(default_factory=list)
     holders_after: list[ID] = Field(default_factory=list)
-    holder_capacity_fte_before: float
-    holder_capacity_fte_after: float
+    holder_capacity_fte_before: float = Field(ge=0)
+    holder_capacity_fte_after: float = Field(ge=0)
     documented_pct: Ratio
     lost: bool
     dependent_workflow_ids: list[ID] = Field(default_factory=list)
@@ -112,6 +112,12 @@ class VendorOverlap(Strict):
     unique_dataset_ids_a: list[ID] = Field(default_factory=list)
     unique_dataset_ids_b: list[ID] = Field(default_factory=list)
     migration_difficulty: MigrationDifficulty
+
+    @model_validator(mode="after")
+    def check_distinct_vendors(self) -> "VendorOverlap":
+        if self.vendor_a == self.vendor_b:
+            raise ValueError("vendor_a and vendor_b must differ")
+        return self
 
 
 class ValueBreakdown(Strict):

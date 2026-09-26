@@ -26,10 +26,12 @@
       "type": "array"
     },
     "holder_capacity_fte_before": {
+      "minimum": 0,
       "title": "Holder Capacity Fte Before",
       "type": "number"
     },
     "holder_capacity_fte_after": {
+      "minimum": 0,
       "title": "Holder Capacity Fte After",
       "type": "number"
     },
