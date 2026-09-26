@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timezone
 from typing import Any
 
 from contracts_py.decision import DecisionBrief
@@ -15,7 +15,7 @@ from contracts_py.events import (
 from contracts_py.twin import VersionInfo
 
 from canary_api.stubs import results
-from canary_api.stubs.twin import STUB_TIME, sample_brief, stub_twin
+from canary_api.stubs.twin import sample_brief, stub_twin
 
 SAMPLE_RUN_ID = "run_sample"
 
@@ -107,7 +107,8 @@ def stub_run_events(brief: DecisionBrief, run_id: str, versions: VersionInfo | N
             actor=actor,
             scenario_id=scenario_id,
             future=future,
-            timestamp=STUB_TIME + timedelta(seconds=sequence),
+            # One fixed wall-clock second per event inside 17:00; the sample run stays under 60 events.
+            timestamp=datetime(2026, 9, 26, 17, 0, sequence, tzinfo=timezone.utc),
             payload=payload,
         )
         for sequence, (kind, payload, actor, scenario_id, future) in enumerate(steps, start=1)

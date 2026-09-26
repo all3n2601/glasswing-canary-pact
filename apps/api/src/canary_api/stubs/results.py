@@ -1,7 +1,9 @@
 """Fixed stub engine outputs for the Northstar vendor and workforce briefs; no calculation happens here."""
 
+import json
 from dataclasses import dataclass, field
-from typing import Callable
+from pathlib import Path
+from typing import Any, Callable
 
 from contracts_py.agents import (
     AgentAssessment,
@@ -28,7 +30,6 @@ from contracts_py.engine import (
     Portfolio,
     PortfolioComparison,
     PressureTrigger,
-    RiskComponents,
     RiskScore,
     SimulationResult,
     ValueBreakdown,
@@ -37,7 +38,6 @@ from contracts_py.engine import (
 )
 from contracts_py.enums import (
     ClaimStatus,
-    Criticality,
     Direction,
     Future,
     ImpactCategory,
@@ -47,7 +47,6 @@ from contracts_py.enums import (
     OverlapDimension,
     Polarity,
     Relation,
-    RiskLevel,
 )
 from contracts_py.package import DecisionPackage, Recommendation
 from contracts_py.twin import VersionInfo
@@ -63,6 +62,8 @@ WORKFORCE_MITIGATED_PLAN = "plan_remove_eight_roles_mitigated"
 WORKFORCE_INTERVENTIONS = [f"remove_{r.removeprefix('role_')}" for r in WORKFORCE_ROLES]
 STUB_AGENTS = ["finance", "ai_data", "sales", "compliance", "challenger"]
 STUB_ASSUMPTION = "Stub engine output: fixed constants, expected-value mode."
+# Every money, risk and delta value is a literal in this fixture; nothing below computes one.
+STORY_VALUES: dict[str, Any] = json.loads((Path(__file__).parent / "story_values.json").read_text())
 
 
 def scenario_id(run_id: str, future: Future, plan_id: str | None) -> str:
@@ -71,30 +72,6 @@ def scenario_id(run_id: str, future: Future, plan_id: str | None) -> str:
 
 def result_id(run_id: str, future: Future, plan_id: str | None) -> str:
     return f"res_{run_id}_{future.value}_{plan_id or 'none'}"
-
-
-def monthly(first: int, last: int) -> list[int]:
-    return [first + (last - first) * month // 11 for month in range(12)]
-
-
-@dataclass(frozen=True)
-class Value:
-    gross: int
-    transition: int
-    added: int
-    rebound: int
-    loss: int
-    pressures: dict[str, int]
-    neutralised: tuple[str, ...] = ()
-    first_month: int = 0
-
-    @property
-    def pressure_total(self) -> int:
-        return sum(self.pressures.values())
-
-    @property
-    def net(self) -> int:
-        return self.gross - self.transition - self.added - self.rebound - self.loss - self.pressure_total
 
 
 @dataclass(frozen=True)
@@ -107,16 +84,11 @@ class Story:
     recommended_label: str
     recommended_source: str
     recommended_ids: list[str]
-    values: dict[str, Value]
-    risks: dict[str, tuple[float, float, float, float, float]]
-    constraints: dict[str, list[tuple[str, str, str, float, float, bool, str]]]
     rejection: str
     headline: str
     act_headline: str
     impacts: Callable[[str, str, Future, str | None], list[Impact]]
-    coverage: dict[str, list[WorkflowCoverage]] = field(default_factory=dict)
     knowledge: dict[str, list[KnowledgeCoverage]] = field(default_factory=dict)
-    breakeven: tuple[int | None, int | None] = (None, None)
 
 
 def _impact(decision_id: str, scn: str, impact_id: str, source_entity: str, source_ref: str, affected: str,
@@ -223,30 +195,6 @@ def _workforce_impacts(run_id: str, decision_id: str, future: Future, plan_id: s
     ]
 
 
-def _coverage(workflow_id: str, before: list[str], after: list[str], documented: float, reason: str) -> WorkflowCoverage:
-    return WorkflowCoverage(workflow_id=workflow_id, criticality=Criticality.critical, owners_before=before,
-                            owners_after=after, min_qualified_owners=2, backup_count_after=max(len(after) - 1, 0),
-                            documented_pct=documented, stranded=len(after) < 2, reasons=[reason])
-
-
-BILLING_OWNERS = ["role_billing_ops_lead", "role_billing_specialist", "role_revenue_accountant", "role_ar_specialist"]
-CLOSE_OWNERS = ["role_close_accountant", "role_gl_accountant", "role_reporting_analyst"]
-WORKFORCE_COVERAGE = {
-    "naive": [
-        _coverage("wf_billing_recon", BILLING_OWNERS, [], 0.35, "Every qualified owner is removed."),
-        _coverage("wf_financial_close", CLOSE_OWNERS, [], 0.4, "Every qualified owner is removed."),
-    ],
-    "mitigated": [
-        _coverage("wf_billing_recon", BILLING_OWNERS, ["role_finance_analyst", "role_billing_ops_lead"], 0.7,
-                  "Finance analyst reassigned; billing ops lead retained for 90 days."),
-        _coverage("wf_financial_close", CLOSE_OWNERS, ["role_controller", "role_close_accountant"], 0.7,
-                  "Controller reassigned; close accountant retained for 90 days."),
-    ],
-    "inaction": [
-        _coverage("wf_billing_recon", BILLING_OWNERS, BILLING_OWNERS, 0.35, "No change."),
-        _coverage("wf_financial_close", CLOSE_OWNERS, CLOSE_OWNERS, 0.4, "No change."),
-    ],
-}
 WORKFORCE_KNOWLEDGE = {
     "naive": [KnowledgeCoverage(knowledge_id="kn_warehouse_lineage", holders_before=["role_data_platform_lead"],
                                 holders_after=[], holder_capacity_fte_before=1.0, holder_capacity_fte_after=0.0,
@@ -268,41 +216,11 @@ VENDOR = Story(
     recommended_label="Remove BeaconIQ and EchoMarket",
     recommended_source="optimizer",
     recommended_ids=RECOMMENDED_INTERVENTIONS,
-    values={
-        "act_now": Value(2_300_000_000, 180_000_000, 0, 60_000_000, 90_000_000,
-                         {"pr_apex_renewal": 128_000_000, "pr_echo_renewal": 0, "pr_flux_usage_growth": 76_000_000,
-                          "pr_vendor_recon_hazard": 14_400_000}, ("pr_echo_renewal",), -180_000_000),
-        "inaction": Value(0, 0, 0, 0, 0,
-                          {"pr_apex_renewal": 128_000_000, "pr_echo_renewal": 132_000_000,
-                           "pr_flux_usage_growth": 76_000_000, "pr_vendor_recon_hazard": 14_400_000},
-                          first_month=-29_200_000),
-        "delay": Value(1_725_000_000, 180_000_000, 0, 60_000_000, 90_000_000,
-                       {"pr_apex_renewal": 128_000_000, "pr_echo_renewal": 132_000_000,
-                        "pr_flux_usage_growth": 76_000_000, "pr_vendor_recon_hazard": 14_400_000},
-                       first_month=-29_200_000),
-        "naive": Value(3_000_000_000, 180_000_000, 0, 60_000_000, 400_000_000,
-                       {"pr_apex_renewal": 0, "pr_echo_renewal": 132_000_000, "pr_flux_usage_growth": 76_000_000,
-                        "pr_vendor_recon_hazard": 14_400_000}, ("pr_apex_renewal",), -180_000_000),
-    },
-    risks={"act_now": (8, 10, 6, 6, 6), "inaction": (15, 14, 10, 8, 8), "delay": (9, 11, 7, 7, 8),
-           "naive": (10, 14, 12, 34, 8)},
-    constraints={
-        "pass": [("c_compliance", "compliance_controls_broken", "==", 0, 0, True, "No mandatory control breaks."),
-                 ("c_sales", "revenue_impact_pct", "<=", 3, 1.2, True, "Pipeline falls 1.2%, within 3%."),
-                 ("c_customer", "customer_impact_pct", "<=", 2, 0.4, True, "Customer impact 0.4%, within 2%."),
-                 ("c_stranded", "stranded_workflows", "==", 0, 0, False, "No workflow is stranded.")],
-        "naive": [("c_compliance", "compliance_controls_broken", "==", 0, 1, True,
-                   "ctl_kyc_screening breaks: ds_corporate_linkage has no provider after vendor_apex is removed."),
-                  ("c_sales", "revenue_impact_pct", "<=", 3, 2.1, True, "Pipeline falls 2.1%, within 3%."),
-                  ("c_customer", "customer_impact_pct", "<=", 2, 0.9, True, "Customer impact 0.9%, within 2%."),
-                  ("c_stranded", "stranded_workflows", "==", 0, 0, False, "No workflow is stranded.")],
-    },
     rejection="Removing vendor_apex leaves ds_corporate_linkage with no provider, which breaks wf_kyc_screening "
               "and the mandatory control ctl_kyc_screening.",
     headline="Acting now is worth $2.1B more than doing nothing; waiting 90 days costs $0.71B.",
     act_headline="Remove BeaconIQ and EchoMarket now; keep ApexData, which alone provides ds_corporate_linkage.",
     impacts=_vendor_impacts,
-    breakeven=(60, 150),
 )
 
 WORKFORCE = Story(
@@ -314,38 +232,11 @@ WORKFORCE = Story(
     recommended_label="Remove all eight roles with owner reassignment, runbooks and temporary retention",
     recommended_source="mitigated",
     recommended_ids=WORKFORCE_INTERVENTIONS,
-    values={
-        "act_now": Value(1_070_000, 730_000, 480_000, 0, 0,
-                         {"pr_billing_recon_hazard": 28_800_000, "pr_lineage_holder_attrition": 5_400_000,
-                          "pr_contractor_cost_growth": 1_200_000}, first_month=-3_000_000),
-        "inaction": Value(0, 0, 0, 0, 0,
-                          {"pr_billing_recon_hazard": 28_800_000, "pr_lineage_holder_attrition": 16_200_000,
-                           "pr_contractor_cost_growth": 1_200_000}, first_month=-3_850_000),
-        "delay": Value(802_500, 730_000, 480_000, 0, 0,
-                       {"pr_billing_recon_hazard": 28_800_000, "pr_lineage_holder_attrition": 9_450_000,
-                        "pr_contractor_cost_growth": 1_200_000}, first_month=-3_850_000),
-        "naive": Value(1_070_000, 320_000, 0, 0, 45_000_000,
-                       {"pr_billing_recon_hazard": 86_400_000, "pr_lineage_holder_attrition": 16_200_000,
-                        "pr_contractor_cost_growth": 1_200_000}, first_month=-12_000_000),
-    },
-    risks={"act_now": (6, 14, 4, 4, 8), "inaction": (8, 16, 4, 4, 8), "delay": (7, 15, 4, 4, 8),
-           "naive": (20, 40, 8, 6, 10)},
-    constraints={
-        "pass": [("c_compliance", "compliance_controls_broken", "==", 0, 0, True, "No mandatory control breaks."),
-                 ("c_stranded", "stranded_workflows", "==", 0, 0, True, "Both critical workflows keep two owners."),
-                 ("c_customer", "customer_impact_pct", "<=", 2, 0.3, True, "Customer impact 0.3%, within 2%.")],
-        "naive": [("c_compliance", "compliance_controls_broken", "==", 0, 0, True, "No mandatory control breaks."),
-                  ("c_stranded", "stranded_workflows", "==", 0, 2, True,
-                   "wf_financial_close and wf_billing_recon are left without qualified owners."),
-                  ("c_customer", "customer_impact_pct", "<=", 2, 1.1, True, "Customer impact 1.1%, within 2%.")],
-    },
     rejection="wf_financial_close and wf_billing_recon are stranded: every qualified owner is removed.",
     headline="Acting now is worth $10.66M more than doing nothing; waiting 90 days costs $4.32M.",
     act_headline="Remove the eight roles only with owner reassignment, runbooks and 90-day retention in place.",
     impacts=_workforce_impacts,
-    coverage=WORKFORCE_COVERAGE,
     knowledge=WORKFORCE_KNOWLEDGE,
-    breakeven=(None, None),
 )
 
 STORIES = {VENDOR.decision_id: VENDOR, WORKFORCE.decision_id: WORKFORCE}
@@ -371,30 +262,10 @@ def scenario(run_id: str, future: Future, plan_id: str | None, delay_days: int =
                     created_at=STUB_TIME)
 
 
-def _breakdown(value: Value) -> ValueBreakdown:
-    return ValueBreakdown(
-        gross_savings_usd=value.gross, transition_cost_usd=value.transition, added_cost_usd=value.added,
-        rebound_cost_usd=value.rebound, expected_business_loss_usd=value.loss,
-        pressure_cost_usd=value.pressure_total, avoided_failure_cost_usd=0, net_value_usd=value.net,
-        monthly_net_usd=monthly(value.first_month, value.net),
-    )
-
-
-def _risk(parts: tuple[float, float, float, float, float]) -> RiskScore:
-    score = sum(parts)
-    level = RiskLevel.low if score < 25 else RiskLevel.medium if score < 50 else RiskLevel.high if score < 75 \
-        else RiskLevel.critical
-    return RiskScore(score=score, level=level, settings_version=1, components=RiskComponents(
-        financial=parts[0], capability_workflow=parts[1], customer_revenue=parts[2], compliance_control=parts[3],
-        execution_uncertainty=parts[4]))
-
-
 def _result(run_id: str, decision_id: str, key: str, future: Future, plan_id: str | None, mode: str) -> SimulationResult:
     s = story(decision_id)
-    value = s.values[key]
+    stored = STORY_VALUES[story(decision_id).decision_id]["results"][key]
     naive = key == "naive"
-    coverage_key = "naive" if naive else "inaction" if plan_id is None else "mitigated"
-    constraint_rows = s.constraints["naive" if naive else "pass"]
     impacts = s.impacts(run_id, decision_id, future, plan_id)
     return SimulationResult(
         result_id=result_id(run_id, future, plan_id),
@@ -405,25 +276,16 @@ def _result(run_id: str, decision_id: str, key: str, future: Future, plan_id: st
         mode=mode,  # type: ignore[arg-type]
         seed=42,
         intervention_ids=[] if plan_id is None else (s.naive_ids if naive else s.recommended_ids),
-        value=_breakdown(value),
-        goal_met=plan_id is not None and future is not Future.delay,
-        constraint_results=[
-            ConstraintResult(constraint_id=cid, metric=metric, operator=op, threshold=threshold,  # type: ignore[arg-type]
-                             value=actual, hard=hard, passed=actual == 0 if op == "==" else actual <= threshold,
-                             explanation=text)
-            for cid, metric, op, threshold, actual, hard, text in constraint_rows
-        ],
+        value=ValueBreakdown.model_validate(stored["value"]),
+        goal_met=stored["goal_met"],
+        constraint_results=[ConstraintResult.model_validate(c) for c in stored["constraint_results"]],
         impacts=impacts,
-        workflow_coverage=s.coverage.get(coverage_key, []),
-        knowledge_coverage=s.knowledge.get(coverage_key, []),
-        pressures_triggered=[
-            PressureTrigger(pressure_id=pid, expected_events=0.0 if pid in value.neutralised else 1.0,
-                            expected_cost_usd=cost, neutralised=pid in value.neutralised)
-            for pid, cost in value.pressures.items()
-        ],
-        risk=_risk(s.risks[key]),
+        workflow_coverage=[WorkflowCoverage.model_validate(w) for w in stored["workflow_coverage"]],
+        knowledge_coverage=s.knowledge.get("naive" if naive else "inaction" if plan_id is None else "mitigated", []),
+        pressures_triggered=[PressureTrigger.model_validate(t) for t in stored["pressures_triggered"]],
+        risk=RiskScore.model_validate(stored["risk"]),
         affected_department_ids=sorted({i.affected_department for i in impacts if i.affected_department}),
-        feasible=not naive,
+        feasible=stored["feasible"],
         rejection_reasons=[s.rejection] if naive else [],
         assumptions=[STUB_ASSUMPTION],
         computed_at=STUB_TIME,
@@ -457,32 +319,15 @@ def future_results(run_id: str, decision_id: str) -> dict[Future, SimulationResu
 def future_comparison(run_id: str, decision_id: str) -> FutureComparison:
     s = story(decision_id)
     results = future_results(run_id, decision_id)
-    base = results[Future.inaction].value
-    act_breakeven, delay_breakeven = s.breakeven
-
-    def row(future: Future, label: str, breakeven: int | None, cost_of_delay: int | None = None) -> FutureRow:
-        result = results[future]
-        delta = result.value.net_value_usd - base.net_value_usd
-        return FutureRow(
-            future=future, plan_id=result.plan_id, result_id=result.result_id, label=label,
-            net_value_p50_usd=result.value.net_value_usd, delta_vs_inaction_p10_usd=delta,
-            delta_vs_inaction_p50_usd=delta, delta_vs_inaction_p90_usd=delta,
-            p_better_than_inaction=1.0 if delta > 0 else 0.0, breakeven_day=breakeven, cost_of_delay_usd=cost_of_delay,
-            feasible=result.feasible, risk_score=result.risk.score,
-            monthly_delta_usd=[a - b for a, b in zip(result.value.monthly_net_usd, base.monthly_net_usd)],
-        )
-
-    act_delta = results[Future.act_now].value.net_value_usd - base.net_value_usd
-    delay_delta = results[Future.delay].value.net_value_usd - base.net_value_usd
     return FutureComparison(
         comparison_id=f"cmp_{run_id}",
         decision_id=decision_id,
         run_id=run_id,
         reference_result_id=results[Future.inaction].result_id,
         rows=[
-            row(Future.act_now, "Act now", act_breakeven),
-            row(Future.inaction, "Do nothing", None),
-            row(Future.delay, "Wait 90 days", delay_breakeven, act_delta - delay_delta),
+            FutureRow.model_validate({**row, "plan_id": results[Future(row["future"])].plan_id,
+                                      "result_id": results[Future(row["future"])].result_id})
+            for row in STORY_VALUES[story(decision_id).decision_id]["rows"]
         ],
         best_row_index=0,
         headline=s.headline,
@@ -502,24 +347,14 @@ def _node(node_id: str, kind: str, headline: str, **fields: object) -> BlastNode
     return BlastNode(node_id=node_id, kind=kind, headline=headline, **fields)  # type: ignore[arg-type]
 
 
-def _summaries(impacts: list[Impact]) -> list[DepartmentImpactSummary]:
-    departments: dict[str, list[Impact]] = {}
-    for impact in impacts:
-        if impact.affected_department:
-            departments.setdefault(impact.affected_department, []).append(impact)
+def _summaries(decision_id: str, key: str) -> list[DepartmentImpactSummary]:
     return [
-        DepartmentImpactSummary(
-            department_id=department,
-            headline=f"{len(items)} stub impact(s)",
-            polarity=Polarity.harm if any(i.polarity is Polarity.harm for i in items) else Polarity.benefit,
-            severity=max(i.severity for i in items),
-            impact_ids=[i.impact_id for i in items],
-        )
-        for department, items in sorted(departments.items())
+        DepartmentImpactSummary.model_validate({**d, "impact_ids": [f"imp_{suffix}" for suffix in d["impact_ids"]]})
+        for d in STORY_VALUES[story(decision_id).decision_id]["departments"][key]
     ]
 
 
-def _blast(run_id: str, decision_id: str, result: SimulationResult, root_headline: str) -> BlastRadius:
+def _blast(run_id: str, decision_id: str, result: SimulationResult, root_headline: str, key: str) -> BlastRadius:
     nodes = [_node(decision_id, "decision", root_headline)]
     edges: list[BlastEdge] = []
     for impact in result.impacts:
@@ -538,18 +373,18 @@ def _blast(run_id: str, decision_id: str, result: SimulationResult, root_headlin
     nodes.append(_node("kpi_company", "outcome", "Company outcome", value_usd=result.value.net_value_usd))
     return BlastRadius(
         run_id=run_id, scenario_id=result.scenario_id, future=result.future, plan_id=result.plan_id,
-        root_node_id=decision_id, nodes=nodes, edges=edges, departments=_summaries(result.impacts),
+        root_node_id=decision_id, nodes=nodes, edges=edges, departments=_summaries(decision_id, key),
         outcome=CompanyOutcome(net_value_usd=result.value.net_value_usd, risk_level=result.risk.level,
                                headline=f"Stub outcome for {result.future.value}."),
     )
 
 
 def act_now_blast_radius(run_id: str, decision_id: str) -> BlastRadius:
-    return _blast(run_id, decision_id, act_now_result(run_id, decision_id), story(decision_id).recommended_label)
+    return _blast(run_id, decision_id, act_now_result(run_id, decision_id), story(decision_id).recommended_label, "act_now")
 
 
 def inaction_blast_radius(run_id: str, decision_id: str) -> BlastRadius:
-    return _blast(run_id, decision_id, inaction_result(run_id, decision_id), "Do nothing")
+    return _blast(run_id, decision_id, inaction_result(run_id, decision_id), "Do nothing", "inaction")
 
 
 def _metrics(agent_id: str) -> CallMetrics:

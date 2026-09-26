@@ -57,3 +57,27 @@ def test_sample_run_is_the_vendor_story_without_person_tokens() -> None:
     assert log.root[0].type is EventType.run_created and log.root[0].payload.decision_id == "dec_vendor_reduction"
     assert not PERSON_TOKEN.search(text)
     assert not PERSON_TOKEN.search(stub_twin().model_dump_json())
+
+
+HEADLINE = re.compile(r"worth \$(?P<act>[\d.]+)(?P<act_unit>[MB]) more than doing nothing; "
+                      r"waiting (?P<days>\d+) days costs \$(?P<delay>[\d.]+)(?P<delay_unit>[MB])\.$")
+SCALE = {"M": 1_000_000, "B": 1_000_000_000}
+
+
+def stated(amount: str, unit: str) -> tuple[float, float]:
+    decimals = len(amount.partition(".")[2])
+    return float(amount) * SCALE[unit], 0.5 * 10 ** -decimals * SCALE[unit]
+
+
+def test_headlines_state_the_row_values() -> None:
+    for brief in (sample_brief(), workforce_brief()):
+        comparison = results.future_comparison("run_x", brief.decision_id)
+        match = HEADLINE.search(comparison.headline)
+        assert match, comparison.headline
+        rows = {row.future: row for row in comparison.rows}
+        act, act_tolerance = stated(match["act"], match["act_unit"])
+        delay, delay_tolerance = stated(match["delay"], match["delay_unit"])
+        assert abs(act - rows[Future.act_now].delta_vs_inaction_p50_usd) <= act_tolerance
+        assert rows[Future.delay].cost_of_delay_usd is not None
+        assert abs(delay - rows[Future.delay].cost_of_delay_usd) <= delay_tolerance
+        assert int(match["days"]) == brief.delay_days

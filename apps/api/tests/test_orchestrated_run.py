@@ -234,3 +234,27 @@ def test_live_mode_needs_explicit_opt_in(client, brief_json, monkeypatch) -> Non
     assert runs.live_allowed()
     monkeypatch.setenv("CANARY_ALLOW_LIVE", "yes")
     assert not runs.live_allowed()
+
+
+def test_mock_workforce_decision_routes_people_knowledge_and_strands_two_workflows(client) -> None:
+    from canary_api.stubs.twin import workforce_brief
+
+    body = workforce_brief().model_dump(mode="json")
+    run_id = client.post("/decisions?llm_mode=mock", headers=auth_headers(client), json=body).json()["run_id"]
+    wait_for(client, run_id, "awaiting_approval")
+    events = runtime.bus.runs[run_id].events
+    assert "people_knowledge" in [e.payload.agent_id for e in events if e.type is EventType.agent_started]
+    assessments = {e.payload.agent_id: e.payload for e in events if e.type is EventType.agent_completed}
+    assert assessments["people_knowledge"].status == "ok"
+
+    response = client.get(f"/runs/{run_id}/package")
+    assert response.status_code == 200
+    package = DecisionPackage.model_validate(response.json())
+    assert package.decision_id == "dec_workforce_knowledge"
+    assert not PERSON_TOKEN.search(response.text) and not PERSON_TOKEN.search(all_event_text(run_id))
+    naive = package.portfolios.naive.result
+    assert naive.plan_id == "plan_remove_eight_roles" and not naive.feasible
+    assert {w.workflow_id for w in naive.workflow_coverage if w.stranded} == {"wf_financial_close", "wf_billing_recon"}
+    assert package.portfolios.recommended and not [
+        w for w in package.portfolios.recommended.result.workflow_coverage if w.stranded
+    ]
