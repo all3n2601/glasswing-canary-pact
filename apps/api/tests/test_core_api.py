@@ -2,6 +2,7 @@ import hashlib
 import time
 
 import pytest
+from api_auth_helpers import auth_headers
 from pydantic import TypeAdapter
 
 from contracts_py.api import DecisionCreated, HealthResponse, OrganizationProfileView, ReplayInfo, ReplayStarted
@@ -94,7 +95,7 @@ def test_simulate_endpoints_match_contracts(client, brief_json) -> None:
 
 
 def test_decision_run_reaches_approval_and_records_decision(client, brief_json) -> None:
-    run_id = validate(DecisionCreated, client.post("/decisions", json=brief_json)).run_id
+    run_id = validate(DecisionCreated, client.post("/decisions", headers=auth_headers(client), json=brief_json)).run_id
     state = wait_for_status(client, run_id, RunStatus.awaiting_approval)
     assert state.package_id
 
@@ -103,12 +104,12 @@ def test_decision_run_reaches_approval_and_records_decision(client, brief_json) 
     assert package.futures.rows and package.blast_radius_act_now and package.blast_radius_inaction
     served_hash = hashlib.sha256(response.content).hexdigest()
 
-    wrong = client.post(f"/runs/{run_id}/decision",
+    wrong = client.post(f"/runs/{run_id}/decision", headers=auth_headers(client),
                         json={"decision": "approve", "decided_by": "demo_user", "package_hash": "0" * 64})
     assert wrong.status_code == 409
 
     decision = validate(HumanDecision, client.post(
-        f"/runs/{run_id}/decision",
+        f"/runs/{run_id}/decision", headers=auth_headers(client),
         json={"decision": "approve", "decided_by": "demo_user", "package_hash": served_hash},
     ))
     assert decision.package_hash == served_hash
@@ -118,7 +119,7 @@ def test_decision_run_reaches_approval_and_records_decision(client, brief_json) 
 def test_decision_brief_gets_settings_defaults(client, brief_json) -> None:
     for key in ("horizon_days", "futures", "delay_days", "seed", "mc_samples"):
         brief_json.pop(key)
-    run_id = validate(DecisionCreated, client.post("/decisions", json=brief_json)).run_id
+    run_id = validate(DecisionCreated, client.post("/decisions", headers=auth_headers(client), json=brief_json)).run_id
     wait_for_status(client, run_id, RunStatus.awaiting_approval)
     brief = runtime.bus.runs[run_id].events[0].payload
     settings = OrganizationSettings()
@@ -131,13 +132,13 @@ def test_decision_brief_gets_settings_defaults(client, brief_json) -> None:
 
 def test_invalid_brief_is_rejected(client, brief_json) -> None:
     brief_json["candidate_interventions"][0]["target_entity_id"] = "ctl_soc2_audit_logging"
-    assert client.post("/decisions", json=brief_json).status_code == 422
+    assert client.post("/decisions", headers=auth_headers(client), json=brief_json).status_code == 422
 
 
 def test_package_before_ready_is_409(client) -> None:
     runtime.bus.create_run("run_empty", "dec_cut_2m", "stub-twin-1")
     assert client.get("/runs/run_empty/package").status_code == 409
-    assert client.post("/runs/run_empty/decision",
+    assert client.post("/runs/run_empty/decision", headers=auth_headers(client),
                        json={"decision": "approve", "decided_by": "x", "package_hash": "0" * 64}).status_code == 409
 
 
@@ -173,7 +174,7 @@ def test_profile_marks_departments_without_enabled_agent(client, monkeypatch) ->
 
 
 def awaiting_run(client, brief_json) -> tuple[str, str]:
-    run_id = validate(DecisionCreated, client.post("/decisions", json=brief_json)).run_id
+    run_id = validate(DecisionCreated, client.post("/decisions", headers=auth_headers(client), json=brief_json)).run_id
     wait_for_status(client, run_id, RunStatus.awaiting_approval)
     response = client.get(f"/runs/{run_id}/package")
     assert response.status_code == 200
@@ -181,7 +182,7 @@ def awaiting_run(client, brief_json) -> tuple[str, str]:
 
 
 def decide(client, run_id: str, decision: str, package_hash: str):
-    return client.post(f"/runs/{run_id}/decision",
+    return client.post(f"/runs/{run_id}/decision", headers=auth_headers(client),
                        json={"decision": decision, "decided_by": "demo_user", "package_hash": package_hash})
 
 

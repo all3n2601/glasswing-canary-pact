@@ -281,6 +281,11 @@ export type RunStatus =
 export type EventLog = Event[];
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "UserRole".
+ */
+export type UserRole = "viewer" | "approver";
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
  * via the `definition` "OverlapDimension".
  */
 export type OverlapDimension =
@@ -346,6 +351,10 @@ export interface CanaryContracts {
   ReplayInfo: ReplayInfo;
   ReplayStarted: ReplayStarted;
   OrganizationProfileView: OrganizationProfileView;
+  SignupRequest: SignupRequest;
+  LoginRequest: LoginRequest;
+  UserPublic: UserPublic;
+  AuthToken: AuthToken;
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
@@ -1712,4 +1721,42 @@ export interface OrganizationDepartmentSummary {
   utilisation: number;
   maturity_level: number;
   enabled: boolean;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "SignupRequest".
+ */
+export interface SignupRequest {
+  email: string;
+  password: string;
+  display_name: string;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "LoginRequest".
+ */
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "UserPublic".
+ */
+export interface UserPublic {
+  user_id: string;
+  email: string;
+  display_name: string;
+  role: UserRole;
+  created_at: string;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "AuthToken".
+ */
+export interface AuthToken {
+  access_token: string;
+  token_type?: "bearer";
+  expires_at: string;
+  user: UserPublic;
 }

@@ -2,6 +2,7 @@ import asyncio
 import functools
 import logging
 import os
+import re
 import uuid
 from pathlib import Path
 from typing import Any, Coroutine, Literal
@@ -12,7 +13,8 @@ from pydantic import BaseModel
 from contracts_py.api import ReplayInfo
 from contracts_py.decision import DecisionBrief
 from contracts_py.enums import Future, RunStatus
-from contracts_py.events import Event, EventLog, EventType, PhaseChanged, RunFailed, SettingsUpdated
+from contracts_py.events import Event, EventLog, EventType, PhaseChanged, RunFailed
+from contracts_py.package import find_person_tokens
 from contracts_py.twin import OrganizationSettings, Twin
 
 from canary_api import engine_port, runtime
@@ -73,10 +75,11 @@ async def play(run_id: str, events: list[Event], delay: float) -> None:
                                 future=event.future)
             await asyncio.sleep(delay)
     except Exception as exc:
-        state = runtime.bus.runs[run_id].state
-        runtime.bus.publish(run_id, EventType.phase_changed,
-                            PhaseChanged(from_status=state.status, to_status=RunStatus.failed), actor="api")
-        runtime.bus.publish(run_id, EventType.run_failed, RunFailed(reason=str(exc)), actor="api")
+        fail_run(run_id, str(exc))
+
+
+def live_allowed() -> bool:
+    return os.environ.get("CANARY_ALLOW_LIVE", "").strip().lower() == "true"
 
 
 def resolve_llm_settings(settings: OrganizationSettings, llm_mode: LlmMode | None) -> tuple[OrganizationSettings, bool]:
@@ -86,32 +89,80 @@ def resolve_llm_settings(settings: OrganizationSettings, llm_mode: LlmMode | Non
     return settings.model_copy(update={"llm_mode": "mock" if fell_back else mode}), fell_back
 
 
+MOCK_FALLBACK_ASSUMPTION = "Agents ran in mock mode: no recorded answers were available"
+ENGINE_EVENTS = {
+    EventType.impact_computed,
+    EventType.simulation_completed,
+    EventType.futures_compared,
+    EventType.portfolio_ranked,
+    EventType.blast_radius_ready,
+    EventType.mitigation_applied,
+    EventType.package_ready,
+}
+PERSON_TOKEN_TEXT = re.compile(r"(?<![a-z0-9])pt_[a-z0-9_]+")
+
+
+class PersonTokenLeak(ValueError):
+    pass
+
+
+def _redact(text: str) -> str:
+    return PERSON_TOKEN_TEXT.sub("[person]", text)
+
+
+def fail_run(run_id: str, reason: str) -> None:
+    run = runtime.bus.runs[run_id]
+    if any(e.type is EventType.run_failed for e in run.events):
+        return
+    if run.state.status is not RunStatus.failed:
+        runtime.bus.publish(run_id, EventType.phase_changed,
+                            PhaseChanged(from_status=run.state.status, to_status=RunStatus.failed), actor="api")
+    runtime.bus.publish(run_id, EventType.run_failed, RunFailed(reason=_redact(reason)), actor="api")
+
+
+def prepare_payload(kind: EventType, payload: BaseModel, twin: Twin, extra_assumptions: list[str]) -> dict[str, Any]:
+    leveled: Any = engine_port.to_role_level(payload, twin) if kind in ENGINE_EVENTS else payload
+    data = leveled.model_dump(mode="json") if isinstance(leveled, BaseModel) else leveled
+    if kind is EventType.package_ready and extra_assumptions:
+        data = {**data, "assumptions": [*data.get("assumptions", []),
+                                        *[a for a in extra_assumptions if a not in data.get("assumptions", [])]]}
+    if find_person_tokens(data):
+        raise PersonTokenLeak(f"{kind.value} payload still contains person tokens after to_role_level")
+    return data
+
+
 def _publish(run_id: str, kind: EventType, payload: BaseModel, actor: str, scenario_id: str | None,
-             future: Future | None) -> None:
+             future: Future | None, twin: Twin, extra_assumptions: list[str]) -> None:
+    run = runtime.bus.runs[run_id]
+    if run.state.status is RunStatus.failed:
+        # After a failure only the first run_failed (carrying the reason) is still published.
+        if kind is not EventType.run_failed or any(e.type is EventType.run_failed for e in run.events):
+            log.warning("run %s already failed; skipping %s", run_id, kind)
+            return
     try:
-        runtime.bus.publish(run_id, kind, payload, actor=actor, scenario_id=scenario_id, future=future)
-    except Exception:
-        log.exception("dropped %s event for %s", kind, run_id)
+        if kind is EventType.run_failed and isinstance(payload, RunFailed):
+            payload = RunFailed(reason=_redact(payload.reason))
+        data = prepare_payload(kind, payload, twin, extra_assumptions)
+        runtime.bus.publish(run_id, kind, data, actor=actor, scenario_id=scenario_id, future=future)
+    except Exception as exc:
+        log.exception("could not publish %s for %s", kind, run_id)
+        fail_run(run_id, f"could not publish {kind.value}: {exc}")
 
 
 class ThreadEmitter:
     """Called from orchestrator worker threads; every publish is queued onto the event loop thread."""
 
-    def __init__(self, run_id: str, loop: asyncio.AbstractEventLoop, after_created: list[tuple[EventType, BaseModel]]):
-        self.run_id, self.loop, self.after_created = run_id, loop, after_created
-
-    def _schedule(self, kind: EventType, payload: BaseModel, actor: str, scenario_id: str | None,
-                  future: Future | None) -> None:
-        # call_soon_threadsafe runs callbacks in submission order, so sequence follows emit order.
-        self.loop.call_soon_threadsafe(functools.partial(_publish, self.run_id, kind, payload, actor, scenario_id, future))
+    def __init__(self, run_id: str, loop: asyncio.AbstractEventLoop, twin: Twin,
+                 extra_assumptions: list[str] | None = None) -> None:
+        self.run_id, self.loop, self.twin = run_id, loop, twin
+        self.extra_assumptions = extra_assumptions or []
 
     def __call__(self, type: EventType, payload: BaseModel, *, actor: str, scenario_id: str | None = None,
                  future: Future | None = None) -> None:
-        self._schedule(type, payload, actor, scenario_id, future)
-        if type is EventType.run_created:
-            for kind, note in self.after_created:
-                self._schedule(kind, note, "api", None, None)
-            self.after_created = []
+        # call_soon_threadsafe runs callbacks in submission order, so sequence follows emit order.
+        self.loop.call_soon_threadsafe(functools.partial(
+            _publish, self.run_id, type, payload, actor, scenario_id, future, self.twin, self.extra_assumptions
+        ))
 
 
 async def orchestrate(run_id: str, brief: DecisionBrief, twin: Twin, settings: OrganizationSettings,
@@ -119,22 +170,14 @@ async def orchestrate(run_id: str, brief: DecisionBrief, twin: Twin, settings: O
     loop = asyncio.get_running_loop()
     try:
         run_settings, fell_back = resolve_llm_settings(settings, llm_mode)
-        notes: list[tuple[EventType, BaseModel]] = []
-        if fell_back:
-            notes.append((EventType.settings_updated,
-                          SettingsUpdated(settings_version=run_settings.settings_version, changed_fields=["llm_mode"])))
-        emit = ThreadEmitter(run_id, loop, notes)
+        emit = ThreadEmitter(run_id, loop, twin, [MOCK_FALLBACK_ASSUMPTION] if fell_back else [])
         # AgentLLM.model_label is a property, which pyright treats as not matching the LLMClient attribute.
         llm: Any = runtime.build_llm(run_settings)
         await asyncio.to_thread(run_decision, brief, engine=engine_port, settings=run_settings, llm=llm, emit=emit,
                                 run_id=run_id, twin=twin)
     except Exception as exc:
         await asyncio.sleep(0)
-        state = runtime.bus.runs[run_id].state
-        if state.status is not RunStatus.failed:
-            runtime.bus.publish(run_id, EventType.phase_changed,
-                                PhaseChanged(from_status=state.status, to_status=RunStatus.failed), actor="api")
-            runtime.bus.publish(run_id, EventType.run_failed, RunFailed(reason=str(exc)), actor="api")
+        fail_run(run_id, str(exc))
 
 
 def start_run(brief: DecisionBrief, llm_mode: LlmMode | None = None) -> str:

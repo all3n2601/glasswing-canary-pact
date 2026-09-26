@@ -2,9 +2,10 @@
 
 import asyncio
 import hashlib
-from typing import Any, get_args
+from contextlib import asynccontextmanager
+from typing import Any, AsyncIterator, get_args
 
-from fastapi import FastAPI, HTTPException, Query, Request, Response, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ValidationError
@@ -22,6 +23,7 @@ from contracts_py.api import (
     ReplayInfo,
     ReplaySpeed,
     ReplayStarted,
+    UserPublic,
 )
 from contracts_py.decision import CandidatePlan, DecisionBrief
 from contracts_py.engine import FutureComparison, PortfolioComparison, SimulationResult
@@ -39,15 +41,25 @@ from contracts_py.twin import (
     Twin,
 )
 
-from canary_api import engine_port, runs, runtime
+from canary_api import auth, engine_port, runs, runtime
 from canary_api.engine_port import EngineNotReady
 from canary_api.events import Run, utc_now
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    auth.signer()
+    auth.seed_demo_approver()
+    yield
+
+
 app = FastAPI(
+    lifespan=lifespan,
     title="Canary Pact API",
     version="0.1.0",
     description="Organizational decision simulation and blast-radius API.",
 )
+app.include_router(auth.router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -172,11 +184,14 @@ def document(document_id: str) -> Document:
 
 
 @app.post("/decisions", response_model=DecisionCreated)
-async def create_decision(brief: DecisionBrief, llm_mode: runs.LlmMode | None = None) -> DecisionCreated:
+async def create_decision(brief: DecisionBrief, llm_mode: runs.LlmMode | None = None,
+                          user: UserPublic = Depends(auth.current_user)) -> DecisionCreated:
     try:
         brief = runs.apply_settings_defaults(brief, runtime.settings())
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=exc.errors(include_url=False)) from exc
+    if (llm_mode or runtime.settings().llm_mode) == "live" and not runs.live_allowed():
+        raise HTTPException(status_code=403, detail="llm_mode=live is disabled; set CANARY_ALLOW_LIVE=true to allow it")
     return DecisionCreated(run_id=runs.start_run(brief, llm_mode))
 
 
@@ -227,7 +242,10 @@ def run_package(run_id: str) -> Response:
 
 
 @app.post("/runs/{run_id}/decision", response_model=HumanDecision)
-async def record_decision(run_id: str, request: HumanDecisionRequest) -> HumanDecision:
+async def record_decision(run_id: str, request: HumanDecisionRequest,
+                          user: UserPublic = Depends(auth.require_approver)) -> HumanDecision:
+    # decided_by comes from the token; the request's own decided_by value is ignored.
+    decided_by = f"{user.display_name} ({user.user_id})"
     run = _run(run_id)
     if run.package is None or run.served_package_hash is None:
         raise HTTPException(status_code=409, detail="Fetch the package before deciding")
@@ -239,12 +257,12 @@ async def record_decision(run_id: str, request: HumanDecisionRequest) -> HumanDe
         run_id=run_id,
         package_id=run.package.package_id,
         decision=request.decision,
-        decided_by=request.decided_by,
+        decided_by=decided_by,
         decided_at=utc_now(),
         notes=request.notes,
         package_hash=run.served_package_hash,
     )
-    runtime.bus.publish(run_id, EventType.human_decision_recorded, decision, actor=request.decided_by)
+    runtime.bus.publish(run_id, EventType.human_decision_recorded, decision, actor=user.user_id)
     # A scenario request keeps the run open so the same package can still be approved or rejected.
     if request.decision != "request_scenario":
         runtime.bus.publish(

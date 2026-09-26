@@ -1,0 +1,22 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "email": {
+      "maxLength": 254,
+      "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+      "title": "Email",
+      "type": "string"
+    },
+    "password": {
+      "maxLength": 256,
+      "title": "Password",
+      "type": "string"
+    }
+  },
+  "required": [
+    "email",
+    "password"
+  ],
+  "title": "LoginRequest",
+  "type": "object"
+}

@@ -66,6 +66,10 @@ TOP_LEVEL: list[type[BaseModel]] = [
     api.ReplayInfo,
     api.ReplayStarted,
     api.OrganizationProfileView,
+    api.SignupRequest,
+    api.LoginRequest,
+    api.UserPublic,
+    api.AuthToken,
 ]
 
 
