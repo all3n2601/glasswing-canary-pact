@@ -6,6 +6,7 @@ requires-python = ">=3.11"
 dependencies = [
   "canary-agent-orchestration",
   "canary-company-twin",
+  "canary-contracts",
   "canary-simulation-engine",
   "fastapi>=0.115",
   "uvicorn[standard]>=0.34",
@@ -21,6 +22,7 @@ dev = [
 [tool.uv.sources]
 canary-agent-orchestration = { workspace = true }
 canary-company-twin = { workspace = true }
+canary-contracts = { workspace = true }
 canary-simulation-engine = { workspace = true }
 
 [build-system]

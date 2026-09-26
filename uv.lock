@@ -70,6 +70,7 @@ source = { editable = "apps/api" }
 dependencies = [
     { name = "canary-agent-orchestration" },
     { name = "canary-company-twin" },
+    { name = "canary-contracts" },
     { name = "canary-simulation-engine" },
     { name = "fastapi" },
     { name = "uvicorn", extra = ["standard"] },
@@ -86,6 +87,7 @@ dev = [
 requires-dist = [
     { name = "canary-agent-orchestration", editable = "packages/agent-orchestration" },
     { name = "canary-company-twin", editable = "packages/company-twin" },
+    { name = "canary-contracts", editable = "packages/contracts-py" },
     { name = "canary-simulation-engine", editable = "packages/simulation-engine" },
     { name = "fastapi", specifier = ">=0.115" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.34" },
