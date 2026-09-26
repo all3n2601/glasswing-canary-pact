@@ -118,6 +118,7 @@ def test_dependencies_become_edges_only_when_new_known_and_evidenced(context) ->
     assert [(e.source, e.target, e.relation.value) for e in outcome.validated_edges] == [NEW_DEPENDENCY[:3]]
     edge = outcome.validated_edges[0]
     assert edge.evidence_refs == [NEW_DEPENDENCY[3]] and edge.id.startswith("e_")
+    assert all(e.extraction_method == "agent" for e in outcome.validated_edges)
     report = outcome.assessment.validation
     assert report.downgraded_to_hypothesis == ["proposed_dependencies[2]"]
     assert report.rejected_entity_ids == ["role_ghost"]
@@ -131,6 +132,7 @@ def test_challenger_dependencies_and_confidence_clamp(context) -> None:
     assert assessment.challenge.missed_dependencies[0].confidence == 0.0
     assert assessment.validation.clamped_fields == ["missed_dependencies[0].confidence", "confidence"]
     assert outcome.validated_edges[0].confidence == 0.0
+    assert [e.extraction_method for e in outcome.validated_edges] == ["agent"]
 
 
 def test_failed_call_keeps_status_and_errors(context) -> None:
