@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
+import { AuthControls } from "@/components/auth-controls";
 
 export function Brand() {
   return (
@@ -29,7 +29,7 @@ export function SiteHeader() {
         <Link className="hidden text-[11px] font-medium text-zinc-500 transition-colors hover:text-zinc-950 md:block" href="/story">Storyboard</Link>
         <Link className="hidden text-[11px] font-medium text-zinc-500 transition-colors hover:text-zinc-950 md:block" href="/evidence">Evidence</Link>
         <Link className="hidden text-[11px] font-medium text-zinc-500 transition-colors hover:text-zinc-950 lg:block" href="/settings/organization">Organization</Link>
-        <Button asChild size="sm" className="rounded-xl bg-zinc-950 text-white hover:bg-zinc-800"><Link href="/simulate">Open simulator</Link></Button>
+        <AuthControls />
       </nav>
     </header>
   );

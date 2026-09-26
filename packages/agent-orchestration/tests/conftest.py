@@ -1,5 +1,5 @@
 import pytest
-from canary_api.stubs.twin import sample_brief, stub_twin
+from canary_api.stubs.twin import sample_brief, stub_twin, workforce_brief
 from contracts_py.decision import DecisionBrief
 from contracts_py.enums import EntityType, Sensitivity
 from contracts_py.twin import Entity, OrganizationSettings, Twin
@@ -13,6 +13,12 @@ def twin() -> Twin:
 @pytest.fixture
 def brief() -> DecisionBrief:
     return sample_brief()
+
+
+@pytest.fixture
+def people_brief() -> DecisionBrief:
+    # The restructure brief is the one that routes people_knowledge.
+    return workforce_brief()
 
 
 @pytest.fixture

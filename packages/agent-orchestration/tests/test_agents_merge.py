@@ -1,12 +1,24 @@
 import pytest
 from contracts_py.agents import AgentOutput, ChallengerOutput, FutureView, ProposedDependency, ProposedImpact
-from contracts_py.enums import ClaimStatus, Origin
+from contracts_py.enums import ClaimStatus, Direction, Future, Origin, Polarity
+
+from canary_api.stubs import results
+from canary_api.stubs.twin import sample_brief, stub_twin
 
 from agent_orchestration.llm import LLMResult
 from agent_orchestration.merge import merge
 from orchestration_helpers import NOW, make_context, metrics, person_output, person_tokens
 
-SCENARIOS = {"act_now": "scn_run_test_act_now_plan_recommended", "inaction": "scn_run_test_inaction_none"}
+SCENARIOS = {"act_now": results.scenario_id("run_test", Future.act_now, results.RECOMMENDED_PLAN),
+             "inaction": results.scenario_id("run_test", Future.inaction, None)}
+TWIN = stub_twin()
+ENTITIES = {e.id: e for e in TWIN.entities}
+# A known workflow the stub engine leaves untouched, with evidence the twin resolves.
+IMPACT_TARGET = "wf_billing_recon"
+IMPACT_EVIDENCE = ENTITIES[IMPACT_TARGET].evidence_refs[0]
+# The planted missed dependency: both endpoints known, not an edge yet, evidenced in the twin.
+NEW_DEPENDENCY = ("wf_vendor_reconciliation", "ds_account_intel", "CONSUMES", "ev_echo_account_intel_feed")
+EXISTING_EDGE = TWIN.edges[0]
 
 
 @pytest.fixture
@@ -16,7 +28,7 @@ def context(brief, twin, settings):
 
 def impact(**overrides) -> ProposedImpact:
     values = {
-        "affected_entity": "wf_billing_recon",
+        "affected_entity": IMPACT_TARGET,
         "metric": "backup_owners",
         "direction": "decrease",
         "polarity": "harm",
@@ -27,7 +39,7 @@ def impact(**overrides) -> ProposedImpact:
         "first_effect_day": 400,
         "severity": 4,
         "rationale": "Only the billing lead can reconcile.",
-        "evidence_refs": ["ev_billing_recon_matrix"],
+        "evidence_refs": [IMPACT_EVIDENCE],
         "confidence": 0.7,
     }
     return ProposedImpact.model_validate(values | overrides)
@@ -69,35 +81,43 @@ def test_no_evidence_becomes_hypothesis(context) -> None:
     assert outcome.assessment.validation.downgraded_to_hypothesis == ["act_now_view.proposed_impacts[0]"]
 
 
-@pytest.mark.parametrize("change", [{"direction": "decrease"}, {"polarity": "benefit"}])
+ENGINE_IMPACT = next(i for i in results.act_now_result("run_test", sample_brief().decision_id).impacts
+                     if i.polarity is Polarity.harm and i.direction is Direction.decrease)
+OPPOSITE_DIRECTION = {Direction.decrease: "increase", Direction.increase: "decrease"}
+
+
+@pytest.mark.parametrize("change", [{"direction": OPPOSITE_DIRECTION[ENGINE_IMPACT.direction]}, {"polarity": "benefit"}])
 def test_contradicting_engine_impact_rejected(context, change) -> None:
-    # The stub engine says failure_probability_monthly on wf_billing_recon increases and is a harm.
-    claim = impact(**({"metric": "failure_probability_monthly", "direction": "increase"} | change))
+    same = {"affected_entity": ENGINE_IMPACT.affected_entity, "metric": ENGINE_IMPACT.metric,
+            "direction": ENGINE_IMPACT.direction.value, "polarity": ENGINE_IMPACT.polarity.value,
+            "evidence_refs": ENGINE_IMPACT.evidence_refs or [IMPACT_EVIDENCE]}
+    assert run_merge(context, output(impact(**same))).assessment.accepted_impacts, "the agreeing claim is accepted"
+    claim = impact(**(same | change))
     outcome = run_merge(context, output(claim))
     assert outcome.assessment.accepted_impacts == []
     assert any("contradicts engine impact" in e for e in outcome.assessment.validation.errors)
 
 
 def dependency(**overrides) -> ProposedDependency:
-    values = {"source": "role_billing_ops_lead", "target": "sys_cloud_platform", "relation": "MAINTAINS",
-              "rationale": "Incident log names the lead.", "evidence_refs": ["ev_ops_incident_log"], "confidence": 0.8}
+    source, target, relation, evidence = NEW_DEPENDENCY
+    values = {"source": source, "target": target, "relation": relation,
+              "rationale": "The workflow map says account intelligence feeds vendor reconciliation.",
+              "evidence_refs": [evidence], "confidence": 0.8}
     return ProposedDependency.model_validate(values | overrides)
 
 
 def test_dependencies_become_edges_only_when_new_known_and_evidenced(context) -> None:
     deps = [
         dependency(),
-        dependency(source="role_billing_ops_lead", target="wf_billing_recon", relation="OWNS",
-                   evidence_refs=["ev_billing_recon_matrix"]),
+        dependency(source=EXISTING_EDGE.source, target=EXISTING_EDGE.target, relation=EXISTING_EDGE.relation.value,
+                   evidence_refs=EXISTING_EDGE.evidence_refs),
         dependency(target="kpi_company", evidence_refs=[]),
         dependency(source="role_ghost"),
     ]
     outcome = run_merge(context, output(dependencies=deps))
-    assert [(e.source, e.target, e.relation.value) for e in outcome.validated_edges] == [
-        ("role_billing_ops_lead", "sys_cloud_platform", "MAINTAINS")
-    ]
+    assert [(e.source, e.target, e.relation.value) for e in outcome.validated_edges] == [NEW_DEPENDENCY[:3]]
     edge = outcome.validated_edges[0]
-    assert edge.evidence_refs == ["ev_ops_incident_log"] and edge.id.startswith("e_")
+    assert edge.evidence_refs == [NEW_DEPENDENCY[3]] and edge.id.startswith("e_")
     report = outcome.assessment.validation
     assert report.downgraded_to_hypothesis == ["proposed_dependencies[2]"]
     assert report.rejected_entity_ids == ["role_ghost"]

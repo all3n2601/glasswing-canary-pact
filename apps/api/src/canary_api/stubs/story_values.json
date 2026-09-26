@@ -1,0 +1,1339 @@
+{
+  "dec_vendor_reduction": {
+    "results": {
+      "act_now": {
+        "value": {
+          "gross_savings_usd": 2300000000,
+          "transition_cost_usd": 180000000,
+          "added_cost_usd": 0,
+          "rebound_cost_usd": 60000000,
+          "expected_business_loss_usd": 90000000,
+          "pressure_cost_usd": 218400000,
+          "avoided_failure_cost_usd": 0,
+          "net_value_usd": 1751600000,
+          "monthly_net_usd": [
+            -180000000,
+            -4400000,
+            171200000,
+            346800000,
+            522400000,
+            698000000,
+            873600000,
+            1049200000,
+            1224800000,
+            1400400000,
+            1576000000,
+            1751600000
+          ],
+          "p10_net_value_usd": null,
+          "p50_net_value_usd": null,
+          "p90_net_value_usd": null
+        },
+        "risk": {
+          "score": 36.0,
+          "level": "medium",
+          "settings_version": 1,
+          "components": {
+            "financial": 8.0,
+            "capability_workflow": 10.0,
+            "customer_revenue": 6.0,
+            "compliance_control": 6.0,
+            "execution_uncertainty": 6.0
+          }
+        },
+        "constraint_results": [
+          {
+            "constraint_id": "c_compliance",
+            "metric": "compliance_controls_broken",
+            "operator": "==",
+            "threshold": 0.0,
+            "value": 0.0,
+            "hard": true,
+            "passed": true,
+            "explanation": "No mandatory control breaks.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_sales",
+            "metric": "revenue_impact_pct",
+            "operator": "<=",
+            "threshold": 3.0,
+            "value": 1.2,
+            "hard": true,
+            "passed": true,
+            "explanation": "Pipeline falls 1.2%, within 3%.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_customer",
+            "metric": "customer_impact_pct",
+            "operator": "<=",
+            "threshold": 2.0,
+            "value": 0.4,
+            "hard": true,
+            "passed": true,
+            "explanation": "Customer impact 0.4%, within 2%.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_stranded",
+            "metric": "stranded_workflows",
+            "operator": "==",
+            "threshold": 0.0,
+            "value": 0.0,
+            "hard": false,
+            "passed": true,
+            "explanation": "No workflow is stranded.",
+            "impact_ids": []
+          }
+        ],
+        "pressures_triggered": [
+          {
+            "pressure_id": "pr_apex_renewal",
+            "expected_events": 1.0,
+            "expected_cost_usd": 128000000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_echo_renewal",
+            "expected_events": 0.0,
+            "expected_cost_usd": 0,
+            "neutralised": true
+          },
+          {
+            "pressure_id": "pr_flux_usage_growth",
+            "expected_events": 1.0,
+            "expected_cost_usd": 76000000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_vendor_recon_hazard",
+            "expected_events": 1.0,
+            "expected_cost_usd": 14400000,
+            "neutralised": false
+          }
+        ],
+        "goal_met": true,
+        "feasible": true,
+        "workflow_coverage": []
+      },
+      "inaction": {
+        "value": {
+          "gross_savings_usd": 0,
+          "transition_cost_usd": 0,
+          "added_cost_usd": 0,
+          "rebound_cost_usd": 0,
+          "expected_business_loss_usd": 0,
+          "pressure_cost_usd": 350400000,
+          "avoided_failure_cost_usd": 0,
+          "net_value_usd": -350400000,
+          "monthly_net_usd": [
+            -29200000,
+            -58400000,
+            -87600000,
+            -116800000,
+            -146000000,
+            -175200000,
+            -204400000,
+            -233600000,
+            -262800000,
+            -292000000,
+            -321200000,
+            -350400000
+          ],
+          "p10_net_value_usd": null,
+          "p50_net_value_usd": null,
+          "p90_net_value_usd": null
+        },
+        "risk": {
+          "score": 55.0,
+          "level": "high",
+          "settings_version": 1,
+          "components": {
+            "financial": 15.0,
+            "capability_workflow": 14.0,
+            "customer_revenue": 10.0,
+            "compliance_control": 8.0,
+            "execution_uncertainty": 8.0
+          }
+        },
+        "constraint_results": [
+          {
+            "constraint_id": "c_compliance",
+            "metric": "compliance_controls_broken",
+            "operator": "==",
+            "threshold": 0.0,
+            "value": 0.0,
+            "hard": true,
+            "passed": true,
+            "explanation": "No mandatory control breaks.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_sales",
+            "metric": "revenue_impact_pct",
+            "operator": "<=",
+            "threshold": 3.0,
+            "value": 1.2,
+            "hard": true,
+            "passed": true,
+            "explanation": "Pipeline falls 1.2%, within 3%.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_customer",
+            "metric": "customer_impact_pct",
+            "operator": "<=",
+            "threshold": 2.0,
+            "value": 0.4,
+            "hard": true,
+            "passed": true,
+            "explanation": "Customer impact 0.4%, within 2%.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_stranded",
+            "metric": "stranded_workflows",
+            "operator": "==",
+            "threshold": 0.0,
+            "value": 0.0,
+            "hard": false,
+            "passed": true,
+            "explanation": "No workflow is stranded.",
+            "impact_ids": []
+          }
+        ],
+        "pressures_triggered": [
+          {
+            "pressure_id": "pr_apex_renewal",
+            "expected_events": 1.0,
+            "expected_cost_usd": 128000000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_echo_renewal",
+            "expected_events": 1.0,
+            "expected_cost_usd": 132000000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_flux_usage_growth",
+            "expected_events": 1.0,
+            "expected_cost_usd": 76000000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_vendor_recon_hazard",
+            "expected_events": 1.0,
+            "expected_cost_usd": 14400000,
+            "neutralised": false
+          }
+        ],
+        "goal_met": false,
+        "feasible": true,
+        "workflow_coverage": []
+      },
+      "delay": {
+        "value": {
+          "gross_savings_usd": 1725000000,
+          "transition_cost_usd": 180000000,
+          "added_cost_usd": 0,
+          "rebound_cost_usd": 60000000,
+          "expected_business_loss_usd": 90000000,
+          "pressure_cost_usd": 350400000,
+          "avoided_failure_cost_usd": 0,
+          "net_value_usd": 1044600000,
+          "monthly_net_usd": [
+            -29200000,
+            68418181,
+            166036363,
+            263654545,
+            361272727,
+            458890909,
+            556509090,
+            654127272,
+            751745454,
+            849363636,
+            946981818,
+            1044600000
+          ],
+          "p10_net_value_usd": null,
+          "p50_net_value_usd": null,
+          "p90_net_value_usd": null
+        },
+        "risk": {
+          "score": 42.0,
+          "level": "medium",
+          "settings_version": 1,
+          "components": {
+            "financial": 9.0,
+            "capability_workflow": 11.0,
+            "customer_revenue": 7.0,
+            "compliance_control": 7.0,
+            "execution_uncertainty": 8.0
+          }
+        },
+        "constraint_results": [
+          {
+            "constraint_id": "c_compliance",
+            "metric": "compliance_controls_broken",
+            "operator": "==",
+            "threshold": 0.0,
+            "value": 0.0,
+            "hard": true,
+            "passed": true,
+            "explanation": "No mandatory control breaks.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_sales",
+            "metric": "revenue_impact_pct",
+            "operator": "<=",
+            "threshold": 3.0,
+            "value": 1.2,
+            "hard": true,
+            "passed": true,
+            "explanation": "Pipeline falls 1.2%, within 3%.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_customer",
+            "metric": "customer_impact_pct",
+            "operator": "<=",
+            "threshold": 2.0,
+            "value": 0.4,
+            "hard": true,
+            "passed": true,
+            "explanation": "Customer impact 0.4%, within 2%.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_stranded",
+            "metric": "stranded_workflows",
+            "operator": "==",
+            "threshold": 0.0,
+            "value": 0.0,
+            "hard": false,
+            "passed": true,
+            "explanation": "No workflow is stranded.",
+            "impact_ids": []
+          }
+        ],
+        "pressures_triggered": [
+          {
+            "pressure_id": "pr_apex_renewal",
+            "expected_events": 1.0,
+            "expected_cost_usd": 128000000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_echo_renewal",
+            "expected_events": 1.0,
+            "expected_cost_usd": 132000000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_flux_usage_growth",
+            "expected_events": 1.0,
+            "expected_cost_usd": 76000000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_vendor_recon_hazard",
+            "expected_events": 1.0,
+            "expected_cost_usd": 14400000,
+            "neutralised": false
+          }
+        ],
+        "goal_met": false,
+        "feasible": true,
+        "workflow_coverage": []
+      },
+      "naive": {
+        "value": {
+          "gross_savings_usd": 3000000000,
+          "transition_cost_usd": 180000000,
+          "added_cost_usd": 0,
+          "rebound_cost_usd": 60000000,
+          "expected_business_loss_usd": 400000000,
+          "pressure_cost_usd": 222400000,
+          "avoided_failure_cost_usd": 0,
+          "net_value_usd": 2137600000,
+          "monthly_net_usd": [
+            -180000000,
+            30690909,
+            241381818,
+            452072727,
+            662763636,
+            873454545,
+            1084145454,
+            1294836363,
+            1505527272,
+            1716218181,
+            1926909090,
+            2137600000
+          ],
+          "p10_net_value_usd": null,
+          "p50_net_value_usd": null,
+          "p90_net_value_usd": null
+        },
+        "risk": {
+          "score": 78.0,
+          "level": "critical",
+          "settings_version": 1,
+          "components": {
+            "financial": 10.0,
+            "capability_workflow": 14.0,
+            "customer_revenue": 12.0,
+            "compliance_control": 34.0,
+            "execution_uncertainty": 8.0
+          }
+        },
+        "constraint_results": [
+          {
+            "constraint_id": "c_compliance",
+            "metric": "compliance_controls_broken",
+            "operator": "==",
+            "threshold": 0.0,
+            "value": 1.0,
+            "hard": true,
+            "passed": false,
+            "explanation": "ctl_kyc_screening breaks: ds_corporate_linkage has no provider after vendor_apex is removed.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_sales",
+            "metric": "revenue_impact_pct",
+            "operator": "<=",
+            "threshold": 3.0,
+            "value": 2.1,
+            "hard": true,
+            "passed": true,
+            "explanation": "Pipeline falls 2.1%, within 3%.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_customer",
+            "metric": "customer_impact_pct",
+            "operator": "<=",
+            "threshold": 2.0,
+            "value": 0.9,
+            "hard": true,
+            "passed": true,
+            "explanation": "Customer impact 0.9%, within 2%.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_stranded",
+            "metric": "stranded_workflows",
+            "operator": "==",
+            "threshold": 0.0,
+            "value": 0.0,
+            "hard": false,
+            "passed": true,
+            "explanation": "No workflow is stranded.",
+            "impact_ids": []
+          }
+        ],
+        "pressures_triggered": [
+          {
+            "pressure_id": "pr_apex_renewal",
+            "expected_events": 0.0,
+            "expected_cost_usd": 0,
+            "neutralised": true
+          },
+          {
+            "pressure_id": "pr_echo_renewal",
+            "expected_events": 1.0,
+            "expected_cost_usd": 132000000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_flux_usage_growth",
+            "expected_events": 1.0,
+            "expected_cost_usd": 76000000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_vendor_recon_hazard",
+            "expected_events": 1.0,
+            "expected_cost_usd": 14400000,
+            "neutralised": false
+          }
+        ],
+        "goal_met": true,
+        "feasible": false,
+        "workflow_coverage": []
+      }
+    },
+    "rows": [
+      {
+        "future": "act_now",
+        "label": "Act now",
+        "net_value_p50_usd": 1751600000,
+        "delta_vs_inaction_p10_usd": 2102000000,
+        "delta_vs_inaction_p50_usd": 2102000000,
+        "delta_vs_inaction_p90_usd": 2102000000,
+        "p_better_than_inaction": 1.0,
+        "breakeven_day": 60,
+        "cost_of_delay_usd": null,
+        "feasible": true,
+        "risk_score": 36.0,
+        "monthly_delta_usd": [
+          -150800000,
+          54000000,
+          258800000,
+          463600000,
+          668400000,
+          873200000,
+          1078000000,
+          1282800000,
+          1487600000,
+          1692400000,
+          1897200000,
+          2102000000
+        ]
+      },
+      {
+        "future": "inaction",
+        "label": "Do nothing",
+        "net_value_p50_usd": -350400000,
+        "delta_vs_inaction_p10_usd": 0,
+        "delta_vs_inaction_p50_usd": 0,
+        "delta_vs_inaction_p90_usd": 0,
+        "p_better_than_inaction": 0.0,
+        "breakeven_day": null,
+        "cost_of_delay_usd": null,
+        "feasible": true,
+        "risk_score": 55.0,
+        "monthly_delta_usd": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "future": "delay",
+        "label": "Wait 90 days",
+        "net_value_p50_usd": 1044600000,
+        "delta_vs_inaction_p10_usd": 1395000000,
+        "delta_vs_inaction_p50_usd": 1395000000,
+        "delta_vs_inaction_p90_usd": 1395000000,
+        "p_better_than_inaction": 1.0,
+        "breakeven_day": 150,
+        "cost_of_delay_usd": 707000000,
+        "feasible": true,
+        "risk_score": 42.0,
+        "monthly_delta_usd": [
+          0,
+          126818181,
+          253636363,
+          380454545,
+          507272727,
+          634090909,
+          760909090,
+          887727272,
+          1014545454,
+          1141363636,
+          1268181818,
+          1395000000
+        ]
+      }
+    ],
+    "departments": {
+      "act_now": [
+        {
+          "department_id": "dept_ai_data",
+          "headline": "3 stub impact(s)",
+          "polarity": "harm",
+          "severity": 3,
+          "impact_ids": [
+            "act_now_plan_beacon_echo_beacon_cost",
+            "act_now_plan_beacon_echo_echo_cost",
+            "act_now_plan_beacon_echo_account_intel"
+          ]
+        },
+        {
+          "department_id": "dept_sales",
+          "headline": "2 stub impact(s)",
+          "polarity": "harm",
+          "severity": 4,
+          "impact_ids": [
+            "act_now_plan_beacon_echo_account_planning",
+            "act_now_plan_beacon_echo_pipeline"
+          ]
+        }
+      ],
+      "inaction": [
+        {
+          "department_id": "dept_ai_data",
+          "headline": "3 stub impact(s)",
+          "polarity": "harm",
+          "severity": 3,
+          "impact_ids": [
+            "inaction_none_apex_renewal",
+            "inaction_none_echo_renewal",
+            "inaction_none_flux_growth"
+          ]
+        },
+        {
+          "department_id": "dept_operations",
+          "headline": "1 stub impact(s)",
+          "polarity": "harm",
+          "severity": 3,
+          "impact_ids": [
+            "inaction_none_vendor_recon"
+          ]
+        }
+      ]
+    }
+  },
+  "dec_workforce_knowledge": {
+    "results": {
+      "act_now": {
+        "value": {
+          "gross_savings_usd": 1070000,
+          "transition_cost_usd": 730000,
+          "added_cost_usd": 480000,
+          "rebound_cost_usd": 0,
+          "expected_business_loss_usd": 0,
+          "pressure_cost_usd": 35400000,
+          "avoided_failure_cost_usd": 0,
+          "net_value_usd": -35540000,
+          "monthly_net_usd": [
+            -3000000,
+            -5958182,
+            -8916364,
+            -11874546,
+            -14832728,
+            -17790910,
+            -20749091,
+            -23707273,
+            -26665455,
+            -29623637,
+            -32581819,
+            -35540000
+          ],
+          "p10_net_value_usd": null,
+          "p50_net_value_usd": null,
+          "p90_net_value_usd": null
+        },
+        "risk": {
+          "score": 36.0,
+          "level": "medium",
+          "settings_version": 1,
+          "components": {
+            "financial": 6.0,
+            "capability_workflow": 14.0,
+            "customer_revenue": 4.0,
+            "compliance_control": 4.0,
+            "execution_uncertainty": 8.0
+          }
+        },
+        "constraint_results": [
+          {
+            "constraint_id": "c_compliance",
+            "metric": "compliance_controls_broken",
+            "operator": "==",
+            "threshold": 0.0,
+            "value": 0.0,
+            "hard": true,
+            "passed": true,
+            "explanation": "No mandatory control breaks.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_stranded",
+            "metric": "stranded_workflows",
+            "operator": "==",
+            "threshold": 0.0,
+            "value": 0.0,
+            "hard": true,
+            "passed": true,
+            "explanation": "Both critical workflows keep two owners.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_customer",
+            "metric": "customer_impact_pct",
+            "operator": "<=",
+            "threshold": 2.0,
+            "value": 0.3,
+            "hard": true,
+            "passed": true,
+            "explanation": "Customer impact 0.3%, within 2%.",
+            "impact_ids": []
+          }
+        ],
+        "pressures_triggered": [
+          {
+            "pressure_id": "pr_billing_recon_hazard",
+            "expected_events": 1.0,
+            "expected_cost_usd": 28800000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_lineage_holder_attrition",
+            "expected_events": 1.0,
+            "expected_cost_usd": 5400000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_contractor_cost_growth",
+            "expected_events": 1.0,
+            "expected_cost_usd": 1200000,
+            "neutralised": false
+          }
+        ],
+        "goal_met": true,
+        "feasible": true,
+        "workflow_coverage": [
+          {
+            "workflow_id": "wf_billing_recon",
+            "criticality": "critical",
+            "owners_before": [
+              "role_billing_ops_lead",
+              "role_billing_specialist",
+              "role_revenue_accountant",
+              "role_ar_specialist"
+            ],
+            "owners_after": [
+              "role_finance_analyst",
+              "role_billing_ops_lead"
+            ],
+            "min_qualified_owners": 2,
+            "backup_count_after": 1,
+            "documented_pct": 0.7,
+            "stranded": false,
+            "reasons": [
+              "Finance analyst reassigned; billing ops lead retained for 90 days."
+            ],
+            "owner_capacity_fte_before": null,
+            "owner_capacity_fte_after": null,
+            "exception_documented_pct": null,
+            "automation_pct": null,
+            "training_days_required": null,
+            "replacement_cost_usd": null
+          },
+          {
+            "workflow_id": "wf_financial_close",
+            "criticality": "critical",
+            "owners_before": [
+              "role_close_accountant",
+              "role_gl_accountant",
+              "role_reporting_analyst"
+            ],
+            "owners_after": [
+              "role_controller",
+              "role_close_accountant"
+            ],
+            "min_qualified_owners": 2,
+            "backup_count_after": 1,
+            "documented_pct": 0.7,
+            "stranded": false,
+            "reasons": [
+              "Controller reassigned; close accountant retained for 90 days."
+            ],
+            "owner_capacity_fte_before": null,
+            "owner_capacity_fte_after": null,
+            "exception_documented_pct": null,
+            "automation_pct": null,
+            "training_days_required": null,
+            "replacement_cost_usd": null
+          }
+        ]
+      },
+      "inaction": {
+        "value": {
+          "gross_savings_usd": 0,
+          "transition_cost_usd": 0,
+          "added_cost_usd": 0,
+          "rebound_cost_usd": 0,
+          "expected_business_loss_usd": 0,
+          "pressure_cost_usd": 46200000,
+          "avoided_failure_cost_usd": 0,
+          "net_value_usd": -46200000,
+          "monthly_net_usd": [
+            -3850000,
+            -7700000,
+            -11550000,
+            -15400000,
+            -19250000,
+            -23100000,
+            -26950000,
+            -30800000,
+            -34650000,
+            -38500000,
+            -42350000,
+            -46200000
+          ],
+          "p10_net_value_usd": null,
+          "p50_net_value_usd": null,
+          "p90_net_value_usd": null
+        },
+        "risk": {
+          "score": 40.0,
+          "level": "medium",
+          "settings_version": 1,
+          "components": {
+            "financial": 8.0,
+            "capability_workflow": 16.0,
+            "customer_revenue": 4.0,
+            "compliance_control": 4.0,
+            "execution_uncertainty": 8.0
+          }
+        },
+        "constraint_results": [
+          {
+            "constraint_id": "c_compliance",
+            "metric": "compliance_controls_broken",
+            "operator": "==",
+            "threshold": 0.0,
+            "value": 0.0,
+            "hard": true,
+            "passed": true,
+            "explanation": "No mandatory control breaks.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_stranded",
+            "metric": "stranded_workflows",
+            "operator": "==",
+            "threshold": 0.0,
+            "value": 0.0,
+            "hard": true,
+            "passed": true,
+            "explanation": "Both critical workflows keep two owners.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_customer",
+            "metric": "customer_impact_pct",
+            "operator": "<=",
+            "threshold": 2.0,
+            "value": 0.3,
+            "hard": true,
+            "passed": true,
+            "explanation": "Customer impact 0.3%, within 2%.",
+            "impact_ids": []
+          }
+        ],
+        "pressures_triggered": [
+          {
+            "pressure_id": "pr_billing_recon_hazard",
+            "expected_events": 1.0,
+            "expected_cost_usd": 28800000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_lineage_holder_attrition",
+            "expected_events": 1.0,
+            "expected_cost_usd": 16200000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_contractor_cost_growth",
+            "expected_events": 1.0,
+            "expected_cost_usd": 1200000,
+            "neutralised": false
+          }
+        ],
+        "goal_met": false,
+        "feasible": true,
+        "workflow_coverage": [
+          {
+            "workflow_id": "wf_billing_recon",
+            "criticality": "critical",
+            "owners_before": [
+              "role_billing_ops_lead",
+              "role_billing_specialist",
+              "role_revenue_accountant",
+              "role_ar_specialist"
+            ],
+            "owners_after": [
+              "role_billing_ops_lead",
+              "role_billing_specialist",
+              "role_revenue_accountant",
+              "role_ar_specialist"
+            ],
+            "min_qualified_owners": 2,
+            "backup_count_after": 3,
+            "documented_pct": 0.35,
+            "stranded": false,
+            "reasons": [
+              "No change."
+            ],
+            "owner_capacity_fte_before": null,
+            "owner_capacity_fte_after": null,
+            "exception_documented_pct": null,
+            "automation_pct": null,
+            "training_days_required": null,
+            "replacement_cost_usd": null
+          },
+          {
+            "workflow_id": "wf_financial_close",
+            "criticality": "critical",
+            "owners_before": [
+              "role_close_accountant",
+              "role_gl_accountant",
+              "role_reporting_analyst"
+            ],
+            "owners_after": [
+              "role_close_accountant",
+              "role_gl_accountant",
+              "role_reporting_analyst"
+            ],
+            "min_qualified_owners": 2,
+            "backup_count_after": 2,
+            "documented_pct": 0.4,
+            "stranded": false,
+            "reasons": [
+              "No change."
+            ],
+            "owner_capacity_fte_before": null,
+            "owner_capacity_fte_after": null,
+            "exception_documented_pct": null,
+            "automation_pct": null,
+            "training_days_required": null,
+            "replacement_cost_usd": null
+          }
+        ]
+      },
+      "delay": {
+        "value": {
+          "gross_savings_usd": 802500,
+          "transition_cost_usd": 730000,
+          "added_cost_usd": 480000,
+          "rebound_cost_usd": 0,
+          "expected_business_loss_usd": 0,
+          "pressure_cost_usd": 39450000,
+          "avoided_failure_cost_usd": 0,
+          "net_value_usd": -39857500,
+          "monthly_net_usd": [
+            -3850000,
+            -7123410,
+            -10396819,
+            -13670228,
+            -16943637,
+            -20217046,
+            -23490455,
+            -26763864,
+            -30037273,
+            -33310682,
+            -36584091,
+            -39857500
+          ],
+          "p10_net_value_usd": null,
+          "p50_net_value_usd": null,
+          "p90_net_value_usd": null
+        },
+        "risk": {
+          "score": 38.0,
+          "level": "medium",
+          "settings_version": 1,
+          "components": {
+            "financial": 7.0,
+            "capability_workflow": 15.0,
+            "customer_revenue": 4.0,
+            "compliance_control": 4.0,
+            "execution_uncertainty": 8.0
+          }
+        },
+        "constraint_results": [
+          {
+            "constraint_id": "c_compliance",
+            "metric": "compliance_controls_broken",
+            "operator": "==",
+            "threshold": 0.0,
+            "value": 0.0,
+            "hard": true,
+            "passed": true,
+            "explanation": "No mandatory control breaks.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_stranded",
+            "metric": "stranded_workflows",
+            "operator": "==",
+            "threshold": 0.0,
+            "value": 0.0,
+            "hard": true,
+            "passed": true,
+            "explanation": "Both critical workflows keep two owners.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_customer",
+            "metric": "customer_impact_pct",
+            "operator": "<=",
+            "threshold": 2.0,
+            "value": 0.3,
+            "hard": true,
+            "passed": true,
+            "explanation": "Customer impact 0.3%, within 2%.",
+            "impact_ids": []
+          }
+        ],
+        "pressures_triggered": [
+          {
+            "pressure_id": "pr_billing_recon_hazard",
+            "expected_events": 1.0,
+            "expected_cost_usd": 28800000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_lineage_holder_attrition",
+            "expected_events": 1.0,
+            "expected_cost_usd": 9450000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_contractor_cost_growth",
+            "expected_events": 1.0,
+            "expected_cost_usd": 1200000,
+            "neutralised": false
+          }
+        ],
+        "goal_met": false,
+        "feasible": true,
+        "workflow_coverage": [
+          {
+            "workflow_id": "wf_billing_recon",
+            "criticality": "critical",
+            "owners_before": [
+              "role_billing_ops_lead",
+              "role_billing_specialist",
+              "role_revenue_accountant",
+              "role_ar_specialist"
+            ],
+            "owners_after": [
+              "role_finance_analyst",
+              "role_billing_ops_lead"
+            ],
+            "min_qualified_owners": 2,
+            "backup_count_after": 1,
+            "documented_pct": 0.7,
+            "stranded": false,
+            "reasons": [
+              "Finance analyst reassigned; billing ops lead retained for 90 days."
+            ],
+            "owner_capacity_fte_before": null,
+            "owner_capacity_fte_after": null,
+            "exception_documented_pct": null,
+            "automation_pct": null,
+            "training_days_required": null,
+            "replacement_cost_usd": null
+          },
+          {
+            "workflow_id": "wf_financial_close",
+            "criticality": "critical",
+            "owners_before": [
+              "role_close_accountant",
+              "role_gl_accountant",
+              "role_reporting_analyst"
+            ],
+            "owners_after": [
+              "role_controller",
+              "role_close_accountant"
+            ],
+            "min_qualified_owners": 2,
+            "backup_count_after": 1,
+            "documented_pct": 0.7,
+            "stranded": false,
+            "reasons": [
+              "Controller reassigned; close accountant retained for 90 days."
+            ],
+            "owner_capacity_fte_before": null,
+            "owner_capacity_fte_after": null,
+            "exception_documented_pct": null,
+            "automation_pct": null,
+            "training_days_required": null,
+            "replacement_cost_usd": null
+          }
+        ]
+      },
+      "naive": {
+        "value": {
+          "gross_savings_usd": 1070000,
+          "transition_cost_usd": 320000,
+          "added_cost_usd": 0,
+          "rebound_cost_usd": 0,
+          "expected_business_loss_usd": 45000000,
+          "pressure_cost_usd": 103800000,
+          "avoided_failure_cost_usd": 0,
+          "net_value_usd": -148050000,
+          "monthly_net_usd": [
+            -12000000,
+            -24368182,
+            -36736364,
+            -49104546,
+            -61472728,
+            -73840910,
+            -86209091,
+            -98577273,
+            -110945455,
+            -123313637,
+            -135681819,
+            -148050000
+          ],
+          "p10_net_value_usd": null,
+          "p50_net_value_usd": null,
+          "p90_net_value_usd": null
+        },
+        "risk": {
+          "score": 84.0,
+          "level": "critical",
+          "settings_version": 1,
+          "components": {
+            "financial": 20.0,
+            "capability_workflow": 40.0,
+            "customer_revenue": 8.0,
+            "compliance_control": 6.0,
+            "execution_uncertainty": 10.0
+          }
+        },
+        "constraint_results": [
+          {
+            "constraint_id": "c_compliance",
+            "metric": "compliance_controls_broken",
+            "operator": "==",
+            "threshold": 0.0,
+            "value": 0.0,
+            "hard": true,
+            "passed": true,
+            "explanation": "No mandatory control breaks.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_stranded",
+            "metric": "stranded_workflows",
+            "operator": "==",
+            "threshold": 0.0,
+            "value": 2.0,
+            "hard": true,
+            "passed": false,
+            "explanation": "wf_financial_close and wf_billing_recon are left without qualified owners.",
+            "impact_ids": []
+          },
+          {
+            "constraint_id": "c_customer",
+            "metric": "customer_impact_pct",
+            "operator": "<=",
+            "threshold": 2.0,
+            "value": 1.1,
+            "hard": true,
+            "passed": true,
+            "explanation": "Customer impact 1.1%, within 2%.",
+            "impact_ids": []
+          }
+        ],
+        "pressures_triggered": [
+          {
+            "pressure_id": "pr_billing_recon_hazard",
+            "expected_events": 1.0,
+            "expected_cost_usd": 86400000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_lineage_holder_attrition",
+            "expected_events": 1.0,
+            "expected_cost_usd": 16200000,
+            "neutralised": false
+          },
+          {
+            "pressure_id": "pr_contractor_cost_growth",
+            "expected_events": 1.0,
+            "expected_cost_usd": 1200000,
+            "neutralised": false
+          }
+        ],
+        "goal_met": true,
+        "feasible": false,
+        "workflow_coverage": [
+          {
+            "workflow_id": "wf_billing_recon",
+            "criticality": "critical",
+            "owners_before": [
+              "role_billing_ops_lead",
+              "role_billing_specialist",
+              "role_revenue_accountant",
+              "role_ar_specialist"
+            ],
+            "owners_after": [],
+            "min_qualified_owners": 2,
+            "backup_count_after": 0,
+            "documented_pct": 0.35,
+            "stranded": true,
+            "reasons": [
+              "Every qualified owner is removed."
+            ],
+            "owner_capacity_fte_before": null,
+            "owner_capacity_fte_after": null,
+            "exception_documented_pct": null,
+            "automation_pct": null,
+            "training_days_required": null,
+            "replacement_cost_usd": null
+          },
+          {
+            "workflow_id": "wf_financial_close",
+            "criticality": "critical",
+            "owners_before": [
+              "role_close_accountant",
+              "role_gl_accountant",
+              "role_reporting_analyst"
+            ],
+            "owners_after": [],
+            "min_qualified_owners": 2,
+            "backup_count_after": 0,
+            "documented_pct": 0.4,
+            "stranded": true,
+            "reasons": [
+              "Every qualified owner is removed."
+            ],
+            "owner_capacity_fte_before": null,
+            "owner_capacity_fte_after": null,
+            "exception_documented_pct": null,
+            "automation_pct": null,
+            "training_days_required": null,
+            "replacement_cost_usd": null
+          }
+        ]
+      }
+    },
+    "rows": [
+      {
+        "future": "act_now",
+        "label": "Act now",
+        "net_value_p50_usd": -35540000,
+        "delta_vs_inaction_p10_usd": 10660000,
+        "delta_vs_inaction_p50_usd": 10660000,
+        "delta_vs_inaction_p90_usd": 10660000,
+        "p_better_than_inaction": 1.0,
+        "breakeven_day": null,
+        "cost_of_delay_usd": null,
+        "feasible": true,
+        "risk_score": 36.0,
+        "monthly_delta_usd": [
+          850000,
+          1741818,
+          2633636,
+          3525454,
+          4417272,
+          5309090,
+          6200909,
+          7092727,
+          7984545,
+          8876363,
+          9768181,
+          10660000
+        ]
+      },
+      {
+        "future": "inaction",
+        "label": "Do nothing",
+        "net_value_p50_usd": -46200000,
+        "delta_vs_inaction_p10_usd": 0,
+        "delta_vs_inaction_p50_usd": 0,
+        "delta_vs_inaction_p90_usd": 0,
+        "p_better_than_inaction": 0.0,
+        "breakeven_day": null,
+        "cost_of_delay_usd": null,
+        "feasible": true,
+        "risk_score": 40.0,
+        "monthly_delta_usd": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "future": "delay",
+        "label": "Wait 90 days",
+        "net_value_p50_usd": -39857500,
+        "delta_vs_inaction_p10_usd": 6342500,
+        "delta_vs_inaction_p50_usd": 6342500,
+        "delta_vs_inaction_p90_usd": 6342500,
+        "p_better_than_inaction": 1.0,
+        "breakeven_day": null,
+        "cost_of_delay_usd": 4317500,
+        "feasible": true,
+        "risk_score": 38.0,
+        "monthly_delta_usd": [
+          0,
+          576590,
+          1153181,
+          1729772,
+          2306363,
+          2882954,
+          3459545,
+          4036136,
+          4612727,
+          5189318,
+          5765909,
+          6342500
+        ]
+      }
+    ],
+    "departments": {
+      "act_now": [
+        {
+          "department_id": "dept_finance",
+          "headline": "2 stub impact(s)",
+          "polarity": "harm",
+          "severity": 3,
+          "impact_ids": [
+            "act_now_plan_remove_eight_roles_mitigated_role_cost",
+            "act_now_plan_remove_eight_roles_mitigated_close_owners"
+          ]
+        },
+        {
+          "department_id": "dept_operations",
+          "headline": "1 stub impact(s)",
+          "polarity": "harm",
+          "severity": 3,
+          "impact_ids": [
+            "act_now_plan_remove_eight_roles_mitigated_billing_owners"
+          ]
+        }
+      ],
+      "inaction": [
+        {
+          "department_id": "dept_ai_data",
+          "headline": "1 stub impact(s)",
+          "polarity": "harm",
+          "severity": 3,
+          "impact_ids": [
+            "inaction_none_lineage"
+          ]
+        },
+        {
+          "department_id": "dept_operations",
+          "headline": "1 stub impact(s)",
+          "polarity": "harm",
+          "severity": 3,
+          "impact_ids": [
+            "inaction_none_billing_hazard"
+          ]
+        }
+      ]
+    }
+  }
+}

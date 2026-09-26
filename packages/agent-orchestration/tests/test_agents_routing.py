@@ -16,13 +16,26 @@ def test_roster_follows_contract_agent_ids() -> None:
 
 def test_routing_sources_are_intervention_and_pressure_targets(brief, twin) -> None:
     sources = routing_sources(brief, twin)
-    assert {"dept_operations", "vendor_auditlog", "sys_cloud_platform", "wf_billing_recon"} <= set(sources)
+    targets = [i.target_entity_id for i in brief.candidate_interventions]
+    active = [p.target_entity_id for p in twin.pressures if p.id in (brief.active_pressure_ids or [])]
+    inactive = {p.target_entity_id for p in twin.pressures if p.id not in (brief.active_pressure_ids or [])}
+    assert sources[:len(targets)] == targets
+    assert set(sources) == set(targets) | set(active)
+    assert inactive - set(targets) - set(active) and not (inactive - set(targets) - set(active)) & set(sources)
 
 
-def test_route_uses_reachability_and_types(brief, twin, settings) -> None:
+def test_route_uses_reachability_and_types(brief, people_brief, twin, settings) -> None:
+    reachable = set(stub_engine.reachable_departments(twin, routing_sources(brief, twin)))
     routed = route_agents(brief, twin=twin, engine=stub_engine, settings=settings)
-    # Stub reachability: compliance, engineering, finance, operations. Challenger runs later.
-    assert routed == ["finance", "engineering", "operations", "compliance", "people_knowledge"]
+    # Vendor brief. Challenger runs later; product and people_knowledge do not route for vendor consolidation.
+    assert routed == ["finance", "engineering", "ai_data", "operations", "sales", "compliance"]
+    # marketing and customer_success match the decision type but their departments are not reachable.
+    assert {"dept_marketing", "dept_customer_success"}.isdisjoint(reachable)
+    assert "vendor_consolidation" in ROSTER["marketing"].routes_for and "marketing" not in routed
+    assert "vendor_consolidation" not in ROSTER["product"].routes_for and "product" not in routed
+
+    restructure = route_agents(people_brief, twin=twin, engine=stub_engine, settings=settings)
+    assert "people_knowledge" in restructure and "marketing" not in restructure
 
 
 def test_route_respects_enabled_agents_but_keeps_mandatory(brief, twin) -> None:

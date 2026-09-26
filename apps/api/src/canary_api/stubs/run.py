@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timezone
 from typing import Any
 
 from contracts_py.decision import DecisionBrief
@@ -15,7 +15,7 @@ from contracts_py.events import (
 from contracts_py.twin import VersionInfo
 
 from canary_api.stubs import results
-from canary_api.stubs.twin import STUB_TIME, sample_brief, stub_twin
+from canary_api.stubs.twin import sample_brief, stub_twin
 
 SAMPLE_RUN_ID = "run_sample"
 
@@ -37,7 +37,9 @@ PHASES = [
 def stub_run_events(brief: DecisionBrief, run_id: str, versions: VersionInfo | None = None) -> list[Event]:
     versions = versions or stub_twin().version
     decision_id = brief.decision_id
-    plans = {p.plan_id: p for p in results.plans()}
+    story = results.story(decision_id)
+    naive_plan, recommended_plan = story.naive_plan, story.recommended_plan
+    plans = {p.plan_id: p for p in results.plans(decision_id)}
     futures = results.future_results(run_id, decision_id)
     phase = iter(zip(PHASES, PHASES[1:]))
     steps: list[tuple[EventType, Any, str, str | None, Future | None]] = []
@@ -65,26 +67,25 @@ def stub_run_events(brief: DecisionBrief, run_id: str, versions: VersionInfo | N
                                expected_cost_usd=trigger.expected_cost_usd),
              actor="engine", scenario_id=inaction.scenario_id, future=Future.inaction)
     advance()
-    emit(EventType.candidate_generated, plans[results.NAIVE_PLAN], actor="engine")
+    emit(EventType.candidate_generated, plans[naive_plan], actor="engine")
     emit(EventType.candidate_rejected,
-         CandidateRejected(plan_id=results.NAIVE_PLAN,
-                           reasons=["Removing vendor_auditlog breaks the protected control ctl_soc2_audit_logging."]),
+         CandidateRejected(plan_id=naive_plan, reasons=[story.rejection]),
          actor="engine")
-    emit(EventType.candidate_generated, plans[results.RECOMMENDED_PLAN], actor="engine")
+    emit(EventType.candidate_generated, plans[recommended_plan], actor="engine")
     emit(EventType.portfolio_ranked, results.portfolio_comparison(run_id, decision_id), actor="engine")
-    scenario(Future.act_now, results.RECOMMENDED_PLAN)
-    scenario(Future.delay, results.RECOMMENDED_PLAN)
+    scenario(Future.act_now, recommended_plan)
+    scenario(Future.delay, recommended_plan)
     advance()
     first_pass = [a for a in results.STUB_AGENTS if a != "challenger"]
     for agent_id in first_pass:
-        emit(EventType.agent_started, AgentStarted(agent_id=agent_id, plan_id=results.RECOMMENDED_PLAN), actor=agent_id)
+        emit(EventType.agent_started, AgentStarted(agent_id=agent_id, plan_id=recommended_plan), actor=agent_id)
     for agent_id in first_pass:
         emit(EventType.agent_completed, results.assessment(run_id, agent_id), actor=agent_id)
     advance()
     act_now = futures[Future.act_now]
     emit(EventType.simulation_completed, act_now, actor="engine", scenario_id=act_now.scenario_id, future=Future.act_now)
     advance()
-    emit(EventType.agent_started, AgentStarted(agent_id="challenger", plan_id=results.RECOMMENDED_PLAN), actor="challenger")
+    emit(EventType.agent_started, AgentStarted(agent_id="challenger", plan_id=recommended_plan), actor="challenger")
     emit(EventType.agent_completed, results.assessment(run_id, "challenger"), actor="challenger")
     advance()
     for result in futures.values():
@@ -106,7 +107,8 @@ def stub_run_events(brief: DecisionBrief, run_id: str, versions: VersionInfo | N
             actor=actor,
             scenario_id=scenario_id,
             future=future,
-            timestamp=STUB_TIME + timedelta(seconds=sequence),
+            # One fixed wall-clock second per event inside 17:00; the sample run stays under 60 events.
+            timestamp=datetime(2026, 9, 26, 17, 0, sequence, tzinfo=timezone.utc),
             payload=payload,
         )
         for sequence, (kind, payload, actor, scenario_id, future) in enumerate(steps, start=1)
