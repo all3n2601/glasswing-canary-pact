@@ -9,15 +9,12 @@ from agent_orchestration.prompts import (
     MANIFEST_RELATIVE,
     SECTION_TITLES,
     assemble,
-    department_knowledge,
     find_repo_root,
+    load_manifest,
     redact_people,
+    strip_title,
 )
 from orchestration_helpers import make_context
-
-AGENTS_WITH_SKILLS = ["finance", "engineering", "ai_data", "operations", "product", "marketing", "sales",
-                      "customer_success", "compliance", "challenger"]
-
 
 @pytest.fixture
 def context(brief, twin, settings):
@@ -72,9 +69,32 @@ def test_redact_keeps_department_ids() -> None:
     assert redact_people("dept_ops, kept_x, pt_1") == ("dept_ops, kept_x, [role]", ["pt_1"])
 
 
-def test_skill_files_for_ten_agents_and_fallback_for_people_knowledge() -> None:
-    for agent_id in AGENTS_WITH_SKILLS:
-        text, source, _ = department_knowledge(agent_id)
-        assert source == "skill" and not text.startswith("# "), agent_id
-    text, source, _ = department_knowledge("people_knowledge")
-    assert source == "fallback" and text.startswith("Role")
+def knowledge_texts(root, agent_id: str) -> tuple[str, str]:
+    manifest = load_manifest(root)
+    entry = manifest["agents"][agent_id]
+    skill = root / entry["skill"]
+    fallback = (root / manifest["prompts_root"] / entry["fallback"]).read_text(encoding="utf-8").strip()
+    skill_text = redact_people(strip_title(skill.read_text(encoding="utf-8")))[0] if skill.is_file() else ""
+    return skill_text, fallback
+
+
+@pytest.mark.parametrize("agent_id", sorted(load_manifest()["agents"]))
+def test_prompt_uses_skill_file_when_present_else_fallback(agent_id, brief, twin, settings) -> None:
+    root = find_repo_root()
+    skill_text, fallback = knowledge_texts(root, agent_id)
+    system = assemble(agent_id, make_context(brief, twin, settings, agent_id=agent_id)).messages[0]["content"]
+    if skill_text:
+        assert skill_text in system and fallback not in system
+    else:
+        assert fallback in system
+
+
+def test_missing_skill_file_falls_back(tmp_path, brief, twin, settings) -> None:
+    root = find_repo_root()
+    shutil.copytree(root / MANIFEST_RELATIVE.parent, tmp_path / MANIFEST_RELATIVE.parent)
+    skill_text, fallback = knowledge_texts(root, "finance")
+    assert skill_text, "finance must have a skill file in the repo for this test to mean anything"
+    prompt = assemble("finance", make_context(brief, twin, settings, agent_id="finance"), root=tmp_path)
+    system = prompt.messages[0]["content"]
+    assert prompt.knowledge_source == "fallback"
+    assert fallback in system and skill_text not in system
