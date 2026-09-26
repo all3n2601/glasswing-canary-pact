@@ -1,0 +1,379 @@
+{
+  "note": "Synthetic. Overlap DATA for the vendor-consolidation demo; the 128-portfolio optimisation is the engine's job. Vendor ids reconcile to id_registry.json.",
+  "savings_target_usd": 2000000000,
+  "total_annual_spend_usd": 8000000000,
+  "vendors": [
+    {
+      "id": "vendor_apex",
+      "name": "ApexData",
+      "annual_cost_usd": 1600000000,
+      "consumers": [
+        "dept_sales",
+        "dept_marketing"
+      ],
+      "critical": false,
+      "field_count": 8,
+      "unique_fields": [
+        "contact_phone"
+      ],
+      "unique_field_count": 1,
+      "substitutability": 0.875,
+      "dominated_by": [],
+      "freshness": 0.85,
+      "accuracy": 0.9,
+      "note": "Global company and contact attributes; broadest, high company-wide marginal value."
+    },
+    {
+      "id": "vendor_beacon",
+      "name": "BeaconIQ",
+      "annual_cost_usd": 1200000000,
+      "consumers": [
+        "dept_sales"
+      ],
+      "critical": false,
+      "field_count": 7,
+      "unique_fields": [],
+      "unique_field_count": 0,
+      "substitutability": 0.875,
+      "dominated_by": [
+        "vendor_apex"
+      ],
+      "freshness": 0.8,
+      "accuracy": 0.86,
+      "note": "Contact enrichment and firmographics; heavily overlaps Apex."
+    },
+    {
+      "id": "vendor_cinder",
+      "name": "CinderSignals",
+      "annual_cost_usd": 1400000000,
+      "consumers": [
+        "dept_marketing",
+        "dept_sales"
+      ],
+      "critical": false,
+      "field_count": 6,
+      "unique_fields": [
+        "buying_stage",
+        "intent_score",
+        "surge_signal"
+      ],
+      "unique_field_count": 3,
+      "substitutability": 0.333,
+      "dominated_by": [],
+      "freshness": 0.92,
+      "accuracy": 0.83,
+      "note": "Purchase-intent signals; overlaps Echo on market signals."
+    },
+    {
+      "id": "vendor_delta",
+      "name": "DeltaVerify",
+      "annual_cost_usd": 900000000,
+      "consumers": [
+        "dept_compliance"
+      ],
+      "critical": true,
+      "field_count": 5,
+      "unique_fields": [
+        "beneficial_owner",
+        "identity_verified",
+        "kyc_status",
+        "sanctions_flag"
+      ],
+      "unique_field_count": 4,
+      "substitutability": 0.111,
+      "dominated_by": [],
+      "freshness": 0.88,
+      "accuracy": 0.97,
+      "note": "Identity and compliance verification; low overlap, mandatory for controls."
+    },
+    {
+      "id": "vendor_echo",
+      "name": "EchoMarket",
+      "annual_cost_usd": 1100000000,
+      "consumers": [
+        "dept_product",
+        "dept_marketing"
+      ],
+      "critical": false,
+      "field_count": 6,
+      "unique_fields": [
+        "account_intel",
+        "competitor_map",
+        "market_size"
+      ],
+      "unique_field_count": 3,
+      "substitutability": 0.333,
+      "dominated_by": [],
+      "freshness": 0.78,
+      "accuracy": 0.82,
+      "note": "Market and account intelligence; overlaps Apex (company) and Cinder (intent)."
+    },
+    {
+      "id": "vendor_flux",
+      "name": "FluxBehavior",
+      "annual_cost_usd": 800000000,
+      "consumers": [
+        "dept_product",
+        "dept_ai_data"
+      ],
+      "critical": false,
+      "field_count": 4,
+      "unique_fields": [
+        "churn_signal",
+        "feature_adoption",
+        "product_usage",
+        "session_behavior"
+      ],
+      "unique_field_count": 4,
+      "substitutability": 0.0,
+      "dominated_by": [],
+      "freshness": 0.95,
+      "accuracy": 0.88,
+      "note": "Behavioural and product-usage signals; unique, low overlap."
+    },
+    {
+      "id": "vendor_granite",
+      "name": "GraniteGeo",
+      "annual_cost_usd": 1000000000,
+      "consumers": [
+        "dept_operations",
+        "dept_compliance"
+      ],
+      "critical": false,
+      "field_count": 5,
+      "unique_fields": [
+        "geo_risk",
+        "macro_indicator",
+        "region_stability",
+        "supply_risk"
+      ],
+      "unique_field_count": 4,
+      "substitutability": 0.111,
+      "dominated_by": [],
+      "freshness": 0.83,
+      "accuracy": 0.9,
+      "note": "Geographic and macroeconomic risk; small overlap with Delta on compliance_score."
+    }
+  ],
+  "pairwise_overlap": [
+    {
+      "a": "vendor_apex",
+      "b": "vendor_beacon",
+      "field_overlap": 0.875,
+      "geo_overlap": 0.5,
+      "shared_fields": [
+        "company_domain",
+        "company_name",
+        "company_size",
+        "contact_email",
+        "contact_name",
+        "contact_title",
+        "industry"
+      ]
+    },
+    {
+      "a": "vendor_apex",
+      "b": "vendor_cinder",
+      "field_overlap": 0.167,
+      "geo_overlap": 0.75,
+      "shared_fields": [
+        "company_domain",
+        "industry"
+      ]
+    },
+    {
+      "a": "vendor_apex",
+      "b": "vendor_delta",
+      "field_overlap": 0.0,
+      "geo_overlap": 1.0,
+      "shared_fields": []
+    },
+    {
+      "a": "vendor_apex",
+      "b": "vendor_echo",
+      "field_overlap": 0.167,
+      "geo_overlap": 0.5,
+      "shared_fields": [
+        "company_domain",
+        "industry"
+      ]
+    },
+    {
+      "a": "vendor_apex",
+      "b": "vendor_flux",
+      "field_overlap": 0.0,
+      "geo_overlap": 0.75,
+      "shared_fields": []
+    },
+    {
+      "a": "vendor_apex",
+      "b": "vendor_granite",
+      "field_overlap": 0.0,
+      "geo_overlap": 1.0,
+      "shared_fields": []
+    },
+    {
+      "a": "vendor_beacon",
+      "b": "vendor_cinder",
+      "field_overlap": 0.182,
+      "geo_overlap": 0.667,
+      "shared_fields": [
+        "company_domain",
+        "industry"
+      ]
+    },
+    {
+      "a": "vendor_beacon",
+      "b": "vendor_delta",
+      "field_overlap": 0.0,
+      "geo_overlap": 0.5,
+      "shared_fields": []
+    },
+    {
+      "a": "vendor_beacon",
+      "b": "vendor_echo",
+      "field_overlap": 0.182,
+      "geo_overlap": 1.0,
+      "shared_fields": [
+        "company_domain",
+        "industry"
+      ]
+    },
+    {
+      "a": "vendor_beacon",
+      "b": "vendor_flux",
+      "field_overlap": 0.0,
+      "geo_overlap": 0.667,
+      "shared_fields": []
+    },
+    {
+      "a": "vendor_beacon",
+      "b": "vendor_granite",
+      "field_overlap": 0.0,
+      "geo_overlap": 0.5,
+      "shared_fields": []
+    },
+    {
+      "a": "vendor_cinder",
+      "b": "vendor_delta",
+      "field_overlap": 0.0,
+      "geo_overlap": 0.75,
+      "shared_fields": []
+    },
+    {
+      "a": "vendor_cinder",
+      "b": "vendor_echo",
+      "field_overlap": 0.333,
+      "geo_overlap": 0.667,
+      "shared_fields": [
+        "company_domain",
+        "industry",
+        "intent_topic"
+      ]
+    },
+    {
+      "a": "vendor_cinder",
+      "b": "vendor_flux",
+      "field_overlap": 0.0,
+      "geo_overlap": 1.0,
+      "shared_fields": []
+    },
+    {
+      "a": "vendor_cinder",
+      "b": "vendor_granite",
+      "field_overlap": 0.0,
+      "geo_overlap": 0.75,
+      "shared_fields": []
+    },
+    {
+      "a": "vendor_delta",
+      "b": "vendor_echo",
+      "field_overlap": 0.0,
+      "geo_overlap": 0.5,
+      "shared_fields": []
+    },
+    {
+      "a": "vendor_delta",
+      "b": "vendor_flux",
+      "field_overlap": 0.0,
+      "geo_overlap": 0.75,
+      "shared_fields": []
+    },
+    {
+      "a": "vendor_delta",
+      "b": "vendor_granite",
+      "field_overlap": 0.111,
+      "geo_overlap": 1.0,
+      "shared_fields": [
+        "compliance_score"
+      ]
+    },
+    {
+      "a": "vendor_echo",
+      "b": "vendor_flux",
+      "field_overlap": 0.0,
+      "geo_overlap": 0.667,
+      "shared_fields": []
+    },
+    {
+      "a": "vendor_echo",
+      "b": "vendor_granite",
+      "field_overlap": 0.0,
+      "geo_overlap": 0.5,
+      "shared_fields": []
+    },
+    {
+      "a": "vendor_flux",
+      "b": "vendor_granite",
+      "field_overlap": 0.0,
+      "geo_overlap": 0.75,
+      "shared_fields": []
+    }
+  ],
+  "expected_recommended_plan": {
+    "removed": [
+      "vendor_beacon",
+      "vendor_echo"
+    ],
+    "gross_savings_usd": 2300000000,
+    "meets_target": true,
+    "required_field_coverage_pct": 89.3,
+    "lost_fields": [
+      "account_intel",
+      "competitor_map",
+      "market_size"
+    ],
+    "fields_to_migrate": [
+      "account_intel",
+      "competitor_map",
+      "market_size"
+    ],
+    "breaks_compliance": false,
+    "feasible_pure_removal": false,
+    "feasible_after_migration": true
+  },
+  "naive_plan": {
+    "removed": [
+      "vendor_apex",
+      "vendor_cinder"
+    ],
+    "gross_savings_usd": 3000000000,
+    "meets_target": true,
+    "required_field_coverage_pct": 85.7,
+    "lost_fields": [
+      "buying_stage",
+      "contact_phone",
+      "intent_score",
+      "surge_signal"
+    ],
+    "fields_to_migrate": [
+      "buying_stage",
+      "contact_phone",
+      "intent_score",
+      "surge_signal"
+    ],
+    "breaks_compliance": false,
+    "feasible_pure_removal": false,
+    "feasible_after_migration": true
+  }
+}
