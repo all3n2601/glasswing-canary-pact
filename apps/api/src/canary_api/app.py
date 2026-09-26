@@ -172,12 +172,12 @@ def document(document_id: str) -> Document:
 
 
 @app.post("/decisions", response_model=DecisionCreated)
-async def create_decision(brief: DecisionBrief) -> DecisionCreated:
+async def create_decision(brief: DecisionBrief, llm_mode: runs.LlmMode | None = None) -> DecisionCreated:
     try:
         brief = runs.apply_settings_defaults(brief, runtime.settings())
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=exc.errors(include_url=False)) from exc
-    return DecisionCreated(run_id=runs.start_run(brief))
+    return DecisionCreated(run_id=runs.start_run(brief, llm_mode))
 
 
 @app.get("/runs/{run_id}", response_model=RunState)

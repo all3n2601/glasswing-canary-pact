@@ -118,7 +118,7 @@ def test_real_engine_missing_function_gives_clear_error(client, monkeypatch) -> 
     with pytest.raises(engine_port.EngineNotReady, match=r"simulation_engine\.quick_impact"):
         engine_port.quick_impact(stub_twin(), [])
     with pytest.raises(engine_port.EngineNotReady, match=r"company_twin\.load_twin"):
-        engine_port.load_twin(REPLAYS_DIR, REPLAYS_DIR)
+        engine_port.load_twin(REPLAYS_DIR)
     response = client.get("/company")
     assert response.status_code == 503
     assert "company_twin.load_twin" in response.json()["detail"]
