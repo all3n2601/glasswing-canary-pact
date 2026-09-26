@@ -5,12 +5,14 @@ description = "LangGraph orchestration for Canary Pact department assessments"
 requires-python = ">=3.11"
 dependencies = [
   "canary-company-twin",
+  "canary-contracts",
   "canary-simulation-engine",
   "langgraph>=1.0",
 ]
 
 [tool.uv.sources]
 canary-company-twin = { workspace = true }
+canary-contracts = { workspace = true }
 canary-simulation-engine = { workspace = true }
 
 [build-system]

@@ -8,6 +8,11 @@ members = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["apps/api/tests", "packages/contracts-py/tests", "packages/company-twin/tests"]
+testpaths = [
+  "apps/api/tests",
+  "packages/contracts-py/tests",
+  "packages/company-twin/tests",
+  "packages/agent-orchestration/tests",
+]
 pythonpath = ["apps/api/src"]
 
