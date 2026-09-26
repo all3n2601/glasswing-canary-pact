@@ -13,7 +13,9 @@ from contracts_py.enums import (
     Future,
     ImpactCategory,
     ImpactLevel,
+    MigrationDifficulty,
     Origin,
+    OverlapDimension,
     Polarity,
     RiskLevel,
 )
@@ -75,12 +77,41 @@ class WorkflowCoverage(Strict):
     documented_pct: float = Field(ge=0, le=100)
     stranded: bool
     reasons: list[str] = Field(default_factory=list)
+    owner_capacity_fte_before: float | None = None
+    owner_capacity_fte_after: float | None = None
+    exception_documented_pct: Ratio | None = None
+    automation_pct: Ratio | None = None
+    training_days_required: int | None = None
+    replacement_cost_usd: USD | None = None
 
     @model_validator(mode="after")
     def check_stranded(self) -> "WorkflowCoverage":
         if self.stranded != (len(self.owners_after) < self.min_qualified_owners):
             raise ValueError("stranded must equal len(owners_after) < min_qualified_owners")
         return self
+
+
+class KnowledgeCoverage(Strict):
+    knowledge_id: ID
+    holders_before: list[ID] = Field(default_factory=list)
+    holders_after: list[ID] = Field(default_factory=list)
+    holder_capacity_fte_before: float
+    holder_capacity_fte_after: float
+    documented_pct: Ratio
+    lost: bool
+    dependent_workflow_ids: list[ID] = Field(default_factory=list)
+    reasons: list[str] = Field(default_factory=list)
+
+
+class VendorOverlap(Strict):
+    vendor_a: ID
+    vendor_b: ID
+    dimensions: dict[OverlapDimension, Ratio]
+    overall_overlap: Ratio
+    shared_dataset_ids: list[ID] = Field(default_factory=list)
+    unique_dataset_ids_a: list[ID] = Field(default_factory=list)
+    unique_dataset_ids_b: list[ID] = Field(default_factory=list)
+    migration_difficulty: MigrationDifficulty
 
 
 class ValueBreakdown(Strict):
@@ -172,6 +203,7 @@ class SimulationResult(Strict):
     constraint_results: list[ConstraintResult] = Field(default_factory=list)
     impacts: list[Impact] = Field(default_factory=list)
     workflow_coverage: list[WorkflowCoverage] = Field(default_factory=list)
+    knowledge_coverage: list[KnowledgeCoverage] = Field(default_factory=list)
     pressures_triggered: list[PressureTrigger] = Field(default_factory=list)
     risk: RiskScore
     affected_department_ids: list[ID] = Field(default_factory=list)

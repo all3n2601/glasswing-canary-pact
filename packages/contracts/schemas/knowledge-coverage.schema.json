@@ -1,0 +1,72 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "knowledge_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Knowledge Id",
+      "type": "string"
+    },
+    "holders_before": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Holders Before",
+      "type": "array"
+    },
+    "holders_after": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Holders After",
+      "type": "array"
+    },
+    "holder_capacity_fte_before": {
+      "title": "Holder Capacity Fte Before",
+      "type": "number"
+    },
+    "holder_capacity_fte_after": {
+      "title": "Holder Capacity Fte After",
+      "type": "number"
+    },
+    "documented_pct": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Documented Pct",
+      "type": "number"
+    },
+    "lost": {
+      "title": "Lost",
+      "type": "boolean"
+    },
+    "dependent_workflow_ids": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Dependent Workflow Ids",
+      "type": "array"
+    },
+    "reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Reasons",
+      "type": "array"
+    }
+  },
+  "required": [
+    "knowledge_id",
+    "holder_capacity_fte_before",
+    "holder_capacity_fte_after",
+    "documented_pct",
+    "lost"
+  ],
+  "title": "KnowledgeCoverage",
+  "type": "object"
+}

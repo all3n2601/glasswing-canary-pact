@@ -59,6 +59,10 @@ class VersionInfo(Strict):
     engine_version: str
     created_at: datetime
     as_of_date: date
+    data_snapshot_id: str | None = None
+    policy_version: str | None = None
+    coefficient_version: str | None = None
+    created_by: str | None = None
 
 
 class Entity(Strict):
@@ -89,6 +93,19 @@ class Entity(Strict):
     arr_usd: USD | None = None
     tags: list[str] = Field(default_factory=list)
     evidence_refs: list[ID] = Field(default_factory=list)
+    geographies: list[str] = Field(default_factory=list)
+    history_years: int | None = None
+    freshness_days: int | None = None
+    accuracy: Ratio | None = None
+    permitted_uses: list[str] = Field(default_factory=list)
+    retains_history_after_termination: bool | None = None
+    attribute_group: str | None = None
+    time_to_train_days: int | None = None
+    replacement_cost_usd: USD | None = None
+    exception_documented_pct: Ratio | None = None
+    automation_pct: Ratio | None = None
+    max_downtime_days: int | None = None
+    aliases: list[str] = Field(default_factory=list)
 
 
 class Edge(Strict):
@@ -106,6 +123,8 @@ class Edge(Strict):
     criticality: Criticality
     confidence: Ratio
     evidence_refs: list[ID] = Field(default_factory=list)
+    extraction_method: Literal["seeded", "keyword", "zero_shot", "canary"] | None = None
+    last_validated: date | None = None
 
     @model_validator(mode="after")
     def fill_strength_range(self) -> "Edge":
@@ -326,6 +345,7 @@ CORE_AGENT_IDS = (
     "customer_success",
     "compliance",
     "challenger",
+    "people_knowledge",
 )
 
 

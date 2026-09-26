@@ -382,7 +382,8 @@
             "compliance_controls_broken",
             "stranded_workflows",
             "critical_systems_degraded",
-            "max_capacity_loss_pct"
+            "max_capacity_loss_pct",
+            "critical_coverage_pct"
           ],
           "title": "Metric",
           "type": "string"
@@ -457,7 +458,8 @@
             "compliance_controls_broken",
             "stranded_workflows",
             "critical_systems_degraded",
-            "max_capacity_loss_pct"
+            "max_capacity_loss_pct",
+            "critical_coverage_pct"
           ],
           "title": "Metric",
           "type": "string"
@@ -528,8 +530,11 @@
       "additionalProperties": false,
       "properties": {
         "schema_version": {
-          "const": "2.1.0",
-          "default": "2.1.0",
+          "default": "2.1.1",
+          "enum": [
+            "2.1.0",
+            "2.1.1"
+          ],
           "title": "Schema Version",
           "type": "string"
         },
@@ -1365,6 +1370,87 @@
       "title": "ItemCounterfactual",
       "type": "object"
     },
+    "KnowledgeCoverage": {
+      "additionalProperties": false,
+      "properties": {
+        "knowledge_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Knowledge Id",
+          "type": "string"
+        },
+        "holders_before": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Holders Before",
+          "type": "array"
+        },
+        "holders_after": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Holders After",
+          "type": "array"
+        },
+        "holder_capacity_fte_before": {
+          "title": "Holder Capacity Fte Before",
+          "type": "number"
+        },
+        "holder_capacity_fte_after": {
+          "title": "Holder Capacity Fte After",
+          "type": "number"
+        },
+        "documented_pct": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Documented Pct",
+          "type": "number"
+        },
+        "lost": {
+          "title": "Lost",
+          "type": "boolean"
+        },
+        "dependent_workflow_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Dependent Workflow Ids",
+          "type": "array"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "knowledge_id",
+        "holder_capacity_fte_before",
+        "holder_capacity_fte_after",
+        "documented_pct",
+        "lost"
+      ],
+      "title": "KnowledgeCoverage",
+      "type": "object"
+    },
+    "MigrationDifficulty": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "title": "MigrationDifficulty",
+      "type": "string"
+    },
     "MissingQuestion": {
       "additionalProperties": false,
       "properties": {
@@ -1567,6 +1653,23 @@
         "user"
       ],
       "title": "Origin",
+      "type": "string"
+    },
+    "OverlapDimension": {
+      "enum": [
+        "record_coverage",
+        "attribute_coverage",
+        "geography",
+        "history_depth",
+        "freshness",
+        "accuracy",
+        "permitted_use",
+        "consumer_teams",
+        "downstream_workflows",
+        "model_features",
+        "substitutability"
+      ],
+      "title": "OverlapDimension",
       "type": "string"
     },
     "Polarity": {
@@ -1901,6 +2004,13 @@
           "title": "Workflow Coverage",
           "type": "array"
         },
+        "knowledge_coverage": {
+          "items": {
+            "$ref": "#/$defs/KnowledgeCoverage"
+          },
+          "title": "Knowledge Coverage",
+          "type": "array"
+        },
         "pressures_triggered": {
           "items": {
             "$ref": "#/$defs/PressureTrigger"
@@ -2051,6 +2161,80 @@
       "title": "ValueBreakdown",
       "type": "object"
     },
+    "VendorOverlap": {
+      "additionalProperties": false,
+      "properties": {
+        "vendor_a": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Vendor A",
+          "type": "string"
+        },
+        "vendor_b": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Vendor B",
+          "type": "string"
+        },
+        "dimensions": {
+          "additionalProperties": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/OverlapDimension"
+          },
+          "title": "Dimensions",
+          "type": "object"
+        },
+        "overall_overlap": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Overall Overlap",
+          "type": "number"
+        },
+        "shared_dataset_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Shared Dataset Ids",
+          "type": "array"
+        },
+        "unique_dataset_ids_a": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Unique Dataset Ids A",
+          "type": "array"
+        },
+        "unique_dataset_ids_b": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Unique Dataset Ids B",
+          "type": "array"
+        },
+        "migration_difficulty": {
+          "$ref": "#/$defs/MigrationDifficulty"
+        }
+      },
+      "required": [
+        "vendor_a",
+        "vendor_b",
+        "dimensions",
+        "overall_overlap",
+        "migration_difficulty"
+      ],
+      "title": "VendorOverlap",
+      "type": "object"
+    },
     "VersionInfo": {
       "additionalProperties": false,
       "properties": {
@@ -2084,6 +2268,54 @@
           "format": "date",
           "title": "As Of Date",
           "type": "string"
+        },
+        "data_snapshot_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Data Snapshot Id"
+        },
+        "policy_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Policy Version"
+        },
+        "coefficient_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Coefficient Version"
+        },
+        "created_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Created By"
         }
       },
       "required": [
@@ -2154,6 +2386,82 @@
           },
           "title": "Reasons",
           "type": "array"
+        },
+        "owner_capacity_fte_before": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Capacity Fte Before"
+        },
+        "owner_capacity_fte_after": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Capacity Fte After"
+        },
+        "exception_documented_pct": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exception Documented Pct"
+        },
+        "automation_pct": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Automation Pct"
+        },
+        "training_days_required": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Training Days Required"
+        },
+        "replacement_cost_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replacement Cost Usd"
         }
       },
       "required": [
@@ -2171,8 +2479,11 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "2.1.0",
-      "default": "2.1.0",
+      "default": "2.1.1",
+      "enum": [
+        "2.1.0",
+        "2.1.1"
+      ],
       "title": "Schema Version",
       "type": "string"
     },
@@ -2242,6 +2553,13 @@
         "$ref": "#/$defs/MitigationComparison"
       },
       "title": "Mitigations",
+      "type": "array"
+    },
+    "vendor_overlaps": {
+      "items": {
+        "$ref": "#/$defs/VendorOverlap"
+      },
+      "title": "Vendor Overlaps",
       "type": "array"
     },
     "counterfactuals": {

@@ -3,10 +3,29 @@ from contracts_py.enums import Future
 from contracts_py.twin import DepartmentProfile, Document, Organization, OrganizationSettings, Pressure
 
 
-def test_primary_brief_validates(brief: DecisionBrief) -> None:
+def test_vendor_reduction_brief_validates(vendor_brief: DecisionBrief) -> None:
+    again = DecisionBrief.model_validate(vendor_brief.model_dump(mode="json"))
+    assert again == vendor_brief
+    assert again.schema_version == "2.1.1"
+    assert [i.target_entity_id for i in again.candidate_interventions] == [
+        f"vendor_{name}" for name in ("apex", "beacon", "cinder", "delta", "echo", "flux", "granite")
+    ]
+    assert all(c.hard and c.metric in ENGINE_METRICS for c in again.constraints)
+    assert again.futures == [Future.act_now, Future.inaction, Future.delay]
+
+
+def test_workforce_knowledge_brief_validates(workforce_brief: DecisionBrief) -> None:
+    again = DecisionBrief.model_validate(workforce_brief.model_dump(mode="json"))
+    assert again == workforce_brief
+    assert [i.type for i in again.candidate_interventions] == ["remove_roles"] * 8
+    assert [i.target_entity_id for i in again.candidate_interventions] == [f"role_wk_{n:02d}" for n in range(1, 9)]
+    assert [(c.metric, c.hard) for c in again.constraints] == [("stranded_workflows", True)]
+
+
+def test_cut_2m_brief_still_validates(cut_2m_brief: DecisionBrief) -> None:
+    brief = cut_2m_brief
     again = DecisionBrief.model_validate(brief.model_dump(mode="json"))
     assert again == brief
-    assert again.schema_version == "2.1.0"
     assert [i.id for i in again.candidate_interventions] == ["i_platform_ops", "i_auditlog", "i_migration", "i_eng"]
     assert again.futures == [Future.act_now, Future.inaction, Future.delay]
     assert all(c.metric in ENGINE_METRICS for c in again.constraints)

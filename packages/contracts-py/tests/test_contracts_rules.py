@@ -61,7 +61,7 @@ def package_data(brief: DecisionBrief) -> dict:
     return {
         "package_id": "pkg_1",
         "run_id": "run_1",
-        "decision_id": "dec_cut_2m",
+        "decision_id": brief.decision_id,
         "versions": {
             "twin_version": "t1",
             "settings_version": 1,
@@ -193,7 +193,7 @@ def test_brief_without_inaction_gets_inaction_added(brief: DecisionBrief) -> Non
 
 def test_brief_rejects_protected_target(brief: DecisionBrief) -> None:
     with pytest.raises(ValidationError, match="protected entities"):
-        DecisionBrief.model_validate(brief.model_dump() | {"protected_entity_ids": ["vendor_auditlog"]})
+        DecisionBrief.model_validate(brief.model_dump() | {"protected_entity_ids": ["vendor_apex"]})
 
 
 def test_only_inaction_scenario_has_no_plan() -> None:

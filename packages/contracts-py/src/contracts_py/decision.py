@@ -15,6 +15,7 @@ EngineMetric = Literal[
     "stranded_workflows",
     "critical_systems_degraded",
     "max_capacity_loss_pct",
+    "critical_coverage_pct",
 ]
 ENGINE_METRICS: tuple[str, ...] = get_args(EngineMetric)
 

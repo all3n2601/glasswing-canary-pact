@@ -8,8 +8,11 @@
       "type": "string"
     },
     "schema_version": {
-      "const": "2.1.0",
-      "default": "2.1.0",
+      "default": "2.1.1",
+      "enum": [
+        "2.1.0",
+        "2.1.1"
+      ],
       "title": "Schema Version",
       "type": "string"
     }

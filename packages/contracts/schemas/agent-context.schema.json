@@ -329,7 +329,8 @@
             "compliance_controls_broken",
             "stranded_workflows",
             "critical_systems_degraded",
-            "max_capacity_loss_pct"
+            "max_capacity_loss_pct",
+            "critical_coverage_pct"
           ],
           "title": "Metric",
           "type": "string"
@@ -400,8 +401,11 @@
       "additionalProperties": false,
       "properties": {
         "schema_version": {
-          "const": "2.1.0",
-          "default": "2.1.0",
+          "default": "2.1.1",
+          "enum": [
+            "2.1.0",
+            "2.1.1"
+          ],
           "title": "Schema Version",
           "type": "string"
         },
@@ -1158,6 +1162,37 @@
           },
           "title": "Evidence Refs",
           "type": "array"
+        },
+        "extraction_method": {
+          "anyOf": [
+            {
+              "enum": [
+                "seeded",
+                "keyword",
+                "zero_shot",
+                "canary"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Extraction Method"
+        },
+        "last_validated": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Validated"
         }
       },
       "required": [
@@ -1460,6 +1495,153 @@
             "type": "string"
           },
           "title": "Evidence Refs",
+          "type": "array"
+        },
+        "geographies": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Geographies",
+          "type": "array"
+        },
+        "history_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "History Years"
+        },
+        "freshness_days": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Freshness Days"
+        },
+        "accuracy": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accuracy"
+        },
+        "permitted_uses": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Permitted Uses",
+          "type": "array"
+        },
+        "retains_history_after_termination": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Retains History After Termination"
+        },
+        "attribute_group": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attribute Group"
+        },
+        "time_to_train_days": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Time To Train Days"
+        },
+        "replacement_cost_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replacement Cost Usd"
+        },
+        "exception_documented_pct": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exception Documented Pct"
+        },
+        "automation_pct": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Automation Pct"
+        },
+        "max_downtime_days": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Downtime Days"
+        },
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
           "type": "array"
         }
       },
@@ -2518,8 +2700,11 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "2.1.0",
-      "default": "2.1.0",
+      "default": "2.1.1",
+      "enum": [
+        "2.1.0",
+        "2.1.1"
+      ],
       "title": "Schema Version",
       "type": "string"
     },

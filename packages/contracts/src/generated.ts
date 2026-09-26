@@ -223,6 +223,11 @@ export type ClaimStatus = "computed" | "validated" | "hypothesis" | "rejected";
 export type RiskLevel = "low" | "medium" | "high" | "critical";
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "MigrationDifficulty".
+ */
+export type MigrationDifficulty = "low" | "medium" | "high";
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
  * via the `definition` "EventType".
  */
 export type EventType =
@@ -274,6 +279,22 @@ export type RunStatus =
  * via the `definition` "EventLog".
  */
 export type EventLog = Event[];
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "OverlapDimension".
+ */
+export type OverlapDimension =
+  | "record_coverage"
+  | "attribute_coverage"
+  | "geography"
+  | "history_depth"
+  | "freshness"
+  | "accuracy"
+  | "permitted_use"
+  | "consumer_teams"
+  | "downstream_workflows"
+  | "model_features"
+  | "substitutability";
 
 export interface CanaryContracts {
   Twin: Twin;
@@ -301,6 +322,8 @@ export interface CanaryContracts {
   PortfolioComparison: PortfolioComparison;
   MitigationComparison: MitigationComparison;
   BlastRadius: BlastRadius;
+  VendorOverlap: VendorOverlap;
+  KnowledgeCoverage: KnowledgeCoverage;
   ItemCounterfactual: ItemCounterfactual;
   MissingQuestion: MissingQuestion;
   UserAnswer: UserAnswer;
@@ -329,7 +352,7 @@ export interface CanaryContracts {
  * via the `definition` "Twin".
  */
 export interface Twin {
-  schema_version?: "2.1.0";
+  schema_version?: "2.1.0" | "2.1.1";
   version: VersionInfo;
   organization: Organization;
   department_profiles?: DepartmentProfile[];
@@ -351,6 +374,10 @@ export interface VersionInfo {
   engine_version: string;
   created_at: string;
   as_of_date: string;
+  data_snapshot_id?: string | null;
+  policy_version?: string | null;
+  coefficient_version?: string | null;
+  created_by?: string | null;
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
@@ -490,6 +517,19 @@ export interface Entity {
   arr_usd?: number | null;
   tags?: string[];
   evidence_refs?: string[];
+  geographies?: string[];
+  history_years?: number | null;
+  freshness_days?: number | null;
+  accuracy?: number | null;
+  permitted_uses?: string[];
+  retains_history_after_termination?: boolean | null;
+  attribute_group?: string | null;
+  time_to_train_days?: number | null;
+  replacement_cost_usd?: number | null;
+  exception_documented_pct?: number | null;
+  automation_pct?: number | null;
+  max_downtime_days?: number | null;
+  aliases?: string[];
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
@@ -509,6 +549,8 @@ export interface Edge {
   criticality: Criticality;
   confidence: number;
   evidence_refs?: string[];
+  extraction_method?: ("seeded" | "keyword" | "zero_shot" | "canary") | null;
+  last_validated?: string | null;
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
@@ -654,7 +696,8 @@ export interface Constraint {
     | "compliance_controls_broken"
     | "stranded_workflows"
     | "critical_systems_degraded"
-    | "max_capacity_loss_pct";
+    | "max_capacity_loss_pct"
+    | "critical_coverage_pct";
   operator: "<=" | ">=" | "==";
   threshold: number;
   unit: string;
@@ -737,7 +780,7 @@ export interface DepartmentDetail {
  * via the `definition` "DecisionBrief".
  */
 export interface DecisionBrief {
-  schema_version?: "2.1.0";
+  schema_version?: "2.1.0" | "2.1.1";
   decision_id: string;
   decision_type: DecisionType;
   title: string;
@@ -860,6 +903,7 @@ export interface SimulationResult {
   constraint_results?: ConstraintResult[];
   impacts?: Impact[];
   workflow_coverage?: WorkflowCoverage[];
+  knowledge_coverage?: KnowledgeCoverage[];
   pressures_triggered?: PressureTrigger[];
   risk: RiskScore;
   affected_department_ids?: string[];
@@ -900,7 +944,8 @@ export interface ConstraintResult {
     | "compliance_controls_broken"
     | "stranded_workflows"
     | "critical_systems_degraded"
-    | "max_capacity_loss_pct";
+    | "max_capacity_loss_pct"
+    | "critical_coverage_pct";
   operator: "<=" | ">=" | "==";
   threshold: number;
   value: number;
@@ -922,6 +967,27 @@ export interface WorkflowCoverage {
   backup_count_after: number;
   documented_pct: number;
   stranded: boolean;
+  reasons?: string[];
+  owner_capacity_fte_before?: number | null;
+  owner_capacity_fte_after?: number | null;
+  exception_documented_pct?: number | null;
+  automation_pct?: number | null;
+  training_days_required?: number | null;
+  replacement_cost_usd?: number | null;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "KnowledgeCoverage".
+ */
+export interface KnowledgeCoverage {
+  knowledge_id: string;
+  holders_before?: string[];
+  holders_after?: string[];
+  holder_capacity_fte_before: number;
+  holder_capacity_fte_after: number;
+  documented_pct: number;
+  lost: boolean;
+  dependent_workflow_ids?: string[];
   reasons?: string[];
 }
 /**
@@ -1091,6 +1157,22 @@ export interface CompanyOutcome {
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "VendorOverlap".
+ */
+export interface VendorOverlap {
+  vendor_a: string;
+  vendor_b: string;
+  dimensions: {
+    [k: string]: number;
+  };
+  overall_overlap: number;
+  shared_dataset_ids?: string[];
+  unique_dataset_ids_a?: string[];
+  unique_dataset_ids_b?: string[];
+  migration_difficulty: MigrationDifficulty;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
  * via the `definition` "ItemCounterfactual".
  */
 export interface ItemCounterfactual {
@@ -1145,7 +1227,7 @@ export interface AgentSpec {
  * via the `definition` "AgentContext".
  */
 export interface AgentContext {
-  schema_version?: "2.1.0";
+  schema_version?: "2.1.0" | "2.1.1";
   run_id: string;
   agent: AgentSpec;
   brief: DecisionBrief;
@@ -1333,7 +1415,7 @@ export interface ToolCall {
  * via the `definition` "DecisionPackage".
  */
 export interface DecisionPackage {
-  schema_version?: "2.1.0";
+  schema_version?: "2.1.0" | "2.1.1";
   package_id: string;
   run_id: string;
   decision_id: string;
@@ -1347,6 +1429,7 @@ export interface DecisionPackage {
   department_impacts?: DepartmentImpactSummary[];
   critical_risks?: Impact[];
   mitigations?: MitigationComparison[];
+  vendor_overlaps?: VendorOverlap[];
   counterfactuals?: ItemCounterfactual[];
   missing_information?: MissingQuestion[];
   implementation?: ImplementationStep[];
@@ -1418,7 +1501,7 @@ export interface HumanDecision {
  * via the `definition` "Event".
  */
 export interface Event {
-  schema_version?: "2.1.0";
+  schema_version?: "2.1.0" | "2.1.1";
   event_id: string;
   run_id: string;
   sequence: number;
@@ -1523,7 +1606,7 @@ export interface RunFailed {
  * via the `definition` "RunState".
  */
 export interface RunState {
-  schema_version?: "2.1.0";
+  schema_version?: "2.1.0" | "2.1.1";
   run_id: string;
   decision_id: string;
   baseline_twin_version: string;
@@ -1544,7 +1627,7 @@ export interface RunState {
  */
 export interface HealthResponse {
   status?: "ok";
-  schema_version?: "2.1.0";
+  schema_version?: "2.1.0" | "2.1.1";
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema

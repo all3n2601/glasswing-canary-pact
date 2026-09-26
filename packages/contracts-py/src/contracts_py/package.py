@@ -16,6 +16,7 @@ from contracts_py.engine import (
     MissingQuestion,
     MitigationComparison,
     PortfolioComparison,
+    VendorOverlap,
 )
 from contracts_py.enums import Future
 from contracts_py.twin import VersionInfo
@@ -78,6 +79,7 @@ class DecisionPackage(Strict):
     department_impacts: list[DepartmentImpactSummary] = Field(default_factory=list)
     critical_risks: list[Impact] = Field(default_factory=list)
     mitigations: list[MitigationComparison] = Field(default_factory=list)
+    vendor_overlaps: list[VendorOverlap] = Field(default_factory=list)
     counterfactuals: list[ItemCounterfactual] = Field(default_factory=list)
     missing_information: list[MissingQuestion] = Field(default_factory=list)
     implementation: list[ImplementationStep] = Field(default_factory=list)
