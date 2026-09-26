@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://canary-pact.local/schemas/scenario-result.schema.json",
+  "title": "ScenarioResult",
+  "type": "object",
+  "required": ["scenario_id", "status", "gross_savings", "transition_cost", "net_savings", "impacts", "violations", "recommendation"],
+  "properties": {
+    "scenario_id": { "type": "string" },
+    "status": { "enum": ["feasible", "infeasible", "needs_review"] },
+    "gross_savings": { "type": "number" },
+    "transition_cost": { "type": "number" },
+    "net_savings": { "type": "number" },
+    "impacts": { "type": "array", "items": { "type": "object" } },
+    "violations": { "type": "array", "items": { "type": "string" } },
+    "recommendation": { "type": "string" }
+  },
+  "additionalProperties": false
+}
+

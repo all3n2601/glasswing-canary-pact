@@ -1,0 +1,17 @@
+{
+  "name": "glasswing-canary-pact",
+  "private": true,
+  "packageManager": "pnpm@11.5.1",
+  "scripts": {
+    "dev": "turbo dev",
+    "dev:web": "pnpm --filter @canary-pact/web dev",
+    "dev:api": "pnpm --filter @canary-pact/api dev",
+    "build": "turbo build",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0"
+  }
+}
+

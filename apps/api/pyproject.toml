@@ -1,0 +1,36 @@
+[project]
+name = "canary-api"
+version = "0.1.0"
+description = "FastAPI service for Canary Pact"
+requires-python = ">=3.11"
+dependencies = [
+  "canary-agent-orchestration",
+  "canary-company-twin",
+  "canary-simulation-engine",
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.34",
+]
+
+[dependency-groups]
+dev = [
+  "httpx>=0.28",
+  "pyright>=1.1.400",
+  "pytest>=8.3",
+]
+
+[tool.uv.sources]
+canary-agent-orchestration = { workspace = true }
+canary-company-twin = { workspace = true }
+canary-simulation-engine = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/canary_api"]
+
+[tool.pyright]
+include = ["src"]
+pythonVersion = "3.11"
+typeCheckingMode = "basic"

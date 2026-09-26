@@ -8,4 +8,9 @@ node_modules/
 .next/
 dist/
 build/
-
+.turbo/
+.venv/
+*.egg-info/
+*.tsbuildinfo
+.coverage
+htmlcov/

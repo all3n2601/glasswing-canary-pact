@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: canary
+      POSTGRES_PASSWORD: canary
+      POSTGRES_DB: canary_pact
+    ports:
+      - "5432:5432"
+    volumes:
+      - canary_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U canary -d canary_pact"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  canary_postgres:
+

@@ -1,6 +1,49 @@
 # GlassWing / Canary Pact
 
-Planning repository for Canary Pact, an AI-powered organizational decision simulator that models the company-wide blast radius of proposed decisions before they are approved.
+Monorepo for Canary Pact, an AI-powered organizational decision simulator that models the company-wide blast radius of proposed decisions before they are approved.
+
+## Applications and packages
+
+```text
+apps/
+├── web/                    Next.js executive dashboard
+└── api/                    FastAPI service
+packages/
+├── contracts/              Shared JSON contracts and TypeScript types
+├── company-twin/           Organizational graph and fixtures
+├── simulation-engine/      Deterministic blast-radius calculations
+└── agent-orchestration/    LangGraph department workflow
+data/                       Synthetic company and scenarios
+infra/                      Local PostgreSQL infrastructure
+docs/                       Master plan and four-person work split
+```
+
+## Quick start
+
+Requirements: Node.js 20+, pnpm 10+, Python 3.11+, and uv.
+
+```bash
+pnpm install
+uv sync --all-packages
+pnpm dev
+```
+
+The dashboard runs at `http://localhost:3000`; the API and interactive documentation run at `http://localhost:8000` and `http://localhost:8000/docs`.
+
+To start PostgreSQL separately:
+
+```bash
+docker compose -f infra/compose.yaml up -d
+```
+
+The starter API uses in-memory state so the demo runs without PostgreSQL. The database service is ready for persistence work.
+
+## Verification
+
+```bash
+pnpm typecheck
+pnpm test
+```
 
 ## Documents
 

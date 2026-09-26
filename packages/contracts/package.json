@@ -1,0 +1,16 @@
+{
+  "name": "@canary-pact/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "node -e \"console.log('Contract schemas are validated by API tests')\""
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0"
+  }
+}
+

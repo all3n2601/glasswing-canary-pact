@@ -1,0 +1,38 @@
+{
+  "id": "company_northstar",
+  "name": "Northstar Technologies",
+  "version": "1.0.0",
+  "entities": [
+    {"id":"dept_finance","kind":"department","name":"Finance","metadata":{}},
+    {"id":"dept_sales","kind":"department","name":"Sales","metadata":{}},
+    {"id":"dept_marketing","kind":"department","name":"Marketing","metadata":{}},
+    {"id":"dept_engineering","kind":"department","name":"Engineering","metadata":{}},
+    {"id":"dept_compliance","kind":"department","name":"Compliance","metadata":{}},
+    {"id":"vendor_atlas","kind":"vendor","name":"Atlas Data","annual_cost":1800000000,"metadata":{"coverage":0.91,"unique_coverage":0.12,"transition_cost":80000000}},
+    {"id":"vendor_beacon","kind":"vendor","name":"Beacon Enrichment","annual_cost":1200000000,"metadata":{"coverage":0.76,"unique_coverage":0.03,"transition_cost":40000000}},
+    {"id":"vendor_census","kind":"vendor","name":"Census Signals","annual_cost":1400000000,"metadata":{"coverage":0.68,"unique_coverage":0.24,"transition_cost":100000000}},
+    {"id":"vendor_diligence","kind":"vendor","name":"Diligence Verify","annual_cost":900000000,"metadata":{"coverage":0.42,"unique_coverage":0.31,"transition_cost":60000000,"critical":true}},
+    {"id":"vendor_echo","kind":"vendor","name":"Echo Markets","annual_cost":1000000000,"metadata":{"coverage":0.71,"unique_coverage":0.04,"transition_cost":35000000}},
+    {"id":"vendor_flux","kind":"vendor","name":"Flux Intent","annual_cost":950000000,"metadata":{"coverage":0.59,"unique_coverage":0.18,"transition_cost":70000000}},
+    {"id":"vendor_grove","kind":"vendor","name":"Grove Firmographics","annual_cost":750000000,"metadata":{"coverage":0.63,"unique_coverage":0.05,"transition_cost":30000000}},
+    {"id":"workflow_enrichment","kind":"workflow","name":"Lead enrichment","department_id":"dept_sales","metadata":{"criticality":0.8}},
+    {"id":"workflow_targeting","kind":"workflow","name":"Campaign targeting","department_id":"dept_marketing","metadata":{"criticality":0.7}},
+    {"id":"workflow_verification","kind":"workflow","name":"Customer verification","department_id":"dept_compliance","metadata":{"criticality":1.0}},
+    {"id":"kpi_pipeline","kind":"kpi","name":"Qualified pipeline","department_id":"dept_sales","metadata":{}},
+    {"id":"kpi_cac","kind":"kpi","name":"Customer acquisition cost","department_id":"dept_marketing","metadata":{}},
+    {"id":"kpi_compliance","kind":"kpi","name":"Compliance coverage","department_id":"dept_compliance","metadata":{}}
+  ],
+  "dependencies": [
+    {"source":"vendor_atlas","target":"workflow_enrichment","relationship":"PROVIDES","importance":0.8,"substitutability":0.7,"confidence":0.92,"evidence":"Data inventory"},
+    {"source":"vendor_beacon","target":"workflow_enrichment","relationship":"PROVIDES","importance":0.55,"substitutability":0.9,"confidence":0.88,"evidence":"Data inventory"},
+    {"source":"vendor_census","target":"workflow_targeting","relationship":"PROVIDES","importance":0.9,"substitutability":0.25,"confidence":0.91,"evidence":"Campaign feature registry"},
+    {"source":"vendor_diligence","target":"workflow_verification","relationship":"PROVIDES","importance":1.0,"substitutability":0.05,"confidence":0.98,"evidence":"Compliance control register"},
+    {"source":"vendor_echo","target":"workflow_targeting","relationship":"PROVIDES","importance":0.48,"substitutability":0.88,"confidence":0.84,"evidence":"Marketing inventory"},
+    {"source":"vendor_flux","target":"workflow_targeting","relationship":"PROVIDES","importance":0.72,"substitutability":0.45,"confidence":0.86,"evidence":"Campaign feature registry"},
+    {"source":"vendor_grove","target":"workflow_enrichment","relationship":"PROVIDES","importance":0.42,"substitutability":0.86,"confidence":0.82,"evidence":"Data inventory"},
+    {"source":"workflow_enrichment","target":"kpi_pipeline","relationship":"INFLUENCES","importance":0.8,"substitutability":0.2,"confidence":0.82,"evidence":"Sales analytics"},
+    {"source":"workflow_targeting","target":"kpi_cac","relationship":"INFLUENCES","importance":0.7,"substitutability":0.3,"confidence":0.78,"evidence":"Marketing attribution"},
+    {"source":"workflow_verification","target":"kpi_compliance","relationship":"CONTROLS","importance":1.0,"substitutability":0.0,"confidence":0.97,"evidence":"Compliance policy"}
+  ]
+}
+
