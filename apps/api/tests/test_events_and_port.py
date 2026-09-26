@@ -161,3 +161,13 @@ def test_replay_rewrites_only_run_id_fields() -> None:
     assert runs.rewrite_run_ids({"a": [{"run_id": "run_old", "text": "run_old"}]}, "run_new") == {
         "a": [{"run_id": "run_new", "text": "run_old"}]
     }
+
+
+def test_stub_clone_with_edges_keeps_extraction_method() -> None:
+    from canary_api.stubs import engine as stub_engine
+
+    twin = stub_twin()
+    agent_edge = twin.edges[0].model_copy(update={"id": "e_agent_probe", "extraction_method": "agent"})
+    cloned = stub_engine.clone_with_edges(twin, [agent_edge])
+    assert next(e for e in cloned.edges if e.id == "e_agent_probe").extraction_method == "agent"
+    assert "e_agent_probe" not in {e.id for e in twin.edges}

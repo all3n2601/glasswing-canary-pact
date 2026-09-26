@@ -558,7 +558,7 @@ export interface Edge {
   criticality: Criticality;
   confidence: number;
   evidence_refs?: string[];
-  extraction_method?: ("seeded" | "keyword" | "zero_shot" | "canary") | null;
+  extraction_method?: ("seeded" | "keyword" | "zero_shot" | "canary" | "agent") | null;
   last_validated?: string | null;
 }
 /**

@@ -136,7 +136,8 @@
                 "seeded",
                 "keyword",
                 "zero_shot",
-                "canary"
+                "canary",
+                "agent"
               ],
               "type": "string"
             },

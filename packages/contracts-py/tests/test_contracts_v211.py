@@ -192,6 +192,7 @@ def test_cr9_edge_extraction_method_and_last_validated() -> None:
     parsed = Edge.model_validate(edge(extraction_method="zero_shot", last_validated="2026-09-01"))
     assert parsed.last_validated == date(2026, 9, 1)
     assert Edge.model_validate(edge()).extraction_method is None
+    assert Edge.model_validate(edge(extraction_method="agent")).extraction_method == "agent"
     with pytest.raises(ValidationError):
         Edge.model_validate(edge(extraction_method="guess"))
 
