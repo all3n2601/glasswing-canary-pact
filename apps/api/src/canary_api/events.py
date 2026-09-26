@@ -3,12 +3,13 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, AsyncIterator
+from typing import Any, AsyncIterator, Callable
 
 from contracts_py.enums import Future, RunStatus
 from contracts_py.events import Event, EventType, RunState
 from contracts_py.package import DecisionPackage, HumanDecision
 
+from canary_api import storage
 from canary_api.storage import FileStorage, Storage
 
 
@@ -34,16 +35,29 @@ class Run:
 
 
 class EventBus:
-    def __init__(self, storage: Storage) -> None:
-        self.storage = storage
+    def __init__(self) -> None:
         self.runs: dict[str, Run] = {}
+
+    @property
+    def backend(self) -> Storage:
+        # Looked up per call so a lifespan close and reopen never leaves the bus on a stale backend.
+        return storage.current()
+
+    @staticmethod
+    def _write(action: Callable[[Storage], None]) -> None:
+        storage.writer.submit(lambda: action(storage.current()))
+
+    def flush(self) -> None:
+        storage.writer.flush()
 
     @property
     def root(self) -> Path:
         # Only the file backend has a runs directory; tests and tools read events.jsonl from it.
-        if not isinstance(self.storage, FileStorage):
+        self.flush()
+        backend = self.backend
+        if not isinstance(backend, FileStorage):
             raise AttributeError("root is only available with the file storage backend")
-        return self.storage.root
+        return backend.root
 
     @staticmethod
     def _check(run_id: str) -> None:
@@ -62,7 +76,7 @@ class EventBus:
         )
         self._check(run_id)
         self.runs[run_id] = Run(state=state)
-        self.storage.save_state(state)
+        self._write(lambda backend: backend.save_state(state))
         return state
 
     def get(self, run_id: str) -> Run | None:
@@ -89,11 +103,12 @@ class EventBus:
             timestamp=utc_now(),
             payload=payload,
         )
-        # Stored before it is applied or fanned out; the (run_id, sequence) key rejects a duplicate.
-        self.storage.append_event(event)
+        # Queued in sequence order on the single writer; the (run_id, sequence) key rejects a duplicate.
+        self._write(lambda backend: backend.append_event(event))
         run.events.append(event)
         self._apply(run, event)
-        self.storage.save_state(run.state)
+        state = run.state
+        self._write(lambda backend: backend.save_state(state))
         for queue in run.subscribers:
             queue.put_nowait(event)
         return event
@@ -138,26 +153,28 @@ class EventBus:
             run.package = payload
         elif event.type is EventType.human_decision_recorded:
             run.decision = payload
-            self.storage.save_decision(payload)
+            self._write(lambda backend: backend.save_decision(payload))
         run.state = state.model_copy(update=updates)
 
     def record_served_package(self, run_id: str, package: DecisionPackage, package_hash: str) -> None:
         self.runs[run_id].served_package_hash = package_hash
-        self.storage.save_package(run_id, package, package_hash)
+        self._write(lambda backend: backend.save_package(run_id, package, package_hash))
 
     def _load(self, run_id: str) -> Run | None:
         self._check(run_id)
-        state = self.storage.load_state(run_id)
+        self.flush()
+        backend = self.backend
+        state = backend.load_state(run_id)
         if state is None:
             return None
         run = Run(state=state)
-        for event in self.storage.read_events(run_id):
+        for event in backend.read_events(run_id):
             run.events.append(event)
             if event.type is EventType.package_ready:
                 run.package = event.payload  # type: ignore[assignment]
             elif event.type is EventType.human_decision_recorded:
                 run.decision = event.payload  # type: ignore[assignment]
-        served = self.storage.load_package(run_id)
+        served = backend.load_package(run_id)
         if served is not None:
             run.served_package_hash = served[1]
         self.runs[run_id] = run

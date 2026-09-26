@@ -3,13 +3,14 @@
 import json
 import logging
 import os
+import queue
 import re
 import sqlite3
 import threading
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
 
 from contracts_py.api import UserPublic
 from contracts_py.events import Event, RunState
@@ -18,6 +19,7 @@ from contracts_py.package import DecisionPackage, HumanDecision
 log = logging.getLogger(__name__)
 
 SCHEMA_NAME = re.compile(r"^[a-z_][a-z0-9_]{0,62}$")
+CONNECT_TIMEOUT_SECONDS = 10
 
 
 class DuplicateEmail(ValueError):
@@ -159,10 +161,37 @@ POSTGRES_TABLES = [
     "display_name TEXT NOT NULL, role TEXT NOT NULL, password_hash TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL)",
     "CREATE TABLE IF NOT EXISTS canary_revoked_tokens (token_id TEXT PRIMARY KEY, expires_at TIMESTAMPTZ NOT NULL)",
 ]
+POSTGRES_TABLE_NAMES = ["canary_runs", "canary_events", "canary_packages", "canary_decisions", "canary_users",
+                        "canary_revoked_tokens"]
+DEFAULT_SCHEMA = "canary"
+# Supabase's Data API serves anon and authenticated; those roles (and PUBLIC) get nothing here. Row-level security
+# with no policies denies every row to them as well, while the API's own owner or pooler role bypasses it.
+REVOKE_API_ROLES = """
+DO $$
+DECLARE
+    api_role text;
+    table_name text;
+BEGIN
+    FOREACH api_role IN ARRAY ARRAY['anon', 'authenticated'] LOOP
+        IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = api_role) THEN
+            IF current_schema() <> 'public' THEN
+                EXECUTE format('REVOKE ALL ON SCHEMA %I FROM %I', current_schema(), api_role);
+                EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %I REVOKE ALL ON TABLES FROM %I',
+                               current_schema(), api_role);
+            END IF;
+            FOREACH table_name IN ARRAY ARRAY['canary_runs', 'canary_events', 'canary_packages', 'canary_decisions',
+                                              'canary_users', 'canary_revoked_tokens'] LOOP
+                EXECUTE format('REVOKE ALL ON TABLE %I.%I FROM %I', current_schema(), table_name, api_role);
+            END LOOP;
+            EXECUTE format('REVOKE ALL ON SEQUENCE %I.canary_decisions_id_seq FROM %I', current_schema(), api_role);
+        END IF;
+    END LOOP;
+END $$
+"""
 
 
 class PostgresStorage:
-    def __init__(self, url: str, schema: str = "public") -> None:
+    def __init__(self, url: str, schema: str = DEFAULT_SCHEMA) -> None:
         from psycopg import sql
         from psycopg_pool import ConnectionPool
 
@@ -184,14 +213,20 @@ class PostgresStorage:
             conn.execute(search_path)
             for statement in POSTGRES_TABLES:
                 conn.execute(statement)  # type: ignore[arg-type]
-        self.pool.open(wait=True)
+            for table in POSTGRES_TABLE_NAMES:
+                conn.execute(sql.SQL("ALTER TABLE {} ENABLE ROW LEVEL SECURITY").format(sql.Identifier(table)))
+                conn.execute(sql.SQL("REVOKE ALL ON TABLE {} FROM PUBLIC").format(sql.Identifier(table)))
+            if schema != "public":
+                conn.execute(sql.SQL("REVOKE ALL ON SCHEMA {} FROM PUBLIC").format(sql.Identifier(schema)))
+            conn.execute(REVOKE_API_ROLES)  # type: ignore[arg-type]
+        self.pool.open(wait=True, timeout=CONNECT_TIMEOUT_SECONDS)
         log.info("postgres storage ready (schema %s)", schema)
 
     @staticmethod
     def _bootstrap(url: str) -> Any:
         import psycopg
 
-        return psycopg.connect(url, autocommit=True, prepare_threshold=None)
+        return psycopg.connect(url, autocommit=True, prepare_threshold=None, connect_timeout=CONNECT_TIMEOUT_SECONDS)
 
     def _run(self, query: str, params: tuple[Any, ...] = ()) -> list[tuple[Any, ...]]:
         with self.pool.connection() as conn:
@@ -282,8 +317,14 @@ def current() -> Storage:
         if _current is None:
             url = database_url()
             if url:
-                _current = PostgresStorage(url, os.environ.get("CANARY_DB_SCHEMA") or "public")
-            else:
+                try:
+                    _current = PostgresStorage(url, os.environ.get("CANARY_DB_SCHEMA") or DEFAULT_SCHEMA)
+                except Exception as exc:
+                    # Only the exception type is logged: psycopg messages can name the host.
+                    log.warning("DATABASE_URL is set but Postgres could not be opened (%s); FALLING BACK to file "
+                                "storage under the runs directory. Runs and users will not reach the database.",
+                                type(exc).__name__)
+            if _current is None:
                 from canary_api.paths import runs_dir
 
                 _current = FileStorage(runs_dir())
@@ -296,3 +337,35 @@ def close() -> None:
         if _current is not None:
             _current.close()
             _current = None
+
+
+class Writer:
+    """One background thread runs storage writes in submission order, so publishing never waits on the database."""
+
+    def __init__(self) -> None:
+        self.jobs: queue.Queue[Callable[[], None]] = queue.Queue()
+        self.thread: threading.Thread | None = None
+        self.lock = threading.Lock()
+
+    def submit(self, job: Callable[[], None]) -> None:
+        with self.lock:
+            if self.thread is None or not self.thread.is_alive():
+                self.thread = threading.Thread(target=self._loop, name="canary-storage-writer", daemon=True)
+                self.thread.start()
+        self.jobs.put(job)
+
+    def flush(self) -> None:
+        self.jobs.join()
+
+    def _loop(self) -> None:
+        while True:
+            job = self.jobs.get()
+            try:
+                job()
+            except Exception as exc:
+                log.error("storage write failed (%s)", type(exc).__name__)
+            finally:
+                self.jobs.task_done()
+
+
+writer = Writer()

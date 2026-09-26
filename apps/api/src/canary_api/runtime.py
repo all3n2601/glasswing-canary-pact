@@ -5,11 +5,11 @@ from pathlib import Path
 from agent_orchestration import AgentLLM
 from contracts_py.twin import OrganizationSettings, Twin
 
-from canary_api import engine_port, storage
+from canary_api import engine_port
 from canary_api.events import EventBus
 from canary_api.paths import DATA_DIR
 
-bus = EventBus(storage.current())
+bus = EventBus()
 _twins: dict[str, Twin] = {}
 
 
