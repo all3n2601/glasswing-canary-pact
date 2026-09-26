@@ -50,6 +50,7 @@ from canary_api.events import Run, utc_now
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     auth.signer()
     auth.seed_demo_approver()
+    auth.warn_if_no_approver()
     try:
         yield
     finally:
@@ -96,7 +97,9 @@ def _brief_plan(brief: DecisionBrief, intervention_ids: list[str] | None) -> Can
 
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
-    return HealthResponse()
+    failures = storage.writer.failures
+    return HealthResponse(status="degraded" if failures else "ok", storage=storage.backend_name(),  # type: ignore[arg-type]
+                          storage_write_failures=failures)
 
 
 @app.get("/company", response_model=Twin)

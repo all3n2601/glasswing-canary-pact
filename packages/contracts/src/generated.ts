@@ -1635,8 +1635,10 @@ export interface RunState {
  * via the `definition` "HealthResponse".
  */
 export interface HealthResponse {
-  status?: "ok";
+  status?: "ok" | "degraded";
   schema_version?: "2.1.0" | "2.1.1";
+  storage?: "file" | "postgres";
+  storage_write_failures?: number;
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
@@ -1651,7 +1653,7 @@ export interface DecisionCreated {
  */
 export interface HumanDecisionRequest {
   decision: "approve" | "reject" | "request_scenario";
-  decided_by: string;
+  decided_by?: string | null;
   notes?: string;
   package_hash: string;
 }

@@ -57,6 +57,8 @@ class Storage(Protocol):
 
     def is_revoked(self, token_id: str) -> bool: ...
 
+    def has_role(self, role: str) -> bool: ...
+
     def close(self) -> None: ...
 
 
@@ -143,6 +145,10 @@ class FileStorage:
     def is_revoked(self, token_id: str) -> bool:
         with self._users() as db:
             return db.execute("SELECT 1 FROM revoked_tokens WHERE token_id = ?", (token_id,)).fetchone() is not None
+
+    def has_role(self, role: str) -> bool:
+        with self._users() as db:
+            return db.execute("SELECT 1 FROM users WHERE role = ? LIMIT 1", (role,)).fetchone() is not None
 
     def close(self) -> None:
         pass
@@ -298,6 +304,9 @@ class PostgresStorage:
     def is_revoked(self, token_id: str) -> bool:
         return bool(self._run("SELECT 1 FROM canary_revoked_tokens WHERE token_id = %s", (token_id,)))
 
+    def has_role(self, role: str) -> bool:
+        return bool(self._run("SELECT 1 FROM canary_users WHERE role = %s LIMIT 1", (role,)))
+
     def close(self) -> None:
         self.pool.close()
 
@@ -331,6 +340,10 @@ def current() -> Storage:
         return _current
 
 
+def backend_name() -> str:
+    return "postgres" if isinstance(current(), PostgresStorage) else "file"
+
+
 def close() -> None:
     global _current
     with _lock:
@@ -346,6 +359,7 @@ class Writer:
         self.jobs: queue.Queue[Callable[[], None]] = queue.Queue()
         self.thread: threading.Thread | None = None
         self.lock = threading.Lock()
+        self.failures = 0
 
     def submit(self, job: Callable[[], None]) -> None:
         with self.lock:
@@ -363,6 +377,8 @@ class Writer:
             try:
                 job()
             except Exception as exc:
+                with self.lock:
+                    self.failures += 1
                 log.error("storage write failed (%s)", type(exc).__name__)
             finally:
                 self.jobs.task_done()
