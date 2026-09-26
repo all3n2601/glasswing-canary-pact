@@ -104,7 +104,8 @@ def _brief_plan(brief: DecisionBrief, intervention_ids: list[str] | None) -> Can
 def health() -> HealthResponse:
     failures = storage.writer.failures
     return HealthResponse(status="degraded" if failures else "ok", storage=storage.backend_name(),  # type: ignore[arg-type]
-                          storage_write_failures=failures)
+                          storage_write_failures=failures, engine_impl=engine_port.engine_impl(),  # type: ignore[arg-type]
+                          twin_impl=engine_port.twin_impl())  # type: ignore[arg-type]
 
 
 @app.get("/company", response_model=Twin)
