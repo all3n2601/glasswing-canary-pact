@@ -155,3 +155,21 @@ def test_exports_are_wellformed():
     vr = vendor_report(TWIN)
     auditlog = next(v for v in vr["vendors"] if v["vendor_id"] == "vendor_auditlog")
     assert auditlog["irreplaceable_flag"] is True
+
+
+# ---- companion historical data ---------------------------------------------
+def test_history_is_consistent_with_twin():
+    h = json.loads((DATA_DIR / "history.json").read_text())
+    twin_kpis = {e.id: e for e in TWIN.entities if e.type == EntityType.KPI}
+    assert h["kpi_history"], "no kpi history"
+    for row in h["kpi_history"]:
+        assert row["kpi_id"] in twin_kpis, row["kpi_id"]
+        # last historical point must equal the current twin baseline
+        assert row["values"][-1] == twin_kpis[row["kpi_id"]].kpi_baseline, row["kpi_id"]
+        assert len(row["values"]) == len(row["quarters"])
+    spend = h["monthly_controllable_spend_usd"]
+    assert len(spend["values"]) == len(spend["months"]) == 12
+    wf_ids = {e.id for e in TWIN.entities if e.type == EntityType.WORKFLOW}
+    for inc in h["incident_log"]:
+        assert inc["workflow_id"] in wf_ids, inc["workflow_id"]
+    assert h["prior_cost_programs"][0]["realized_usd"] < h["prior_cost_programs"][0]["target_usd"]

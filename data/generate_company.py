@@ -776,6 +776,64 @@ PLANTED_ITEMS = {
 }
 
 
+QUARTERS = ["Q1-2025", "Q2-2025", "Q3-2025", "Q4-2025",
+            "Q1-2026", "Q2-2026", "Q3-2026", "Q4-2026"]  # 8 quarters ending at the current baseline
+
+# where each KPI was 8 quarters ago (baseline is "now"); linear path to baseline.
+KPI_START = {
+    "kpi_gross_margin": 66.0,       # margin drifting down -> motivates the cost decision
+    "kpi_on_time_delivery": 95.5,   # roughly stable
+    "kpi_net_retention": 119.0,     # retention slipping
+    "kpi_pipeline": 20_000_000.0,   # pipeline softening
+    "kpi_soc2_coverage": 100.0,     # compliant throughout
+    "kpi_uptime_sla": 99.94,        # stable
+}
+
+
+def build_history() -> dict:
+    """Companion historical dataset — NOT part of the frozen twin schema.
+
+    Deterministic dummy history for demo realism and observed-vs-predicted framing.
+    """
+    kpi_history = []
+    for kid, name, did, base, unit, hib in KPIS:
+        start = KPI_START.get(kid, base)
+        n = len(QUARTERS)
+        series = [round(start + (base - start) * i / (n - 1), 2) for i in range(n)]
+        series[-1] = base  # last point equals the twin baseline exactly
+        kpi_history.append({"kpi_id": kid, "name": name, "unit": unit,
+                            "quarters": QUARTERS, "values": series})
+
+    # 12 months of controllable spend (~$8M/yr, trending up with cloud growth)
+    months = [f"2026-{m:02d}" for m in range(1, 13)]
+    monthly_spend = [round(628_000 * (1.006 ** i)) for i in range(12)]
+
+    incidents = [
+        {"date": "2026-02-14", "workflow_id": "wf_billing_recon", "type": "reconciliation_failure",
+         "cost_usd": 410_000, "note": "Exception path required both billing owners; ~2 day recovery."},
+        {"date": "2026-08-03", "workflow_id": "wf_billing_recon", "type": "reconciliation_failure",
+         "cost_usd": 395_000, "note": "Schema change upstream; only P-017 could resolve."},
+        {"date": "2026-05-21", "workflow_id": "wf_incident_mgmt", "type": "sev1_outage",
+         "cost_usd": 120_000, "note": "core-api degradation; recovered within SLA."},
+    ]
+
+    prior_programs = [
+        {"id": "prog_fy24_cuts", "name": "FY24 cost program", "target_usd": 1_500_000,
+         "realized_usd": 1_100_000, "leakage_pct": 0.27,
+         "note": "Across-the-board cuts; ~27% leaked back via contractor rehires and a stranded "
+                 "workflow — the reason leadership wants to simulate this time."},
+    ]
+
+    return {
+        "note": "Synthetic companion history for Halcyon Freight. Not part of the twin schema.",
+        "as_of": CREATED_AT,
+        "kpi_history": kpi_history,
+        "monthly_controllable_spend_usd": {"months": months, "values": monthly_spend},
+        "incident_log": incidents,
+        "prior_cost_programs": prior_programs,
+    }
+
+
 def main() -> None:
     twin = build()
     _self_check(twin)
@@ -783,7 +841,17 @@ def main() -> None:
     out = base / "synthetic_company.json"
     out.write_text(json.dumps(twin, indent=2) + "\n")
     (base / "planted_items.json").write_text(json.dumps(PLANTED_ITEMS, indent=2) + "\n")
+    history = build_history()
+    # consistency: every KPI in history exists in the twin, last point == baseline
+    twin_kpis = {e["id"]: e for e in twin["entities"] if e["type"] == "kpi"}
+    for row in history["kpi_history"]:
+        assert row["kpi_id"] in twin_kpis, f"history references unknown kpi {row['kpi_id']}"
+        assert row["values"][-1] == twin_kpis[row["kpi_id"]].get("kpi_baseline"), \
+            f"history last point != baseline for {row['kpi_id']}"
+    (base / "history.json").write_text(json.dumps(history, indent=2) + "\n")
     print(f"Wrote {base / 'planted_items.json'}")
+    print(f"Wrote {base / 'history.json'}  ({len(history['kpi_history'])} KPI series, "
+          f"{len(history['incident_log'])} incidents, {len(history['prior_cost_programs'])} prior programs)")
 
     from collections import Counter
     kinds = Counter(e["type"] for e in twin["entities"])

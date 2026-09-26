@@ -1,0 +1,219 @@
+{
+  "note": "Synthetic companion history for Halcyon Freight. Not part of the twin schema.",
+  "as_of": "2026-09-26T12:00:00Z",
+  "kpi_history": [
+    {
+      "kpi_id": "kpi_gross_margin",
+      "name": "Gross margin %",
+      "unit": "percent",
+      "quarters": [
+        "Q1-2025",
+        "Q2-2025",
+        "Q3-2025",
+        "Q4-2025",
+        "Q1-2026",
+        "Q2-2026",
+        "Q3-2026",
+        "Q4-2026"
+      ],
+      "values": [
+        66.0,
+        65.43,
+        64.86,
+        64.29,
+        63.71,
+        63.14,
+        62.57,
+        62.0
+      ]
+    },
+    {
+      "kpi_id": "kpi_on_time_delivery",
+      "name": "On-time delivery %",
+      "unit": "percent",
+      "quarters": [
+        "Q1-2025",
+        "Q2-2025",
+        "Q3-2025",
+        "Q4-2025",
+        "Q1-2026",
+        "Q2-2026",
+        "Q3-2026",
+        "Q4-2026"
+      ],
+      "values": [
+        95.5,
+        95.29,
+        95.07,
+        94.86,
+        94.64,
+        94.43,
+        94.21,
+        94.0
+      ]
+    },
+    {
+      "kpi_id": "kpi_net_retention",
+      "name": "Net revenue retention",
+      "unit": "percent",
+      "quarters": [
+        "Q1-2025",
+        "Q2-2025",
+        "Q3-2025",
+        "Q4-2025",
+        "Q1-2026",
+        "Q2-2026",
+        "Q3-2026",
+        "Q4-2026"
+      ],
+      "values": [
+        119.0,
+        118.0,
+        117.0,
+        116.0,
+        115.0,
+        114.0,
+        113.0,
+        112.0
+      ]
+    },
+    {
+      "kpi_id": "kpi_pipeline",
+      "name": "Qualified pipeline",
+      "unit": "usd",
+      "quarters": [
+        "Q1-2025",
+        "Q2-2025",
+        "Q3-2025",
+        "Q4-2025",
+        "Q1-2026",
+        "Q2-2026",
+        "Q3-2026",
+        "Q4-2026"
+      ],
+      "values": [
+        20000000.0,
+        19714285.71,
+        19428571.43,
+        19142857.14,
+        18857142.86,
+        18571428.57,
+        18285714.29,
+        18000000.0
+      ]
+    },
+    {
+      "kpi_id": "kpi_soc2_coverage",
+      "name": "SOC 2 compliance coverage",
+      "unit": "percent",
+      "quarters": [
+        "Q1-2025",
+        "Q2-2025",
+        "Q3-2025",
+        "Q4-2025",
+        "Q1-2026",
+        "Q2-2026",
+        "Q3-2026",
+        "Q4-2026"
+      ],
+      "values": [
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ]
+    },
+    {
+      "kpi_id": "kpi_uptime_sla",
+      "name": "System uptime / SLA",
+      "unit": "percent",
+      "quarters": [
+        "Q1-2025",
+        "Q2-2025",
+        "Q3-2025",
+        "Q4-2025",
+        "Q1-2026",
+        "Q2-2026",
+        "Q3-2026",
+        "Q4-2026"
+      ],
+      "values": [
+        99.94,
+        99.93,
+        99.93,
+        99.92,
+        99.92,
+        99.91,
+        99.91,
+        99.9
+      ]
+    }
+  ],
+  "monthly_controllable_spend_usd": {
+    "months": [
+      "2026-01",
+      "2026-02",
+      "2026-03",
+      "2026-04",
+      "2026-05",
+      "2026-06",
+      "2026-07",
+      "2026-08",
+      "2026-09",
+      "2026-10",
+      "2026-11",
+      "2026-12"
+    ],
+    "values": [
+      628000,
+      631768,
+      635559,
+      639372,
+      643208,
+      647067,
+      650950,
+      654856,
+      658785,
+      662737,
+      666714,
+      670714
+    ]
+  },
+  "incident_log": [
+    {
+      "date": "2026-02-14",
+      "workflow_id": "wf_billing_recon",
+      "type": "reconciliation_failure",
+      "cost_usd": 410000,
+      "note": "Exception path required both billing owners; ~2 day recovery."
+    },
+    {
+      "date": "2026-08-03",
+      "workflow_id": "wf_billing_recon",
+      "type": "reconciliation_failure",
+      "cost_usd": 395000,
+      "note": "Schema change upstream; only P-017 could resolve."
+    },
+    {
+      "date": "2026-05-21",
+      "workflow_id": "wf_incident_mgmt",
+      "type": "sev1_outage",
+      "cost_usd": 120000,
+      "note": "core-api degradation; recovered within SLA."
+    }
+  ],
+  "prior_cost_programs": [
+    {
+      "id": "prog_fy24_cuts",
+      "name": "FY24 cost program",
+      "target_usd": 1500000,
+      "realized_usd": 1100000,
+      "leakage_pct": 0.27,
+      "note": "Across-the-board cuts; ~27% leaked back via contractor rehires and a stranded workflow \u2014 the reason leadership wants to simulate this time."
+    }
+  ]
+}
