@@ -2,13 +2,16 @@
 
 import asyncio
 import hashlib
-from typing import Any, get_args
+from contextlib import asynccontextmanager
+from typing import Any, AsyncIterator, get_args
 
-from fastapi import FastAPI, HTTPException, Query, Request, Response, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ValidationError
 
+from agent_orchestration import run_scenario
+from company_twin import load_company_twin
 from contracts_py.api import (
     DecisionCreated,
     FuturesRequest,
@@ -22,7 +25,9 @@ from contracts_py.api import (
     ReplayInfo,
     ReplaySpeed,
     ReplayStarted,
+    UserPublic,
 )
+from contracts_py.agents import AgentOutput
 from contracts_py.decision import CandidatePlan, DecisionBrief
 from contracts_py.engine import FutureComparison, PortfolioComparison, SimulationResult
 from contracts_py.enums import DocumentStatus, DocumentType, EntityType, RunStatus
@@ -38,16 +43,27 @@ from contracts_py.twin import (
     Pressure,
     Twin,
 )
+from simulation_engine import ScenarioRequest, ScenarioResult
 
-from canary_api import engine_port, runs, runtime
+from canary_api import auth, engine_port, runs, runtime
 from canary_api.engine_port import EngineNotReady
 from canary_api.events import Run, utc_now
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    auth.signer()
+    auth.seed_demo_approver()
+    yield
+
+
 app = FastAPI(
+    lifespan=lifespan,
     title="Canary Pact API",
     version="0.1.0",
     description="Organizational decision simulation and blast-radius API.",
 )
+app.include_router(auth.router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -56,10 +72,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 @app.exception_handler(EngineNotReady)
 async def engine_not_ready(request: Request, exc: EngineNotReady) -> JSONResponse:
     return JSONResponse(status_code=503, content={"detail": str(exc)})
+
+
+scenario_results: dict[str, ScenarioResult] = {}
+scenario_summaries: dict[str, str] = {}
+scenario_assessments: dict[str, dict[str, AgentOutput]] = {}
+scenario_twin = load_company_twin()
 
 
 def _run(run_id: str) -> Run:
@@ -172,12 +193,15 @@ def document(document_id: str) -> Document:
 
 
 @app.post("/decisions", response_model=DecisionCreated)
-async def create_decision(brief: DecisionBrief) -> DecisionCreated:
+async def create_decision(brief: DecisionBrief, llm_mode: runs.LlmMode | None = None,
+                          user: UserPublic = Depends(auth.current_user)) -> DecisionCreated:
     try:
         brief = runs.apply_settings_defaults(brief, runtime.settings())
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=exc.errors(include_url=False)) from exc
-    return DecisionCreated(run_id=runs.start_run(brief))
+    if (llm_mode or runtime.settings().llm_mode) == "live" and not runs.live_allowed():
+        raise HTTPException(status_code=403, detail="llm_mode=live is disabled; set CANARY_ALLOW_LIVE=true to allow it")
+    return DecisionCreated(run_id=runs.start_run(brief, llm_mode))
 
 
 @app.get("/runs/{run_id}", response_model=RunState)
@@ -227,7 +251,10 @@ def run_package(run_id: str) -> Response:
 
 
 @app.post("/runs/{run_id}/decision", response_model=HumanDecision)
-async def record_decision(run_id: str, request: HumanDecisionRequest) -> HumanDecision:
+async def record_decision(run_id: str, request: HumanDecisionRequest,
+                          user: UserPublic = Depends(auth.require_approver)) -> HumanDecision:
+    # decided_by comes from the token; the request's own decided_by value is ignored.
+    decided_by = f"{user.display_name} ({user.user_id})"
     run = _run(run_id)
     if run.package is None or run.served_package_hash is None:
         raise HTTPException(status_code=409, detail="Fetch the package before deciding")
@@ -239,12 +266,12 @@ async def record_decision(run_id: str, request: HumanDecisionRequest) -> HumanDe
         run_id=run_id,
         package_id=run.package.package_id,
         decision=request.decision,
-        decided_by=request.decided_by,
+        decided_by=decided_by,
         decided_at=utc_now(),
         notes=request.notes,
         package_hash=run.served_package_hash,
     )
-    runtime.bus.publish(run_id, EventType.human_decision_recorded, decision, actor=request.decided_by)
+    runtime.bus.publish(run_id, EventType.human_decision_recorded, decision, actor=user.user_id)
     # A scenario request keeps the run open so the same package can still be approved or rejected.
     if request.decision != "request_scenario":
         runtime.bus.publish(
@@ -293,3 +320,51 @@ async def play_replay(name: str, speed: int = Query(1)) -> ReplayStarted:
     if log is None:
         raise HTTPException(status_code=404, detail="Replay not found")
     return ReplayStarted(run_id=runs.play_replay(log, speed), name=name, speed=speed)  # type: ignore[arg-type]
+
+
+@app.post("/scenarios/simulate", response_model=ScenarioResult)
+def simulate_scenario(request: ScenarioRequest) -> ScenarioResult:
+    state = run_scenario(scenario_twin, request)
+    result = state.get("result")
+    if result is None:
+        raise RuntimeError("Scenario workflow completed without a result")
+    scenario_results[result.scenario_id] = result
+    scenario_summaries[result.scenario_id] = state.get(
+        "executive_summary", result.recommendation
+    )
+    scenario_assessments[result.scenario_id] = state.get(
+        "department_assessments", {}
+    )
+    return result
+
+
+@app.get("/scenarios/company", response_model=Twin)
+def scenario_company() -> Twin:
+    return scenario_twin
+
+
+@app.get("/scenarios/{scenario_id}/results", response_model=ScenarioResult)
+def get_scenario_result(scenario_id: str) -> ScenarioResult:
+    result = scenario_results.get(scenario_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Scenario not found")
+    return result
+
+
+@app.get(
+    "/scenarios/{scenario_id}/assessments",
+    response_model=dict[str, AgentOutput],
+)
+def get_scenario_assessments(scenario_id: str) -> dict[str, AgentOutput]:
+    assessments = scenario_assessments.get(scenario_id)
+    if assessments is None:
+        raise HTTPException(status_code=404, detail="Scenario not found")
+    return assessments
+
+
+@app.get("/scenarios/{scenario_id}/report")
+def get_scenario_report(scenario_id: str) -> dict[str, str]:
+    summary = scenario_summaries.get(scenario_id)
+    if summary is None:
+        raise HTTPException(status_code=404, detail="Scenario not found")
+    return {"scenario_id": scenario_id, "executive_summary": summary}

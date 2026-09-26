@@ -28,7 +28,8 @@
             "compliance_controls_broken",
             "stranded_workflows",
             "critical_systems_degraded",
-            "max_capacity_loss_pct"
+            "max_capacity_loss_pct",
+            "critical_coverage_pct"
           ],
           "title": "Metric",
           "type": "string"
@@ -331,6 +332,80 @@
       "title": "ImpactLevel",
       "type": "string"
     },
+    "KnowledgeCoverage": {
+      "additionalProperties": false,
+      "properties": {
+        "knowledge_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Knowledge Id",
+          "type": "string"
+        },
+        "holders_before": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Holders Before",
+          "type": "array"
+        },
+        "holders_after": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Holders After",
+          "type": "array"
+        },
+        "holder_capacity_fte_before": {
+          "minimum": 0,
+          "title": "Holder Capacity Fte Before",
+          "type": "number"
+        },
+        "holder_capacity_fte_after": {
+          "minimum": 0,
+          "title": "Holder Capacity Fte After",
+          "type": "number"
+        },
+        "documented_pct": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Documented Pct",
+          "type": "number"
+        },
+        "lost": {
+          "title": "Lost",
+          "type": "boolean"
+        },
+        "dependent_workflow_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Dependent Workflow Ids",
+          "type": "array"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "knowledge_id",
+        "holder_capacity_fte_before",
+        "holder_capacity_fte_after",
+        "documented_pct",
+        "lost"
+      ],
+      "title": "KnowledgeCoverage",
+      "type": "object"
+    },
     "Origin": {
       "enum": [
         "engine",
@@ -597,6 +672,13 @@
           "title": "Workflow Coverage",
           "type": "array"
         },
+        "knowledge_coverage": {
+          "items": {
+            "$ref": "#/$defs/KnowledgeCoverage"
+          },
+          "title": "Knowledge Coverage",
+          "type": "array"
+        },
         "pressures_triggered": {
           "items": {
             "$ref": "#/$defs/PressureTrigger"
@@ -788,7 +870,7 @@
           "type": "integer"
         },
         "documented_pct": {
-          "maximum": 100,
+          "maximum": 1,
           "minimum": 0,
           "title": "Documented Pct",
           "type": "number"
@@ -803,6 +885,82 @@
           },
           "title": "Reasons",
           "type": "array"
+        },
+        "owner_capacity_fte_before": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Capacity Fte Before"
+        },
+        "owner_capacity_fte_after": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Capacity Fte After"
+        },
+        "exception_documented_pct": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exception Documented Pct"
+        },
+        "automation_pct": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Automation Pct"
+        },
+        "training_days_required": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Training Days Required"
+        },
+        "replacement_cost_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replacement Cost Usd"
         }
       },
       "required": [

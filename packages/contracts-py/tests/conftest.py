@@ -43,8 +43,68 @@ def constraint(cid: str, metric: str, operator: str, hard: bool, threshold: floa
     )
 
 
+VENDORS = ["apex", "beacon", "cinder", "delta", "echo", "flux", "granite"]
+WORKFORCE_ROLES = [f"role_wk_{n:02d}" for n in range(1, 9)]
+
+
 @pytest.fixture
-def brief() -> DecisionBrief:
+def vendor_brief() -> DecisionBrief:
+    return DecisionBrief(
+        decision_id="dec_vendor_reduction",
+        decision_type=DecisionType.vendor_consolidation,
+        title="Consolidate data vendors",
+        statement="Save at least $2B a year by removing overlapping data vendors without losing critical coverage.",
+        goal=Goal(metric="annual_savings_usd", target=2_000_000_000, basis="gross", direction="at_least"),
+        candidate_interventions=[
+            Intervention(
+                id=f"i_remove_{name}",
+                kind=InterventionKind.action,
+                type=ActionType.remove_vendor,
+                target_entity_id=f"vendor_{name}",
+                rationale=f"vendor_{name} overlaps with other data vendors.",
+            )
+            for name in VENDORS
+        ],
+        constraints=[
+            constraint("c_compliance", "compliance_controls_broken", "==", True),
+            constraint("c_critical_coverage", "critical_coverage_pct", ">=", True, threshold=100),
+            constraint("c_revenue", "revenue_impact_pct", "<=", True, threshold=3),
+            constraint("c_customer", "customer_impact_pct", "<=", True, threshold=2),
+        ],
+        created_by="demo_user",
+    )
+
+
+@pytest.fixture
+def workforce_brief() -> DecisionBrief:
+    return DecisionBrief(
+        decision_id="dec_workforce_knowledge",
+        decision_type=DecisionType.restructure,
+        title="Restructure without losing critical knowledge",
+        statement="Remove eight roles while keeping every critical workflow owned.",
+        goal=Goal(metric="annual_savings_usd", target=1_000_000, basis="gross", direction="at_least"),
+        candidate_interventions=[
+            Intervention(
+                id=f"i_remove_{role.removeprefix('role_')}",
+                kind=InterventionKind.action,
+                type=ActionType.remove_roles,
+                target_entity_id=role,
+                rationale=f"{role} is part of the proposed restructure.",
+            )
+            for role in WORKFORCE_ROLES
+        ],
+        constraints=[constraint("c_stranded", "stranded_workflows", "==", True)],
+        created_by="demo_user",
+    )
+
+
+@pytest.fixture
+def brief(vendor_brief: DecisionBrief) -> DecisionBrief:
+    return vendor_brief
+
+
+@pytest.fixture
+def cut_2m_brief() -> DecisionBrief:
     return DecisionBrief(
         decision_id="dec_cut_2m",
         decision_type=DecisionType.cost_reduction,

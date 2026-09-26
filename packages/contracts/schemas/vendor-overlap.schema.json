@@ -1,0 +1,102 @@
+{
+  "$defs": {
+    "MigrationDifficulty": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "title": "MigrationDifficulty",
+      "type": "string"
+    },
+    "OverlapDimension": {
+      "enum": [
+        "record_coverage",
+        "attribute_coverage",
+        "geography",
+        "history_depth",
+        "freshness",
+        "accuracy",
+        "permitted_use",
+        "consumer_teams",
+        "downstream_workflows",
+        "model_features",
+        "substitutability"
+      ],
+      "title": "OverlapDimension",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "vendor_a": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Vendor A",
+      "type": "string"
+    },
+    "vendor_b": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Vendor B",
+      "type": "string"
+    },
+    "dimensions": {
+      "additionalProperties": {
+        "maximum": 1,
+        "minimum": 0,
+        "type": "number"
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/OverlapDimension"
+      },
+      "title": "Dimensions",
+      "type": "object"
+    },
+    "overall_overlap": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Overall Overlap",
+      "type": "number"
+    },
+    "shared_dataset_ids": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Shared Dataset Ids",
+      "type": "array"
+    },
+    "unique_dataset_ids_a": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Unique Dataset Ids A",
+      "type": "array"
+    },
+    "unique_dataset_ids_b": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Unique Dataset Ids B",
+      "type": "array"
+    },
+    "migration_difficulty": {
+      "$ref": "#/$defs/MigrationDifficulty"
+    }
+  },
+  "required": [
+    "vendor_a",
+    "vendor_b",
+    "dimensions",
+    "overall_overlap",
+    "migration_difficulty"
+  ],
+  "title": "VendorOverlap",
+  "type": "object"
+}

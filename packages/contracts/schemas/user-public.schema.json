@@ -1,0 +1,46 @@
+{
+  "$defs": {
+    "UserRole": {
+      "enum": [
+        "viewer",
+        "approver"
+      ],
+      "title": "UserRole",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "user_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "User Id",
+      "type": "string"
+    },
+    "email": {
+      "title": "Email",
+      "type": "string"
+    },
+    "display_name": {
+      "title": "Display Name",
+      "type": "string"
+    },
+    "role": {
+      "$ref": "#/$defs/UserRole"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_id",
+    "email",
+    "display_name",
+    "role",
+    "created_at"
+  ],
+  "title": "UserPublic",
+  "type": "object"
+}

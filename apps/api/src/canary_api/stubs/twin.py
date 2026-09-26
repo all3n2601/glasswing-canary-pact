@@ -177,7 +177,7 @@ def _entities() -> list[Entity]:
             name="Warehouse migration",
             department_id="dept_engineering",
             annual_cost_usd=450_000,
-            completion_pct=35,
+            completion_pct=0.35,
             remaining_cost_usd=290_000,
             expected_completion_day=210,
         ),

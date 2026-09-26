@@ -42,6 +42,8 @@ TOP_LEVEL: list[type[BaseModel]] = [
     engine.PortfolioComparison,
     engine.MitigationComparison,
     engine.BlastRadius,
+    engine.VendorOverlap,
+    engine.KnowledgeCoverage,
     engine.ItemCounterfactual,
     engine.MissingQuestion,
     engine.UserAnswer,
@@ -64,6 +66,10 @@ TOP_LEVEL: list[type[BaseModel]] = [
     api.ReplayInfo,
     api.ReplayStarted,
     api.OrganizationProfileView,
+    api.SignupRequest,
+    api.LoginRequest,
+    api.UserPublic,
+    api.AuthToken,
 ]
 
 

@@ -1,3 +1,4 @@
+from contracts_py.common import SCHEMA_VERSION
 from datetime import datetime, timezone
 
 import pytest
@@ -61,7 +62,7 @@ def package_data(brief: DecisionBrief) -> dict:
     return {
         "package_id": "pkg_1",
         "run_id": "run_1",
-        "decision_id": "dec_cut_2m",
+        "decision_id": brief.decision_id,
         "versions": {
             "twin_version": "t1",
             "settings_version": 1,
@@ -193,7 +194,7 @@ def test_brief_without_inaction_gets_inaction_added(brief: DecisionBrief) -> Non
 
 def test_brief_rejects_protected_target(brief: DecisionBrief) -> None:
     with pytest.raises(ValidationError, match="protected entities"):
-        DecisionBrief.model_validate(brief.model_dump() | {"protected_entity_ids": ["vendor_auditlog"]})
+        DecisionBrief.model_validate(brief.model_dump() | {"protected_entity_ids": ["vendor_apex"]})
 
 
 def test_only_inaction_scenario_has_no_plan() -> None:
@@ -285,8 +286,22 @@ def test_organization_profile_view(organization: Organization) -> None:
         departments=[OrganizationDepartmentSummary.model_validate(department)],
         settings=OrganizationSettings(organization_id=organization.id),
     )
-    assert view.schema_version == "2.1.0"
+    assert view.schema_version == SCHEMA_VERSION
     with pytest.raises(ValidationError):
         OrganizationDepartmentSummary.model_validate({**department, "maturity_level": 6})
     with pytest.raises(ValidationError):
         OrganizationDepartmentSummary.model_validate({**department, "head": "x"})
+
+
+def test_auth_contracts() -> None:
+    from contracts_py.api import AuthToken, LoginRequest, SignupRequest, UserPublic
+
+    signup = SignupRequest(email="ana@example.com", password="correct horse", display_name="Ana")
+    for bad in ({"email": "not-an-email"}, {"password": "short"}, {"display_name": ""}, {"role": "approver"}):
+        with pytest.raises(ValidationError):
+            SignupRequest.model_validate(signup.model_dump() | bad)
+    LoginRequest(email="ana@example.com", password="x")
+    user = UserPublic(user_id="usr_1", email="ana@example.com", display_name="Ana", role="approver", created_at=NOW)
+    token = AuthToken(access_token="a.b", expires_at=NOW, user=user)
+    assert token.token_type == "bearer"
+    assert "password" not in UserPublic.model_fields

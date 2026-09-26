@@ -1,11 +1,43 @@
 import type { CompanyTwin, ScenarioRequest, ScenarioResult } from "@canary-pact/contracts";
+import type { AgentOutput } from "@canary-pact/contracts/generated";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export async function getCompany(): Promise<CompanyTwin> {
-  const response = await fetch(`${API_URL}/company`, { cache: "no-store" });
+  const response = await fetch(`${API_URL}/scenarios/company`, { cache: "no-store" });
   if (!response.ok) throw new Error("Could not load the company twin");
-  return response.json() as Promise<CompanyTwin>;
+  const company = await response.json();
+  return {
+    id: company.organization.id,
+    name: company.organization.display_name,
+    version: company.version.twin_version,
+    entities: company.entities.map((entity: Record<string, unknown>) => ({
+      id: entity.id,
+      kind: entity.type,
+      name: entity.name,
+      departmentId: entity.department_id,
+      annualCost: entity.annual_cost_usd,
+      metadata: {},
+    })),
+    dependencies: company.edges.map((edge: Record<string, unknown>) => ({
+      source: edge.source,
+      target: edge.target,
+      relationship: edge.relation,
+      importance: edge.strength,
+      substitutability: edge.substitutability,
+      confidence: edge.confidence,
+      evidence: Array.isArray(edge.evidence_refs) ? edge.evidence_refs.join(", ") : "",
+    })),
+  } as CompanyTwin;
+}
+
+async function apiError(response: Response, fallback: string): Promise<Error> {
+  try {
+    const body = (await response.json()) as { detail?: string };
+    return new Error(body.detail ?? fallback);
+  } catch {
+    return new Error(fallback);
+  }
 }
 
 export async function simulateScenario(request: ScenarioRequest): Promise<ScenarioResult> {
@@ -20,7 +52,7 @@ export async function simulateScenario(request: ScenarioRequest): Promise<Scenar
       constraints: request.constraints,
     }),
   });
-  if (!response.ok) throw new Error("Simulation failed");
+  if (!response.ok) throw await apiError(response, "Simulation failed");
   const result = await response.json();
   return {
     scenarioId: result.scenario_id,
@@ -42,3 +74,14 @@ export async function simulateScenario(request: ScenarioRequest): Promise<Scenar
   } as ScenarioResult;
 }
 
+export async function getScenarioAssessments(
+  scenarioId: string,
+): Promise<Record<string, AgentOutput>> {
+  const response = await fetch(`${API_URL}/scenarios/${scenarioId}/assessments`, {
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    throw await apiError(response, "Could not load department assessments");
+  }
+  return response.json() as Promise<Record<string, AgentOutput>>;
+}

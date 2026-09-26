@@ -274,6 +274,26 @@ class RiskAppetite(StrEnum):
     aggressive = "aggressive"
 
 
+class OverlapDimension(StrEnum):
+    record_coverage = "record_coverage"
+    attribute_coverage = "attribute_coverage"
+    geography = "geography"
+    history_depth = "history_depth"
+    freshness = "freshness"
+    accuracy = "accuracy"
+    permitted_use = "permitted_use"
+    consumer_teams = "consumer_teams"
+    downstream_workflows = "downstream_workflows"
+    model_features = "model_features"
+    substitutability = "substitutability"
+
+
+class MigrationDifficulty(StrEnum):
+    low = "low"
+    medium = "medium"
+    high = "high"
+
+
 class RunStatus(StrEnum):
     created = "created"
     validating = "validating"
