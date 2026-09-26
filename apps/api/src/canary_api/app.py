@@ -10,8 +10,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ValidationError
 
-from agent_orchestration import run_scenario
-from company_twin import load_company_twin
 from contracts_py.api import (
     DecisionCreated,
     FuturesRequest,
@@ -27,7 +25,6 @@ from contracts_py.api import (
     ReplayStarted,
     UserPublic,
 )
-from contracts_py.agents import AgentOutput
 from contracts_py.decision import CandidatePlan, DecisionBrief
 from contracts_py.engine import FutureComparison, PortfolioComparison, SimulationResult
 from contracts_py.enums import DocumentStatus, DocumentType, EntityType, RunStatus
@@ -43,7 +40,6 @@ from contracts_py.twin import (
     Pressure,
     Twin,
 )
-from simulation_engine import ScenarioRequest, ScenarioResult
 
 from canary_api import auth, engine_port, runs, runtime
 from canary_api.engine_port import EngineNotReady
@@ -72,15 +68,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.exception_handler(EngineNotReady)
 async def engine_not_ready(request: Request, exc: EngineNotReady) -> JSONResponse:
     return JSONResponse(status_code=503, content={"detail": str(exc)})
-
-
-scenario_results: dict[str, ScenarioResult] = {}
-scenario_summaries: dict[str, str] = {}
-scenario_assessments: dict[str, dict[str, AgentOutput]] = {}
-scenario_twin = load_company_twin()
 
 
 def _run(run_id: str) -> Run:
@@ -320,51 +311,3 @@ async def play_replay(name: str, speed: int = Query(1)) -> ReplayStarted:
     if log is None:
         raise HTTPException(status_code=404, detail="Replay not found")
     return ReplayStarted(run_id=runs.play_replay(log, speed), name=name, speed=speed)  # type: ignore[arg-type]
-
-
-@app.post("/scenarios/simulate", response_model=ScenarioResult)
-def simulate_scenario(request: ScenarioRequest) -> ScenarioResult:
-    state = run_scenario(scenario_twin, request)
-    result = state.get("result")
-    if result is None:
-        raise RuntimeError("Scenario workflow completed without a result")
-    scenario_results[result.scenario_id] = result
-    scenario_summaries[result.scenario_id] = state.get(
-        "executive_summary", result.recommendation
-    )
-    scenario_assessments[result.scenario_id] = state.get(
-        "department_assessments", {}
-    )
-    return result
-
-
-@app.get("/scenarios/company", response_model=Twin)
-def scenario_company() -> Twin:
-    return scenario_twin
-
-
-@app.get("/scenarios/{scenario_id}/results", response_model=ScenarioResult)
-def get_scenario_result(scenario_id: str) -> ScenarioResult:
-    result = scenario_results.get(scenario_id)
-    if result is None:
-        raise HTTPException(status_code=404, detail="Scenario not found")
-    return result
-
-
-@app.get(
-    "/scenarios/{scenario_id}/assessments",
-    response_model=dict[str, AgentOutput],
-)
-def get_scenario_assessments(scenario_id: str) -> dict[str, AgentOutput]:
-    assessments = scenario_assessments.get(scenario_id)
-    if assessments is None:
-        raise HTTPException(status_code=404, detail="Scenario not found")
-    return assessments
-
-
-@app.get("/scenarios/{scenario_id}/report")
-def get_scenario_report(scenario_id: str) -> dict[str, str]:
-    summary = scenario_summaries.get(scenario_id)
-    if summary is None:
-        raise HTTPException(status_code=404, detail="Scenario not found")
-    return {"scenario_id": scenario_id, "executive_summary": summary}

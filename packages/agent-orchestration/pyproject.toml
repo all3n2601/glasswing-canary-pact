@@ -4,18 +4,13 @@ version = "0.1.0"
 description = "LangGraph orchestration for Canary Pact department assessments"
 requires-python = ">=3.11"
 dependencies = [
-  "canary-company-twin",
   "canary-contracts",
-  "canary-simulation-engine",
-  "httpx>=0.28",
   "langchain-openai>=1.2",
   "langgraph>=1.0",
 ]
 
 [tool.uv.sources]
-canary-company-twin = { workspace = true }
 canary-contracts = { workspace = true }
-canary-simulation-engine = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]
