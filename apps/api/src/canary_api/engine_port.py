@@ -80,8 +80,8 @@ def check_result(obj: Any, twin: Twin) -> list[ValidationIssue]:
     return _resolve(ENGINE_MODULE, "check_result")(obj, twin)
 
 
-def load_twin(twin_path: Path, documents_path: Path, snippets_path: Path | None = None) -> Twin:
-    return _resolve(TWIN_MODULE, "load_twin")(twin_path, documents_path, snippets_path)
+def load_twin(twin_path: Path, snippets_path: Path | None = None) -> Twin:
+    return _resolve(TWIN_MODULE, "load_twin")(twin_path, snippets_path)
 
 
 def validate_twin(twin: Twin) -> list[ValidationIssue]:

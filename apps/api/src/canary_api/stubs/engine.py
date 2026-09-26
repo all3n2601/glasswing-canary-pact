@@ -56,7 +56,7 @@ def check_result(obj: Any, twin: Twin) -> list[ValidationIssue]:
     return []
 
 
-def load_twin(twin_path: Any, documents_path: Any, snippets_path: Any = None) -> Twin:
+def load_twin(twin_path: Any, snippets_path: Any = None) -> Twin:
     return stub_twin()
 
 

@@ -1,18 +1,25 @@
 import asyncio
+import functools
+import logging
 import os
 import uuid
 from pathlib import Path
-from typing import Any, Coroutine
+from typing import Any, Coroutine, Literal
+
+from agent_orchestration import run_decision
+from pydantic import BaseModel
 
 from contracts_py.api import ReplayInfo
 from contracts_py.decision import DecisionBrief
-from contracts_py.enums import RunStatus
-from contracts_py.events import Event, EventLog, EventType, PhaseChanged, RunFailed
-from contracts_py.twin import OrganizationSettings
+from contracts_py.enums import Future, RunStatus
+from contracts_py.events import Event, EventLog, EventType, PhaseChanged, RunFailed, SettingsUpdated
+from contracts_py.twin import OrganizationSettings, Twin
 
-from canary_api import runtime
+from canary_api import engine_port, runtime
 from canary_api.paths import REPLAYS_DIR
-from canary_api.stubs.run import stub_run_events
+
+LlmMode = Literal["mock", "replay", "live"]
+log = logging.getLogger(__name__)
 
 _tasks: set[asyncio.Task[None]] = set()
 
@@ -72,11 +79,69 @@ async def play(run_id: str, events: list[Event], delay: float) -> None:
         runtime.bus.publish(run_id, EventType.run_failed, RunFailed(reason=str(exc)), actor="api")
 
 
-def start_run(brief: DecisionBrief) -> str:
+def resolve_llm_settings(settings: OrganizationSettings, llm_mode: LlmMode | None) -> tuple[OrganizationSettings, bool]:
+    mode = llm_mode or settings.llm_mode
+    # An empty replay cache would mark every agent unavailable, so the run falls back to mock answers.
+    fell_back = mode == "replay" and runtime.cache_is_empty(runtime.llm_cache_dir())
+    return settings.model_copy(update={"llm_mode": "mock" if fell_back else mode}), fell_back
+
+
+def _publish(run_id: str, kind: EventType, payload: BaseModel, actor: str, scenario_id: str | None,
+             future: Future | None) -> None:
+    try:
+        runtime.bus.publish(run_id, kind, payload, actor=actor, scenario_id=scenario_id, future=future)
+    except Exception:
+        log.exception("dropped %s event for %s", kind, run_id)
+
+
+class ThreadEmitter:
+    """Called from orchestrator worker threads; every publish is queued onto the event loop thread."""
+
+    def __init__(self, run_id: str, loop: asyncio.AbstractEventLoop, after_created: list[tuple[EventType, BaseModel]]):
+        self.run_id, self.loop, self.after_created = run_id, loop, after_created
+
+    def _schedule(self, kind: EventType, payload: BaseModel, actor: str, scenario_id: str | None,
+                  future: Future | None) -> None:
+        # call_soon_threadsafe runs callbacks in submission order, so sequence follows emit order.
+        self.loop.call_soon_threadsafe(functools.partial(_publish, self.run_id, kind, payload, actor, scenario_id, future))
+
+    def __call__(self, type: EventType, payload: BaseModel, *, actor: str, scenario_id: str | None = None,
+                 future: Future | None = None) -> None:
+        self._schedule(type, payload, actor, scenario_id, future)
+        if type is EventType.run_created:
+            for kind, note in self.after_created:
+                self._schedule(kind, note, "api", None, None)
+            self.after_created = []
+
+
+async def orchestrate(run_id: str, brief: DecisionBrief, twin: Twin, settings: OrganizationSettings,
+                      llm_mode: LlmMode | None) -> None:
+    loop = asyncio.get_running_loop()
+    try:
+        run_settings, fell_back = resolve_llm_settings(settings, llm_mode)
+        notes: list[tuple[EventType, BaseModel]] = []
+        if fell_back:
+            notes.append((EventType.settings_updated,
+                          SettingsUpdated(settings_version=run_settings.settings_version, changed_fields=["llm_mode"])))
+        emit = ThreadEmitter(run_id, loop, notes)
+        # AgentLLM.model_label is a property, which pyright treats as not matching the LLMClient attribute.
+        llm: Any = runtime.build_llm(run_settings)
+        await asyncio.to_thread(run_decision, brief, engine=engine_port, settings=run_settings, llm=llm, emit=emit,
+                                run_id=run_id, twin=twin)
+    except Exception as exc:
+        await asyncio.sleep(0)
+        state = runtime.bus.runs[run_id].state
+        if state.status is not RunStatus.failed:
+            runtime.bus.publish(run_id, EventType.phase_changed,
+                                PhaseChanged(from_status=state.status, to_status=RunStatus.failed), actor="api")
+            runtime.bus.publish(run_id, EventType.run_failed, RunFailed(reason=str(exc)), actor="api")
+
+
+def start_run(brief: DecisionBrief, llm_mode: LlmMode | None = None) -> str:
     twin = runtime.twin()
     run_id = new_run_id()
     runtime.bus.create_run(run_id, brief.decision_id, twin.version.twin_version)
-    _spawn(play(run_id, stub_run_events(brief, run_id, twin.version), step_seconds()))
+    _spawn(orchestrate(run_id, brief, twin, runtime.settings(), llm_mode))
     return run_id
 
 
