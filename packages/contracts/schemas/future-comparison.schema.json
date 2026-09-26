@@ -1,0 +1,185 @@
+{
+  "$defs": {
+    "Future": {
+      "enum": [
+        "act_now",
+        "inaction",
+        "delay",
+        "alternative"
+      ],
+      "title": "Future",
+      "type": "string"
+    },
+    "FutureRow": {
+      "additionalProperties": false,
+      "properties": {
+        "future": {
+          "$ref": "#/$defs/Future"
+        },
+        "plan_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Plan Id"
+        },
+        "result_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Result Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "net_value_p50_usd": {
+          "title": "Net Value P50 Usd",
+          "type": "integer"
+        },
+        "delta_vs_inaction_p10_usd": {
+          "title": "Delta Vs Inaction P10 Usd",
+          "type": "integer"
+        },
+        "delta_vs_inaction_p50_usd": {
+          "title": "Delta Vs Inaction P50 Usd",
+          "type": "integer"
+        },
+        "delta_vs_inaction_p90_usd": {
+          "title": "Delta Vs Inaction P90 Usd",
+          "type": "integer"
+        },
+        "p_better_than_inaction": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "P Better Than Inaction",
+          "type": "number"
+        },
+        "breakeven_day": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Breakeven Day"
+        },
+        "cost_of_delay_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost Of Delay Usd"
+        },
+        "feasible": {
+          "title": "Feasible",
+          "type": "boolean"
+        },
+        "risk_score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Risk Score",
+          "type": "number"
+        },
+        "monthly_delta_usd": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Monthly Delta Usd",
+          "type": "array"
+        }
+      },
+      "required": [
+        "future",
+        "result_id",
+        "label",
+        "net_value_p50_usd",
+        "delta_vs_inaction_p10_usd",
+        "delta_vs_inaction_p50_usd",
+        "delta_vs_inaction_p90_usd",
+        "p_better_than_inaction",
+        "feasible",
+        "risk_score"
+      ],
+      "title": "FutureRow",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "comparison_id": {
+      "maxLength": 80,
+      "pattern": "^(?:cmp_)[a-z0-9_]*$",
+      "title": "Comparison Id",
+      "type": "string"
+    },
+    "decision_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Decision Id",
+      "type": "string"
+    },
+    "run_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "reference_result_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Reference Result Id",
+      "type": "string"
+    },
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/FutureRow"
+      },
+      "title": "Rows",
+      "type": "array"
+    },
+    "best_row_index": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Best Row Index"
+    },
+    "headline": {
+      "title": "Headline",
+      "type": "string"
+    }
+  },
+  "required": [
+    "comparison_id",
+    "decision_id",
+    "run_id",
+    "reference_result_id",
+    "rows",
+    "headline"
+  ],
+  "title": "FutureComparison",
+  "type": "object"
+}

@@ -1,0 +1,404 @@
+{
+  "$defs": {
+    "BlastEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Target",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "level": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ImpactLevel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "critical_constraint": {
+          "title": "Critical Constraint",
+          "type": "boolean"
+        },
+        "channel_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel Id"
+        }
+      },
+      "required": [
+        "source",
+        "target",
+        "label",
+        "critical_constraint"
+      ],
+      "title": "BlastEdge",
+      "type": "object"
+    },
+    "BlastNode": {
+      "additionalProperties": false,
+      "properties": {
+        "node_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Node Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "decision",
+            "department",
+            "entity",
+            "pressure",
+            "outcome"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Department Id"
+        },
+        "entity_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entity Id"
+        },
+        "pressure_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pressure Id"
+        },
+        "headline": {
+          "title": "Headline",
+          "type": "string"
+        },
+        "level": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ImpactLevel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "category": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ImpactCategory"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "polarity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Polarity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "maximum": 5,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Severity"
+        },
+        "value_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Usd"
+        },
+        "first_effect_day": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "First Effect Day"
+        },
+        "impact_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Impact Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "node_id",
+        "kind",
+        "headline"
+      ],
+      "title": "BlastNode",
+      "type": "object"
+    },
+    "CompanyOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "net_value_usd": {
+          "title": "Net Value Usd",
+          "type": "integer"
+        },
+        "risk_level": {
+          "$ref": "#/$defs/RiskLevel"
+        },
+        "headline": {
+          "title": "Headline",
+          "type": "string"
+        }
+      },
+      "required": [
+        "net_value_usd",
+        "risk_level",
+        "headline"
+      ],
+      "title": "CompanyOutcome",
+      "type": "object"
+    },
+    "DepartmentImpactSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "department_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Department Id",
+          "type": "string"
+        },
+        "headline": {
+          "title": "Headline",
+          "type": "string"
+        },
+        "polarity": {
+          "$ref": "#/$defs/Polarity"
+        },
+        "severity": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Severity",
+          "type": "integer"
+        },
+        "impact_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Impact Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "department_id",
+        "headline",
+        "polarity",
+        "severity"
+      ],
+      "title": "DepartmentImpactSummary",
+      "type": "object"
+    },
+    "Future": {
+      "enum": [
+        "act_now",
+        "inaction",
+        "delay",
+        "alternative"
+      ],
+      "title": "Future",
+      "type": "string"
+    },
+    "ImpactCategory": {
+      "enum": [
+        "ownership",
+        "technical",
+        "operational",
+        "business",
+        "compliance",
+        "financial"
+      ],
+      "title": "ImpactCategory",
+      "type": "string"
+    },
+    "ImpactLevel": {
+      "enum": [
+        "direct",
+        "dependent",
+        "second_order",
+        "delayed",
+        "feedback"
+      ],
+      "title": "ImpactLevel",
+      "type": "string"
+    },
+    "Polarity": {
+      "enum": [
+        "benefit",
+        "harm"
+      ],
+      "title": "Polarity",
+      "type": "string"
+    },
+    "RiskLevel": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "RiskLevel",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "run_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "scenario_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "future": {
+      "$ref": "#/$defs/Future"
+    },
+    "plan_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Plan Id"
+    },
+    "root_node_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Root Node Id",
+      "type": "string"
+    },
+    "nodes": {
+      "items": {
+        "$ref": "#/$defs/BlastNode"
+      },
+      "title": "Nodes",
+      "type": "array"
+    },
+    "edges": {
+      "items": {
+        "$ref": "#/$defs/BlastEdge"
+      },
+      "title": "Edges",
+      "type": "array"
+    },
+    "departments": {
+      "items": {
+        "$ref": "#/$defs/DepartmentImpactSummary"
+      },
+      "title": "Departments",
+      "type": "array"
+    },
+    "outcome": {
+      "$ref": "#/$defs/CompanyOutcome"
+    }
+  },
+  "required": [
+    "run_id",
+    "scenario_id",
+    "future",
+    "root_node_id",
+    "outcome"
+  ],
+  "title": "BlastRadius",
+  "type": "object"
+}

@@ -1,0 +1,217 @@
+{
+  "$defs": {
+    "DocumentStatus": {
+      "enum": [
+        "current",
+        "outdated",
+        "draft",
+        "archived"
+      ],
+      "title": "DocumentStatus",
+      "type": "string"
+    },
+    "DocumentType": {
+      "enum": [
+        "contract",
+        "policy",
+        "runbook",
+        "sop",
+        "architecture_note",
+        "org_chart",
+        "budget_report",
+        "financial_forecast",
+        "kpi_report",
+        "incident_report",
+        "audit_report",
+        "workflow_map",
+        "knowledge_matrix",
+        "meeting_minutes",
+        "strategy_memo",
+        "other"
+      ],
+      "title": "DocumentType",
+      "type": "string"
+    },
+    "Sensitivity": {
+      "enum": [
+        "general",
+        "finance",
+        "hr",
+        "customer",
+        "security"
+      ],
+      "title": "Sensitivity",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "maxLength": 80,
+      "pattern": "^(?:doc_)[a-z0-9_]*$",
+      "title": "Id",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "doc_type": {
+      "$ref": "#/$defs/DocumentType"
+    },
+    "department_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Department Id"
+    },
+    "owner_role_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "pattern": "^(?:role_)[a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Owner Role Id"
+    },
+    "uri": {
+      "title": "Uri",
+      "type": "string"
+    },
+    "mime_type": {
+      "title": "Mime Type",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/DocumentStatus"
+    },
+    "version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Version"
+    },
+    "last_reviewed": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Last Reviewed"
+    },
+    "review_cycle_days": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Review Cycle Days"
+    },
+    "sensitivity": {
+      "$ref": "#/$defs/Sensitivity",
+      "default": "general"
+    },
+    "covers_entity_ids": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Covers Entity Ids",
+      "type": "array"
+    },
+    "framework_refs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Framework Refs",
+      "type": "array"
+    },
+    "summary": {
+      "title": "Summary",
+      "type": "string"
+    },
+    "page_count": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Page Count"
+    },
+    "checksum_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[a-f0-9]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Checksum Sha256"
+    },
+    "synthetic": {
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "ingested": {
+      "default": false,
+      "title": "Ingested",
+      "type": "boolean"
+    },
+    "uploaded_at": {
+      "format": "date-time",
+      "title": "Uploaded At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "doc_type",
+    "uri",
+    "mime_type",
+    "status",
+    "summary",
+    "uploaded_at"
+  ],
+  "title": "Document",
+  "type": "object"
+}

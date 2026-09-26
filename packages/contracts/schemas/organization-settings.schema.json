@@ -1,0 +1,430 @@
+{
+  "$defs": {
+    "Constraint": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "metric": {
+          "enum": [
+            "annual_savings_usd",
+            "net_value_usd",
+            "revenue_impact_pct",
+            "customer_impact_pct",
+            "compliance_controls_broken",
+            "stranded_workflows",
+            "critical_systems_degraded",
+            "max_capacity_loss_pct"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            "<=",
+            ">=",
+            "=="
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "threshold": {
+          "title": "Threshold",
+          "type": "number"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "hard": {
+          "title": "Hard",
+          "type": "boolean"
+        },
+        "scope_entity_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scope Entity Id"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "metric",
+        "operator",
+        "threshold",
+        "unit",
+        "hard",
+        "description"
+      ],
+      "title": "Constraint",
+      "type": "object"
+    },
+    "DocumentType": {
+      "enum": [
+        "contract",
+        "policy",
+        "runbook",
+        "sop",
+        "architecture_note",
+        "org_chart",
+        "budget_report",
+        "financial_forecast",
+        "kpi_report",
+        "incident_report",
+        "audit_report",
+        "workflow_map",
+        "knowledge_matrix",
+        "meeting_minutes",
+        "strategy_memo",
+        "other"
+      ],
+      "title": "DocumentType",
+      "type": "string"
+    },
+    "Future": {
+      "enum": [
+        "act_now",
+        "inaction",
+        "delay",
+        "alternative"
+      ],
+      "title": "Future",
+      "type": "string"
+    },
+    "RiskAppetite": {
+      "enum": [
+        "conservative",
+        "balanced",
+        "aggressive"
+      ],
+      "title": "RiskAppetite",
+      "type": "string"
+    },
+    "RiskLevelThresholds": {
+      "additionalProperties": false,
+      "properties": {
+        "medium": {
+          "default": 25,
+          "title": "Medium",
+          "type": "number"
+        },
+        "high": {
+          "default": 50,
+          "title": "High",
+          "type": "number"
+        },
+        "critical": {
+          "default": 75,
+          "title": "Critical",
+          "type": "number"
+        }
+      },
+      "title": "RiskLevelThresholds",
+      "type": "object"
+    },
+    "RiskWeights": {
+      "additionalProperties": false,
+      "properties": {
+        "financial": {
+          "default": 25,
+          "minimum": 0,
+          "title": "Financial",
+          "type": "number"
+        },
+        "capability_workflow": {
+          "default": 25,
+          "minimum": 0,
+          "title": "Capability Workflow",
+          "type": "number"
+        },
+        "customer_revenue": {
+          "default": 20,
+          "minimum": 0,
+          "title": "Customer Revenue",
+          "type": "number"
+        },
+        "compliance_control": {
+          "default": 20,
+          "minimum": 0,
+          "title": "Compliance Control",
+          "type": "number"
+        },
+        "execution_uncertainty": {
+          "default": 10,
+          "minimum": 0,
+          "title": "Execution Uncertainty",
+          "type": "number"
+        }
+      },
+      "title": "RiskWeights",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "settings_id": {
+      "default": "set_default",
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Settings Id",
+      "type": "string"
+    },
+    "organization_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Organization Id"
+    },
+    "settings_version": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Settings Version",
+      "type": "integer"
+    },
+    "updated_by": {
+      "default": "system",
+      "title": "Updated By",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    },
+    "display_currency": {
+      "default": "USD",
+      "title": "Display Currency",
+      "type": "string"
+    },
+    "money_display_scale": {
+      "default": "auto",
+      "enum": [
+        "auto",
+        "K",
+        "M",
+        "B"
+      ],
+      "title": "Money Display Scale",
+      "type": "string"
+    },
+    "timezone": {
+      "default": "UTC",
+      "title": "Timezone",
+      "type": "string"
+    },
+    "locale": {
+      "default": "en-US",
+      "title": "Locale",
+      "type": "string"
+    },
+    "default_horizon_days": {
+      "default": 365,
+      "exclusiveMinimum": 0,
+      "title": "Default Horizon Days",
+      "type": "integer"
+    },
+    "default_futures": {
+      "items": {
+        "$ref": "#/$defs/Future"
+      },
+      "title": "Default Futures",
+      "type": "array"
+    },
+    "default_delay_days": {
+      "default": 90,
+      "minimum": 0,
+      "title": "Default Delay Days",
+      "type": "integer"
+    },
+    "mc_samples": {
+      "default": 1000,
+      "maximum": 5000,
+      "minimum": 200,
+      "title": "Mc Samples",
+      "type": "integer"
+    },
+    "default_seed": {
+      "default": 42,
+      "title": "Default Seed",
+      "type": "integer"
+    },
+    "propagation_max_hops": {
+      "default": 4,
+      "maximum": 6,
+      "minimum": 1,
+      "title": "Propagation Max Hops",
+      "type": "integer"
+    },
+    "min_impact_threshold": {
+      "default": 0.02,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Min Impact Threshold",
+      "type": "number"
+    },
+    "risk_appetite": {
+      "$ref": "#/$defs/RiskAppetite",
+      "default": "balanced"
+    },
+    "risk_level_thresholds": {
+      "$ref": "#/$defs/RiskLevelThresholds"
+    },
+    "risk_weights": {
+      "$ref": "#/$defs/RiskWeights"
+    },
+    "optimizer_objective": {
+      "default": "max_net_value",
+      "enum": [
+        "max_net_value",
+        "min_risk",
+        "balanced"
+      ],
+      "title": "Optimizer Objective",
+      "type": "string"
+    },
+    "default_constraints": {
+      "items": {
+        "$ref": "#/$defs/Constraint"
+      },
+      "title": "Default Constraints",
+      "type": "array"
+    },
+    "always_protected_entity_ids": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Always Protected Entity Ids",
+      "type": "array"
+    },
+    "require_human_approval": {
+      "const": true,
+      "default": true,
+      "title": "Require Human Approval",
+      "type": "boolean"
+    },
+    "anonymize_people": {
+      "const": true,
+      "default": true,
+      "title": "Anonymize People",
+      "type": "boolean"
+    },
+    "enabled_agent_ids": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Enabled Agent Ids",
+      "type": "array"
+    },
+    "llm_mode": {
+      "default": "replay",
+      "enum": [
+        "live",
+        "replay",
+        "mock"
+      ],
+      "title": "Llm Mode",
+      "type": "string"
+    },
+    "model_id_strong": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Id Strong"
+    },
+    "model_id_fast": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model Id Fast"
+    },
+    "max_tool_calls": {
+      "default": 3,
+      "maximum": 5,
+      "minimum": 0,
+      "title": "Max Tool Calls",
+      "type": "integer"
+    },
+    "temperature": {
+      "default": 0.4,
+      "maximum": 2,
+      "minimum": 0,
+      "title": "Temperature",
+      "type": "number"
+    },
+    "agent_timeout_seconds": {
+      "default": 45,
+      "exclusiveMinimum": 0,
+      "title": "Agent Timeout Seconds",
+      "type": "integer"
+    },
+    "doc_staleness_days": {
+      "default": 365,
+      "exclusiveMinimum": 0,
+      "title": "Doc Staleness Days",
+      "type": "integer"
+    },
+    "required_doc_types_per_workflow": {
+      "items": {
+        "$ref": "#/$defs/DocumentType"
+      },
+      "title": "Required Doc Types Per Workflow",
+      "type": "array"
+    },
+    "sector_preset_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sector Preset Id"
+    }
+  },
+  "title": "OrganizationSettings",
+  "type": "object"
+}

@@ -1,0 +1,58 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "question_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Question Id",
+      "type": "string"
+    },
+    "text": {
+      "title": "Text",
+      "type": "string"
+    },
+    "uncertain_input": {
+      "title": "Uncertain Input",
+      "type": "string"
+    },
+    "current_assumption": {
+      "title": "Current Assumption",
+      "type": "string"
+    },
+    "answer_type": {
+      "enum": [
+        "boolean",
+        "number",
+        "choice"
+      ],
+      "title": "Answer Type",
+      "type": "string"
+    },
+    "options": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Options",
+      "type": "array"
+    },
+    "changes_recommendation_if": {
+      "title": "Changes Recommendation If",
+      "type": "string"
+    },
+    "value_gap_usd": {
+      "title": "Value Gap Usd",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "question_id",
+    "text",
+    "uncertain_input",
+    "current_assumption",
+    "answer_type",
+    "changes_recommendation_if",
+    "value_gap_usd"
+  ],
+  "title": "MissingQuestion",
+  "type": "object"
+}

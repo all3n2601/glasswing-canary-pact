@@ -1,0 +1,150 @@
+{
+  "$defs": {
+    "ActionType": {
+      "enum": [
+        "remove_vendor",
+        "reduce_capacity",
+        "add_capacity",
+        "remove_roles",
+        "stop_project",
+        "start_project",
+        "delay_project",
+        "invest"
+      ],
+      "title": "ActionType",
+      "type": "string"
+    },
+    "InterventionKind": {
+      "enum": [
+        "action",
+        "mitigation"
+      ],
+      "title": "InterventionKind",
+      "type": "string"
+    },
+    "MitigationType": {
+      "enum": [
+        "reassign_owner",
+        "document_runbook",
+        "reassign_on_call",
+        "add_replacement_feed",
+        "resequence_project",
+        "retain_capacity_temporarily"
+      ],
+      "title": "MitigationType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "$ref": "#/$defs/InterventionKind"
+    },
+    "type": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ActionType"
+        },
+        {
+          "$ref": "#/$defs/MitigationType"
+        }
+      ],
+      "title": "Type"
+    },
+    "target_entity_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Target Entity Id",
+      "type": "string"
+    },
+    "amount_pct": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Amount Pct"
+    },
+    "amount_usd": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Amount Usd"
+    },
+    "start_day": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Start Day",
+      "type": "integer"
+    },
+    "duration_days": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Duration Days"
+    },
+    "one_time_cost_usd": {
+      "default": 0,
+      "minimum": 0,
+      "title": "One Time Cost Usd",
+      "type": "integer"
+    },
+    "new_owner_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "pattern": "^(?:role_)[a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "New Owner Id"
+    },
+    "params": {
+      "additionalProperties": true,
+      "title": "Params",
+      "type": "object"
+    },
+    "rationale": {
+      "title": "Rationale",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "type",
+    "target_entity_id",
+    "rationale"
+  ],
+  "title": "Intervention",
+  "type": "object"
+}

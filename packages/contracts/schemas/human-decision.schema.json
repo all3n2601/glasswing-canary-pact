@@ -1,0 +1,55 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "run_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "package_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Package Id",
+      "type": "string"
+    },
+    "decision": {
+      "enum": [
+        "approve",
+        "reject",
+        "request_scenario"
+      ],
+      "title": "Decision",
+      "type": "string"
+    },
+    "decided_by": {
+      "title": "Decided By",
+      "type": "string"
+    },
+    "decided_at": {
+      "format": "date-time",
+      "title": "Decided At",
+      "type": "string"
+    },
+    "notes": {
+      "default": "",
+      "title": "Notes",
+      "type": "string"
+    },
+    "package_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Package Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "run_id",
+    "package_id",
+    "decision",
+    "decided_by",
+    "decided_at",
+    "package_hash"
+  ],
+  "title": "HumanDecision",
+  "type": "object"
+}

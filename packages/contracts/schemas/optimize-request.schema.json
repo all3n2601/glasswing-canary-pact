@@ -1,0 +1,419 @@
+{
+  "$defs": {
+    "ActionType": {
+      "enum": [
+        "remove_vendor",
+        "reduce_capacity",
+        "add_capacity",
+        "remove_roles",
+        "stop_project",
+        "start_project",
+        "delay_project",
+        "invest"
+      ],
+      "title": "ActionType",
+      "type": "string"
+    },
+    "Constraint": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "metric": {
+          "enum": [
+            "annual_savings_usd",
+            "net_value_usd",
+            "revenue_impact_pct",
+            "customer_impact_pct",
+            "compliance_controls_broken",
+            "stranded_workflows",
+            "critical_systems_degraded",
+            "max_capacity_loss_pct"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            "<=",
+            ">=",
+            "=="
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "threshold": {
+          "title": "Threshold",
+          "type": "number"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "hard": {
+          "title": "Hard",
+          "type": "boolean"
+        },
+        "scope_entity_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scope Entity Id"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "metric",
+        "operator",
+        "threshold",
+        "unit",
+        "hard",
+        "description"
+      ],
+      "title": "Constraint",
+      "type": "object"
+    },
+    "DecisionBrief": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "2.1.0",
+          "default": "2.1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "decision_id": {
+          "maxLength": 80,
+          "pattern": "^(?:dec_)[a-z0-9_]*$",
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "decision_type": {
+          "$ref": "#/$defs/DecisionType"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "statement": {
+          "title": "Statement",
+          "type": "string"
+        },
+        "goal": {
+          "$ref": "#/$defs/Goal"
+        },
+        "horizon_days": {
+          "default": 365,
+          "exclusiveMinimum": 0,
+          "title": "Horizon Days",
+          "type": "integer"
+        },
+        "candidate_interventions": {
+          "items": {
+            "$ref": "#/$defs/Intervention"
+          },
+          "title": "Candidate Interventions",
+          "type": "array"
+        },
+        "protected_entity_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Protected Entity Ids",
+          "type": "array"
+        },
+        "constraints": {
+          "items": {
+            "$ref": "#/$defs/Constraint"
+          },
+          "title": "Constraints",
+          "type": "array"
+        },
+        "futures": {
+          "items": {
+            "$ref": "#/$defs/Future"
+          },
+          "title": "Futures",
+          "type": "array"
+        },
+        "delay_days": {
+          "default": 90,
+          "minimum": 0,
+          "title": "Delay Days",
+          "type": "integer"
+        },
+        "active_pressure_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 80,
+                "pattern": "^[a-z][a-z0-9_]*$",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Active Pressure Ids"
+        },
+        "seed": {
+          "default": 42,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "mc_samples": {
+          "default": 1000,
+          "minimum": 1,
+          "title": "Mc Samples",
+          "type": "integer"
+        },
+        "created_by": {
+          "title": "Created By",
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision_id",
+        "decision_type",
+        "title",
+        "statement",
+        "goal",
+        "candidate_interventions",
+        "created_by"
+      ],
+      "title": "DecisionBrief",
+      "type": "object"
+    },
+    "DecisionType": {
+      "enum": [
+        "cost_reduction",
+        "vendor_consolidation",
+        "capacity_change",
+        "project_decision",
+        "investment",
+        "restructure",
+        "mixed"
+      ],
+      "title": "DecisionType",
+      "type": "string"
+    },
+    "Future": {
+      "enum": [
+        "act_now",
+        "inaction",
+        "delay",
+        "alternative"
+      ],
+      "title": "Future",
+      "type": "string"
+    },
+    "Goal": {
+      "additionalProperties": false,
+      "properties": {
+        "metric": {
+          "title": "Metric",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "number"
+        },
+        "unit": {
+          "default": "usd",
+          "title": "Unit",
+          "type": "string"
+        },
+        "basis": {
+          "default": "gross",
+          "enum": [
+            "gross",
+            "net"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "direction": {
+          "default": "at_least",
+          "enum": [
+            "at_least",
+            "at_most"
+          ],
+          "title": "Direction",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric",
+        "target"
+      ],
+      "title": "Goal",
+      "type": "object"
+    },
+    "Intervention": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/InterventionKind"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ActionType"
+            },
+            {
+              "$ref": "#/$defs/MitigationType"
+            }
+          ],
+          "title": "Type"
+        },
+        "target_entity_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Target Entity Id",
+          "type": "string"
+        },
+        "amount_pct": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Amount Pct"
+        },
+        "amount_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Amount Usd"
+        },
+        "start_day": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Start Day",
+          "type": "integer"
+        },
+        "duration_days": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Days"
+        },
+        "one_time_cost_usd": {
+          "default": 0,
+          "minimum": 0,
+          "title": "One Time Cost Usd",
+          "type": "integer"
+        },
+        "new_owner_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^(?:role_)[a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "New Owner Id"
+        },
+        "params": {
+          "additionalProperties": true,
+          "title": "Params",
+          "type": "object"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "type",
+        "target_entity_id",
+        "rationale"
+      ],
+      "title": "Intervention",
+      "type": "object"
+    },
+    "InterventionKind": {
+      "enum": [
+        "action",
+        "mitigation"
+      ],
+      "title": "InterventionKind",
+      "type": "string"
+    },
+    "MitigationType": {
+      "enum": [
+        "reassign_owner",
+        "document_runbook",
+        "reassign_on_call",
+        "add_replacement_feed",
+        "resequence_project",
+        "retain_capacity_temporarily"
+      ],
+      "title": "MitigationType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "brief": {
+      "$ref": "#/$defs/DecisionBrief"
+    }
+  },
+  "required": [
+    "brief"
+  ],
+  "title": "OptimizeRequest",
+  "type": "object"
+}

@@ -1,0 +1,855 @@
+{
+  "$defs": {
+    "ClaimStatus": {
+      "enum": [
+        "computed",
+        "validated",
+        "hypothesis",
+        "rejected"
+      ],
+      "title": "ClaimStatus",
+      "type": "string"
+    },
+    "ConstraintResult": {
+      "additionalProperties": false,
+      "properties": {
+        "constraint_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Constraint Id",
+          "type": "string"
+        },
+        "metric": {
+          "enum": [
+            "annual_savings_usd",
+            "net_value_usd",
+            "revenue_impact_pct",
+            "customer_impact_pct",
+            "compliance_controls_broken",
+            "stranded_workflows",
+            "critical_systems_degraded",
+            "max_capacity_loss_pct"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            "<=",
+            ">=",
+            "=="
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "threshold": {
+          "title": "Threshold",
+          "type": "number"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "hard": {
+          "title": "Hard",
+          "type": "boolean"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        },
+        "impact_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Impact Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "constraint_id",
+        "metric",
+        "operator",
+        "threshold",
+        "value",
+        "hard",
+        "passed",
+        "explanation"
+      ],
+      "title": "ConstraintResult",
+      "type": "object"
+    },
+    "Criticality": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Criticality",
+      "type": "string"
+    },
+    "Direction": {
+      "enum": [
+        "increase",
+        "decrease",
+        "no_change"
+      ],
+      "title": "Direction",
+      "type": "string"
+    },
+    "Future": {
+      "enum": [
+        "act_now",
+        "inaction",
+        "delay",
+        "alternative"
+      ],
+      "title": "Future",
+      "type": "string"
+    },
+    "Impact": {
+      "additionalProperties": false,
+      "properties": {
+        "impact_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Impact Id",
+          "type": "string"
+        },
+        "decision_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "scenario_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "source_entity": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Source Entity",
+          "type": "string"
+        },
+        "source_kind": {
+          "enum": [
+            "intervention",
+            "pressure"
+          ],
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "source_ref": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "affected_entity": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Affected Entity",
+          "type": "string"
+        },
+        "affected_department": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Affected Department"
+        },
+        "level": {
+          "$ref": "#/$defs/ImpactLevel"
+        },
+        "category": {
+          "$ref": "#/$defs/ImpactCategory"
+        },
+        "polarity": {
+          "$ref": "#/$defs/Polarity"
+        },
+        "direction": {
+          "$ref": "#/$defs/Direction"
+        },
+        "metric": {
+          "title": "Metric",
+          "type": "string"
+        },
+        "magnitude": {
+          "title": "Magnitude",
+          "type": "number"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Usd"
+        },
+        "severity": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Severity",
+          "type": "integer"
+        },
+        "first_effect_day": {
+          "minimum": 0,
+          "title": "First Effect Day",
+          "type": "integer"
+        },
+        "peak_effect_day": {
+          "minimum": 0,
+          "title": "Peak Effect Day",
+          "type": "integer"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "dependency_path": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Dependency Path",
+          "type": "array"
+        },
+        "edge_path": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Edge Path",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "constraint_refs": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Constraint Refs",
+          "type": "array"
+        },
+        "origin": {
+          "$ref": "#/$defs/Origin"
+        },
+        "status": {
+          "$ref": "#/$defs/ClaimStatus"
+        }
+      },
+      "required": [
+        "impact_id",
+        "decision_id",
+        "scenario_id",
+        "source_entity",
+        "source_kind",
+        "source_ref",
+        "affected_entity",
+        "level",
+        "category",
+        "polarity",
+        "direction",
+        "metric",
+        "magnitude",
+        "unit",
+        "severity",
+        "first_effect_day",
+        "peak_effect_day",
+        "confidence",
+        "origin",
+        "status"
+      ],
+      "title": "Impact",
+      "type": "object"
+    },
+    "ImpactCategory": {
+      "enum": [
+        "ownership",
+        "technical",
+        "operational",
+        "business",
+        "compliance",
+        "financial"
+      ],
+      "title": "ImpactCategory",
+      "type": "string"
+    },
+    "ImpactLevel": {
+      "enum": [
+        "direct",
+        "dependent",
+        "second_order",
+        "delayed",
+        "feedback"
+      ],
+      "title": "ImpactLevel",
+      "type": "string"
+    },
+    "Origin": {
+      "enum": [
+        "engine",
+        "agent",
+        "challenger",
+        "user"
+      ],
+      "title": "Origin",
+      "type": "string"
+    },
+    "Polarity": {
+      "enum": [
+        "benefit",
+        "harm"
+      ],
+      "title": "Polarity",
+      "type": "string"
+    },
+    "Portfolio": {
+      "additionalProperties": false,
+      "properties": {
+        "plan_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "intervention_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Intervention Ids",
+          "type": "array"
+        },
+        "rank": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rank"
+        },
+        "result": {
+          "$ref": "#/$defs/SimulationResult"
+        }
+      },
+      "required": [
+        "plan_id",
+        "result"
+      ],
+      "title": "Portfolio",
+      "type": "object"
+    },
+    "PressureTrigger": {
+      "additionalProperties": false,
+      "properties": {
+        "pressure_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Pressure Id",
+          "type": "string"
+        },
+        "expected_events": {
+          "minimum": 0,
+          "title": "Expected Events",
+          "type": "number"
+        },
+        "expected_cost_usd": {
+          "title": "Expected Cost Usd",
+          "type": "integer"
+        },
+        "neutralised": {
+          "title": "Neutralised",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "pressure_id",
+        "expected_events",
+        "expected_cost_usd",
+        "neutralised"
+      ],
+      "title": "PressureTrigger",
+      "type": "object"
+    },
+    "RiskComponents": {
+      "additionalProperties": false,
+      "properties": {
+        "financial": {
+          "minimum": 0,
+          "title": "Financial",
+          "type": "number"
+        },
+        "capability_workflow": {
+          "minimum": 0,
+          "title": "Capability Workflow",
+          "type": "number"
+        },
+        "customer_revenue": {
+          "minimum": 0,
+          "title": "Customer Revenue",
+          "type": "number"
+        },
+        "compliance_control": {
+          "minimum": 0,
+          "title": "Compliance Control",
+          "type": "number"
+        },
+        "execution_uncertainty": {
+          "minimum": 0,
+          "title": "Execution Uncertainty",
+          "type": "number"
+        }
+      },
+      "required": [
+        "financial",
+        "capability_workflow",
+        "customer_revenue",
+        "compliance_control",
+        "execution_uncertainty"
+      ],
+      "title": "RiskComponents",
+      "type": "object"
+    },
+    "RiskLevel": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "RiskLevel",
+      "type": "string"
+    },
+    "RiskScore": {
+      "additionalProperties": false,
+      "properties": {
+        "score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Score",
+          "type": "number"
+        },
+        "level": {
+          "$ref": "#/$defs/RiskLevel"
+        },
+        "settings_version": {
+          "minimum": 1,
+          "title": "Settings Version",
+          "type": "integer"
+        },
+        "components": {
+          "$ref": "#/$defs/RiskComponents"
+        }
+      },
+      "required": [
+        "score",
+        "level",
+        "settings_version",
+        "components"
+      ],
+      "title": "RiskScore",
+      "type": "object"
+    },
+    "SimulationResult": {
+      "additionalProperties": false,
+      "properties": {
+        "result_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Result Id",
+          "type": "string"
+        },
+        "run_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "scenario_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "future": {
+          "$ref": "#/$defs/Future"
+        },
+        "plan_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Plan Id"
+        },
+        "mode": {
+          "enum": [
+            "quick",
+            "full"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "seed": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Seed"
+        },
+        "intervention_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Intervention Ids",
+          "type": "array"
+        },
+        "value": {
+          "$ref": "#/$defs/ValueBreakdown"
+        },
+        "goal_met": {
+          "title": "Goal Met",
+          "type": "boolean"
+        },
+        "constraint_results": {
+          "items": {
+            "$ref": "#/$defs/ConstraintResult"
+          },
+          "title": "Constraint Results",
+          "type": "array"
+        },
+        "impacts": {
+          "items": {
+            "$ref": "#/$defs/Impact"
+          },
+          "title": "Impacts",
+          "type": "array"
+        },
+        "workflow_coverage": {
+          "items": {
+            "$ref": "#/$defs/WorkflowCoverage"
+          },
+          "title": "Workflow Coverage",
+          "type": "array"
+        },
+        "pressures_triggered": {
+          "items": {
+            "$ref": "#/$defs/PressureTrigger"
+          },
+          "title": "Pressures Triggered",
+          "type": "array"
+        },
+        "risk": {
+          "$ref": "#/$defs/RiskScore"
+        },
+        "affected_department_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Affected Department Ids",
+          "type": "array"
+        },
+        "feasible": {
+          "title": "Feasible",
+          "type": "boolean"
+        },
+        "rejection_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Rejection Reasons",
+          "type": "array"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "computed_at": {
+          "format": "date-time",
+          "title": "Computed At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result_id",
+        "run_id",
+        "scenario_id",
+        "future",
+        "mode",
+        "value",
+        "goal_met",
+        "risk",
+        "feasible",
+        "computed_at"
+      ],
+      "title": "SimulationResult",
+      "type": "object"
+    },
+    "ValueBreakdown": {
+      "additionalProperties": false,
+      "properties": {
+        "gross_savings_usd": {
+          "title": "Gross Savings Usd",
+          "type": "integer"
+        },
+        "transition_cost_usd": {
+          "title": "Transition Cost Usd",
+          "type": "integer"
+        },
+        "added_cost_usd": {
+          "title": "Added Cost Usd",
+          "type": "integer"
+        },
+        "rebound_cost_usd": {
+          "title": "Rebound Cost Usd",
+          "type": "integer"
+        },
+        "expected_business_loss_usd": {
+          "title": "Expected Business Loss Usd",
+          "type": "integer"
+        },
+        "pressure_cost_usd": {
+          "title": "Pressure Cost Usd",
+          "type": "integer"
+        },
+        "avoided_failure_cost_usd": {
+          "title": "Avoided Failure Cost Usd",
+          "type": "integer"
+        },
+        "net_value_usd": {
+          "title": "Net Value Usd",
+          "type": "integer"
+        },
+        "monthly_net_usd": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Monthly Net Usd",
+          "type": "array"
+        },
+        "p10_net_value_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "P10 Net Value Usd"
+        },
+        "p50_net_value_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "P50 Net Value Usd"
+        },
+        "p90_net_value_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "P90 Net Value Usd"
+        }
+      },
+      "required": [
+        "gross_savings_usd",
+        "transition_cost_usd",
+        "added_cost_usd",
+        "rebound_cost_usd",
+        "expected_business_loss_usd",
+        "pressure_cost_usd",
+        "avoided_failure_cost_usd",
+        "net_value_usd"
+      ],
+      "title": "ValueBreakdown",
+      "type": "object"
+    },
+    "WorkflowCoverage": {
+      "additionalProperties": false,
+      "properties": {
+        "workflow_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Workflow Id",
+          "type": "string"
+        },
+        "criticality": {
+          "$ref": "#/$defs/Criticality"
+        },
+        "owners_before": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Owners Before",
+          "type": "array"
+        },
+        "owners_after": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Owners After",
+          "type": "array"
+        },
+        "min_qualified_owners": {
+          "minimum": 0,
+          "title": "Min Qualified Owners",
+          "type": "integer"
+        },
+        "backup_count_after": {
+          "minimum": 0,
+          "title": "Backup Count After",
+          "type": "integer"
+        },
+        "documented_pct": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Documented Pct",
+          "type": "number"
+        },
+        "stranded": {
+          "title": "Stranded",
+          "type": "boolean"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "workflow_id",
+        "criticality",
+        "min_qualified_owners",
+        "backup_count_after",
+        "documented_pct",
+        "stranded"
+      ],
+      "title": "WorkflowCoverage",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "evaluated_count": {
+      "minimum": 0,
+      "title": "Evaluated Count",
+      "type": "integer"
+    },
+    "naive": {
+      "$ref": "#/$defs/Portfolio"
+    },
+    "recommended": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Portfolio"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "alternatives": {
+      "items": {
+        "$ref": "#/$defs/Portfolio"
+      },
+      "title": "Alternatives",
+      "type": "array"
+    }
+  },
+  "required": [
+    "evaluated_count",
+    "naive"
+  ],
+  "title": "PortfolioComparison",
+  "type": "object"
+}

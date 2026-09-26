@@ -1,0 +1,75 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Id",
+      "type": "string"
+    },
+    "metric": {
+      "enum": [
+        "annual_savings_usd",
+        "net_value_usd",
+        "revenue_impact_pct",
+        "customer_impact_pct",
+        "compliance_controls_broken",
+        "stranded_workflows",
+        "critical_systems_degraded",
+        "max_capacity_loss_pct"
+      ],
+      "title": "Metric",
+      "type": "string"
+    },
+    "operator": {
+      "enum": [
+        "<=",
+        ">=",
+        "=="
+      ],
+      "title": "Operator",
+      "type": "string"
+    },
+    "threshold": {
+      "title": "Threshold",
+      "type": "number"
+    },
+    "unit": {
+      "title": "Unit",
+      "type": "string"
+    },
+    "hard": {
+      "title": "Hard",
+      "type": "boolean"
+    },
+    "scope_entity_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Scope Entity Id"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "metric",
+    "operator",
+    "threshold",
+    "unit",
+    "hard",
+    "description"
+  ],
+  "title": "Constraint",
+  "type": "object"
+}

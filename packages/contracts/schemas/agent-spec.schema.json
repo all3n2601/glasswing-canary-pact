@@ -1,0 +1,127 @@
+{
+  "$defs": {
+    "DecisionType": {
+      "enum": [
+        "cost_reduction",
+        "vendor_consolidation",
+        "capacity_change",
+        "project_decision",
+        "investment",
+        "restructure",
+        "mixed"
+      ],
+      "title": "DecisionType",
+      "type": "string"
+    },
+    "EntityType": {
+      "enum": [
+        "department",
+        "person_token",
+        "role",
+        "knowledge_asset",
+        "system",
+        "vendor",
+        "project",
+        "workflow",
+        "control",
+        "kpi",
+        "customer_segment",
+        "dataset"
+      ],
+      "title": "EntityType",
+      "type": "string"
+    },
+    "Sensitivity": {
+      "enum": [
+        "general",
+        "finance",
+        "hr",
+        "customer",
+        "security"
+      ],
+      "title": "Sensitivity",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "agent_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Agent Id",
+      "type": "string"
+    },
+    "display_name": {
+      "title": "Display Name",
+      "type": "string"
+    },
+    "department_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Department Id"
+    },
+    "responsibilities": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Responsibilities",
+      "type": "array"
+    },
+    "owned_metrics": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Owned Metrics",
+      "type": "array"
+    },
+    "visible_entity_types": {
+      "items": {
+        "$ref": "#/$defs/EntityType"
+      },
+      "title": "Visible Entity Types",
+      "type": "array"
+    },
+    "visible_sensitivity": {
+      "items": {
+        "$ref": "#/$defs/Sensitivity"
+      },
+      "title": "Visible Sensitivity",
+      "type": "array"
+    },
+    "routes_for": {
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/DecisionType"
+          },
+          {
+            "const": "all",
+            "type": "string"
+          }
+        ]
+      },
+      "title": "Routes For",
+      "type": "array"
+    },
+    "prompt_version": {
+      "title": "Prompt Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "agent_id",
+    "display_name",
+    "prompt_version"
+  ],
+  "title": "AgentSpec",
+  "type": "object"
+}

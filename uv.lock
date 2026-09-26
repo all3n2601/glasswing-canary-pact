@@ -11,6 +11,7 @@ members = [
     "canary-agent-orchestration",
     "canary-api",
     "canary-company-twin",
+    "canary-contracts",
     "canary-simulation-engine",
 ]
 
@@ -112,6 +113,25 @@ requires-dist = [
     { name = "networkx", specifier = ">=3.4" },
     { name = "pydantic", specifier = ">=2.10" },
 ]
+
+[[package]]
+name = "canary-contracts"
+version = "2.1.0"
+source = { editable = "packages/contracts-py" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = ">=2.10" }]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=8.3" }]
 
 [[package]]
 name = "canary-simulation-engine"
