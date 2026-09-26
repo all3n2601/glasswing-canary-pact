@@ -34,13 +34,14 @@ def test_full_mock_run_returns_package_and_exact_phase_order(brief, twin, settin
     assert engine.names().count("optimize") == 1
     assert "to_role_level" in engine.names()
     started = [e.payload.agent_id for e in recorder.of(EventType.agent_started)]
-    assert started == ["finance", "engineering", "operations", "compliance", "people_knowledge", "challenger"]
+    assert started == ["finance", "engineering", "ai_data", "operations", "sales", "compliance", "challenger"]
 
 
 def challenger_with_new_edge(context: AgentContext) -> LLMResult:
-    dependency = ProposedDependency(source="role_billing_ops_lead", target="sys_cloud_platform",
-                                    relation="maintains", rationale="The incident log names the lead on cloud fixes.",
-                                    evidence_refs=["ev_ops_incident_log"], confidence=1.7)
+    # The planted dependency: known endpoints, not yet an edge, evidenced by the workflow map.
+    dependency = ProposedDependency(source="wf_vendor_reconciliation", target="ds_account_intel",
+                                    relation="consumes", rationale="The workflow map says account intel feeds it.",
+                                    evidence_refs=["ev_echo_account_intel_feed"], confidence=1.7)
     return LLMResult(ChallengerOutput(missed_dependencies=[dependency], confidence=0.6), "ok", metrics("challenger"))
 
 
@@ -56,7 +57,7 @@ def test_validated_edge_resimulates_and_reoptimizes(brief, twin, settings) -> No
     assert len(generated) == len(set(generated)) == 2
     assert len(recorder.of(EventType.portfolio_ranked)) == 2
     edge = recorder.of(EventType.dependency_validated)[0].payload.edge
-    assert (edge.source, edge.target, edge.confidence) == ("role_billing_ops_lead", "sys_cloud_platform", 1.0)
+    assert (edge.source, edge.target, edge.confidence) == ("wf_vendor_reconciliation", "ds_account_intel", 1.0)
     assert any(c.source == "agent_validated" for c in package.recommendation.claims)
 
 
@@ -77,7 +78,7 @@ def test_futures_cover_inaction_and_delay(brief, twin, settings) -> None:
     assert futures == {Future.act_now, Future.inaction, Future.delay}
 
 
-def test_person_tokens_never_leave_the_agent_layer(brief, hr_twin, settings) -> None:
+def test_person_tokens_never_leave_the_agent_layer(people_brief, hr_twin, settings) -> None:
     seen: list[set[str]] = []
 
     def people(context: AgentContext) -> LLMResult:
@@ -85,7 +86,8 @@ def test_person_tokens_never_leave_the_agent_layer(brief, hr_twin, settings) -> 
         return LLMResult(person_output(), "ok", metrics("people_knowledge"))
 
     # Default settings: people_knowledge runs as a CORE agent and its HR view really contains the token.
-    package, recorder, engine = run(brief, hr_twin, settings, ScriptedLLM(settings, {"people_knowledge": people}))
+    package, recorder, engine = run(people_brief, hr_twin, settings,
+                                    ScriptedLLM(settings, {"people_knowledge": people}))
     assert seen and "pt_07" in seen[0]
     completed = [e for e in recorder.of(EventType.agent_completed) if e.payload.agent_id == "people_knowledge"]
     assert len(completed) == 1
