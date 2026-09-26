@@ -5,7 +5,7 @@ import pytest
 from api_auth_helpers import auth_headers
 from pydantic import TypeAdapter
 
-from contracts_py.api import DecisionCreated, HealthResponse, OrganizationProfileView, ReplayInfo, ReplayStarted
+from contracts_py.api import DecisionCreated, DecisionDraft, HealthResponse, OrganizationProfileView, ReplayInfo, ReplayStarted
 from contracts_py.engine import FutureComparison, PortfolioComparison, SimulationResult
 from contracts_py.enums import RunStatus
 from contracts_py.events import EventType, PhaseChanged, RunState
@@ -122,6 +122,28 @@ def test_decision_run_reaches_approval_and_records_decision(client, brief_json) 
     ))
     assert decision.package_hash == served_hash
     assert validate(RunState, client.get(f"/runs/{run_id}")).status is RunStatus.completed
+
+
+def test_prompt_decision_drafts_and_runs_every_department(client) -> None:
+    headers = auth_headers(client)
+    draft = validate(DecisionDraft, client.post(
+        "/decisions/draft",
+        headers=headers,
+        json={"prompt": "Should we outsource customer support next quarter while protecting retention?"},
+    ))
+    assert draft.brief.decision_id.startswith("dec_prompt_")
+    assert len(draft.assessing_department_ids) == 9
+    assert all(i.params.get("prompt_generated") is True for i in draft.brief.candidate_interventions)
+
+    run_id = validate(DecisionCreated, client.post(
+        "/decisions?llm_mode=mock", headers=headers, json=draft.brief.model_dump(mode="json")
+    )).run_id
+    state = wait_for_status(client, run_id, RunStatus.awaiting_approval)
+    assert len(state.assessment_ids) >= 11
+    package = validate(DecisionPackage, client.get(f"/runs/{run_id}/package"))
+    assert len(package.department_impacts) == 9
+    assert package.recommendation is None
+    assert any("unquantified" in assumption.lower() for assumption in package.assumptions)
 
 
 def test_decision_brief_gets_settings_defaults(client, brief_json) -> None:

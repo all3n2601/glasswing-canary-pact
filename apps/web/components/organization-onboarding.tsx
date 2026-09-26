@@ -8,6 +8,7 @@ import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { formatCompactCurrency } from "@/lib/formatters";
 
 const steps = [
   { label: "Organization", icon: Building2 },
@@ -19,7 +20,7 @@ const steps = [
 const fieldLabel = "mb-2 block text-[11px] font-semibold text-zinc-600";
 const fieldClass = "h-11 rounded-xl border-zinc-200 bg-white text-sm shadow-none focus-visible:border-zinc-400 focus-visible:ring-zinc-200";
 
-export function OrganizationOnboarding({ profile, connection }: { profile: OrganizationProfile; connection: "live" | "offline_fallback" }) {
+export function OrganizationOnboarding({ profile }: { profile: OrganizationProfile }) {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [organization, setOrganization] = useState(profile.organization);
@@ -42,7 +43,7 @@ export function OrganizationOnboarding({ profile, connection }: { profile: Organ
       <div className="mx-auto grid min-h-[calc(100vh-24px)] max-w-[1440px] overflow-hidden rounded-[28px] border border-zinc-200 bg-white lg:grid-cols-[290px_1fr] sm:min-h-[calc(100vh-40px)]">
         <aside className="border-b border-zinc-200 bg-zinc-950 p-6 text-white lg:border-b-0 lg:border-r lg:p-8">
           <div className="flex items-center gap-2.5 font-semibold"><span className="grid size-8 place-items-center rounded-lg bg-white text-zinc-950"><Network className="size-4" /></span>Canary Pact</div>
-          <p className="mt-3 text-[10px] text-zinc-500">{connection === "live" ? "Connected to the company API" : "Using the offline baseline"}</p>
+          <p className="mt-3 text-[10px] text-zinc-500">Connected to the company API</p>
           <div className="mt-8 lg:mt-20"><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Set up your twin</p><h1 className="mt-3 text-2xl font-semibold leading-tight tracking-[-0.035em]">Give every simulation the right company context.</h1></div>
           <nav className="mt-7 grid grid-cols-4 gap-2 lg:mt-10 lg:grid-cols-1" aria-label="Onboarding progress">
             {steps.map((item, index) => {
@@ -82,9 +83,9 @@ export function OrganizationOnboarding({ profile, connection }: { profile: Organ
                   <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-blue-600">Department map</p>
                   <div className="mt-3 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><h2 className="text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">Who should be in the room?</h2><p className="mt-4 max-w-xl text-sm leading-6 text-zinc-500">Choose the departments the organizational twin should represent. Staffing and budget establish scale, not performance.</p></div><div className="shrink-0 text-right text-xs text-zinc-500"><strong className="block text-xl text-zinc-950">{enabledDepartments.length}</strong>departments</div></div>
                   <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                    {departments.map((department) => <button key={department.department_id} type="button" onClick={() => setDepartments((items) => items.map((item) => item.department_id === department.department_id ? { ...item, enabled: !item.enabled } : item))} className={`flex items-center gap-4 rounded-2xl border p-4 text-left transition-all ${department.enabled ? "border-zinc-300 bg-white shadow-sm" : "border-zinc-200 bg-zinc-50 opacity-55"}`}><span className={`grid size-10 shrink-0 place-items-center rounded-xl ${department.enabled ? "bg-zinc-950 text-white" : "bg-zinc-200 text-zinc-500"}`}><Users className="size-4" /></span><span className="min-w-0 flex-1"><strong className="block text-sm">{department.name}</strong><span className="mt-1 block truncate text-[10px] text-zinc-500">{department.actual_fte} FTE · ${(department.annual_budget_usd / 1_000_000).toFixed(1)}M</span></span><span className={`grid size-5 place-items-center rounded-full border ${department.enabled ? "border-emerald-500 bg-emerald-500 text-white" : "border-zinc-300"}`}>{department.enabled ? <Check className="size-3" /> : null}</span></button>)}
+                    {departments.map((department) => <button key={department.department_id} type="button" onClick={() => setDepartments((items) => items.map((item) => item.department_id === department.department_id ? { ...item, enabled: !item.enabled } : item))} className={`flex items-center gap-4 rounded-2xl border p-4 text-left transition-all ${department.enabled ? "border-zinc-300 bg-white shadow-sm" : "border-zinc-200 bg-zinc-50 opacity-55"}`}><span className={`grid size-10 shrink-0 place-items-center rounded-xl ${department.enabled ? "bg-zinc-950 text-white" : "bg-zinc-200 text-zinc-500"}`}><Users className="size-4" /></span><span className="min-w-0 flex-1"><strong className="block text-sm">{department.name}</strong><span className="mt-1 block truncate text-[10px] text-zinc-500">{department.actual_fte} FTE · {formatCompactCurrency(department.annual_budget_usd)}</span></span><span className={`grid size-5 place-items-center rounded-full border ${department.enabled ? "border-emerald-500 bg-emerald-500 text-white" : "border-zinc-300"}`}>{department.enabled ? <Check className="size-3" /> : null}</span></button>)}
                   </div>
-                  <div className="mt-6 grid gap-3 rounded-2xl bg-zinc-950 p-5 text-white sm:grid-cols-2"><div><span className="text-[10px] text-zinc-500">Modeled headcount</span><strong className="mt-1 block text-2xl">{totals.headcount} FTE</strong></div><div><span className="text-[10px] text-zinc-500">Modeled annual budget</span><strong className="mt-1 block text-2xl">${(totals.budget / 1_000_000).toFixed(1)}M</strong></div></div>
+                  <div className="mt-6 grid gap-3 rounded-2xl bg-zinc-950 p-5 text-white sm:grid-cols-2"><div><span className="text-[10px] text-zinc-500">Modeled headcount</span><strong className="mt-1 block text-2xl">{totals.headcount} FTE</strong></div><div><span className="text-[10px] text-zinc-500">Modeled annual budget</span><strong className="mt-1 block text-2xl">{formatCompactCurrency(totals.budget)}</strong></div></div>
                 </>
               ) : null}
 

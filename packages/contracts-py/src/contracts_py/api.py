@@ -24,6 +24,19 @@ class DecisionCreated(Strict):
     run_id: ID
 
 
+class DecisionPromptRequest(Strict):
+    prompt: str = Field(min_length=10, max_length=4000)
+    horizon_days: int = Field(default=365, gt=0, le=3650)
+
+
+class DecisionDraft(Strict):
+    brief: DecisionBrief
+    matched_entity_ids: list[ID] = Field(default_factory=list)
+    assumptions: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    assessing_department_ids: list[ID] = Field(default_factory=list)
+
+
 class HumanDecisionRequest(Strict):
     decision: Literal["approve", "reject", "request_scenario"]
     # Ignored when sent: the server records the logged-in user.

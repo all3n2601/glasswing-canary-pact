@@ -17,6 +17,7 @@ const ALLOWED_PATHS = [
   /^documents$/,
   /^documents\/[A-Za-z0-9_-]+$/,
   /^decisions$/,
+  /^decisions\/draft$/,
   /^runs\/[A-Za-z0-9_-]+$/,
   /^runs\/[A-Za-z0-9_-]+\/package$/,
   /^runs\/[A-Za-z0-9_-]+\/decision$/,

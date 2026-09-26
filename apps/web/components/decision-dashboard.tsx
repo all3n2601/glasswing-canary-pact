@@ -1,36 +1,38 @@
 "use client";
 
 import type { OrganizationProfile } from "@canary-pact/contracts";
-import type { DecisionPackage } from "@canary-pact/contracts/generated";
+import type { DecisionBrief, DecisionPackage, DomainGraph, RunState } from "@canary-pact/contracts/generated";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, Building2, Check, FileText, Gauge, Map, Mic, Pause, Play, Settings2, Sparkles, Users, WalletCards, X } from "lucide-react";
+import { ArrowRight, Building2, FileText, Gauge, LayoutGrid, Map, Pause, Play, Settings2, Share2, Sparkles, Users, WalletCards } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { AuthControls } from "@/components/auth-controls";
+import { useAuth } from "@/components/auth-provider";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { canaryApi, waitForPackage } from "@/lib/canary-api-client";
-import { applyDecisionPackage, buildDepartmentSimulation } from "@/lib/simulation-demo-data";
+import { formatCompactCurrency } from "@/lib/formatters";
+import { applyDecisionPackage, buildDepartmentSimulation } from "@/lib/simulation-view";
 
+import { DecisionComposer } from "./decision-composer";
+import { CompanyGraph } from "./company-graph";
 import { DepartmentMetricsSidebar } from "./department-metrics-sidebar";
 import { OfficeScene } from "./office-scene";
 import { Brand } from "./site-header";
 
 const chapters = [{ day: 0, label: "Decision" }, { day: 18, label: "Capacity" }, { day: 35, label: "Roadmap" }, { day: 60, label: "Customers" }, { day: 90, label: "Outcome" }] as const;
-const examples = ["Cut $2M in annual cost without breaking compliance or critical systems"] as const;
-
 function money(value: number) {
   const absolute = Math.abs(value);
-  const display = absolute >= 1_000_000 ? `$${(absolute / 1_000_000).toFixed(1)}M` : `$${Math.round(absolute / 1_000)}K`;
+  const display = formatCompactCurrency(absolute);
   return value < 0 ? `−${display}` : display;
 }
 
-export function DecisionDashboard({ profile, connection }: { profile: OrganizationProfile; connection: "live" | "offline_fallback" }) {
-  const decision = examples[0];
+export function DecisionDashboard({ profile }: { profile: OrganizationProfile }) {
+  const { user } = useAuth();
   const [composerOpen, setComposerOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"office" | "graph">("office");
   const [day, setDay] = useState(0);
   const [running, setRunning] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
@@ -38,6 +40,10 @@ export function DecisionDashboard({ profile, connection }: { profile: Organizati
   const [decisionPackage, setDecisionPackage] = useState<DecisionPackage | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [simulationError, setSimulationError] = useState<string | null>(null);
+  const [runState, setRunState] = useState<RunState | null>(null);
+  const [companyGraph, setCompanyGraph] = useState<DomainGraph | null>(null);
+  const [graphLoading, setGraphLoading] = useState(false);
+  const [graphError, setGraphError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!running) return;
@@ -48,6 +54,18 @@ export function DecisionDashboard({ profile, connection }: { profile: Organizati
     return () => window.clearInterval(timer);
   }, [running]);
 
+  useEffect(() => {
+    if (viewMode !== "graph" || companyGraph || graphLoading) return;
+    let active = true;
+    setGraphLoading(true);
+    setGraphError(null);
+    void canaryApi.companyGraph()
+      .then((value) => { if (active) setCompanyGraph(value); })
+      .catch((error: unknown) => { if (active) setGraphError(error instanceof Error ? error.message : "Could not load the company graph."); })
+      .finally(() => { if (active) setGraphLoading(false); });
+    return () => { active = false; };
+  }, [companyGraph, viewMode]);
+
   const baselineDepartments = useMemo(() => buildDepartmentSimulation(profile), [profile]);
   const departments = useMemo(
     () => decisionPackage ? applyDecisionPackage(baselineDepartments, decisionPackage) : baselineDepartments,
@@ -55,22 +73,46 @@ export function DecisionDashboard({ profile, connection }: { profile: Organizati
   );
   const currentChapter = useMemo(() => [...chapters].reverse().find((chapter) => day >= chapter.day) ?? chapters[0], [day]);
   const selectedDepartment = useMemo(() => departments.find((department) => department.departmentId === selectedDepartmentId) ?? null, [departments, selectedDepartmentId]);
-  const simulate = async () => {
+  const completeRun = async (runId: string) => {
+    window.localStorage.setItem("canary:last-run-id", runId);
+    const nextPackage = await waitForPackage(runId, 30_000, setRunState);
+    setDecisionPackage(nextPackage);
+    setComposerOpen(false);
+    setViewMode("graph");
+    setDay(0);
+    setHasStarted(true);
+    setRunning(true);
+  };
+  const replay = async () => {
     setSubmitting(true);
     setSimulationError(null);
+    setRunState(null);
     try {
-      const replay = await canaryApi.playReplay("sample_run", 4);
-      window.localStorage.setItem("canary:last-run-id", replay.run_id);
-      setComposerOpen(false);
-      setDay(0);
-      setHasStarted(true);
-      setRunning(true);
-      setDecisionPackage(await waitForPackage(replay.run_id));
+      const replays = await canaryApi.replays();
+      if (!replays.length) throw new Error("No backend replay is available.");
+      const replay = await canaryApi.playReplay(replays[0].name, 4);
+      await completeRun(replay.run_id);
     } catch (error) {
       setHasStarted(false);
       setRunning(false);
       setComposerOpen(true);
       setSimulationError(error instanceof Error ? error.message : "The simulation could not be started.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+  const simulate = async (brief: DecisionBrief, mode: "live" | "replay" | "mock") => {
+    setSubmitting(true);
+    setSimulationError(null);
+    setRunState(null);
+    setHasStarted(false);
+    setRunning(false);
+    try {
+      const created = await canaryApi.createDecision(brief, mode);
+      await completeRun(created.run_id);
+    } catch (error) {
+      setComposerOpen(true);
+      setSimulationError(error instanceof Error ? error.message : "The decision run could not be completed.");
     } finally {
       setSubmitting(false);
     }
@@ -87,14 +129,14 @@ export function DecisionDashboard({ profile, connection }: { profile: Organizati
     : [
         { value: String(departments.length), label: "Departments", icon: Building2, tone: "bg-blue-50 text-blue-700" },
         { value: String(org.total_headcount_fte), label: "Modeled FTE", icon: Users, tone: "bg-violet-50 text-violet-700" },
-        { value: `$${(org.total_annual_budget_usd / 1_000_000).toFixed(1)}M`, label: "Annual budget", icon: WalletCards, tone: "bg-emerald-50 text-emerald-700" },
+        { value: formatCompactCurrency(org.total_annual_budget_usd), label: "Annual budget", icon: WalletCards, tone: "bg-emerald-50 text-emerald-700" },
       ];
 
   return (
     <main className="relative h-dvh min-h-[640px] overflow-hidden bg-[radial-gradient(circle_at_50%_30%,#fff_0%,#f4f7f4_58%,#e8eee9_100%)]">
-      <section className="absolute inset-0" aria-label="Interactive company office simulation">
+      {viewMode === "office" ? <section className="absolute inset-0" aria-label="Interactive company office simulation">
         <OfficeScene day={hasStarted ? day : -1} departments={departments} selectedDepartmentId={selectedDepartmentId ?? undefined} showAllDepartmentLabels onDepartmentSelect={setSelectedDepartmentId} />
-      </section>
+      </section> : <CompanyGraph graph={companyGraph} blastRadius={decisionPackage?.blast_radius_act_now} decisionPackage={decisionPackage} day={day} loading={graphLoading} error={graphError} />}
 
       <header className="absolute inset-x-3 top-3 z-30 flex h-16 items-center justify-between rounded-2xl border border-white/90 bg-white/88 px-3 shadow-[0_12px_45px_rgb(40_55_50/.1)] backdrop-blur-xl sm:inset-x-5 sm:px-4">
         <div className="flex items-center gap-4">
@@ -109,7 +151,7 @@ export function DecisionDashboard({ profile, connection }: { profile: Organizati
             <Button asChild variant="ghost" size="sm" className="text-zinc-500"><Link href="/settings/organization"><Settings2 />Settings</Link></Button>
           </nav>
           <span className="hidden h-6 w-px bg-zinc-200 sm:block" />
-          <div className="hidden items-center gap-2 px-2 text-[10px] font-medium text-zinc-500 lg:flex"><span className={`size-2 rounded-full ${connection === "live" ? "bg-emerald-500 shadow-[0_0_0_4px_rgb(16_185_129/.11)]" : "bg-amber-500"}`} />{connection === "live" ? "Twin synchronized" : "Offline baseline"}</div>
+          <div className="hidden items-center gap-2 px-2 text-[10px] font-medium text-zinc-500 lg:flex"><span className="size-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgb(16_185_129/.11)]" />Twin synchronized</div>
           <AuthControls compact />
           <Button className="h-10 rounded-xl bg-zinc-950 px-3.5 text-white hover:bg-zinc-800 sm:px-4" onClick={() => setComposerOpen(true)}><Sparkles />Make a decision</Button>
         </div>
@@ -139,28 +181,18 @@ export function DecisionDashboard({ profile, connection }: { profile: Organizati
       )}
 
       <div className="absolute bottom-4 left-3 z-20 flex items-center gap-2 sm:left-5">
-        <Button className="border-white bg-white/90 text-zinc-700 shadow-lg backdrop-blur hover:bg-white" variant="outline" size="sm" onClick={() => setSelectedDepartmentId(selectedDepartmentId ?? departments[0]?.departmentId ?? null)}><Map />Explore departments</Button>
+        <Button className="border-white bg-white/90 text-zinc-700 shadow-lg backdrop-blur hover:bg-white" variant="outline" size="sm" onClick={() => { setSelectedDepartmentId(null); setViewMode((current) => current === "office" ? "graph" : "office"); }}>{viewMode === "office" ? <Share2 /> : <LayoutGrid />}{viewMode === "office" ? "Dependency map" : "Office view"}</Button>
+        {viewMode === "office" ? <Button className="border-white bg-white/90 text-zinc-700 shadow-lg backdrop-blur hover:bg-white" variant="outline" size="sm" onClick={() => setSelectedDepartmentId(selectedDepartmentId ?? departments[0]?.departmentId ?? null)}><Map />Explore departments</Button> : null}
         {hasStarted ? <div className="hidden items-center gap-3 rounded-xl border border-white bg-white/90 px-3 py-2 text-[9px] font-semibold text-zinc-500 shadow-lg backdrop-blur md:flex"><span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-emerald-500" />Benefit</span><span className="flex items-center gap-1.5"><i className="size-2 rounded-full bg-rose-500" />Risk</span></div> : null}
       </div>
-      {!selectedDepartment ? <p className="absolute bottom-5 right-5 z-10 hidden text-[9px] text-zinc-400 md:block">Drag to rotate · scroll to zoom</p> : null}
+      {viewMode === "office" && !selectedDepartment ? <p className="absolute bottom-5 right-5 z-10 hidden text-[9px] text-zinc-400 md:block">Drag to rotate · scroll to zoom</p> : null}
 
       <AnimatePresence>
         {selectedDepartment ? <DepartmentMetricsSidebar departments={departments} department={selectedDepartment} scenarioStarted={hasStarted && decisionPackage !== null} onSelect={setSelectedDepartmentId} onClose={() => setSelectedDepartmentId(null)} /> : null}
       </AnimatePresence>
 
       <AnimatePresence>
-        {composerOpen ? (
-          <motion.div className="absolute inset-0 z-50 grid place-items-center bg-zinc-950/20 p-4 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => { if (event.currentTarget === event.target) setComposerOpen(false); }}>
-            <motion.div role="dialog" aria-modal="true" aria-labelledby="decision-title" className="w-full max-w-[640px] rounded-[26px] border border-white bg-white p-5 shadow-[0_30px_100px_rgb(0_0_0/.22)] sm:p-7" initial={{ opacity: 0, y: 24, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.98 }} transition={{ duration: 0.22 }}>
-              <div className="flex items-start justify-between gap-4"><div><span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-blue-600">Prepared simulation</span><h1 id="decision-title" className="mt-2 text-3xl font-semibold tracking-[-0.045em]">Run the verified decision replay</h1><p className="mt-2 max-w-lg text-xs leading-5 text-zinc-500">This starts the backend’s saved, deterministic scenario and loads its resulting decision package.</p></div><Button variant="ghost" size="icon" className="shrink-0 text-zinc-400" onClick={() => setComposerOpen(false)} aria-label="Close decision composer"><X /></Button></div>
-              <form className="mt-7" onSubmit={(event) => { event.preventDefault(); if (decision.trim()) void simulate(); }}>
-                <label className="flex min-h-[72px] items-center gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-2.5"><span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white text-blue-600 shadow-sm"><Mic className="size-5" /></span><span className="sr-only">Decision to simulate</span><Input readOnly className="h-auto min-w-0 flex-1 border-0 bg-transparent px-0 text-sm font-semibold shadow-none focus-visible:ring-0" value={decision} /></label>
-                {simulationError ? <p role="alert" className="mt-4 rounded-xl bg-rose-50 p-3 text-xs text-rose-700">{simulationError}</p> : null}
-                <div className="mt-7 flex items-center justify-between border-t border-zinc-100 pt-5"><span className="hidden items-center gap-2 text-[10px] text-zinc-400 sm:flex"><Check className="size-3 text-emerald-600" />Human approval remains required</span><Button type="submit" disabled={!decision.trim() || submitting} className="ml-auto bg-zinc-950 px-5 text-white hover:bg-zinc-800"><Play className="fill-current" />{submitting ? "Starting replay…" : "Simulate decision"}</Button></div>
-              </form>
-            </motion.div>
-          </motion.div>
-        ) : null}
+        {composerOpen ? <DecisionComposer user={user} submitting={submitting} run={runState} error={simulationError} onClose={() => setComposerOpen(false)} onSubmit={simulate} onReplay={replay} /> : null}
       </AnimatePresence>
     </main>
   );

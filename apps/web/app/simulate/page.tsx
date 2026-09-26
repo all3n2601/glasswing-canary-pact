@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { BackendUnavailable } from "@/components/backend-unavailable";
 import { DecisionDashboard } from "@/components/decision-dashboard";
 import { getOrganizationProfile } from "@/lib/canary-api-server";
 
@@ -9,6 +10,9 @@ export const metadata: Metadata = {
 };
 
 export default async function SimulatorPage() {
-  const { profile, connection } = await getOrganizationProfile();
-  return <DecisionDashboard profile={profile} connection={connection} />;
+  try {
+    return <DecisionDashboard profile={await getOrganizationProfile()} />;
+  } catch {
+    return <BackendUnavailable resource="organization and simulation data" />;
+  }
 }

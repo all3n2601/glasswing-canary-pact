@@ -16,6 +16,7 @@ from contracts_py.twin import (
 )
 
 from canary_api.stubs import results
+from canary_api.stubs import general_decision
 from canary_api.stubs.twin import VENDOR_DECISION, stub_twin
 
 
@@ -27,6 +28,8 @@ def quick_impact(twin: Twin, interventions: list[Intervention], *, brief: Decisi
 
 def simulate(twin: Twin, brief: DecisionBrief, scenario: Scenario, plan: CandidatePlan | None, mode: str, *,
              settings: OrganizationSettings | None = None) -> SimulationResult:
+    if general_decision.is_general(brief):
+        return general_decision.result(brief, twin, scenario, plan)
     by_future = {
         Future.inaction: results.inaction_result,
         Future.delay: results.delay_result,
@@ -39,15 +42,21 @@ def simulate(twin: Twin, brief: DecisionBrief, scenario: Scenario, plan: Candida
 
 def compare_futures(twin: Twin, brief: DecisionBrief, plan: CandidatePlan, *, alternatives: list[CandidatePlan] | None = None,
                     settings: OrganizationSettings | None = None, run_id: str = "run_adhoc") -> FutureComparison:
+    if general_decision.is_general(brief):
+        return general_decision.futures(brief, twin, plan, run_id)
     return results.future_comparison(run_id, brief.decision_id)
 
 
 def optimize(twin: Twin, brief: DecisionBrief, *, settings: OrganizationSettings | None = None,
              run_id: str = "run_adhoc") -> PortfolioComparison:
+    if general_decision.is_general(brief):
+        return general_decision.portfolios(brief, twin, run_id)
     return results.portfolio_comparison(run_id, brief.decision_id)
 
 
 def blast_radius(result: SimulationResult, twin: Twin) -> BlastRadius:
+    if general_decision.ASSUMPTION in result.assumptions:
+        return general_decision.blast(result, twin)
     decision_id = result.impacts[0].decision_id if result.impacts else VENDOR_DECISION
     if result.future is Future.inaction:
         return results.inaction_blast_radius(result.run_id, decision_id)
@@ -125,4 +134,3 @@ def clone_with_edges(twin: Twin, edges: list[Edge]) -> Twin:
 
 def widen_uncertainty(twin: Twin, department_ids: list[str], delta: float = 0.1) -> Twin:
     return twin.model_copy(deep=True)
-

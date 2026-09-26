@@ -91,6 +91,125 @@
       "title": "Constraint",
       "type": "object"
     },
+    "DecisionBrief": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "default": "2.1.1",
+          "enum": [
+            "2.1.0",
+            "2.1.1"
+          ],
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "decision_id": {
+          "maxLength": 80,
+          "pattern": "^(?:dec_)[a-z0-9_]*$",
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "decision_type": {
+          "$ref": "#/$defs/DecisionType"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "statement": {
+          "title": "Statement",
+          "type": "string"
+        },
+        "goal": {
+          "$ref": "#/$defs/Goal"
+        },
+        "horizon_days": {
+          "default": 365,
+          "exclusiveMinimum": 0,
+          "title": "Horizon Days",
+          "type": "integer"
+        },
+        "candidate_interventions": {
+          "items": {
+            "$ref": "#/$defs/Intervention"
+          },
+          "title": "Candidate Interventions",
+          "type": "array"
+        },
+        "protected_entity_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Protected Entity Ids",
+          "type": "array"
+        },
+        "constraints": {
+          "items": {
+            "$ref": "#/$defs/Constraint"
+          },
+          "title": "Constraints",
+          "type": "array"
+        },
+        "futures": {
+          "items": {
+            "$ref": "#/$defs/Future"
+          },
+          "title": "Futures",
+          "type": "array"
+        },
+        "delay_days": {
+          "default": 90,
+          "minimum": 0,
+          "title": "Delay Days",
+          "type": "integer"
+        },
+        "active_pressure_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 80,
+                "pattern": "^[a-z][a-z0-9_]*$",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Active Pressure Ids"
+        },
+        "seed": {
+          "default": 42,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "mc_samples": {
+          "default": 1000,
+          "minimum": 1,
+          "title": "Mc Samples",
+          "type": "integer"
+        },
+        "created_by": {
+          "title": "Created By",
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision_id",
+        "decision_type",
+        "title",
+        "statement",
+        "goal",
+        "candidate_interventions",
+        "created_by"
+      ],
+      "title": "DecisionBrief",
+      "type": "object"
+    },
     "DecisionType": {
       "enum": [
         "cost_reduction",
@@ -293,119 +412,45 @@
   },
   "additionalProperties": false,
   "properties": {
-    "schema_version": {
-      "default": "2.1.1",
-      "enum": [
-        "2.1.0",
-        "2.1.1"
-      ],
-      "title": "Schema Version",
-      "type": "string"
+    "brief": {
+      "$ref": "#/$defs/DecisionBrief"
     },
-    "decision_id": {
-      "maxLength": 80,
-      "pattern": "^(?:dec_)[a-z0-9_]*$",
-      "title": "Decision Id",
-      "type": "string"
-    },
-    "decision_type": {
-      "$ref": "#/$defs/DecisionType"
-    },
-    "title": {
-      "title": "Title",
-      "type": "string"
-    },
-    "statement": {
-      "title": "Statement",
-      "type": "string"
-    },
-    "goal": {
-      "$ref": "#/$defs/Goal"
-    },
-    "horizon_days": {
-      "default": 365,
-      "exclusiveMinimum": 0,
-      "title": "Horizon Days",
-      "type": "integer"
-    },
-    "candidate_interventions": {
-      "items": {
-        "$ref": "#/$defs/Intervention"
-      },
-      "title": "Candidate Interventions",
-      "type": "array"
-    },
-    "protected_entity_ids": {
+    "matched_entity_ids": {
       "items": {
         "maxLength": 80,
         "pattern": "^[a-z][a-z0-9_]*$",
         "type": "string"
       },
-      "title": "Protected Entity Ids",
+      "title": "Matched Entity Ids",
       "type": "array"
     },
-    "constraints": {
+    "assumptions": {
       "items": {
-        "$ref": "#/$defs/Constraint"
+        "type": "string"
       },
-      "title": "Constraints",
+      "title": "Assumptions",
       "type": "array"
     },
-    "futures": {
+    "warnings": {
       "items": {
-        "$ref": "#/$defs/Future"
+        "type": "string"
       },
-      "title": "Futures",
+      "title": "Warnings",
       "type": "array"
     },
-    "delay_days": {
-      "default": 90,
-      "minimum": 0,
-      "title": "Delay Days",
-      "type": "integer"
-    },
-    "active_pressure_ids": {
-      "anyOf": [
-        {
-          "items": {
-            "maxLength": 80,
-            "pattern": "^[a-z][a-z0-9_]*$",
-            "type": "string"
-          },
-          "type": "array"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Active Pressure Ids"
-    },
-    "seed": {
-      "default": 42,
-      "title": "Seed",
-      "type": "integer"
-    },
-    "mc_samples": {
-      "default": 1000,
-      "minimum": 1,
-      "title": "Mc Samples",
-      "type": "integer"
-    },
-    "created_by": {
-      "title": "Created By",
-      "type": "string"
+    "assessing_department_ids": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Assessing Department Ids",
+      "type": "array"
     }
   },
   "required": [
-    "decision_id",
-    "decision_type",
-    "title",
-    "statement",
-    "goal",
-    "candidate_interventions",
-    "created_by"
+    "brief"
   ],
-  "title": "DecisionBrief",
+  "title": "DecisionDraft",
   "type": "object"
 }

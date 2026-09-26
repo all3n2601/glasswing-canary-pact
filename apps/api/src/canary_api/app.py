@@ -11,7 +11,9 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ValidationError
 
 from contracts_py.api import (
+    DecisionDraft,
     DecisionCreated,
+    DecisionPromptRequest,
     FuturesRequest,
     GraphLevel,
     HealthResponse,
@@ -40,6 +42,8 @@ from contracts_py.twin import (
     Pressure,
     Twin,
 )
+
+from agent_orchestration import interpret_decision_prompt
 
 from canary_api import auth, engine_port, runs, runtime, storage
 from canary_api.engine_port import EngineNotReady
@@ -200,6 +204,13 @@ async def create_decision(brief: DecisionBrief, llm_mode: runs.LlmMode | None = 
     if (llm_mode or runtime.settings().llm_mode) == "live" and not runs.live_allowed():
         raise HTTPException(status_code=403, detail="llm_mode=live is disabled; set CANARY_ALLOW_LIVE=true to allow it")
     return DecisionCreated(run_id=runs.start_run(brief, llm_mode))
+
+
+@app.post("/decisions/draft", response_model=DecisionDraft)
+def draft_decision(request: DecisionPromptRequest,
+                   user: UserPublic = Depends(auth.current_user)) -> DecisionDraft:
+    return interpret_decision_prompt(request.prompt, twin=runtime.twin(), created_by=user.user_id,
+                                     horizon_days=request.horizon_days)
 
 
 @app.get("/runs/{run_id}", response_model=RunState)

@@ -6,13 +6,9 @@ import { Suspense, useEffect, useMemo, useRef } from "react";
 import type { Group, Object3D } from "three";
 import { CanvasTexture, LinearFilter, MathUtils, Mesh, SRGBColorSpace, Vector3 } from "three";
 
-import type { DepartmentImpactTone, DepartmentSimulationView } from "@/lib/simulation-demo-data";
+import type { DepartmentImpactTone, DepartmentSimulationView } from "@/lib/simulation-view";
 
 export type DepartmentSceneMarker = Pick<DepartmentSimulationView, "departmentId" | "name" | "label" | "tone" | "position" | "strength" | "startsAt">;
-
-interface ImpactField extends DepartmentSceneMarker {
-  label: string;
-}
 
 interface AgentRoute {
   id: string;
@@ -21,14 +17,6 @@ interface AgentRoute {
   finalRotation: number;
   stagger: number;
 }
-
-const impacts: ImpactField[] = [
-  { departmentId: "dept_engineering", name: "Engineering", label: "Source decision", tone: "source", position: [0, 0.08, -5.65], strength: 0.76, startsAt: 0 },
-  { departmentId: "dept_finance", name: "Finance", label: "Cost savings +$3.0M", tone: "positive", position: [-7.6, 0.08, -5.65], strength: 0.62, startsAt: 4 },
-  { departmentId: "dept_product", name: "Product", label: "Roadmap delay +5 weeks", tone: "negative", position: [7.6, 0.08, -5.65], strength: 0.9, startsAt: 28 },
-  { departmentId: "dept_sales", name: "Sales", label: "Commitments at risk", tone: "negative", position: [0, 0.08, 5.65], strength: 0.66, startsAt: 48 },
-  { departmentId: "dept_customer", name: "Customer Success", label: "Churn risk +3%", tone: "negative", position: [7.6, 0.08, 5.65], strength: 0.45, startsAt: 64 },
-];
 
 const agentRoutes: AgentRoute[] = [
   { id: "finance", start: [-6.05, 0.13, -5.5], end: [0, 0.13, -2.4], finalRotation: 0, stagger: 0 },
@@ -228,7 +216,7 @@ function Scene({ day, interactive, departments, selectedDepartmentId, showAllDep
   );
 }
 
-export function OfficeScene({ day, interactive = true, departments = impacts, selectedDepartmentId, showAllDepartmentLabels = false, onDepartmentSelect }: { day: number; interactive?: boolean; departments?: DepartmentSceneMarker[]; selectedDepartmentId?: string; showAllDepartmentLabels?: boolean; onDepartmentSelect?: (departmentId: string) => void }) {
+export function OfficeScene({ day, interactive = true, departments = [], selectedDepartmentId, showAllDepartmentLabels = false, onDepartmentSelect }: { day: number; interactive?: boolean; departments?: DepartmentSceneMarker[]; selectedDepartmentId?: string; showAllDepartmentLabels?: boolean; onDepartmentSelect?: (departmentId: string) => void }) {
   return (
     <Canvas camera={{ position: [19, 20, 24], fov: 38 }} dpr={[1, 1.6]} gl={{ antialias: true, alpha: true }} shadows>
       <Suspense fallback={null}><Scene day={day} interactive={interactive} departments={departments} selectedDepartmentId={selectedDepartmentId} showAllDepartmentLabels={showAllDepartmentLabels} onDepartmentSelect={onDepartmentSelect} /></Suspense>

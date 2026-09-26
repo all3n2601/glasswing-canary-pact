@@ -2,6 +2,7 @@
   "$defs": {
     "ActionType": {
       "enum": [
+        "assess_change",
         "remove_vendor",
         "reduce_capacity",
         "add_capacity",

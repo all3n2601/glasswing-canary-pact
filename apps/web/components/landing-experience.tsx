@@ -26,13 +26,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { OfficeScene } from "./office-scene";
 import { SiteHeader } from "./site-header";
 
-const orbitDepartments = [
-  { label: "Finance", icon: BadgeDollarSign, position: "left-[8%] top-[35%]", tone: "text-emerald-600" },
-  { label: "People", icon: Users, position: "left-[20%] top-[69%]", tone: "text-violet-600" },
-  { label: "Product", icon: Lightbulb, position: "left-[36%] top-[14%]", tone: "text-amber-500" },
-  { label: "Operations", icon: BarChart3, position: "right-[35%] top-[12%]", tone: "text-blue-600" },
-  { label: "Sales", icon: Megaphone, position: "right-[18%] top-[68%]", tone: "text-rose-500" },
-  { label: "Customer", icon: Headphones, position: "right-[7%] top-[34%]", tone: "text-cyan-600" },
+const orbitConcepts = [
+  { label: "Evidence", icon: BadgeDollarSign, position: "left-[8%] top-[35%]", tone: "text-emerald-600" },
+  { label: "Workflows", icon: Users, position: "left-[20%] top-[69%]", tone: "text-violet-600" },
+  { label: "Constraints", icon: Lightbulb, position: "left-[36%] top-[14%]", tone: "text-amber-500" },
+  { label: "Futures", icon: BarChart3, position: "right-[35%] top-[12%]", tone: "text-blue-600" },
+  { label: "Monitoring", icon: Megaphone, position: "right-[18%] top-[68%]", tone: "text-rose-500" },
+  { label: "Approval", icon: Headphones, position: "right-[7%] top-[34%]", tone: "text-cyan-600" },
 ] as const;
 
 const steps = [
@@ -41,10 +41,10 @@ const steps = [
   { number: "03", title: "See the consequence", body: "Explore the blast radius, timeline, evidence, and safer alternatives before you commit." },
 ] as const;
 
-const impacts = [
-  { department: "Finance", value: "+$3.0M", detail: "annual savings", positive: true },
-  { department: "Product", value: "+5 weeks", detail: "roadmap delay", positive: false },
-  { department: "Customer", value: "+3.2%", detail: "churn exposure", positive: false },
+const resultCapabilities = [
+  { title: "Direct effects", detail: "Calculated from the selected intervention" },
+  { title: "Dependent effects", detail: "Traced through the company graph" },
+  { title: "Delayed effects", detail: "Placed on the returned simulation timeline" },
 ] as const;
 
 const reveal = { hidden: { opacity: 0, y: 22 }, visible: { opacity: 1, y: 0 } };
@@ -87,12 +87,12 @@ export function LandingExperience() {
             <motion.div key={ring} className={`absolute ${ring} rounded-[50%] border border-zinc-200/80`} animate={reduceMotion ? undefined : { rotate: index % 2 ? [0, -2, 0] : [0, 2, 0] }} transition={{ duration: 10 + index * 3, repeat: Infinity, ease: "easeInOut" }} />
           ))}
 
-          {orbitDepartments.map((department, index) => {
-            const Icon = department.icon;
+          {orbitConcepts.map((concept, index) => {
+            const Icon = concept.icon;
             return (
-              <motion.div key={department.label} className={`absolute z-20 ${department.position} hidden flex-col items-center gap-1.5 sm:flex`} initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1, y: reduceMotion ? 0 : [0, index % 2 ? -7 : 7, 0] }} transition={{ opacity: { delay: 0.45 + index * 0.06 }, scale: { delay: 0.45 + index * 0.06 }, y: { duration: 4 + index * 0.35, repeat: Infinity, ease: "easeInOut" } }}>
-                <span className="grid size-12 place-items-center rounded-full border border-zinc-200 bg-white shadow-[0_8px_30px_rgb(0_0_0/.08)]"><Icon className={`size-5 ${department.tone}`} /></span>
-                <span className="rounded-full bg-white/80 px-2 py-1 text-[9px] font-semibold text-zinc-500 backdrop-blur">{department.label}</span>
+              <motion.div key={concept.label} className={`absolute z-20 ${concept.position} hidden flex-col items-center gap-1.5 sm:flex`} initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1, y: reduceMotion ? 0 : [0, index % 2 ? -7 : 7, 0] }} transition={{ opacity: { delay: 0.45 + index * 0.06 }, scale: { delay: 0.45 + index * 0.06 }, y: { duration: 4 + index * 0.35, repeat: Infinity, ease: "easeInOut" } }}>
+                <span className="grid size-12 place-items-center rounded-full border border-zinc-200 bg-white shadow-[0_8px_30px_rgb(0_0_0/.08)]"><Icon className={`size-5 ${concept.tone}`} /></span>
+                <span className="rounded-full bg-white/80 px-2 py-1 text-[9px] font-semibold text-zinc-500 backdrop-blur">{concept.label}</span>
               </motion.div>
             );
           })}
@@ -106,7 +106,7 @@ export function LandingExperience() {
       <section className="mx-auto max-w-[1320px] border-b border-zinc-200 px-5 py-12 text-center lg:px-8">
         <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-zinc-400">One decision connects every team</p>
         <div className="mt-7 flex flex-wrap items-center justify-center gap-x-10 gap-y-5 text-sm font-semibold text-zinc-400 sm:gap-x-16">
-          {["Finance", "Engineering", "Product", "Sales", "People", "Customer"].map((team) => <span key={team}>{team}</span>)}
+          {["Company twin", "Decision brief", "Constraints", "Simulation", "Evidence", "Approval"].map((stage) => <span key={stage}>{stage}</span>)}
         </div>
       </section>
 
@@ -122,13 +122,13 @@ export function LandingExperience() {
           <div className="absolute inset-x-[8%] top-16 h-px bg-zinc-200" />
           <div className="absolute bottom-16 left-1/2 top-16 w-px bg-zinc-200" />
           <Card className="absolute left-[5%] top-10 w-[230px] border-zinc-200 bg-white shadow-[0_14px_45px_rgb(0_0_0/.08)] sm:left-[10%] sm:w-[270px]">
-            <CardContent className="p-4"><span className="text-[9px] font-semibold uppercase tracking-wider text-zinc-400">Proposed decision</span><p className="mt-2 text-sm font-semibold">Reduce engineering capacity by 20%</p><div className="mt-4 flex items-center gap-2 text-[10px] text-zinc-500"><span className="grid size-6 place-items-center rounded-full bg-zinc-100"><Users className="size-3" /></span>Leadership · Today</div></CardContent>
+            <CardContent className="p-4"><span className="text-[9px] font-semibold uppercase tracking-wider text-zinc-400">Decision brief</span><p className="mt-2 text-sm font-semibold">Validated inputs and constraints</p><div className="mt-4 flex items-center gap-2 text-[10px] text-zinc-500"><span className="grid size-6 place-items-center rounded-full bg-zinc-100"><Users className="size-3" /></span>Loaded from the API</div></CardContent>
           </Card>
           <Card className="absolute right-[4%] top-[35%] w-[220px] border-emerald-100 bg-white shadow-[0_18px_55px_rgb(26_150_110/.12)] sm:right-[8%] sm:w-[255px]">
-            <CardContent className="p-4"><span className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-wider text-emerald-600"><CircleDot className="size-3" /> Benefit found</span><p className="mt-2 text-sm font-semibold">Operating cost improves</p><p className="mt-1 text-[10px] text-zinc-500">High confidence · Finance</p></CardContent>
+            <CardContent className="p-4"><span className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-wider text-emerald-600"><CircleDot className="size-3" /> Benefit found</span><p className="mt-2 text-sm font-semibold">Calculated value is preserved</p><p className="mt-1 text-[10px] text-zinc-500">Backed by a simulation result</p></CardContent>
           </Card>
           <Card className="absolute bottom-10 left-[10%] w-[235px] border-rose-100 bg-white shadow-[0_18px_55px_rgb(220_80_80/.12)] sm:left-[19%] sm:w-[280px]">
-            <CardContent className="p-4"><span className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-wider text-rose-600"><CircleDot className="size-3" /> Delayed consequence</span><p className="mt-2 text-sm font-semibold">Roadmap slips, renewals follow</p><p className="mt-1 text-[10px] text-zinc-500">Day 35 → Day 90 · 3 teams</p></CardContent>
+            <CardContent className="p-4"><span className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-wider text-rose-600"><CircleDot className="size-3" /> Delayed consequence</span><p className="mt-2 text-sm font-semibold">Dependencies expose downstream risk</p><p className="mt-1 text-[10px] text-zinc-500">Timed by the propagation engine</p></CardContent>
           </Card>
         </motion.div>
       </section>
@@ -153,17 +153,16 @@ export function LandingExperience() {
 
       <section className="mx-auto grid max-w-[1320px] items-center gap-16 px-5 py-24 lg:grid-cols-2 lg:px-8 lg:py-36">
         <motion.div className="relative min-h-[490px] rounded-[30px] border border-zinc-200 bg-[radial-gradient(circle_at_50%_50%,#e6f7ff,#fafafa_58%,#fff)] p-6" initial={{ opacity: 0, x: -35 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.7 }}>
-          <div className="absolute inset-x-6 top-6 flex items-center justify-between text-[9px] font-semibold uppercase tracking-wider text-zinc-400"><span>90-day simulation</span><span>3 effects found</span></div>
+          <div className="absolute inset-x-6 top-6 flex items-center justify-between text-[9px] font-semibold uppercase tracking-wider text-zinc-400"><span>Simulation timeline</span><span>API results</span></div>
           <div className="absolute inset-x-6 top-16 space-y-3 sm:inset-x-12">
-            {impacts.map((impact, index) => (
-              <motion.div key={impact.department} className={`grid grid-cols-[36px_1fr_auto] items-center gap-3 rounded-2xl border bg-white p-4 shadow-[0_10px_35px_rgb(0_0_0/.06)] ${impact.positive ? "border-emerald-100" : "border-rose-100"}`} initial={{ opacity: 0, y: 20, scale: 0.97 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true }} transition={{ delay: index * 0.12, duration: 0.5 }}>
-                <span className={`grid size-9 place-items-center rounded-full ${impact.positive ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}`}><CircleDot className="size-4" /></span>
-                <div><strong className="block text-sm">{impact.department}</strong><span className="text-[10px] text-zinc-500">{impact.detail}</span></div>
-                <strong className={impact.positive ? "text-emerald-600" : "text-rose-600"}>{impact.value}</strong>
+            {resultCapabilities.map((capability, index) => (
+              <motion.div key={capability.title} className="grid grid-cols-[36px_1fr] items-center gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-[0_10px_35px_rgb(0_0_0/.06)]" initial={{ opacity: 0, y: 20, scale: 0.97 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true }} transition={{ delay: index * 0.12, duration: 0.5 }}>
+                <span className="grid size-9 place-items-center rounded-full bg-zinc-100 text-zinc-700"><CircleDot className="size-4" /></span>
+                <div><strong className="block text-sm">{capability.title}</strong><span className="text-[10px] text-zinc-500">{capability.detail}</span></div>
               </motion.div>
             ))}
           </div>
-          <div className="absolute bottom-7 left-1/2 w-[72%] -translate-x-1/2 rounded-2xl border border-zinc-200 bg-white/90 p-4 text-center shadow-sm backdrop-blur"><span className="text-[9px] font-semibold uppercase tracking-wider text-zinc-400">Recommended alternative</span><p className="mt-1 text-sm font-semibold">Phase the reduction after the Q3 launch</p></div>
+          <div className="absolute bottom-7 left-1/2 w-[72%] -translate-x-1/2 rounded-2xl border border-zinc-200 bg-white/90 p-4 text-center shadow-sm backdrop-blur"><span className="text-[9px] font-semibold uppercase tracking-wider text-zinc-400">Recommendation</span><p className="mt-1 text-sm font-semibold">Rendered from the completed decision package</p></div>
         </motion.div>
 
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.35 }} transition={{ staggerChildren: 0.09 }}>
@@ -177,19 +176,11 @@ export function LandingExperience() {
         </motion.div>
       </section>
 
-      <section className="mx-auto max-w-[1320px] border-y border-zinc-200 px-5 py-16 lg:px-8">
-        <div className="grid divide-y divide-zinc-200 text-center sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-          <div className="px-5 py-8"><strong className="block text-4xl font-semibold tracking-[-0.04em]">6</strong><span className="mt-2 block text-xs text-zinc-500">departments modeled</span></div>
-          <div className="px-5 py-8"><strong className="block text-4xl font-semibold tracking-[-0.04em]">90 days</strong><span className="mt-2 block text-xs text-zinc-500">of consequences made visible</span></div>
-          <div className="px-5 py-8"><strong className="block text-4xl font-semibold tracking-[-0.04em]">100%</strong><span className="mt-2 block text-xs text-zinc-500">human-controlled decisions</span></div>
-        </div>
-      </section>
-
       <motion.section className="mx-auto my-6 flex min-h-[480px] max-w-[1500px] flex-col items-center justify-center overflow-hidden rounded-[28px] bg-zinc-950 px-5 text-center text-white" initial={{ opacity: 0, y: 25 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.3 }}>
         <div className="relative z-10">
           <span className="mx-auto grid size-11 place-items-center rounded-2xl bg-white text-zinc-950"><Network className="size-5" /></span>
           <h2 className="mx-auto mt-7 max-w-3xl text-4xl font-semibold leading-[1.02] tracking-[-0.05em] sm:text-6xl">Make the decision after you see the consequence.</h2>
-          <p className="mx-auto mt-5 max-w-lg text-sm leading-6 text-zinc-400">Start with the prepared engineering capacity scenario, then create one of your own.</p>
+          <p className="mx-auto mt-5 max-w-lg text-sm leading-6 text-zinc-400">Load the company twin and run a backend-supported decision scenario.</p>
           <Button asChild size="lg" className="mt-8 rounded-xl bg-white px-5 text-zinc-950 hover:bg-zinc-200"><Link href="/simulate">Enter the simulation <ArrowRight /></Link></Button>
         </div>
       </motion.section>

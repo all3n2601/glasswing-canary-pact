@@ -98,6 +98,7 @@ export type PressureKind = "cost_growth" | "renewal_step" | "hazard" | "kpi_drif
  * via the `definition` "ActionType".
  */
 export type ActionType =
+  | "assess_change"
   | "remove_vendor"
   | "reduce_capacity"
   | "add_capacity"
@@ -344,6 +345,8 @@ export interface CanaryContracts {
   RunState: RunState;
   HealthResponse: HealthResponse;
   DecisionCreated: DecisionCreated;
+  DecisionPromptRequest: DecisionPromptRequest;
+  DecisionDraft: DecisionDraft;
   HumanDecisionRequest: HumanDecisionRequest;
   QuickSimulateRequest: QuickSimulateRequest;
   FuturesRequest: FuturesRequest;
@@ -1646,6 +1649,25 @@ export interface HealthResponse {
  */
 export interface DecisionCreated {
   run_id: string;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "DecisionPromptRequest".
+ */
+export interface DecisionPromptRequest {
+  prompt: string;
+  horizon_days?: number;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "DecisionDraft".
+ */
+export interface DecisionDraft {
+  brief: DecisionBrief;
+  matched_entity_ids?: string[];
+  assumptions?: string[];
+  warnings?: string[];
+  assessing_department_ids?: string[];
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema

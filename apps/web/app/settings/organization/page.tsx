@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { BackendUnavailable } from "@/components/backend-unavailable";
 import { OrganizationSettings } from "@/components/organization-settings";
 import { getOrganizationProfile } from "@/lib/canary-api-server";
 
@@ -9,6 +10,9 @@ export const metadata: Metadata = {
 };
 
 export default async function OrganizationSettingsPage() {
-  const { profile, connection } = await getOrganizationProfile();
-  return <OrganizationSettings profile={profile} connection={connection} />;
+  try {
+    return <OrganizationSettings profile={await getOrganizationProfile()} />;
+  } catch {
+    return <BackendUnavailable resource="organization settings" />;
+  }
 }

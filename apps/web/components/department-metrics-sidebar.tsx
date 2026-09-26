@@ -5,7 +5,8 @@ import { motion } from "motion/react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { DepartmentSimulationView } from "@/lib/simulation-demo-data";
+import { formatCompactCurrency } from "@/lib/formatters";
+import type { DepartmentSimulationView } from "@/lib/simulation-view";
 
 const toneStyles = {
   source: "bg-blue-50 text-blue-700",
@@ -13,10 +14,6 @@ const toneStyles = {
   negative: "bg-rose-50 text-rose-700",
   neutral: "bg-zinc-100 text-zinc-600",
 } as const;
-
-function formatBudget(value: number) {
-  return `$${(value / 1_000_000).toFixed(1)}M`;
-}
 
 export function DepartmentMetricsSidebar({ departments, department, scenarioStarted, onSelect, onClose }: { departments: DepartmentSimulationView[]; department: DepartmentSimulationView; scenarioStarted: boolean; onSelect: (departmentId: string) => void; onClose: () => void }) {
   return (
@@ -49,7 +46,7 @@ export function DepartmentMetricsSidebar({ departments, department, scenarioStar
         <section className="grid grid-cols-2 gap-2" aria-label="Department baseline metrics">
           {[
             { label: "Headcount", value: String(department.headcount), icon: Users },
-            { label: "Annual budget", value: formatBudget(department.annualBudgetUsd), icon: WalletCards },
+            { label: "Annual budget", value: formatCompactCurrency(department.annualBudgetUsd), icon: WalletCards },
             { label: "Utilisation", value: `${Math.round(department.utilisation * 100)}%`, icon: Activity },
             { label: "Maturity", value: `${department.maturityLevel} / 5`, icon: Building2 },
           ].map((metric) => { const Icon = metric.icon; return <div key={metric.label} className="rounded-2xl border border-zinc-200 p-3"><Icon className="size-3.5 text-zinc-400" /><strong className="mt-3 block text-lg tracking-[-.03em]">{metric.value}</strong><span className="text-[9px] text-zinc-500">{metric.label}</span></div>; })}
@@ -59,7 +56,7 @@ export function DepartmentMetricsSidebar({ departments, department, scenarioStar
           <div className="flex items-center justify-between gap-3"><h3 className="text-[10px] font-semibold uppercase tracking-[.12em] text-zinc-400">Scenario impact</h3><Badge className={`border-0 text-[9px] ${toneStyles[department.tone]}`}>{scenarioStarted ? department.severity : "Not simulated"}</Badge></div>
           <div className="mt-3 rounded-2xl bg-zinc-50 p-4">
             <strong className="text-sm">{scenarioStarted ? department.label : "Run the simulation to reveal impact"}</strong>
-            <p className="mt-2 text-[11px] leading-5 text-zinc-500">{scenarioStarted ? department.summary : "Baseline department metrics are available now. Scenario-specific impacts, evidence, and mitigations appear after the sample run starts."}</p>
+            <p className="mt-2 text-[11px] leading-5 text-zinc-500">{scenarioStarted ? department.summary : "Baseline department metrics are available now. Scenario-specific impacts, evidence, and mitigations appear after a run completes."}</p>
             {scenarioStarted && department.confidence !== undefined ? <div className="mt-3 flex items-center justify-between border-t border-zinc-200 pt-3 text-[10px]"><span className="text-zinc-500">Confidence</span><strong>{Math.round(department.confidence * 100)}%</strong></div> : null}
           </div>
         </section>

@@ -112,6 +112,7 @@ class InterventionKind(StrEnum):
 
 
 class ActionType(StrEnum):
+    assess_change = "assess_change"
     remove_vendor = "remove_vendor"
     reduce_capacity = "reduce_capacity"
     add_capacity = "add_capacity"

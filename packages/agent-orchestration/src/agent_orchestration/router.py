@@ -35,6 +35,10 @@ def routing_sources(brief: DecisionBrief, twin: Twin) -> list[str]:
 
 def route_agents(brief: DecisionBrief, *, twin: Twin, engine: EnginePort, settings: OrganizationSettings) -> list[str]:
     """First-pass agents in roster order; the challenger runs later in its own phase."""
+    prompt_generated = any(i.params.get("prompt_generated") is True for i in brief.candidate_interventions)
+    if prompt_generated:
+        enabled = set(settings.enabled_agent_ids) | set(ALWAYS_RUN)
+        return [agent_id for agent_id in ROSTER if agent_id != CHALLENGER and agent_id in enabled]
     reachable = set(engine.reachable_departments(twin, routing_sources(brief, twin), ROUTING_HOPS))
     types = decision_types(brief)
     enabled = set(settings.enabled_agent_ids) | set(ALWAYS_RUN)

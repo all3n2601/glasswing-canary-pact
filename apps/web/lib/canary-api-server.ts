@@ -4,18 +4,13 @@ import type { OrganizationProfileView } from "@canary-pact/contracts/generated";
 
 import type { OrganizationProfile } from "@canary-pact/contracts";
 
-import fallbackProfile from "../../../data/organization_profile.json";
-
 const API_URL = process.env.CANARY_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-export type ApiConnection = "live" | "offline_fallback";
-
-export interface OrganizationProfileResult {
-  profile: OrganizationProfile;
-  connection: ApiConnection;
-}
-
 function normalizeProfile(profile: OrganizationProfileView): OrganizationProfile {
+  const required = <T,>(value: T | null | undefined, field: string): T => {
+    if (value === null || value === undefined) throw new Error(`Organization profile is missing ${field}`);
+    return value;
+  };
   const normalizeSector = (sector: string): OrganizationProfile["organization"]["sector"] => {
     if (sector === "retail_ecommerce") return "retail_consumer";
     if (["technology_saas", "financial_services", "healthcare", "professional_services", "manufacturing", "public_sector", "other"].includes(sector)) {
@@ -23,7 +18,7 @@ function normalizeProfile(profile: OrganizationProfileView): OrganizationProfile
     }
     return "other";
   };
-  const defaultFutures = (profile.settings.default_futures ?? ["act_now", "inaction", "delay"])
+  const defaultFutures = required(profile.settings.default_futures, "settings.default_futures")
     .filter((future): future is "act_now" | "inaction" | "delay" => future !== "alternative");
   return {
     schema_version: "2.0.0",
@@ -42,54 +37,44 @@ function normalizeProfile(profile: OrganizationProfileView): OrganizationProfile
     },
     departments: profile.departments,
     settings: {
-      settings_id: profile.settings.settings_id ?? "settings_default",
-      organization_id: profile.settings.organization_id ?? profile.organization.id,
-      settings_version: profile.settings.settings_version ?? 1,
-      updated_by: profile.settings.updated_by ?? "system",
-      updated_at: profile.settings.updated_at ?? new Date(0).toISOString(),
-      display_currency: profile.settings.display_currency ?? "USD",
-      money_display_scale: profile.settings.money_display_scale ?? "auto",
-      timezone: profile.settings.timezone ?? "UTC",
-      locale: profile.settings.locale ?? "en-US",
-      default_horizon_days: profile.settings.default_horizon_days ?? 365,
+      settings_id: required(profile.settings.settings_id, "settings.settings_id"),
+      organization_id: required(profile.settings.organization_id, "settings.organization_id"),
+      settings_version: required(profile.settings.settings_version, "settings.settings_version"),
+      updated_by: required(profile.settings.updated_by, "settings.updated_by"),
+      updated_at: required(profile.settings.updated_at, "settings.updated_at"),
+      display_currency: required(profile.settings.display_currency, "settings.display_currency"),
+      money_display_scale: required(profile.settings.money_display_scale, "settings.money_display_scale"),
+      timezone: required(profile.settings.timezone, "settings.timezone"),
+      locale: required(profile.settings.locale, "settings.locale"),
+      default_horizon_days: required(profile.settings.default_horizon_days, "settings.default_horizon_days"),
       default_futures: defaultFutures,
-      default_delay_days: profile.settings.default_delay_days ?? 90,
-      propagation_max_hops: profile.settings.propagation_max_hops ?? 4,
-      min_impact_threshold: profile.settings.min_impact_threshold ?? 0.02,
-      risk_appetite: profile.settings.risk_appetite ?? "balanced",
+      default_delay_days: required(profile.settings.default_delay_days, "settings.default_delay_days"),
+      propagation_max_hops: required(profile.settings.propagation_max_hops, "settings.propagation_max_hops"),
+      min_impact_threshold: required(profile.settings.min_impact_threshold, "settings.min_impact_threshold"),
+      risk_appetite: required(profile.settings.risk_appetite, "settings.risk_appetite"),
       risk_weights: {
-        financial: profile.settings.risk_weights?.financial ?? 25,
-        capability_workflow: profile.settings.risk_weights?.capability_workflow ?? 25,
-        customer_revenue: profile.settings.risk_weights?.customer_revenue ?? 20,
-        compliance_control: profile.settings.risk_weights?.compliance_control ?? 20,
-        execution_uncertainty: profile.settings.risk_weights?.execution_uncertainty ?? 10,
+        financial: required(profile.settings.risk_weights?.financial, "settings.risk_weights.financial"),
+        capability_workflow: required(profile.settings.risk_weights?.capability_workflow, "settings.risk_weights.capability_workflow"),
+        customer_revenue: required(profile.settings.risk_weights?.customer_revenue, "settings.risk_weights.customer_revenue"),
+        compliance_control: required(profile.settings.risk_weights?.compliance_control, "settings.risk_weights.compliance_control"),
+        execution_uncertainty: required(profile.settings.risk_weights?.execution_uncertainty, "settings.risk_weights.execution_uncertainty"),
       },
-      optimizer_objective: profile.settings.optimizer_objective ?? "balanced",
+      optimizer_objective: required(profile.settings.optimizer_objective, "settings.optimizer_objective"),
       always_protected_entity_ids: profile.settings.always_protected_entity_ids ?? [],
-      require_human_approval: true,
-      anonymize_people: true,
-      llm_mode: profile.settings.llm_mode ?? "replay",
-      doc_staleness_days: profile.settings.doc_staleness_days ?? 365,
+      require_human_approval: required(profile.settings.require_human_approval, "settings.require_human_approval"),
+      anonymize_people: required(profile.settings.anonymize_people, "settings.anonymize_people"),
+      llm_mode: required(profile.settings.llm_mode, "settings.llm_mode"),
+      doc_staleness_days: required(profile.settings.doc_staleness_days, "settings.doc_staleness_days"),
     },
   };
 }
 
-export async function getOrganizationProfile(): Promise<OrganizationProfileResult> {
-  try {
-    const response = await fetch(`${API_URL}/organization/profile`, {
-      cache: "no-store",
-      headers: { Accept: "application/json" },
-      signal: AbortSignal.timeout(3_000),
-    });
-    if (!response.ok) throw new Error(`Canary API returned ${response.status}`);
-    return {
-      profile: normalizeProfile((await response.json()) as OrganizationProfileView),
-      connection: "live",
-    };
-  } catch {
-    return {
-      profile: fallbackProfile as OrganizationProfile,
-      connection: "offline_fallback",
-    };
-  }
+export async function getOrganizationProfile(): Promise<OrganizationProfile> {
+  const response = await fetch(`${API_URL}/organization/profile`, {
+    cache: "no-store",
+    headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(3_000),
+  });
+  if (!response.ok) throw new Error(`Canary API returned ${response.status}`);
+  return normalizeProfile((await response.json()) as OrganizationProfileView);
 }

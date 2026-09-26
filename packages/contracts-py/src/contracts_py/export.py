@@ -59,6 +59,8 @@ TOP_LEVEL: list[type[BaseModel]] = [
     events.RunState,
     api.HealthResponse,
     api.DecisionCreated,
+    api.DecisionPromptRequest,
+    api.DecisionDraft,
     api.HumanDecisionRequest,
     api.QuickSimulateRequest,
     api.FuturesRequest,

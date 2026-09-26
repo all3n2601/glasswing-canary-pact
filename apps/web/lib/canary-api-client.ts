@@ -1,6 +1,8 @@
 import type {
   DecisionBrief,
   DecisionCreated,
+  DecisionDraft,
+  DecisionPromptRequest,
   DecisionPackage,
   DepartmentDetail,
   DepartmentProfile,
@@ -66,6 +68,8 @@ export const canaryApi = {
   document: (documentId: string) => request<Document>(`/documents/${encodeURIComponent(documentId)}`),
   createDecision: (brief: DecisionBrief, llmMode?: "live" | "replay" | "mock") =>
     request<DecisionCreated>(`/decisions${llmMode ? `?llm_mode=${llmMode}` : ""}`, { method: "POST", body: JSON.stringify(brief) }),
+  draftDecision: (input: DecisionPromptRequest) =>
+    request<DecisionDraft>("/decisions/draft", { method: "POST", body: JSON.stringify(input) }),
   run: (runId: string) => request<RunState>(`/runs/${encodeURIComponent(runId)}`),
   package: (runId: string) => request<DecisionPackage>(`/runs/${encodeURIComponent(runId)}/package`),
   decide: (runId: string, decision: HumanDecisionRequest) => request<HumanDecision>(`/runs/${encodeURIComponent(runId)}/decision`, { method: "POST", body: JSON.stringify(decision) }),
@@ -76,10 +80,15 @@ export const canaryApi = {
   playReplay: (name: string, speed: 1 | 2 | 4 = 4) => request<ReplayStarted>(`/replays/${encodeURIComponent(name)}/play?speed=${speed}`, { method: "POST" }),
 };
 
-export async function waitForPackage(runId: string, timeoutMs = 15_000): Promise<DecisionPackage> {
+export async function waitForPackage(
+  runId: string,
+  timeoutMs = 30_000,
+  onState?: (state: RunState) => void,
+): Promise<DecisionPackage> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const state = await canaryApi.run(runId);
+    onState?.(state);
     if (state.status === "failed") throw new CanaryApiError(500, "The simulation run failed.");
     if (state.package_id) return canaryApi.package(runId);
     await new Promise((resolve) => window.setTimeout(resolve, 250));
