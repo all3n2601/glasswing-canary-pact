@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { AuthControls } from "@/components/auth-controls";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -73,6 +74,7 @@ export function DecisionDashboard() {
           </nav>
           <span className="hidden h-6 w-px bg-zinc-200 sm:block" />
           <div className="hidden items-center gap-2 px-2 text-[10px] font-medium text-zinc-500 lg:flex"><span className="size-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgb(16_185_129/.11)]" />Twin synchronized</div>
+          <AuthControls compact />
           <Button className="h-10 rounded-xl bg-zinc-950 px-3.5 text-white hover:bg-zinc-800 sm:px-4" onClick={() => setComposerOpen(true)}><Sparkles />Make a decision</Button>
         </div>
       </header>
