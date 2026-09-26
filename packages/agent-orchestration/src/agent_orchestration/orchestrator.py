@@ -28,7 +28,7 @@ from agent_orchestration.llm import LLMClient
 from agent_orchestration.merge import MergeOutcome, merge
 from agent_orchestration.ports import EnginePort
 from agent_orchestration.prompts import assemble
-from agent_orchestration.roster import CHALLENGER, PROMPT_VERSION, ROSTER
+from agent_orchestration.roster import CHALLENGER, PROMPT_VERSION, ROSTER, model_tier
 from agent_orchestration.router import route_agents
 
 FAILED_STATUSES = {"fallback_cached", "unavailable", "invalid"}
@@ -154,7 +154,7 @@ class _Run:
         prompt = assemble(agent_id, context)
         self.stop_if_requested(f"the {agent_id} agent call")
         result = self.llm.call(agent_id, prompt.messages, prompt.output_model, prompt_version=PROMPT_VERSION,
-                               context=context)
+                               context=context, fast=model_tier(agent_id) == "fast")
         outcome = merge(agent_id, result, context=context, pass_type=pass_type,  # type: ignore[arg-type]
                         scenario_ids=self.scenario_ids(plan), created_at=self.clock())
         assessment = outcome.assessment

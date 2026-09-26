@@ -113,7 +113,7 @@ class AgentLLM:
 
     @property
     def model_label(self) -> str:
-        return self.model_id() or self.mode
+        return self.model_id() or self.model_id(fast=True) or self.mode
 
     def model_id(self, fast: bool = False) -> str | None:
         if fast:
@@ -137,7 +137,12 @@ class AgentLLM:
 
     def call(self, agent_id: str, messages: Messages, output_model: type[BaseModel], *, prompt_version: str,
              context: AgentContext, fast: bool = False) -> LLMResult:
-        model_id = self.model_id(fast) or "unconfigured"
+        notes: list[str] = []
+        model_id = self.model_id(fast)
+        if model_id is None and not fast and self.model_id(fast=True):
+            model_id = self.model_id(fast=True)
+            notes.append(f"strong model not configured; {agent_id} ran on the fast model {model_id}")
+        model_id = model_id or "unconfigured"
         digest = prompt_hash(model_id, prompt_version, messages, output_model, context.run_id)
         metrics = CallMetrics(model_id=model_id, prompt_version=prompt_version, prompt_hash=digest, latency_ms=0,
                               input_tokens=0, output_tokens=0)
@@ -146,8 +151,11 @@ class AgentLLM:
             return LLMResult(mock_output(output_model, context), "ok", metrics)
         decision_id = context.brief.decision_id
         if self.mode == "replay":
-            return self._from_cache(agent_id, decision_id, digest, output_model, metrics, [])
-        return self._live(agent_id, decision_id, model_id, digest, messages, output_model, metrics)
+            result = self._from_cache(agent_id, decision_id, digest, output_model, metrics, [])
+        else:
+            result = self._live(agent_id, decision_id, model_id, digest, messages, output_model, metrics)
+        result.errors = [*notes, *result.errors]
+        return result
 
     def _live(self, agent_id: str, decision_id: str, model_id: str, digest: str, messages: Messages, output_model: type[BaseModel],
               metrics: CallMetrics) -> LLMResult:
