@@ -6,6 +6,7 @@ import threading
 import time
 
 import pytest
+from api_auth_helpers import auth_headers
 
 import company_twin
 from agent_orchestration.ports import EnginePort
@@ -79,7 +80,7 @@ def test_thread_emitter_publishes_on_the_loop_in_order(monkeypatch) -> None:
 
 
 def test_mock_decision_runs_real_orchestrator_to_approval(client, brief_json) -> None:
-    run_id = client.post("/decisions?llm_mode=mock", json=brief_json).json()["run_id"]
+    run_id = client.post("/decisions?llm_mode=mock", headers=auth_headers(client), json=brief_json).json()["run_id"]
     wait_for(client, run_id, "awaiting_approval")
     events = runtime.bus.runs[run_id].events
     assert events[0].type is EventType.run_created
@@ -97,7 +98,7 @@ def test_mock_decision_runs_real_orchestrator_to_approval(client, brief_json) ->
         received = [Event.model_validate_json(ws.receive_text()) for _ in events]
     assert [e.sequence for e in received] == list(range(1, len(events) + 1))
 
-    decision = client.post(f"/runs/{run_id}/decision", json={
+    decision = client.post(f"/runs/{run_id}/decision", headers=auth_headers(client), json={
         "decision": "approve", "decided_by": "demo_user",
         "package_hash": hashlib.sha256(response.content).hexdigest(),
     })
@@ -106,7 +107,7 @@ def test_mock_decision_runs_real_orchestrator_to_approval(client, brief_json) ->
 
 
 def test_websocket_mid_orchestrated_run_gets_every_sequence_once(client, brief_json) -> None:
-    run_id = client.post("/decisions?llm_mode=mock", json=brief_json).json()["run_id"]
+    run_id = client.post("/decisions?llm_mode=mock", headers=auth_headers(client), json=brief_json).json()["run_id"]
     with client.websocket_connect(f"/runs/{run_id}/events") as ws:
         received: list[Event] = []
         while not received or not (received[-1].type is EventType.phase_changed
@@ -117,7 +118,7 @@ def test_websocket_mid_orchestrated_run_gets_every_sequence_once(client, brief_j
 
 def test_empty_replay_cache_falls_back_to_mock_with_a_note(client, brief_json) -> None:
     assert runtime.cache_is_empty(runtime.llm_cache_dir())
-    run_id = client.post("/decisions", json=brief_json).json()["run_id"]
+    run_id = client.post("/decisions", headers=auth_headers(client), json=brief_json).json()["run_id"]
     wait_for(client, run_id, "awaiting_approval")
     events = runtime.bus.runs[run_id].events
     assert events[0].type is EventType.run_created
@@ -139,7 +140,7 @@ def test_replay_with_cached_answers_stays_in_replay(monkeypatch, tmp_path) -> No
 
 
 def test_bad_llm_mode_is_rejected(client, brief_json) -> None:
-    assert client.post("/decisions?llm_mode=chatty", json=brief_json).status_code == 422
+    assert client.post("/decisions?llm_mode=chatty", headers=auth_headers(client), json=brief_json).status_code == 422
 
 
 def test_real_mode_loads_synthetic_company_with_optional_snippets(monkeypatch) -> None:
