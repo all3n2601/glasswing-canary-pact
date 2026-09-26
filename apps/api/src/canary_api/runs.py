@@ -1,5 +1,4 @@
 import asyncio
-import json
 import os
 import uuid
 from pathlib import Path
@@ -51,13 +50,19 @@ def _spawn(coro: Coroutine[Any, Any, None]) -> None:
     task.add_done_callback(_tasks.discard)
 
 
+def rewrite_run_ids(value: Any, run_id: str) -> Any:
+    if isinstance(value, dict):
+        return {k: run_id if k == "run_id" and isinstance(v, str) else rewrite_run_ids(v, run_id) for k, v in value.items()}
+    if isinstance(value, list):
+        return [rewrite_run_ids(item, run_id) for item in value]
+    return value
+
+
 async def play(run_id: str, events: list[Event], delay: float) -> None:
-    source_run_id = events[0].run_id if events else run_id
     try:
         for event in events:
-            payload = json.loads(event.payload.model_dump_json().replace(source_run_id, run_id))
-            scenario_id = event.scenario_id.replace(source_run_id, run_id) if event.scenario_id else None
-            runtime.bus.publish(run_id, event.type, payload, actor=event.actor, scenario_id=scenario_id,
+            payload = rewrite_run_ids(event.payload.model_dump(mode="json"), run_id)
+            runtime.bus.publish(run_id, event.type, payload, actor=event.actor, scenario_id=event.scenario_id,
                                 future=event.future)
             await asyncio.sleep(delay)
     except Exception as exc:

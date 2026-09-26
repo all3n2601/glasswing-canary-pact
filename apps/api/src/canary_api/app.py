@@ -16,6 +16,8 @@ from contracts_py.api import (
     HealthResponse,
     HumanDecisionRequest,
     OptimizeRequest,
+    OrganizationDepartmentSummary,
+    OrganizationProfileView,
     QuickSimulateRequest,
     ReplayInfo,
     ReplaySpeed,
@@ -107,6 +109,30 @@ def organization() -> Organization:
 @app.get("/organization/settings", response_model=OrganizationSettings)
 def organization_settings() -> OrganizationSettings:
     return runtime.settings()
+
+
+@app.get("/organization/profile", response_model=OrganizationProfileView)
+def organization_profile() -> OrganizationProfileView:
+    twin = runtime.twin()
+    settings = runtime.settings()
+    names = {e.id: e.name for e in twin.entities if e.type is EntityType.department}
+    return OrganizationProfileView(
+        organization=twin.organization,
+        departments=[
+            OrganizationDepartmentSummary(
+                department_id=p.department_id,
+                name=names[p.department_id],
+                mission=p.mission,
+                actual_fte=p.staffing.actual_fte,
+                annual_budget_usd=p.budget.annual_budget_usd,
+                utilisation=p.staffing.utilisation,
+                maturity_level=p.maturity_level,
+                enabled=p.agent_id is None or p.agent_id in settings.enabled_agent_ids,
+            )
+            for p in twin.department_profiles
+        ],
+        settings=settings,
+    )
 
 
 @app.get("/departments", response_model=list[DepartmentProfile])
@@ -205,8 +231,8 @@ async def record_decision(run_id: str, request: HumanDecisionRequest) -> HumanDe
     run = _run(run_id)
     if run.package is None or run.served_package_hash is None:
         raise HTTPException(status_code=409, detail="Fetch the package before deciding")
-    if run.decision is not None:
-        raise HTTPException(status_code=409, detail="Decision already recorded")
+    if run.state.status is not RunStatus.awaiting_approval:
+        raise HTTPException(status_code=409, detail=f"Run is {run.state.status}, not awaiting_approval")
     if request.package_hash != run.served_package_hash:
         raise HTTPException(status_code=409, detail="package_hash does not match the package served")
     decision = HumanDecision(
@@ -219,12 +245,14 @@ async def record_decision(run_id: str, request: HumanDecisionRequest) -> HumanDe
         package_hash=run.served_package_hash,
     )
     runtime.bus.publish(run_id, EventType.human_decision_recorded, decision, actor=request.decided_by)
-    runtime.bus.publish(
-        run_id,
-        EventType.phase_changed,
-        PhaseChanged(from_status=run.state.status, to_status=RunStatus.completed),
-        actor="api",
-    )
+    # A scenario request keeps the run open so the same package can still be approved or rejected.
+    if request.decision != "request_scenario":
+        runtime.bus.publish(
+            run_id,
+            EventType.phase_changed,
+            PhaseChanged(from_status=RunStatus.awaiting_approval, to_status=RunStatus.completed),
+            actor="api",
+        )
     return decision
 
 

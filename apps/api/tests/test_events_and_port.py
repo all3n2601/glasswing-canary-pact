@@ -128,3 +128,30 @@ def test_real_engine_does_not_crash_at_import() -> None:
     env = {**os.environ, "ENGINE_IMPL": "real"}
     result = subprocess.run([sys.executable, "-c", "import canary_api.app"], env=env, capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
+
+
+def test_replay_rewrites_only_run_id_fields() -> None:
+    import asyncio
+
+    from canary_api import runs
+
+    events = sample_run().root
+    package_event = next(e for e in events if e.type is EventType.package_ready)
+    note = f"Recorded as {package_event.run_id}; check run_sample before approving."
+    package = package_event.payload.model_copy(update={"open_questions": [note]})
+    edited = [e.model_copy(update={"payload": package}) if e is package_event else e for e in events]
+
+    runtime.bus.create_run("run_rewrite", "dec_cut_2m", "stub-twin-1")
+    asyncio.run(runs.play("run_rewrite", edited, 0))
+
+    replayed = runtime.bus.runs["run_rewrite"]
+    assert replayed.state.status == "awaiting_approval"
+    assert replayed.package is not None
+    assert replayed.package.run_id == "run_rewrite"
+    assert replayed.package.futures.run_id == "run_rewrite"
+    assert replayed.package.portfolios.naive.result.run_id == "run_rewrite"
+    assert replayed.package.open_questions == [note]
+    assert replayed.package.package_id == package.package_id
+    assert runs.rewrite_run_ids({"a": [{"run_id": "run_old", "text": "run_old"}]}, "run_new") == {
+        "a": [{"run_id": "run_new", "text": "run_old"}]
+    }

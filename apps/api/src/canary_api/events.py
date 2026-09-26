@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -8,6 +9,13 @@ from typing import Any, AsyncIterator
 from contracts_py.enums import Future, RunStatus
 from contracts_py.events import Event, EventType, RunState
 from contracts_py.package import DecisionPackage, HumanDecision
+
+
+RUN_ID = re.compile(r"^run_[a-z0-9_]+$")
+
+
+def is_run_id(value: str) -> bool:
+    return RUN_ID.fullmatch(value) is not None
 
 
 def utc_now() -> datetime:
@@ -30,6 +38,8 @@ class EventBus:
         self.runs: dict[str, Run] = {}
 
     def _dir(self, run_id: str) -> Path:
+        if not is_run_id(run_id):
+            raise ValueError(f"invalid run id {run_id!r}")
         return self.root / run_id
 
     def create_run(self, run_id: str, decision_id: str, baseline_twin_version: str) -> RunState:
@@ -48,6 +58,8 @@ class EventBus:
         return state
 
     def get(self, run_id: str) -> Run | None:
+        if not is_run_id(run_id):
+            return None
         run = self.runs.get(run_id)
         if run is None:
             run = self._load(run_id)
