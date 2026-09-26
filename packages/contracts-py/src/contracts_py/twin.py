@@ -121,7 +121,7 @@ class Edge(Strict):
     criticality: Criticality
     confidence: Ratio
     evidence_refs: list[ID] = Field(default_factory=list)
-    extraction_method: Literal["seeded", "keyword", "zero_shot", "canary"] | None = None
+    extraction_method: Literal["seeded", "keyword", "zero_shot", "canary", "agent"] | None = None
     last_validated: date | None = None
 
     @model_validator(mode="after")

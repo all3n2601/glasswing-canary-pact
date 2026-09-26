@@ -167,6 +167,7 @@ class _Merger:
             criticality=Criticality.medium,
             confidence=confidence,
             evidence_refs=[r for r in dep.evidence_refs if r in self.known_evidence],
+            extraction_method="agent",
         )
 
     def agent_output(self, output: AgentOutput) -> AgentOutput:
