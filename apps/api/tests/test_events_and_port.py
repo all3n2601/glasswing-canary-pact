@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 import sys
+import types
 import time
 
 import pytest
@@ -114,6 +115,10 @@ def test_package_guard_rejects_person_tokens(client, monkeypatch) -> None:
 
 
 def test_real_engine_missing_function_gives_clear_error(client, monkeypatch) -> None:
+    # Stand-in modules without the functions, so this keeps testing the error path however far the
+    # real twin and engine packages have got.
+    monkeypatch.setitem(sys.modules, "simulation_engine", types.ModuleType("simulation_engine"))
+    monkeypatch.setitem(sys.modules, "company_twin", types.ModuleType("company_twin"))
     monkeypatch.setenv("ENGINE_IMPL", "real")
     with pytest.raises(engine_port.EngineNotReady, match=r"simulation_engine\.quick_impact"):
         engine_port.quick_impact(stub_twin(), [])
