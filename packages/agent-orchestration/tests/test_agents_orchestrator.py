@@ -4,12 +4,14 @@ from contracts_py.agents import AgentContext, ChallengerOutput, ProposedDependen
 from contracts_py.enums import Future
 from contracts_py.events import EventType
 from contracts_py.package import DecisionPackage
+from contracts_py.twin import OrganizationSettings
 
 import pytest
 from canary_api.stubs import engine as stub_engine
 
 from agent_orchestration import AgentLLM, RunCancelled, run_decision
-from agent_orchestration.llm import LLMResult
+from agent_orchestration.llm import LLMResult, LiveReply
+from agent_orchestration.roster import MODEL_TIER, model_tier
 from orchestration_helpers import NOW, Recorder, ScriptedLLM, SpyEngine, metrics, person_output, person_tokens
 
 BASE_PHASES = ["validating", "building_futures", "optimizing", "running_agents", "propagating", "challenging",
@@ -209,3 +211,49 @@ def test_reoptimization_rejects_plan_that_became_infeasible(brief, twin, setting
     assert len({e.payload.plan_id for e in recorder.of(EventType.candidate_rejected)}) == \
         len(recorder.of(EventType.candidate_rejected))
 
+
+
+MODEL_ENV = ["CANARY_MODEL_STRONG", "CANARY_MODEL_FAST", "MODEL_STRONG", "MODEL_FAST", "SCIFORIUM_MODEL"]
+
+
+def live_run(brief, twin, tmp_path, monkeypatch, **env):
+    for name in MODEL_ENV:
+        monkeypatch.delenv(name, raising=False)
+    for name, value in env.items():
+        monkeypatch.setenv(name, value)
+    used: list[tuple[str, str]] = []
+
+    def live(model_id, messages, output_model, *, timeout, temperature):
+        used.append((output_model.__name__, model_id))
+        if output_model is ChallengerOutput:
+            return LiveReply({"confidence": 0.5})
+        return LiveReply({"act_now_view": {"summary": "ok"}, "inaction_view": {"summary": "ok"}, "confidence": 0.5})
+
+    settings = OrganizationSettings(llm_mode="live")
+    llm = AgentLLM(settings, cache_dir=tmp_path, live_call=live)
+    _, recorder, _ = run(brief, twin, settings, llm)
+    metrics_by_agent = {e.payload.agent_id: e.payload for e in recorder.of(EventType.agent_completed)}
+    return metrics_by_agent, used
+
+
+def test_model_tier_table() -> None:
+    assert MODEL_TIER == {"challenger": "strong"}
+    assert model_tier("challenger") == "strong" and model_tier("finance") == "fast"
+
+
+def test_departments_use_fast_model_and_challenger_strong(brief, twin, tmp_path, monkeypatch) -> None:
+    assessments, used = live_run(brief, twin, tmp_path, monkeypatch,
+                                 CANARY_MODEL_FAST="deepseek-fast-test", CANARY_MODEL_STRONG="glm-strong-test")
+    assert assessments["challenger"].metrics.model_id == "glm-strong-test"
+    departments = {a: v for a, v in assessments.items() if a != "challenger"}
+    assert departments and {v.metrics.model_id for v in departments.values()} == {"deepseek-fast-test"}
+    assert ("ChallengerOutput", "glm-strong-test") in used
+    assert {m for name, m in used if name == "AgentOutput"} == {"deepseek-fast-test"}
+    assert all(not v.validation.errors for v in assessments.values())
+
+
+def test_missing_strong_model_runs_challenger_on_fast(brief, twin, tmp_path, monkeypatch) -> None:
+    assessments, _ = live_run(brief, twin, tmp_path, monkeypatch, CANARY_MODEL_FAST="deepseek-fast-test")
+    challenger = assessments["challenger"]
+    assert challenger.status == "ok" and challenger.metrics.model_id == "deepseek-fast-test"
+    assert any("strong model not configured" in e for e in challenger.validation.errors)

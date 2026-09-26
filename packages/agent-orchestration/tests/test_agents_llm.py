@@ -181,3 +181,19 @@ def test_api_key_never_appears_in_errors(tmp_path, brief, twin, settings, clean_
     result = call(llm, make_context(brief, twin, settings))
     assert result.status == "unavailable"
     assert "sk-secret-value" not in " ".join(result.errors) + caplog.text
+
+
+def test_missing_strong_model_falls_back_to_fast(tmp_path, brief, twin, settings, clean_env) -> None:
+    clean_env.setenv("CANARY_MODEL_FAST", "fast-model")
+    seen = []
+
+    def live(model_id, messages, output_model, *, timeout, temperature):
+        seen.append(model_id)
+        return LiveReply(VALID)
+
+    llm = AgentLLM(OrganizationSettings(llm_mode="live"), cache_dir=tmp_path, live_call=live)
+    result = llm.call("challenger", MESSAGES, AgentOutput, prompt_version="p1",
+                      context=make_context(brief, twin, settings), fast=False)
+    assert result.status == "ok" and seen == ["fast-model"] and result.metrics.model_id == "fast-model"
+    assert result.errors == ["strong model not configured; challenger ran on the fast model fast-model"]
+    assert llm.model_label == "fast-model"

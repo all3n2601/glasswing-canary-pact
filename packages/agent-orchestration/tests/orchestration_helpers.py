@@ -43,7 +43,8 @@ class ScriptedLLM:
              prompt_version: str, context: AgentContext, fast: bool = False) -> LLMResult:
         if agent_id in self.overrides:
             return self.overrides[agent_id](context)
-        return self.base.call(agent_id, messages, output_model, prompt_version=prompt_version, context=context)
+        return self.base.call(agent_id, messages, output_model, prompt_version=prompt_version, context=context,
+                              fast=fast)
 
 
 def metrics(agent_id: str = "x") -> CallMetrics:
