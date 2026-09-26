@@ -78,15 +78,23 @@ def knowledge_texts(root, agent_id: str) -> tuple[str, str]:
     return skill_text, fallback
 
 
+# Agents allowed to run on their fallback text; empty now that every agent has a skill file.
+FALLBACK_ALLOWED: set[str] = set()
+
+
 @pytest.mark.parametrize("agent_id", sorted(load_manifest()["agents"]))
-def test_prompt_uses_skill_file_when_present_else_fallback(agent_id, brief, twin, settings) -> None:
+def test_every_agent_uses_its_skill_file(agent_id, brief, twin, settings) -> None:
     root = find_repo_root()
+    skill = root / load_manifest(root)["agents"][agent_id]["skill"]
     skill_text, fallback = knowledge_texts(root, agent_id)
-    system = assemble(agent_id, make_context(brief, twin, settings, agent_id=agent_id)).messages[0]["content"]
-    if skill_text:
-        assert skill_text in system and fallback not in system
-    else:
+    prompt = assemble(agent_id, make_context(brief, twin, settings, agent_id=agent_id))
+    system = prompt.messages[0]["content"]
+    if agent_id in FALLBACK_ALLOWED and not skill.is_file():
         assert fallback in system
+        return
+    assert skill.is_file(), f"{agent_id} has no skill file at {skill}"
+    assert prompt.knowledge_source == "skill"
+    assert skill_text in system and fallback not in system
 
 
 def test_missing_skill_file_falls_back(tmp_path, brief, twin, settings) -> None:
