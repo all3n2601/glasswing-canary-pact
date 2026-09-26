@@ -19,7 +19,7 @@ from .models import (
     entity_map,
 )
 from .validate import validate_twin
-from .versioning import clone, clone_with_edges, widen_uncertainty
+from .versioning import AGENT_EDGE_DEFAULTS, clone, clone_with_edges, edge_from_agent_dependency, widen_uncertainty
 from .views import aggregate_domain_graph, build_agent_view, department_detail, to_role_level
 
 __all__ = [
@@ -47,6 +47,8 @@ __all__ = [
     "validate_twin",
     "clone",
     "clone_with_edges",
+    "edge_from_agent_dependency",
+    "AGENT_EDGE_DEFAULTS",
     "widen_uncertainty",
     "build_agent_view",
     "to_role_level",

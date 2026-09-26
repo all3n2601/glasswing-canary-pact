@@ -8,10 +8,18 @@ from __future__ import annotations
 import json
 from datetime import date, timedelta
 
+from contracts_py.engine import KnowledgeCoverage, WorkflowCoverage
+
 from company_twin.documents import document_is_stale
 from company_twin.loader import default_fixture_path, load_twin
 from company_twin.models import Edge, EntityType, Relation, Sensitivity
-from company_twin.versioning import clone, clone_with_edges, widen_uncertainty
+from company_twin.versioning import (
+    AGENT_EDGE_DEFAULTS,
+    clone,
+    clone_with_edges,
+    edge_from_agent_dependency,
+    widen_uncertainty,
+)
 from company_twin.views import aggregate_domain_graph, build_agent_view, department_detail, to_role_level
 
 TWIN = load_twin(default_fixture_path())
@@ -181,6 +189,104 @@ def test_to_role_level_maps_pt_ids_inside_a_pydantic_model():
     assert mapped.source != person_token.id
     # original untouched
     assert edge.source == person_token.id
+
+
+def test_to_role_level_maps_pt_ids_inside_workflow_coverage_owners():
+    pt_before, pt_after = [e for e in TWIN.entities if e.type == EntityType.person_token][:2]
+    coverage = WorkflowCoverage(
+        workflow_id="wf_redaction_check",
+        criticality="high",
+        owners_before=[pt_before.id, pt_after.id],
+        owners_after=[pt_after.id],
+        min_qualified_owners=1,
+        backup_count_after=0,
+        documented_pct=0.4,
+        stranded=False,
+    )
+
+    mapped = to_role_level(coverage, TWIN)
+
+    assert mapped.owners_before == [pt_before.role_id, pt_after.role_id]
+    assert mapped.owners_after == [pt_after.role_id]
+    dumped = json.dumps(mapped.model_dump(mode="json"))
+    assert pt_before.id not in dumped
+    assert pt_after.id not in dumped
+    # original untouched
+    assert coverage.owners_before == [pt_before.id, pt_after.id]
+
+
+def test_to_role_level_maps_pt_ids_inside_knowledge_coverage_holders():
+    pt_before, pt_after = [e for e in TWIN.entities if e.type == EntityType.person_token][:2]
+    coverage = KnowledgeCoverage(
+        knowledge_id="kn_redaction_check",
+        holders_before=[pt_before.id, pt_after.id],
+        holders_after=[],
+        holder_capacity_fte_before=2.0,
+        holder_capacity_fte_after=0.0,
+        documented_pct=0.4,
+        lost=True,
+    )
+
+    mapped = to_role_level(coverage, TWIN)
+
+    assert mapped.holders_before == [pt_before.role_id, pt_after.role_id]
+    dumped = json.dumps(mapped.model_dump(mode="json"))
+    assert pt_before.id not in dumped
+    assert pt_after.id not in dumped
+    # original untouched
+    assert coverage.holders_before == [pt_before.id, pt_after.id]
+
+
+# ---- A2: edge_from_agent_dependency / clone_with_edges(agent_proposed=True) --
+def test_agent_edge_defaults_cover_every_relation():
+    assert set(AGENT_EDGE_DEFAULTS) == set(Relation)
+    for defaults in AGENT_EDGE_DEFAULTS.values():
+        low, high = defaults.strength_range
+        assert low <= defaults.strength <= high
+
+
+def test_edge_from_agent_dependency_uses_relation_specific_defaults():
+    defaults = AGENT_EDGE_DEFAULTS[Relation.SUBSTITUTES_FOR]
+    edge = edge_from_agent_dependency(
+        source="vendor_apex",
+        target="vendor_beacon",
+        relation=Relation.SUBSTITUTES_FOR,
+        evidence_refs=["ev_1"],
+        confidence=0.6,
+    )
+    assert edge.strength == defaults.strength
+    assert edge.strength_range == defaults.strength_range
+    assert edge.substitutability == defaults.substitutability
+    assert edge.confidence == 0.6
+    assert edge.evidence_refs == ["ev_1"]
+    assert edge.extraction_method is None
+
+
+def test_clone_with_edges_agent_proposed_replaces_placeholder_strength():
+    placeholder = Edge(
+        id="e_agent_placeholder_dep",
+        source="vendor_apex",
+        target="vendor_beacon",
+        relation=Relation.DEPENDS_ON,
+        strength=0.5,
+        substitutability=0.5,
+        lag_days=0,
+        criticality="medium",
+        confidence=0.7,
+    )
+
+    scenario = clone_with_edges(TWIN, [placeholder], agent_proposed=True)
+
+    added = next(e for e in scenario.edges if e.id == placeholder.id)
+    defaults = AGENT_EDGE_DEFAULTS[Relation.DEPENDS_ON]
+    assert added.strength == defaults.strength
+    assert added.strength_range == defaults.strength_range
+    assert added.substitutability == defaults.substitutability
+    # baseline untouched, and the un-flagged call path keeps its old placeholder values
+    unflagged = clone_with_edges(TWIN, [placeholder])
+    kept = next(e for e in unflagged.edges if e.id == placeholder.id)
+    assert kept.strength == 0.5
+    assert kept.substitutability == 0.5
 
 
 # ---- B-05: document_is_stale -------------------------------------------------
