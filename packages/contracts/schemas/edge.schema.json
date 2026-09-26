@@ -148,6 +148,37 @@
       },
       "title": "Evidence Refs",
       "type": "array"
+    },
+    "extraction_method": {
+      "anyOf": [
+        {
+          "enum": [
+            "seeded",
+            "keyword",
+            "zero_shot",
+            "canary"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extraction Method"
+    },
+    "last_validated": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Last Validated"
     }
   },
   "required": [

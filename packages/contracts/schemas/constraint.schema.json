@@ -16,7 +16,8 @@
         "compliance_controls_broken",
         "stranded_workflows",
         "critical_systems_degraded",
-        "max_capacity_loss_pct"
+        "max_capacity_loss_pct",
+        "critical_coverage_pct"
       ],
       "title": "Metric",
       "type": "string"

@@ -2,8 +2,8 @@ from typing import Annotated, Any, Literal
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, StringConstraints
 
-SCHEMA_VERSION = "2.1.0"
-SchemaVersion = Literal["2.1.0"]
+SCHEMA_VERSION = "2.1.1"
+SchemaVersion = Literal["2.1.0", "2.1.1"]
 
 ID_PATTERN = r"^[a-z][a-z0-9_]*$"
 ID = Annotated[str, StringConstraints(pattern=ID_PATTERN, max_length=80)]

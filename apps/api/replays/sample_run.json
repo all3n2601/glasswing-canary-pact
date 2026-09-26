@@ -1,6 +1,6 @@
 [
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_1",
     "run_id": "run_sample",
     "sequence": 1,
@@ -10,7 +10,7 @@
     "future": null,
     "timestamp": "2026-09-26T17:00:01Z",
     "payload": {
-      "schema_version": "2.1.0",
+      "schema_version": "2.1.1",
       "decision_id": "dec_cut_2m",
       "decision_type": "cost_reduction",
       "title": "Cut $2M in annual cost",
@@ -145,7 +145,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_2",
     "run_id": "run_sample",
     "sequence": 2,
@@ -160,7 +160,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_3",
     "run_id": "run_sample",
     "sequence": 3,
@@ -175,7 +175,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_4",
     "run_id": "run_sample",
     "sequence": 4,
@@ -195,7 +195,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_5",
     "run_id": "run_sample",
     "sequence": 5,
@@ -211,7 +211,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_6",
     "run_id": "run_sample",
     "sequence": 6,
@@ -227,7 +227,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_7",
     "run_id": "run_sample",
     "sequence": 7,
@@ -243,7 +243,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_8",
     "run_id": "run_sample",
     "sequence": 8,
@@ -258,7 +258,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_9",
     "run_id": "run_sample",
     "sequence": 9,
@@ -281,7 +281,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_10",
     "run_id": "run_sample",
     "sequence": 10,
@@ -298,7 +298,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_11",
     "run_id": "run_sample",
     "sequence": 11,
@@ -320,7 +320,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_12",
     "run_id": "run_sample",
     "sequence": 12,
@@ -603,13 +603,20 @@
               ],
               "min_qualified_owners": 1,
               "backup_count_after": 0,
-              "documented_pct": 30.0,
+              "documented_pct": 0.3,
               "stranded": false,
               "reasons": [
                 "One qualified owner remains and has no backup."
-              ]
+              ],
+              "owner_capacity_fte_before": null,
+              "owner_capacity_fte_after": null,
+              "exception_documented_pct": null,
+              "automation_pct": null,
+              "training_days_required": null,
+              "replacement_cost_usd": null
             }
           ],
+          "knowledge_coverage": [],
           "pressures_triggered": [
             {
               "pressure_id": "pr_cloud_growth",
@@ -926,13 +933,20 @@
               ],
               "min_qualified_owners": 1,
               "backup_count_after": 0,
-              "documented_pct": 30.0,
+              "documented_pct": 0.3,
               "stranded": false,
               "reasons": [
                 "One qualified owner remains and has no backup."
-              ]
+              ],
+              "owner_capacity_fte_before": null,
+              "owner_capacity_fte_after": null,
+              "exception_documented_pct": null,
+              "automation_pct": null,
+              "training_days_required": null,
+              "replacement_cost_usd": null
             }
           ],
+          "knowledge_coverage": [],
           "pressures_triggered": [
             {
               "pressure_id": "pr_cloud_growth",
@@ -981,7 +995,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_13",
     "run_id": "run_sample",
     "sequence": 13,
@@ -1001,7 +1015,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_14",
     "run_id": "run_sample",
     "sequence": 14,
@@ -1021,7 +1035,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_15",
     "run_id": "run_sample",
     "sequence": 15,
@@ -1036,7 +1050,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_16",
     "run_id": "run_sample",
     "sequence": 16,
@@ -1051,7 +1065,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_17",
     "run_id": "run_sample",
     "sequence": 17,
@@ -1066,7 +1080,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_18",
     "run_id": "run_sample",
     "sequence": 18,
@@ -1081,7 +1095,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_19",
     "run_id": "run_sample",
     "sequence": 19,
@@ -1096,7 +1110,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_20",
     "run_id": "run_sample",
     "sequence": 20,
@@ -1177,7 +1191,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_21",
     "run_id": "run_sample",
     "sequence": 21,
@@ -1258,7 +1272,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_22",
     "run_id": "run_sample",
     "sequence": 22,
@@ -1342,7 +1356,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_23",
     "run_id": "run_sample",
     "sequence": 23,
@@ -1423,7 +1437,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_24",
     "run_id": "run_sample",
     "sequence": 24,
@@ -1438,7 +1452,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_25",
     "run_id": "run_sample",
     "sequence": 25,
@@ -1709,13 +1723,20 @@
           ],
           "min_qualified_owners": 1,
           "backup_count_after": 0,
-          "documented_pct": 30.0,
+          "documented_pct": 0.3,
           "stranded": false,
           "reasons": [
             "One qualified owner remains and has no backup."
-          ]
+          ],
+          "owner_capacity_fte_before": null,
+          "owner_capacity_fte_after": null,
+          "exception_documented_pct": null,
+          "automation_pct": null,
+          "training_days_required": null,
+          "replacement_cost_usd": null
         }
       ],
+      "knowledge_coverage": [],
       "pressures_triggered": [
         {
           "pressure_id": "pr_cloud_growth",
@@ -1761,7 +1782,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_26",
     "run_id": "run_sample",
     "sequence": 26,
@@ -1776,7 +1797,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_27",
     "run_id": "run_sample",
     "sequence": 27,
@@ -1791,7 +1812,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_28",
     "run_id": "run_sample",
     "sequence": 28,
@@ -1861,7 +1882,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_29",
     "run_id": "run_sample",
     "sequence": 29,
@@ -1876,7 +1897,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_30",
     "run_id": "run_sample",
     "sequence": 30,
@@ -2147,13 +2168,20 @@
           ],
           "min_qualified_owners": 1,
           "backup_count_after": 0,
-          "documented_pct": 30.0,
+          "documented_pct": 0.3,
           "stranded": false,
           "reasons": [
             "One qualified owner remains and has no backup."
-          ]
+          ],
+          "owner_capacity_fte_before": null,
+          "owner_capacity_fte_after": null,
+          "exception_documented_pct": null,
+          "automation_pct": null,
+          "training_days_required": null,
+          "replacement_cost_usd": null
         }
       ],
+      "knowledge_coverage": [],
       "pressures_triggered": [
         {
           "pressure_id": "pr_cloud_growth",
@@ -2199,7 +2227,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_31",
     "run_id": "run_sample",
     "sequence": 31,
@@ -2396,13 +2424,20 @@
           ],
           "min_qualified_owners": 1,
           "backup_count_after": 0,
-          "documented_pct": 30.0,
+          "documented_pct": 0.3,
           "stranded": false,
           "reasons": [
             "One qualified owner remains and has no backup."
-          ]
+          ],
+          "owner_capacity_fte_before": null,
+          "owner_capacity_fte_after": null,
+          "exception_documented_pct": null,
+          "automation_pct": null,
+          "training_days_required": null,
+          "replacement_cost_usd": null
         }
       ],
+      "knowledge_coverage": [],
       "pressures_triggered": [
         {
           "pressure_id": "pr_cloud_growth",
@@ -2448,7 +2483,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_32",
     "run_id": "run_sample",
     "sequence": 32,
@@ -2719,13 +2754,20 @@
           ],
           "min_qualified_owners": 1,
           "backup_count_after": 0,
-          "documented_pct": 30.0,
+          "documented_pct": 0.3,
           "stranded": false,
           "reasons": [
             "One qualified owner remains and has no backup."
-          ]
+          ],
+          "owner_capacity_fte_before": null,
+          "owner_capacity_fte_after": null,
+          "exception_documented_pct": null,
+          "automation_pct": null,
+          "training_days_required": null,
+          "replacement_cost_usd": null
         }
       ],
+      "knowledge_coverage": [],
       "pressures_triggered": [
         {
           "pressure_id": "pr_cloud_growth",
@@ -2771,7 +2813,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_33",
     "run_id": "run_sample",
     "sequence": 33,
@@ -2786,7 +2828,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_34",
     "run_id": "run_sample",
     "sequence": 34,
@@ -2894,7 +2936,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_35",
     "run_id": "run_sample",
     "sequence": 35,
@@ -3065,7 +3107,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_36",
     "run_id": "run_sample",
     "sequence": 36,
@@ -3226,7 +3268,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_37",
     "run_id": "run_sample",
     "sequence": 37,
@@ -3241,7 +3283,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_38",
     "run_id": "run_sample",
     "sequence": 38,
@@ -3251,7 +3293,7 @@
     "future": null,
     "timestamp": "2026-09-26T17:00:38Z",
     "payload": {
-      "schema_version": "2.1.0",
+      "schema_version": "2.1.1",
       "package_id": "pkg_run_sample",
       "run_id": "run_sample",
       "decision_id": "dec_cut_2m",
@@ -3262,10 +3304,14 @@
         "model_id": "stub",
         "engine_version": "stub",
         "created_at": "2026-09-26T17:00:00Z",
-        "as_of_date": "2026-09-26"
+        "as_of_date": "2026-09-26",
+        "data_snapshot_id": null,
+        "policy_version": null,
+        "coefficient_version": null,
+        "created_by": null
       },
       "brief": {
-        "schema_version": "2.1.0",
+        "schema_version": "2.1.1",
         "decision_id": "dec_cut_2m",
         "decision_type": "cost_reduction",
         "title": "Cut $2M in annual cost",
@@ -3787,13 +3833,20 @@
                 ],
                 "min_qualified_owners": 1,
                 "backup_count_after": 0,
-                "documented_pct": 30.0,
+                "documented_pct": 0.3,
                 "stranded": false,
                 "reasons": [
                   "One qualified owner remains and has no backup."
-                ]
+                ],
+                "owner_capacity_fte_before": null,
+                "owner_capacity_fte_after": null,
+                "exception_documented_pct": null,
+                "automation_pct": null,
+                "training_days_required": null,
+                "replacement_cost_usd": null
               }
             ],
+            "knowledge_coverage": [],
             "pressures_triggered": [
               {
                 "pressure_id": "pr_cloud_growth",
@@ -4110,13 +4163,20 @@
                 ],
                 "min_qualified_owners": 1,
                 "backup_count_after": 0,
-                "documented_pct": 30.0,
+                "documented_pct": 0.3,
                 "stranded": false,
                 "reasons": [
                   "One qualified owner remains and has no backup."
-                ]
+                ],
+                "owner_capacity_fte_before": null,
+                "owner_capacity_fte_after": null,
+                "exception_documented_pct": null,
+                "automation_pct": null,
+                "training_days_required": null,
+                "replacement_cost_usd": null
               }
             ],
+            "knowledge_coverage": [],
             "pressures_triggered": [
               {
                 "pressure_id": "pr_cloud_growth",
@@ -4536,6 +4596,7 @@
         }
       ],
       "mitigations": [],
+      "vendor_overlaps": [],
       "counterfactuals": [],
       "missing_information": [],
       "implementation": [],
@@ -4552,7 +4613,7 @@
     }
   },
   {
-    "schema_version": "2.1.0",
+    "schema_version": "2.1.1",
     "event_id": "evt_run_sample_39",
     "run_id": "run_sample",
     "sequence": 39,
