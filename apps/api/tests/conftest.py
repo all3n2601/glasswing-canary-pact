@@ -9,6 +9,7 @@ os.environ["CANARY_RUNS_DIR"] = tempfile.mkdtemp(prefix="canary_runs_")
 os.environ["CANARY_REPLAY_STEP_SECONDS"] = "0.01"
 os.environ["CANARY_LLM_CACHE_DIR"] = tempfile.mkdtemp(prefix="canary_llm_cache_")
 os.environ.pop("ENGINE_IMPL", None)
+os.environ.pop("TWIN_IMPL", None)
 # The default suite always runs on the file backend, whatever the shell exports.
 os.environ.pop("DATABASE_URL", None)
 

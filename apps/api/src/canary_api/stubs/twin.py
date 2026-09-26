@@ -1,6 +1,8 @@
 """Stub Northstar twin and briefs. Every ID comes from the team ID registry; the numbers are fixed stub values."""
 
+import logging
 from datetime import date, datetime, timezone
+from typing import Callable
 
 from contracts_py.decision import Constraint, DecisionBrief, Goal, Intervention
 from contracts_py.enums import (
@@ -38,6 +40,8 @@ from contracts_py.twin import (
     Twin,
     VersionInfo,
 )
+
+log = logging.getLogger(__name__)
 
 STUB_TIME = datetime(2026, 9, 26, 17, 0, tzinfo=timezone.utc)
 TWIN_VERSION = "stub-northstar-1"
@@ -442,7 +446,7 @@ def _remove(intervention_id: str, target: str, action: ActionType, one_time_cost
                         start_day=30, one_time_cost_usd=one_time_cost, rationale=rationale)
 
 
-def sample_brief() -> DecisionBrief:
+def fallback_vendor_brief() -> DecisionBrief:
     return DecisionBrief(
         decision_id=VENDOR_DECISION,
         decision_type=DecisionType.vendor_consolidation,
@@ -484,7 +488,7 @@ WORKFORCE_ONE_TIME_COSTS = {
 }
 
 
-def workforce_brief() -> DecisionBrief:
+def fallback_workforce_brief() -> DecisionBrief:
     return DecisionBrief(
         decision_id=WORKFORCE_DECISION,
         decision_type=DecisionType.restructure,
@@ -512,3 +516,21 @@ def workforce_brief() -> DecisionBrief:
         mc_samples=1000,
         created_by="demo_user",
     )
+
+
+def _load_brief(filename: str, fallback: Callable[[], DecisionBrief]) -> DecisionBrief:
+    from canary_api.paths import DATA_DIR
+
+    path = DATA_DIR / filename
+    if not path.is_file():
+        log.warning("%s not found; using the built-in %s brief", path, fallback().decision_id)
+        return fallback()
+    return DecisionBrief.model_validate_json(path.read_text())
+
+
+def sample_brief() -> DecisionBrief:
+    return _load_brief("vendor_scenario.json", fallback_vendor_brief)
+
+
+def workforce_brief() -> DecisionBrief:
+    return _load_brief("workforce_scenario.json", fallback_workforce_brief)

@@ -14,7 +14,7 @@ _twins: dict[str, Twin] = {}
 
 
 def twin() -> Twin:
-    impl = engine_port.engine_impl()
+    impl = engine_port.twin_impl()
     if impl not in _twins:
         snippets = DATA_DIR / "artifacts" / "snippets.json"
         _twins[impl] = engine_port.load_twin(

@@ -33,6 +33,24 @@
       "minimum": 0,
       "title": "Storage Write Failures",
       "type": "integer"
+    },
+    "engine_impl": {
+      "default": "stub",
+      "enum": [
+        "stub",
+        "real"
+      ],
+      "title": "Engine Impl",
+      "type": "string"
+    },
+    "twin_impl": {
+      "default": "stub",
+      "enum": [
+        "stub",
+        "real"
+      ],
+      "title": "Twin Impl",
+      "type": "string"
     }
   },
   "title": "HealthResponse",

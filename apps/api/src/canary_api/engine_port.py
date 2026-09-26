@@ -1,4 +1,4 @@
-"""The only module that reaches the engine and twin. ENGINE_IMPL=stub|real picks the implementation."""
+"""The only module that reaches the engine and twin. ENGINE_IMPL and TWIN_IMPL (stub|real) pick each side."""
 
 import importlib
 import os
@@ -28,25 +28,35 @@ class EngineNotReady(RuntimeError):
     pass
 
 
-def engine_impl() -> str:
-    impl = os.environ.get("ENGINE_IMPL", "stub")
+def _impl(variable: str, default: str) -> str:
+    impl = os.environ.get(variable) or default
     if impl not in ("stub", "real"):
-        raise EngineNotReady(f"ENGINE_IMPL must be 'stub' or 'real', got {impl!r}")
+        raise EngineNotReady(f"{variable} must be 'stub' or 'real', got {impl!r}")
     return impl
 
 
+def engine_impl() -> str:
+    return _impl("ENGINE_IMPL", "stub")
+
+
+def twin_impl() -> str:
+    # The twin follows the engine unless TWIN_IMPL says otherwise, so a real twin can run with the stub engine.
+    return _impl("TWIN_IMPL", engine_impl())
+
+
 def _resolve(module_name: str, name: str) -> Callable[..., Any]:
-    if engine_impl() == "stub":
+    variable, impl = ("TWIN_IMPL", twin_impl()) if module_name == TWIN_MODULE else ("ENGINE_IMPL", engine_impl())
+    if impl == "stub":
         from canary_api.stubs import engine as stub_engine
 
         return getattr(stub_engine, name)
     try:
         module = importlib.import_module(module_name)
     except ImportError as exc:
-        raise EngineNotReady(f"ENGINE_IMPL=real but {module_name} cannot be imported: {exc}") from exc
+        raise EngineNotReady(f"{variable}=real but {module_name} cannot be imported: {exc}") from exc
     function = getattr(module, name, None)
     if not callable(function):
-        raise EngineNotReady(f"ENGINE_IMPL=real but {module_name}.{name} does not exist yet")
+        raise EngineNotReady(f"{variable}=real but {module_name}.{name} does not exist yet")
     return function
 
 

@@ -18,6 +18,8 @@ class HealthResponse(Strict):
     schema_version: SchemaVersion = SCHEMA_VERSION
     storage: Literal["file", "postgres"] = "file"
     storage_write_failures: int = Field(default=0, ge=0)
+    engine_impl: Literal["stub", "real"] = "stub"
+    twin_impl: Literal["stub", "real"] = "stub"
 
 
 class DecisionCreated(Strict):

@@ -164,6 +164,16 @@
           "hard": false,
           "scope_entity_id": null,
           "description": "Prefer no stranded workflows"
+        },
+        {
+          "id": "c_coverage",
+          "metric": "critical_coverage_pct",
+          "operator": ">=",
+          "threshold": 100.0,
+          "unit": "percent",
+          "hard": true,
+          "scope_entity_id": null,
+          "description": "Every critical dataset keeps a provider"
         }
       ],
       "futures": [
@@ -3453,6 +3463,16 @@
             "hard": false,
             "scope_entity_id": null,
             "description": "Prefer no stranded workflows"
+          },
+          {
+            "id": "c_coverage",
+            "metric": "critical_coverage_pct",
+            "operator": ">=",
+            "threshold": 100.0,
+            "unit": "percent",
+            "hard": true,
+            "scope_entity_id": null,
+            "description": "Every critical dataset keeps a provider"
           }
         ],
         "futures": [

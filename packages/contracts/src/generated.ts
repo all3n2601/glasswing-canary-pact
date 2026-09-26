@@ -1642,6 +1642,8 @@ export interface HealthResponse {
   schema_version?: "2.1.0" | "2.1.1";
   storage?: "file" | "postgres";
   storage_write_failures?: number;
+  engine_impl?: "stub" | "real";
+  twin_impl?: "stub" | "real";
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
