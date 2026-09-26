@@ -4,12 +4,13 @@ import pytest
 from pydantic import ValidationError
 
 from contracts_py.agents import AgentOutput, ProposedDependency
+from contracts_py.api import OrganizationDepartmentSummary, OrganizationProfileView
 from contracts_py.decision import DecisionBrief, Intervention, Scenario
 from contracts_py.engine import ValueBreakdown
 from contracts_py.enums import Direction, Future, ImpactCategory, ImpactLevel, Polarity, Relation
 from contracts_py.events import Event, EventType, PhaseChanged
 from contracts_py.package import DecisionPackage, find_person_tokens
-from contracts_py.twin import Organization
+from contracts_py.twin import Organization, OrganizationSettings
 
 NOW = datetime(2026, 9, 26, 15, 0, tzinfo=timezone.utc)
 
@@ -266,3 +267,26 @@ def test_agent_enums_accept_any_casing() -> None:
 def test_strict_models_keep_exact_enums() -> None:
     with pytest.raises(ValidationError):
         Intervention(id="i_x", kind="ACTION", type="remove_vendor", target_entity_id="vendor_auditlog", rationale="x")
+
+
+def test_organization_profile_view(organization: Organization) -> None:
+    department = {
+        "department_id": "dept_operations",
+        "name": "Operations",
+        "mission": "Keep critical business workflows reliable.",
+        "actual_fte": 58,
+        "annual_budget_usd": 4_100_000,
+        "utilisation": 1.12,
+        "maturity_level": 3,
+        "enabled": True,
+    }
+    view = OrganizationProfileView(
+        organization=organization,
+        departments=[OrganizationDepartmentSummary.model_validate(department)],
+        settings=OrganizationSettings(organization_id=organization.id),
+    )
+    assert view.schema_version == "2.1.0"
+    with pytest.raises(ValidationError):
+        OrganizationDepartmentSummary.model_validate({**department, "maturity_level": 6})
+    with pytest.raises(ValidationError):
+        OrganizationDepartmentSummary.model_validate({**department, "head": "x"})

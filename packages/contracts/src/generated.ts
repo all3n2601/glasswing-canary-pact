@@ -322,6 +322,7 @@ export interface CanaryContracts {
   OptimizeRequest: OptimizeRequest;
   ReplayInfo: ReplayInfo;
   ReplayStarted: ReplayStarted;
+  OrganizationProfileView: OrganizationProfileView;
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
@@ -1604,4 +1605,28 @@ export interface ReplayStarted {
   run_id: string;
   name: string;
   speed: 1 | 2 | 4;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "OrganizationProfileView".
+ */
+export interface OrganizationProfileView {
+  schema_version?: "2.1.0";
+  organization: Organization;
+  departments: OrganizationDepartmentSummary[];
+  settings: OrganizationSettings;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "OrganizationDepartmentSummary".
+ */
+export interface OrganizationDepartmentSummary {
+  department_id: string;
+  name: string;
+  mission: string;
+  actual_fte: number;
+  annual_budget_usd: number;
+  utilisation: number;
+  maturity_level: number;
+  enabled: boolean;
 }
