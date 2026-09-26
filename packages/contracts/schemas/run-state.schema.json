@@ -1,0 +1,141 @@
+{
+  "$defs": {
+    "RunStatus": {
+      "enum": [
+        "created",
+        "validating",
+        "building_futures",
+        "running_agents",
+        "propagating",
+        "challenging",
+        "optimizing",
+        "comparing_futures",
+        "mitigating",
+        "generating_package",
+        "awaiting_approval",
+        "completed",
+        "failed"
+      ],
+      "title": "RunStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "2.1.0",
+      "default": "2.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "run_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "decision_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Decision Id",
+      "type": "string"
+    },
+    "baseline_twin_version": {
+      "title": "Baseline Twin Version",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/RunStatus"
+    },
+    "scenario_ids": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Scenario Ids",
+      "type": "array"
+    },
+    "candidate_plan_ids": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Candidate Plan Ids",
+      "type": "array"
+    },
+    "assessment_ids": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Assessment Ids",
+      "type": "array"
+    },
+    "result_ids": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Result Ids",
+      "type": "array"
+    },
+    "comparison_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Comparison Id"
+    },
+    "package_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Package Id"
+    },
+    "last_sequence": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Last Sequence",
+      "type": "integer"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "run_id",
+    "decision_id",
+    "baseline_twin_version",
+    "status",
+    "created_at",
+    "updated_at"
+  ],
+  "title": "RunState",
+  "type": "object"
+}

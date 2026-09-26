@@ -1,0 +1,185 @@
+{
+  "$defs": {
+    "Finding": {
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "entity_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Entity Ids",
+          "type": "array"
+        },
+        "severity": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Severity",
+          "type": "integer"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "severity"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "Objection": {
+      "properties": {
+        "target_ref": {
+          "title": "Target Ref",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "severity": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Severity",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "target_ref",
+        "text",
+        "severity"
+      ],
+      "title": "Objection",
+      "type": "object"
+    },
+    "ProposedDependency": {
+      "properties": {
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        },
+        "relation": {
+          "$ref": "#/$defs/Relation"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "confidence": {
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "source",
+        "target",
+        "relation",
+        "rationale",
+        "confidence"
+      ],
+      "title": "ProposedDependency",
+      "type": "object"
+    },
+    "Relation": {
+      "enum": [
+        "OWNS",
+        "BACKS_UP",
+        "KNOWS",
+        "MAINTAINS",
+        "RUNS",
+        "PROVIDES",
+        "CONSUMES",
+        "DEPENDS_ON",
+        "SUPPORTS",
+        "FUNDS",
+        "CONTROLS",
+        "CONTRIBUTES_TO",
+        "SUBSTITUTES_FOR",
+        "FLOWS_TO"
+      ],
+      "title": "Relation",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "missing_agents": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Missing Agents",
+      "type": "array"
+    },
+    "unsupported_assumptions": {
+      "items": {
+        "$ref": "#/$defs/Finding"
+      },
+      "title": "Unsupported Assumptions",
+      "type": "array"
+    },
+    "circular_logic": {
+      "items": {
+        "$ref": "#/$defs/Finding"
+      },
+      "title": "Circular Logic",
+      "type": "array"
+    },
+    "overlooked_combinations": {
+      "items": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "title": "Overlooked Combinations",
+      "type": "array"
+    },
+    "missed_dependencies": {
+      "items": {
+        "$ref": "#/$defs/ProposedDependency"
+      },
+      "title": "Missed Dependencies",
+      "type": "array"
+    },
+    "inaction_underestimated": {
+      "items": {
+        "$ref": "#/$defs/Finding"
+      },
+      "title": "Inaction Underestimated",
+      "type": "array"
+    },
+    "objections": {
+      "items": {
+        "$ref": "#/$defs/Objection"
+      },
+      "title": "Objections",
+      "type": "array"
+    },
+    "confidence": {
+      "title": "Confidence",
+      "type": "number"
+    }
+  },
+  "required": [
+    "confidence"
+  ],
+  "title": "ChallengerOutput",
+  "type": "object"
+}

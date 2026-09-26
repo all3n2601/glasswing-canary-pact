@@ -1,0 +1,268 @@
+{
+  "$defs": {
+    "ActionType": {
+      "enum": [
+        "remove_vendor",
+        "reduce_capacity",
+        "add_capacity",
+        "remove_roles",
+        "stop_project",
+        "start_project",
+        "delay_project",
+        "invest"
+      ],
+      "title": "ActionType",
+      "type": "string"
+    },
+    "MitigationType": {
+      "enum": [
+        "reassign_owner",
+        "document_runbook",
+        "reassign_on_call",
+        "add_replacement_feed",
+        "resequence_project",
+        "retain_capacity_temporarily"
+      ],
+      "title": "MitigationType",
+      "type": "string"
+    },
+    "NeutraliserRef": {
+      "additionalProperties": false,
+      "properties": {
+        "intervention_type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ActionType"
+            },
+            {
+              "$ref": "#/$defs/MitigationType"
+            }
+          ],
+          "title": "Intervention Type"
+        },
+        "target_entity_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Target Entity Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "intervention_type",
+        "target_entity_id"
+      ],
+      "title": "NeutraliserRef",
+      "type": "object"
+    },
+    "PressureKind": {
+      "enum": [
+        "cost_growth",
+        "renewal_step",
+        "hazard",
+        "kpi_drift",
+        "budget_ceiling",
+        "deadline"
+      ],
+      "title": "PressureKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "maxLength": 80,
+      "pattern": "^(?:pr_)[a-z0-9_]*$",
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "$ref": "#/$defs/PressureKind"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "target_entity_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Target Entity Id",
+      "type": "string"
+    },
+    "start_day": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Start Day",
+      "type": "integer"
+    },
+    "end_day": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "End Day"
+    },
+    "rate": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rate"
+    },
+    "rate_range": {
+      "anyOf": [
+        {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rate Range"
+    },
+    "step_pct": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Step Pct"
+    },
+    "monthly_probability": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Monthly Probability"
+    },
+    "probability_range": {
+      "anyOf": [
+        {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Probability Range"
+    },
+    "cost_per_event_usd": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cost Per Event Usd"
+    },
+    "capacity_sensitivity": {
+      "default": 0.0,
+      "minimum": 0,
+      "title": "Capacity Sensitivity",
+      "type": "number"
+    },
+    "threshold": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Threshold"
+    },
+    "consequence_cost_usd": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Consequence Cost Usd"
+    },
+    "neutralised_by": {
+      "items": {
+        "$ref": "#/$defs/NeutraliserRef"
+      },
+      "title": "Neutralised By",
+      "type": "array"
+    },
+    "evidence_refs": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Evidence Refs",
+      "type": "array"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "kind",
+    "name",
+    "target_entity_id",
+    "description"
+  ],
+  "title": "Pressure",
+  "type": "object"
+}

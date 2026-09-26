@@ -1,0 +1,69 @@
+{
+  "$defs": {
+    "EvidenceSource": {
+      "enum": [
+        "contract",
+        "workflow_map",
+        "system_ownership",
+        "kpi_definition",
+        "runbook",
+        "architecture_note",
+        "activity_log",
+        "knowledge_matrix",
+        "policy",
+        "incident",
+        "finance_forecast"
+      ],
+      "title": "EvidenceSource",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "maxLength": 80,
+      "pattern": "^(?:ev_)[a-z0-9_]*$",
+      "title": "Id",
+      "type": "string"
+    },
+    "source_type": {
+      "$ref": "#/$defs/EvidenceSource"
+    },
+    "document_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Document Id",
+      "type": "string"
+    },
+    "location": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Location"
+    },
+    "snippet": {
+      "maxLength": 300,
+      "title": "Snippet",
+      "type": "string"
+    },
+    "synthetic": {
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "id",
+    "source_type",
+    "document_id",
+    "snippet"
+  ],
+  "title": "Evidence",
+  "type": "object"
+}

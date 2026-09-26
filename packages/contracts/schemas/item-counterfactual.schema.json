@@ -1,0 +1,46 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "intervention_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Intervention Id",
+      "type": "string"
+    },
+    "contribution_usd": {
+      "title": "Contribution Usd",
+      "type": "integer"
+    },
+    "net_value_without_usd": {
+      "title": "Net Value Without Usd",
+      "type": "integer"
+    },
+    "goal_still_met": {
+      "title": "Goal Still Met",
+      "type": "boolean"
+    },
+    "verdict": {
+      "enum": [
+        "keep",
+        "drop",
+        "borderline"
+      ],
+      "title": "Verdict",
+      "type": "string"
+    },
+    "explanation": {
+      "title": "Explanation",
+      "type": "string"
+    }
+  },
+  "required": [
+    "intervention_id",
+    "contribution_usd",
+    "net_value_without_usd",
+    "goal_still_met",
+    "verdict",
+    "explanation"
+  ],
+  "title": "ItemCounterfactual",
+  "type": "object"
+}

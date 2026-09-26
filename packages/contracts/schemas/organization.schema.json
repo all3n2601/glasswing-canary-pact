@@ -1,0 +1,206 @@
+{
+  "$defs": {
+    "BusinessModel": {
+      "enum": [
+        "b2b",
+        "b2c",
+        "b2b2c",
+        "marketplace",
+        "public_service",
+        "mixed"
+      ],
+      "title": "BusinessModel",
+      "type": "string"
+    },
+    "Sector": {
+      "enum": [
+        "technology_saas",
+        "financial_services",
+        "banking",
+        "insurance",
+        "healthcare",
+        "pharma_life_sciences",
+        "manufacturing",
+        "retail_ecommerce",
+        "telecom",
+        "energy_utilities",
+        "logistics_transport",
+        "media_entertainment",
+        "professional_services",
+        "education",
+        "public_sector",
+        "nonprofit",
+        "other"
+      ],
+      "title": "Sector",
+      "type": "string"
+    },
+    "SizeBand": {
+      "enum": [
+        "startup",
+        "smb",
+        "mid_market",
+        "enterprise",
+        "large_enterprise"
+      ],
+      "title": "SizeBand",
+      "type": "string"
+    },
+    "StrategicPriority": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "rank": {
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "kpi_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Kpi Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "rank"
+      ],
+      "title": "StrategicPriority",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "maxLength": 80,
+      "pattern": "^(?:org_)[a-z0-9_]*$",
+      "title": "Id",
+      "type": "string"
+    },
+    "legal_name": {
+      "title": "Legal Name",
+      "type": "string"
+    },
+    "display_name": {
+      "title": "Display Name",
+      "type": "string"
+    },
+    "sector": {
+      "$ref": "#/$defs/Sector"
+    },
+    "sub_sector": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sub Sector"
+    },
+    "secondary_sectors": {
+      "items": {
+        "$ref": "#/$defs/Sector"
+      },
+      "title": "Secondary Sectors",
+      "type": "array"
+    },
+    "business_model": {
+      "$ref": "#/$defs/BusinessModel"
+    },
+    "size_band": {
+      "$ref": "#/$defs/SizeBand"
+    },
+    "headquarters_country": {
+      "title": "Headquarters Country",
+      "type": "string"
+    },
+    "operating_regions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Operating Regions",
+      "type": "array"
+    },
+    "annual_revenue_usd": {
+      "minimum": 0,
+      "title": "Annual Revenue Usd",
+      "type": "integer"
+    },
+    "total_annual_budget_usd": {
+      "minimum": 0,
+      "title": "Total Annual Budget Usd",
+      "type": "integer"
+    },
+    "total_headcount_fte": {
+      "minimum": 0,
+      "title": "Total Headcount Fte",
+      "type": "number"
+    },
+    "fiscal_year_start_month": {
+      "maximum": 12,
+      "minimum": 1,
+      "title": "Fiscal Year Start Month",
+      "type": "integer"
+    },
+    "regulatory_frameworks": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Regulatory Frameworks",
+      "type": "array"
+    },
+    "strategic_priorities": {
+      "items": {
+        "$ref": "#/$defs/StrategicPriority"
+      },
+      "title": "Strategic Priorities",
+      "type": "array"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "evidence_refs": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Evidence Refs",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "legal_name",
+    "display_name",
+    "sector",
+    "business_model",
+    "size_band",
+    "headquarters_country",
+    "annual_revenue_usd",
+    "total_annual_budget_usd",
+    "total_headcount_fte",
+    "fiscal_year_start_month",
+    "description"
+  ],
+  "title": "Organization",
+  "type": "object"
+}

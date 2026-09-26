@@ -3,14 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "exports": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./generated": "./src/generated.ts"
+  },
   "scripts": {
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "node -e \"console.log('Contract schemas are validated by API tests')\""
   },
   "devDependencies": {
+    "json-schema-to-typescript": "^16.0.0",
     "typescript": "^5.9.0"
   }
 }
-
