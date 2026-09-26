@@ -27,11 +27,12 @@ from contracts_py.api import (
     ReplayStarted,
     UserPublic,
 )
+from contracts_py.agents import AgentAssessment
 from contracts_py.decision import CandidatePlan, DecisionBrief
 from contracts_py.engine import FutureComparison, PortfolioComparison, SimulationResult
 from contracts_py.enums import DocumentStatus, DocumentType, EntityType, RunStatus
 from contracts_py.events import EventType, PhaseChanged, RunState
-from contracts_py.package import DecisionPackage, HumanDecision
+from contracts_py.package import DecisionPackage, HumanDecision, find_person_tokens
 from contracts_py.twin import (
     DepartmentDetail,
     DepartmentProfile,
@@ -216,6 +217,23 @@ def draft_decision(request: DecisionPromptRequest,
 @app.get("/runs/{run_id}", response_model=RunState)
 def run_state(run_id: str) -> RunState:
     return _run(run_id).state
+
+
+PERSPECTIVE_EVENTS = (EventType.agent_completed, EventType.challenge_raised)
+
+
+@app.get("/runs/{run_id}/perspectives", response_model=list[AgentAssessment])
+def run_perspectives(run_id: str) -> list[AgentAssessment]:
+    events = sorted(_run(run_id).events, key=lambda e: e.sequence)
+    # The challenger's assessment is published as agent_completed and again as challenge_raised; keep the first.
+    by_id: dict[str, AgentAssessment] = {}
+    for event in events:
+        if event.type in PERSPECTIVE_EVENTS and isinstance(event.payload, AgentAssessment):
+            by_id.setdefault(event.payload.assessment_id, event.payload)
+    assessments = list(by_id.values())
+    if find_person_tokens([a.model_dump(mode="json") for a in assessments]):
+        raise HTTPException(status_code=500, detail="Perspectives withheld: person tokens found in agent output")
+    return assessments
 
 
 @app.websocket("/runs/{run_id}/events")
