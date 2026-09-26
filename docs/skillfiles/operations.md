@@ -5,7 +5,7 @@ Calm, precise; "here's what breaks, and when." **Decision 1 (reduce Platform Ops
 **Blast dimensions.** Ownership, Technical, Operational, Financial.
 
 ## Owns (twin ids)
-- `dept_operations`; roles `role_billing_ops_lead`, `role_sre`, `role_platform_eng`, `role_support_lead`, `role_onboarding`
+- `dept_operations`; roles `role_billing_ops_lead`, `role_sre`, `role_platform_eng`
 - systems `sys_billing_platform`, `sys_invoicing`, `sys_cloud_platform`, `sys_sso_gateway`, `sys_warehouse_legacy`
 - workflows `wf_billing_recon`, `wf_invoicing`, `wf_incident_mgmt`
 - knowledge `kn_billing_exception`, `kn_oncall` (owned by `role_billing_ops_lead` and `role_sre`)
