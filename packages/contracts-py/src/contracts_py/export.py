@@ -63,6 +63,7 @@ TOP_LEVEL: list[type[BaseModel]] = [
     api.OptimizeRequest,
     api.ReplayInfo,
     api.ReplayStarted,
+    api.OrganizationProfileView,
 ]
 
 
