@@ -1,0 +1,4569 @@
+[
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_1",
+    "run_id": "run_sample",
+    "sequence": 1,
+    "type": "run_created",
+    "actor": "api",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:01Z",
+    "payload": {
+      "schema_version": "2.1.0",
+      "decision_id": "dec_cut_2m",
+      "decision_type": "cost_reduction",
+      "title": "Cut $2M in annual cost",
+      "statement": "Find at least $2M of gross annual savings without breaking compliance or critical systems.",
+      "goal": {
+        "metric": "annual_savings_usd",
+        "target": 2000000.0,
+        "unit": "usd",
+        "basis": "gross",
+        "direction": "at_least"
+      },
+      "horizon_days": 365,
+      "candidate_interventions": [
+        {
+          "id": "i_platform_ops",
+          "kind": "action",
+          "type": "reduce_capacity",
+          "target_entity_id": "dept_operations",
+          "amount_pct": 20.0,
+          "amount_usd": null,
+          "start_day": 0,
+          "duration_days": null,
+          "one_time_cost_usd": 60000,
+          "new_owner_id": null,
+          "params": {
+            "scope": "platform_ops"
+          },
+          "rationale": "Platform operations is over sanctioned headcount."
+        },
+        {
+          "id": "i_auditlog",
+          "kind": "action",
+          "type": "remove_vendor",
+          "target_entity_id": "vendor_auditlog",
+          "amount_pct": null,
+          "amount_usd": null,
+          "start_day": 30,
+          "duration_days": null,
+          "one_time_cost_usd": 0,
+          "new_owner_id": null,
+          "params": {},
+          "rationale": "Audit log vendor overlaps with in-house logging."
+        },
+        {
+          "id": "i_migration",
+          "kind": "action",
+          "type": "stop_project",
+          "target_entity_id": "proj_warehouse_migration",
+          "amount_pct": null,
+          "amount_usd": null,
+          "start_day": 0,
+          "duration_days": null,
+          "one_time_cost_usd": 40000,
+          "new_owner_id": null,
+          "params": {},
+          "rationale": "Warehouse migration is behind schedule."
+        },
+        {
+          "id": "i_eng",
+          "kind": "action",
+          "type": "reduce_capacity",
+          "target_entity_id": "dept_engineering",
+          "amount_pct": 10.0,
+          "amount_usd": null,
+          "start_day": 0,
+          "duration_days": null,
+          "one_time_cost_usd": 120000,
+          "new_owner_id": null,
+          "params": {},
+          "rationale": "Engineering capacity trimmed to match roadmap."
+        }
+      ],
+      "protected_entity_ids": [
+        "ctl_soc2_audit_logging"
+      ],
+      "constraints": [
+        {
+          "id": "c_compliance",
+          "metric": "compliance_controls_broken",
+          "operator": "==",
+          "threshold": 0.0,
+          "unit": "count",
+          "hard": true,
+          "scope_entity_id": null,
+          "description": "compliance_controls_broken == 0"
+        },
+        {
+          "id": "c_critical",
+          "metric": "critical_systems_degraded",
+          "operator": "==",
+          "threshold": 0.0,
+          "unit": "count",
+          "hard": true,
+          "scope_entity_id": null,
+          "description": "critical_systems_degraded == 0"
+        },
+        {
+          "id": "c_revenue",
+          "metric": "revenue_impact_pct",
+          "operator": "<=",
+          "threshold": 3.0,
+          "unit": "pct",
+          "hard": true,
+          "scope_entity_id": null,
+          "description": "revenue_impact_pct <= 3"
+        },
+        {
+          "id": "c_stranded",
+          "metric": "stranded_workflows",
+          "operator": "==",
+          "threshold": 0.0,
+          "unit": "count",
+          "hard": false,
+          "scope_entity_id": null,
+          "description": "stranded_workflows == 0"
+        }
+      ],
+      "futures": [
+        "act_now",
+        "inaction",
+        "delay"
+      ],
+      "delay_days": 90,
+      "active_pressure_ids": [
+        "pr_cloud_growth",
+        "pr_auditlog_renewal",
+        "pr_billing_recon_hazard"
+      ],
+      "seed": 42,
+      "mc_samples": 1000,
+      "created_by": "demo_user"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_2",
+    "run_id": "run_sample",
+    "sequence": 2,
+    "type": "phase_changed",
+    "actor": "orchestrator",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:02Z",
+    "payload": {
+      "from_status": "created",
+      "to_status": "validating"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_3",
+    "run_id": "run_sample",
+    "sequence": 3,
+    "type": "phase_changed",
+    "actor": "orchestrator",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:03Z",
+    "payload": {
+      "from_status": "validating",
+      "to_status": "building_futures"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_4",
+    "run_id": "run_sample",
+    "sequence": 4,
+    "type": "scenario_created",
+    "actor": "orchestrator",
+    "scenario_id": "scn_run_sample_inaction_none",
+    "future": "inaction",
+    "timestamp": "2026-09-26T17:00:04Z",
+    "payload": {
+      "scenario_id": "scn_run_sample_inaction_none",
+      "run_id": "run_sample",
+      "future": "inaction",
+      "plan_id": null,
+      "delay_days": 0,
+      "baseline_twin_version": "stub-twin-1",
+      "created_at": "2026-09-26T17:00:00Z"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_5",
+    "run_id": "run_sample",
+    "sequence": 5,
+    "type": "pressure_activated",
+    "actor": "engine",
+    "scenario_id": "scn_run_sample_inaction_none",
+    "future": "inaction",
+    "timestamp": "2026-09-26T17:00:05Z",
+    "payload": {
+      "pressure_id": "pr_cloud_growth",
+      "future": "inaction",
+      "expected_cost_usd": 64000
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_6",
+    "run_id": "run_sample",
+    "sequence": 6,
+    "type": "pressure_activated",
+    "actor": "engine",
+    "scenario_id": "scn_run_sample_inaction_none",
+    "future": "inaction",
+    "timestamp": "2026-09-26T17:00:06Z",
+    "payload": {
+      "pressure_id": "pr_auditlog_renewal",
+      "future": "inaction",
+      "expected_cost_usd": 36000
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_7",
+    "run_id": "run_sample",
+    "sequence": 7,
+    "type": "pressure_activated",
+    "actor": "engine",
+    "scenario_id": "scn_run_sample_inaction_none",
+    "future": "inaction",
+    "timestamp": "2026-09-26T17:00:07Z",
+    "payload": {
+      "pressure_id": "pr_billing_recon_hazard",
+      "future": "inaction",
+      "expected_cost_usd": 192000
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_8",
+    "run_id": "run_sample",
+    "sequence": 8,
+    "type": "phase_changed",
+    "actor": "orchestrator",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:08Z",
+    "payload": {
+      "from_status": "building_futures",
+      "to_status": "optimizing"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_9",
+    "run_id": "run_sample",
+    "sequence": 9,
+    "type": "candidate_generated",
+    "actor": "engine",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:09Z",
+    "payload": {
+      "plan_id": "plan_naive",
+      "label": "All four cuts",
+      "intervention_ids": [
+        "i_platform_ops",
+        "i_auditlog",
+        "i_migration",
+        "i_eng"
+      ],
+      "source": "naive",
+      "parent_plan_id": null
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_10",
+    "run_id": "run_sample",
+    "sequence": 10,
+    "type": "candidate_rejected",
+    "actor": "engine",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:10Z",
+    "payload": {
+      "plan_id": "plan_naive",
+      "reasons": [
+        "Removing vendor_auditlog breaks the protected control ctl_soc2_audit_logging."
+      ]
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_11",
+    "run_id": "run_sample",
+    "sequence": 11,
+    "type": "candidate_generated",
+    "actor": "engine",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:11Z",
+    "payload": {
+      "plan_id": "plan_recommended",
+      "label": "Keep the audit log vendor",
+      "intervention_ids": [
+        "i_platform_ops",
+        "i_migration",
+        "i_eng"
+      ],
+      "source": "optimizer",
+      "parent_plan_id": null
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_12",
+    "run_id": "run_sample",
+    "sequence": 12,
+    "type": "portfolio_ranked",
+    "actor": "engine",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:12Z",
+    "payload": {
+      "evaluated_count": 15,
+      "naive": {
+        "plan_id": "plan_naive",
+        "intervention_ids": [
+          "i_platform_ops",
+          "i_auditlog",
+          "i_migration",
+          "i_eng"
+        ],
+        "rank": null,
+        "result": {
+          "result_id": "res_run_sample_act_now_plan_naive",
+          "run_id": "run_sample",
+          "scenario_id": "scn_run_sample_act_now_plan_naive",
+          "future": "act_now",
+          "plan_id": "plan_naive",
+          "mode": "full",
+          "seed": 42,
+          "intervention_ids": [
+            "i_platform_ops",
+            "i_auditlog",
+            "i_migration",
+            "i_eng"
+          ],
+          "value": {
+            "gross_savings_usd": 2480000,
+            "transition_cost_usd": 220000,
+            "added_cost_usd": 0,
+            "rebound_cost_usd": 90000,
+            "expected_business_loss_usd": 120000,
+            "pressure_cost_usd": 374000,
+            "avoided_failure_cost_usd": 0,
+            "net_value_usd": 1676000,
+            "monthly_net_usd": [
+              -220000,
+              -80000,
+              60000,
+              200000,
+              340000,
+              480000,
+              640000,
+              850000,
+              1060000,
+              1270000,
+              1470000,
+              1676000
+            ],
+            "p10_net_value_usd": null,
+            "p50_net_value_usd": null,
+            "p90_net_value_usd": null
+          },
+          "goal_met": true,
+          "constraint_results": [
+            {
+              "constraint_id": "c_compliance",
+              "metric": "compliance_controls_broken",
+              "operator": "==",
+              "threshold": 0.0,
+              "value": 1.0,
+              "hard": true,
+              "passed": false,
+              "explanation": "Removing vendor_auditlog breaks ctl_soc2_audit_logging.",
+              "impact_ids": []
+            },
+            {
+              "constraint_id": "c_critical",
+              "metric": "critical_systems_degraded",
+              "operator": "==",
+              "threshold": 0.0,
+              "value": 0.0,
+              "hard": true,
+              "passed": true,
+              "explanation": "No critical system loses its owner.",
+              "impact_ids": []
+            },
+            {
+              "constraint_id": "c_revenue",
+              "metric": "revenue_impact_pct",
+              "operator": "<=",
+              "threshold": 3.0,
+              "value": 0.4,
+              "hard": true,
+              "passed": true,
+              "explanation": "Revenue impact stays under 3 percent.",
+              "impact_ids": []
+            },
+            {
+              "constraint_id": "c_stranded",
+              "metric": "stranded_workflows",
+              "operator": "==",
+              "threshold": 0.0,
+              "value": 0.0,
+              "hard": false,
+              "passed": true,
+              "explanation": "Billing reconciliation keeps one qualified owner.",
+              "impact_ids": []
+            }
+          ],
+          "impacts": [
+            {
+              "impact_id": "imp_act_now_plan_naive_ops_capacity",
+              "decision_id": "dec_cut_2m",
+              "scenario_id": "scn_run_sample_act_now_plan_naive",
+              "source_entity": "dept_operations",
+              "source_kind": "intervention",
+              "source_ref": "i_platform_ops",
+              "affected_entity": "dept_operations",
+              "affected_department": "dept_operations",
+              "level": "direct",
+              "category": "operational",
+              "polarity": "harm",
+              "direction": "decrease",
+              "metric": "capacity_fte",
+              "magnitude": 11.6,
+              "unit": "fte",
+              "value_usd": null,
+              "severity": 3,
+              "first_effect_day": 0,
+              "peak_effect_day": 30,
+              "confidence": 0.8,
+              "dependency_path": [],
+              "edge_path": [],
+              "evidence_refs": [],
+              "assumptions": [],
+              "constraint_refs": [],
+              "origin": "engine",
+              "status": "computed"
+            },
+            {
+              "impact_id": "imp_act_now_plan_naive_billing_recon",
+              "decision_id": "dec_cut_2m",
+              "scenario_id": "scn_run_sample_act_now_plan_naive",
+              "source_entity": "dept_operations",
+              "source_kind": "intervention",
+              "source_ref": "i_platform_ops",
+              "affected_entity": "wf_billing_recon",
+              "affected_department": "dept_operations",
+              "level": "dependent",
+              "category": "ownership",
+              "polarity": "harm",
+              "direction": "increase",
+              "metric": "failure_probability_monthly",
+              "magnitude": 0.03,
+              "unit": "ratio",
+              "value_usd": 120000,
+              "severity": 4,
+              "first_effect_day": 30,
+              "peak_effect_day": 120,
+              "confidence": 0.8,
+              "dependency_path": [
+                "role_billing_ops_lead",
+                "wf_billing_recon"
+              ],
+              "edge_path": [
+                "e_role_owns_billing_recon"
+              ],
+              "evidence_refs": [
+                "ev_billing_recon_matrix"
+              ],
+              "assumptions": [],
+              "constraint_refs": [
+                "c_stranded"
+              ],
+              "origin": "engine",
+              "status": "computed"
+            },
+            {
+              "impact_id": "imp_act_now_plan_naive_company_value",
+              "decision_id": "dec_cut_2m",
+              "scenario_id": "scn_run_sample_act_now_plan_naive",
+              "source_entity": "wf_billing_recon",
+              "source_kind": "intervention",
+              "source_ref": "i_platform_ops",
+              "affected_entity": "kpi_company",
+              "affected_department": null,
+              "level": "second_order",
+              "category": "business",
+              "polarity": "harm",
+              "direction": "decrease",
+              "metric": "net_value_usd",
+              "magnitude": 120000.0,
+              "unit": "usd",
+              "value_usd": 120000,
+              "severity": 3,
+              "first_effect_day": 60,
+              "peak_effect_day": 150,
+              "confidence": 0.8,
+              "dependency_path": [
+                "wf_billing_recon",
+                "kpi_company"
+              ],
+              "edge_path": [
+                "e_billing_recon_kpi"
+              ],
+              "evidence_refs": [
+                "ev_billing_recon_matrix"
+              ],
+              "assumptions": [],
+              "constraint_refs": [],
+              "origin": "engine",
+              "status": "computed"
+            },
+            {
+              "impact_id": "imp_act_now_plan_naive_eng_cost",
+              "decision_id": "dec_cut_2m",
+              "scenario_id": "scn_run_sample_act_now_plan_naive",
+              "source_entity": "dept_engineering",
+              "source_kind": "intervention",
+              "source_ref": "i_eng",
+              "affected_entity": "dept_engineering",
+              "affected_department": "dept_engineering",
+              "level": "direct",
+              "category": "financial",
+              "polarity": "benefit",
+              "direction": "decrease",
+              "metric": "annual_cost_usd",
+              "magnitude": 620000.0,
+              "unit": "usd",
+              "value_usd": 620000,
+              "severity": 2,
+              "first_effect_day": 0,
+              "peak_effect_day": 30,
+              "confidence": 0.8,
+              "dependency_path": [],
+              "edge_path": [],
+              "evidence_refs": [],
+              "assumptions": [],
+              "constraint_refs": [],
+              "origin": "engine",
+              "status": "computed"
+            },
+            {
+              "impact_id": "imp_act_now_plan_naive_migration",
+              "decision_id": "dec_cut_2m",
+              "scenario_id": "scn_run_sample_act_now_plan_naive",
+              "source_entity": "proj_warehouse_migration",
+              "source_kind": "intervention",
+              "source_ref": "i_migration",
+              "affected_entity": "proj_warehouse_migration",
+              "affected_department": "dept_engineering",
+              "level": "direct",
+              "category": "financial",
+              "polarity": "benefit",
+              "direction": "decrease",
+              "metric": "remaining_cost_usd",
+              "magnitude": 290000.0,
+              "unit": "usd",
+              "value_usd": 290000,
+              "severity": 2,
+              "first_effect_day": 0,
+              "peak_effect_day": 0,
+              "confidence": 0.8,
+              "dependency_path": [],
+              "edge_path": [],
+              "evidence_refs": [],
+              "assumptions": [],
+              "constraint_refs": [],
+              "origin": "engine",
+              "status": "computed"
+            }
+          ],
+          "workflow_coverage": [
+            {
+              "workflow_id": "wf_billing_recon",
+              "criticality": "critical",
+              "owners_before": [
+                "role_billing_ops_lead"
+              ],
+              "owners_after": [
+                "role_billing_ops_lead"
+              ],
+              "min_qualified_owners": 1,
+              "backup_count_after": 0,
+              "documented_pct": 30.0,
+              "stranded": false,
+              "reasons": [
+                "One qualified owner remains and has no backup."
+              ]
+            }
+          ],
+          "pressures_triggered": [
+            {
+              "pressure_id": "pr_cloud_growth",
+              "expected_events": 12.0,
+              "expected_cost_usd": 64000,
+              "neutralised": false
+            },
+            {
+              "pressure_id": "pr_auditlog_renewal",
+              "expected_events": 0.0,
+              "expected_cost_usd": 0,
+              "neutralised": true
+            },
+            {
+              "pressure_id": "pr_billing_recon_hazard",
+              "expected_events": 0.48,
+              "expected_cost_usd": 310000,
+              "neutralised": false
+            }
+          ],
+          "risk": {
+            "score": 71.0,
+            "level": "high",
+            "settings_version": 1,
+            "components": {
+              "financial": 9.0,
+              "capability_workflow": 14.0,
+              "customer_revenue": 6.0,
+              "compliance_control": 35.0,
+              "execution_uncertainty": 7.0
+            }
+          },
+          "affected_department_ids": [
+            "dept_engineering",
+            "dept_operations"
+          ],
+          "feasible": false,
+          "rejection_reasons": [
+            "Removing vendor_auditlog breaks the protected control ctl_soc2_audit_logging."
+          ],
+          "assumptions": [
+            "Expected-value mode: pressure costs use mean probabilities."
+          ],
+          "computed_at": "2026-09-26T17:00:00Z"
+        }
+      },
+      "recommended": {
+        "plan_id": "plan_recommended",
+        "intervention_ids": [
+          "i_platform_ops",
+          "i_migration",
+          "i_eng"
+        ],
+        "rank": 1,
+        "result": {
+          "result_id": "res_run_sample_act_now_plan_recommended",
+          "run_id": "run_sample",
+          "scenario_id": "scn_run_sample_act_now_plan_recommended",
+          "future": "act_now",
+          "plan_id": "plan_recommended",
+          "mode": "full",
+          "seed": 42,
+          "intervention_ids": [
+            "i_platform_ops",
+            "i_migration",
+            "i_eng"
+          ],
+          "value": {
+            "gross_savings_usd": 2150000,
+            "transition_cost_usd": 220000,
+            "added_cost_usd": 0,
+            "rebound_cost_usd": 90000,
+            "expected_business_loss_usd": 120000,
+            "pressure_cost_usd": 410000,
+            "avoided_failure_cost_usd": 0,
+            "net_value_usd": 1310000,
+            "monthly_net_usd": [
+              -220000,
+              -95000,
+              20000,
+              140000,
+              255000,
+              370000,
+              480000,
+              640000,
+              800000,
+              970000,
+              1140000,
+              1310000
+            ],
+            "p10_net_value_usd": null,
+            "p50_net_value_usd": null,
+            "p90_net_value_usd": null
+          },
+          "goal_met": true,
+          "constraint_results": [
+            {
+              "constraint_id": "c_compliance",
+              "metric": "compliance_controls_broken",
+              "operator": "==",
+              "threshold": 0.0,
+              "value": 0.0,
+              "hard": true,
+              "passed": true,
+              "explanation": "Mandatory controls keep their supporting systems.",
+              "impact_ids": []
+            },
+            {
+              "constraint_id": "c_critical",
+              "metric": "critical_systems_degraded",
+              "operator": "==",
+              "threshold": 0.0,
+              "value": 0.0,
+              "hard": true,
+              "passed": true,
+              "explanation": "No critical system loses its owner.",
+              "impact_ids": []
+            },
+            {
+              "constraint_id": "c_revenue",
+              "metric": "revenue_impact_pct",
+              "operator": "<=",
+              "threshold": 3.0,
+              "value": 0.4,
+              "hard": true,
+              "passed": true,
+              "explanation": "Revenue impact stays under 3 percent.",
+              "impact_ids": []
+            },
+            {
+              "constraint_id": "c_stranded",
+              "metric": "stranded_workflows",
+              "operator": "==",
+              "threshold": 0.0,
+              "value": 0.0,
+              "hard": false,
+              "passed": true,
+              "explanation": "Billing reconciliation keeps one qualified owner.",
+              "impact_ids": []
+            }
+          ],
+          "impacts": [
+            {
+              "impact_id": "imp_act_now_plan_recommended_ops_capacity",
+              "decision_id": "dec_cut_2m",
+              "scenario_id": "scn_run_sample_act_now_plan_recommended",
+              "source_entity": "dept_operations",
+              "source_kind": "intervention",
+              "source_ref": "i_platform_ops",
+              "affected_entity": "dept_operations",
+              "affected_department": "dept_operations",
+              "level": "direct",
+              "category": "operational",
+              "polarity": "harm",
+              "direction": "decrease",
+              "metric": "capacity_fte",
+              "magnitude": 11.6,
+              "unit": "fte",
+              "value_usd": null,
+              "severity": 3,
+              "first_effect_day": 0,
+              "peak_effect_day": 30,
+              "confidence": 0.8,
+              "dependency_path": [],
+              "edge_path": [],
+              "evidence_refs": [],
+              "assumptions": [],
+              "constraint_refs": [],
+              "origin": "engine",
+              "status": "computed"
+            },
+            {
+              "impact_id": "imp_act_now_plan_recommended_billing_recon",
+              "decision_id": "dec_cut_2m",
+              "scenario_id": "scn_run_sample_act_now_plan_recommended",
+              "source_entity": "dept_operations",
+              "source_kind": "intervention",
+              "source_ref": "i_platform_ops",
+              "affected_entity": "wf_billing_recon",
+              "affected_department": "dept_operations",
+              "level": "dependent",
+              "category": "ownership",
+              "polarity": "harm",
+              "direction": "increase",
+              "metric": "failure_probability_monthly",
+              "magnitude": 0.03,
+              "unit": "ratio",
+              "value_usd": 120000,
+              "severity": 4,
+              "first_effect_day": 30,
+              "peak_effect_day": 120,
+              "confidence": 0.8,
+              "dependency_path": [
+                "role_billing_ops_lead",
+                "wf_billing_recon"
+              ],
+              "edge_path": [
+                "e_role_owns_billing_recon"
+              ],
+              "evidence_refs": [
+                "ev_billing_recon_matrix"
+              ],
+              "assumptions": [],
+              "constraint_refs": [
+                "c_stranded"
+              ],
+              "origin": "engine",
+              "status": "computed"
+            },
+            {
+              "impact_id": "imp_act_now_plan_recommended_company_value",
+              "decision_id": "dec_cut_2m",
+              "scenario_id": "scn_run_sample_act_now_plan_recommended",
+              "source_entity": "wf_billing_recon",
+              "source_kind": "intervention",
+              "source_ref": "i_platform_ops",
+              "affected_entity": "kpi_company",
+              "affected_department": null,
+              "level": "second_order",
+              "category": "business",
+              "polarity": "harm",
+              "direction": "decrease",
+              "metric": "net_value_usd",
+              "magnitude": 120000.0,
+              "unit": "usd",
+              "value_usd": 120000,
+              "severity": 3,
+              "first_effect_day": 60,
+              "peak_effect_day": 150,
+              "confidence": 0.8,
+              "dependency_path": [
+                "wf_billing_recon",
+                "kpi_company"
+              ],
+              "edge_path": [
+                "e_billing_recon_kpi"
+              ],
+              "evidence_refs": [
+                "ev_billing_recon_matrix"
+              ],
+              "assumptions": [],
+              "constraint_refs": [],
+              "origin": "engine",
+              "status": "computed"
+            },
+            {
+              "impact_id": "imp_act_now_plan_recommended_eng_cost",
+              "decision_id": "dec_cut_2m",
+              "scenario_id": "scn_run_sample_act_now_plan_recommended",
+              "source_entity": "dept_engineering",
+              "source_kind": "intervention",
+              "source_ref": "i_eng",
+              "affected_entity": "dept_engineering",
+              "affected_department": "dept_engineering",
+              "level": "direct",
+              "category": "financial",
+              "polarity": "benefit",
+              "direction": "decrease",
+              "metric": "annual_cost_usd",
+              "magnitude": 620000.0,
+              "unit": "usd",
+              "value_usd": 620000,
+              "severity": 2,
+              "first_effect_day": 0,
+              "peak_effect_day": 30,
+              "confidence": 0.8,
+              "dependency_path": [],
+              "edge_path": [],
+              "evidence_refs": [],
+              "assumptions": [],
+              "constraint_refs": [],
+              "origin": "engine",
+              "status": "computed"
+            },
+            {
+              "impact_id": "imp_act_now_plan_recommended_migration",
+              "decision_id": "dec_cut_2m",
+              "scenario_id": "scn_run_sample_act_now_plan_recommended",
+              "source_entity": "proj_warehouse_migration",
+              "source_kind": "intervention",
+              "source_ref": "i_migration",
+              "affected_entity": "proj_warehouse_migration",
+              "affected_department": "dept_engineering",
+              "level": "direct",
+              "category": "financial",
+              "polarity": "benefit",
+              "direction": "decrease",
+              "metric": "remaining_cost_usd",
+              "magnitude": 290000.0,
+              "unit": "usd",
+              "value_usd": 290000,
+              "severity": 2,
+              "first_effect_day": 0,
+              "peak_effect_day": 0,
+              "confidence": 0.8,
+              "dependency_path": [],
+              "edge_path": [],
+              "evidence_refs": [],
+              "assumptions": [],
+              "constraint_refs": [],
+              "origin": "engine",
+              "status": "computed"
+            }
+          ],
+          "workflow_coverage": [
+            {
+              "workflow_id": "wf_billing_recon",
+              "criticality": "critical",
+              "owners_before": [
+                "role_billing_ops_lead"
+              ],
+              "owners_after": [
+                "role_billing_ops_lead"
+              ],
+              "min_qualified_owners": 1,
+              "backup_count_after": 0,
+              "documented_pct": 30.0,
+              "stranded": false,
+              "reasons": [
+                "One qualified owner remains and has no backup."
+              ]
+            }
+          ],
+          "pressures_triggered": [
+            {
+              "pressure_id": "pr_cloud_growth",
+              "expected_events": 12.0,
+              "expected_cost_usd": 64000,
+              "neutralised": false
+            },
+            {
+              "pressure_id": "pr_auditlog_renewal",
+              "expected_events": 1.0,
+              "expected_cost_usd": 36000,
+              "neutralised": false
+            },
+            {
+              "pressure_id": "pr_billing_recon_hazard",
+              "expected_events": 0.48,
+              "expected_cost_usd": 310000,
+              "neutralised": false
+            }
+          ],
+          "risk": {
+            "score": 38.0,
+            "level": "medium",
+            "settings_version": 1,
+            "components": {
+              "financial": 8.0,
+              "capability_workflow": 12.0,
+              "customer_revenue": 6.0,
+              "compliance_control": 7.0,
+              "execution_uncertainty": 5.0
+            }
+          },
+          "affected_department_ids": [
+            "dept_engineering",
+            "dept_operations"
+          ],
+          "feasible": true,
+          "rejection_reasons": [],
+          "assumptions": [
+            "Expected-value mode: pressure costs use mean probabilities."
+          ],
+          "computed_at": "2026-09-26T17:00:00Z"
+        }
+      },
+      "alternatives": []
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_13",
+    "run_id": "run_sample",
+    "sequence": 13,
+    "type": "scenario_created",
+    "actor": "orchestrator",
+    "scenario_id": "scn_run_sample_act_now_plan_recommended",
+    "future": "act_now",
+    "timestamp": "2026-09-26T17:00:13Z",
+    "payload": {
+      "scenario_id": "scn_run_sample_act_now_plan_recommended",
+      "run_id": "run_sample",
+      "future": "act_now",
+      "plan_id": "plan_recommended",
+      "delay_days": 0,
+      "baseline_twin_version": "stub-twin-1",
+      "created_at": "2026-09-26T17:00:00Z"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_14",
+    "run_id": "run_sample",
+    "sequence": 14,
+    "type": "scenario_created",
+    "actor": "orchestrator",
+    "scenario_id": "scn_run_sample_delay_plan_recommended",
+    "future": "delay",
+    "timestamp": "2026-09-26T17:00:14Z",
+    "payload": {
+      "scenario_id": "scn_run_sample_delay_plan_recommended",
+      "run_id": "run_sample",
+      "future": "delay",
+      "plan_id": "plan_recommended",
+      "delay_days": 90,
+      "baseline_twin_version": "stub-twin-1",
+      "created_at": "2026-09-26T17:00:00Z"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_15",
+    "run_id": "run_sample",
+    "sequence": 15,
+    "type": "phase_changed",
+    "actor": "orchestrator",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:15Z",
+    "payload": {
+      "from_status": "optimizing",
+      "to_status": "running_agents"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_16",
+    "run_id": "run_sample",
+    "sequence": 16,
+    "type": "agent_started",
+    "actor": "finance",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:16Z",
+    "payload": {
+      "agent_id": "finance",
+      "plan_id": "plan_recommended"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_17",
+    "run_id": "run_sample",
+    "sequence": 17,
+    "type": "agent_started",
+    "actor": "operations",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:17Z",
+    "payload": {
+      "agent_id": "operations",
+      "plan_id": "plan_recommended"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_18",
+    "run_id": "run_sample",
+    "sequence": 18,
+    "type": "agent_started",
+    "actor": "engineering",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:18Z",
+    "payload": {
+      "agent_id": "engineering",
+      "plan_id": "plan_recommended"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_19",
+    "run_id": "run_sample",
+    "sequence": 19,
+    "type": "agent_started",
+    "actor": "compliance",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:19Z",
+    "payload": {
+      "agent_id": "compliance",
+      "plan_id": "plan_recommended"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_20",
+    "run_id": "run_sample",
+    "sequence": 20,
+    "type": "agent_completed",
+    "actor": "finance",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:20Z",
+    "payload": {
+      "assessment_id": "asm_run_sample_finance",
+      "run_id": "run_sample",
+      "plan_id": "plan_recommended",
+      "agent_id": "finance",
+      "pass_type": "first_pass",
+      "status": "replayed",
+      "output": {
+        "affected_entities": [
+          "kpi_company"
+        ],
+        "act_now_view": {
+          "summary": "Savings clear the $2M gross goal.",
+          "failure_modes": [
+            {
+              "text": "Savings clear the $2M gross goal.",
+              "entity_ids": [
+                "kpi_company"
+              ],
+              "severity": 3,
+              "evidence_refs": []
+            }
+          ],
+          "edge_cases": [],
+          "proposed_impacts": []
+        },
+        "inaction_view": {
+          "summary": "Pressure costs keep rising while nothing changes.",
+          "failure_modes": [
+            {
+              "text": "Pressure costs keep rising while nothing changes.",
+              "entity_ids": [
+                "kpi_company"
+              ],
+              "severity": 2,
+              "evidence_refs": []
+            }
+          ],
+          "edge_cases": [],
+          "proposed_impacts": []
+        },
+        "proposed_dependencies": [],
+        "questions": [],
+        "objections": [],
+        "assumptions": [
+          "Stub assessment."
+        ],
+        "evidence_refs": [],
+        "confidence": 0.7
+      },
+      "challenge": null,
+      "accepted_impacts": [],
+      "validation": {
+        "rejected_entity_ids": [],
+        "downgraded_to_hypothesis": [],
+        "clamped_fields": [],
+        "retries": 0,
+        "errors": []
+      },
+      "metrics": {
+        "model_id": "replay",
+        "prompt_version": "stub",
+        "prompt_hash": "stub_finance",
+        "latency_ms": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "tool_calls": []
+      },
+      "created_at": "2026-09-26T17:00:00Z"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_21",
+    "run_id": "run_sample",
+    "sequence": 21,
+    "type": "agent_completed",
+    "actor": "operations",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:21Z",
+    "payload": {
+      "assessment_id": "asm_run_sample_operations",
+      "run_id": "run_sample",
+      "plan_id": "plan_recommended",
+      "agent_id": "operations",
+      "pass_type": "first_pass",
+      "status": "replayed",
+      "output": {
+        "affected_entities": [
+          "wf_billing_recon"
+        ],
+        "act_now_view": {
+          "summary": "Billing reconciliation keeps one owner with no backup.",
+          "failure_modes": [
+            {
+              "text": "Billing reconciliation keeps one owner with no backup.",
+              "entity_ids": [
+                "wf_billing_recon"
+              ],
+              "severity": 3,
+              "evidence_refs": []
+            }
+          ],
+          "edge_cases": [],
+          "proposed_impacts": []
+        },
+        "inaction_view": {
+          "summary": "Reconciliation hazard persists.",
+          "failure_modes": [
+            {
+              "text": "Reconciliation hazard persists.",
+              "entity_ids": [
+                "wf_billing_recon"
+              ],
+              "severity": 2,
+              "evidence_refs": []
+            }
+          ],
+          "edge_cases": [],
+          "proposed_impacts": []
+        },
+        "proposed_dependencies": [],
+        "questions": [],
+        "objections": [],
+        "assumptions": [
+          "Stub assessment."
+        ],
+        "evidence_refs": [],
+        "confidence": 0.7
+      },
+      "challenge": null,
+      "accepted_impacts": [],
+      "validation": {
+        "rejected_entity_ids": [],
+        "downgraded_to_hypothesis": [],
+        "clamped_fields": [],
+        "retries": 0,
+        "errors": []
+      },
+      "metrics": {
+        "model_id": "replay",
+        "prompt_version": "stub",
+        "prompt_hash": "stub_operations",
+        "latency_ms": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "tool_calls": []
+      },
+      "created_at": "2026-09-26T17:00:00Z"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_22",
+    "run_id": "run_sample",
+    "sequence": 22,
+    "type": "agent_completed",
+    "actor": "engineering",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:22Z",
+    "payload": {
+      "assessment_id": "asm_run_sample_engineering",
+      "run_id": "run_sample",
+      "plan_id": "plan_recommended",
+      "agent_id": "engineering",
+      "pass_type": "first_pass",
+      "status": "replayed",
+      "output": {
+        "affected_entities": [
+          "sys_cloud_platform",
+          "proj_warehouse_migration"
+        ],
+        "act_now_view": {
+          "summary": "Capacity cut is absorbed by stopping the migration.",
+          "failure_modes": [
+            {
+              "text": "Capacity cut is absorbed by stopping the migration.",
+              "entity_ids": [
+                "sys_cloud_platform",
+                "proj_warehouse_migration"
+              ],
+              "severity": 3,
+              "evidence_refs": []
+            }
+          ],
+          "edge_cases": [],
+          "proposed_impacts": []
+        },
+        "inaction_view": {
+          "summary": "Cloud spend keeps growing.",
+          "failure_modes": [
+            {
+              "text": "Cloud spend keeps growing.",
+              "entity_ids": [
+                "sys_cloud_platform",
+                "proj_warehouse_migration"
+              ],
+              "severity": 2,
+              "evidence_refs": []
+            }
+          ],
+          "edge_cases": [],
+          "proposed_impacts": []
+        },
+        "proposed_dependencies": [],
+        "questions": [],
+        "objections": [],
+        "assumptions": [
+          "Stub assessment."
+        ],
+        "evidence_refs": [],
+        "confidence": 0.7
+      },
+      "challenge": null,
+      "accepted_impacts": [],
+      "validation": {
+        "rejected_entity_ids": [],
+        "downgraded_to_hypothesis": [],
+        "clamped_fields": [],
+        "retries": 0,
+        "errors": []
+      },
+      "metrics": {
+        "model_id": "replay",
+        "prompt_version": "stub",
+        "prompt_hash": "stub_engineering",
+        "latency_ms": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "tool_calls": []
+      },
+      "created_at": "2026-09-26T17:00:00Z"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_23",
+    "run_id": "run_sample",
+    "sequence": 23,
+    "type": "agent_completed",
+    "actor": "compliance",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:23Z",
+    "payload": {
+      "assessment_id": "asm_run_sample_compliance",
+      "run_id": "run_sample",
+      "plan_id": "plan_recommended",
+      "agent_id": "compliance",
+      "pass_type": "first_pass",
+      "status": "replayed",
+      "output": {
+        "affected_entities": [
+          "ctl_soc2_audit_logging"
+        ],
+        "act_now_view": {
+          "summary": "SOC2 audit logging stays covered because the vendor is kept.",
+          "failure_modes": [
+            {
+              "text": "SOC2 audit logging stays covered because the vendor is kept.",
+              "entity_ids": [
+                "ctl_soc2_audit_logging"
+              ],
+              "severity": 3,
+              "evidence_refs": []
+            }
+          ],
+          "edge_cases": [],
+          "proposed_impacts": []
+        },
+        "inaction_view": {
+          "summary": "No control change.",
+          "failure_modes": [
+            {
+              "text": "No control change.",
+              "entity_ids": [
+                "ctl_soc2_audit_logging"
+              ],
+              "severity": 2,
+              "evidence_refs": []
+            }
+          ],
+          "edge_cases": [],
+          "proposed_impacts": []
+        },
+        "proposed_dependencies": [],
+        "questions": [],
+        "objections": [],
+        "assumptions": [
+          "Stub assessment."
+        ],
+        "evidence_refs": [],
+        "confidence": 0.7
+      },
+      "challenge": null,
+      "accepted_impacts": [],
+      "validation": {
+        "rejected_entity_ids": [],
+        "downgraded_to_hypothesis": [],
+        "clamped_fields": [],
+        "retries": 0,
+        "errors": []
+      },
+      "metrics": {
+        "model_id": "replay",
+        "prompt_version": "stub",
+        "prompt_hash": "stub_compliance",
+        "latency_ms": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "tool_calls": []
+      },
+      "created_at": "2026-09-26T17:00:00Z"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_24",
+    "run_id": "run_sample",
+    "sequence": 24,
+    "type": "phase_changed",
+    "actor": "orchestrator",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:24Z",
+    "payload": {
+      "from_status": "running_agents",
+      "to_status": "propagating"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_25",
+    "run_id": "run_sample",
+    "sequence": 25,
+    "type": "simulation_completed",
+    "actor": "engine",
+    "scenario_id": "scn_run_sample_act_now_plan_recommended",
+    "future": "act_now",
+    "timestamp": "2026-09-26T17:00:25Z",
+    "payload": {
+      "result_id": "res_run_sample_act_now_plan_recommended",
+      "run_id": "run_sample",
+      "scenario_id": "scn_run_sample_act_now_plan_recommended",
+      "future": "act_now",
+      "plan_id": "plan_recommended",
+      "mode": "full",
+      "seed": 42,
+      "intervention_ids": [
+        "i_platform_ops",
+        "i_migration",
+        "i_eng"
+      ],
+      "value": {
+        "gross_savings_usd": 2150000,
+        "transition_cost_usd": 220000,
+        "added_cost_usd": 0,
+        "rebound_cost_usd": 90000,
+        "expected_business_loss_usd": 120000,
+        "pressure_cost_usd": 410000,
+        "avoided_failure_cost_usd": 0,
+        "net_value_usd": 1310000,
+        "monthly_net_usd": [
+          -220000,
+          -95000,
+          20000,
+          140000,
+          255000,
+          370000,
+          480000,
+          640000,
+          800000,
+          970000,
+          1140000,
+          1310000
+        ],
+        "p10_net_value_usd": null,
+        "p50_net_value_usd": null,
+        "p90_net_value_usd": null
+      },
+      "goal_met": true,
+      "constraint_results": [
+        {
+          "constraint_id": "c_compliance",
+          "metric": "compliance_controls_broken",
+          "operator": "==",
+          "threshold": 0.0,
+          "value": 0.0,
+          "hard": true,
+          "passed": true,
+          "explanation": "Mandatory controls keep their supporting systems.",
+          "impact_ids": []
+        },
+        {
+          "constraint_id": "c_critical",
+          "metric": "critical_systems_degraded",
+          "operator": "==",
+          "threshold": 0.0,
+          "value": 0.0,
+          "hard": true,
+          "passed": true,
+          "explanation": "No critical system loses its owner.",
+          "impact_ids": []
+        },
+        {
+          "constraint_id": "c_revenue",
+          "metric": "revenue_impact_pct",
+          "operator": "<=",
+          "threshold": 3.0,
+          "value": 0.4,
+          "hard": true,
+          "passed": true,
+          "explanation": "Revenue impact stays under 3 percent.",
+          "impact_ids": []
+        },
+        {
+          "constraint_id": "c_stranded",
+          "metric": "stranded_workflows",
+          "operator": "==",
+          "threshold": 0.0,
+          "value": 0.0,
+          "hard": false,
+          "passed": true,
+          "explanation": "Billing reconciliation keeps one qualified owner.",
+          "impact_ids": []
+        }
+      ],
+      "impacts": [
+        {
+          "impact_id": "imp_act_now_plan_recommended_ops_capacity",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_act_now_plan_recommended",
+          "source_entity": "dept_operations",
+          "source_kind": "intervention",
+          "source_ref": "i_platform_ops",
+          "affected_entity": "dept_operations",
+          "affected_department": "dept_operations",
+          "level": "direct",
+          "category": "operational",
+          "polarity": "harm",
+          "direction": "decrease",
+          "metric": "capacity_fte",
+          "magnitude": 11.6,
+          "unit": "fte",
+          "value_usd": null,
+          "severity": 3,
+          "first_effect_day": 0,
+          "peak_effect_day": 30,
+          "confidence": 0.8,
+          "dependency_path": [],
+          "edge_path": [],
+          "evidence_refs": [],
+          "assumptions": [],
+          "constraint_refs": [],
+          "origin": "engine",
+          "status": "computed"
+        },
+        {
+          "impact_id": "imp_act_now_plan_recommended_billing_recon",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_act_now_plan_recommended",
+          "source_entity": "dept_operations",
+          "source_kind": "intervention",
+          "source_ref": "i_platform_ops",
+          "affected_entity": "wf_billing_recon",
+          "affected_department": "dept_operations",
+          "level": "dependent",
+          "category": "ownership",
+          "polarity": "harm",
+          "direction": "increase",
+          "metric": "failure_probability_monthly",
+          "magnitude": 0.03,
+          "unit": "ratio",
+          "value_usd": 120000,
+          "severity": 4,
+          "first_effect_day": 30,
+          "peak_effect_day": 120,
+          "confidence": 0.8,
+          "dependency_path": [
+            "role_billing_ops_lead",
+            "wf_billing_recon"
+          ],
+          "edge_path": [
+            "e_role_owns_billing_recon"
+          ],
+          "evidence_refs": [
+            "ev_billing_recon_matrix"
+          ],
+          "assumptions": [],
+          "constraint_refs": [
+            "c_stranded"
+          ],
+          "origin": "engine",
+          "status": "computed"
+        },
+        {
+          "impact_id": "imp_act_now_plan_recommended_company_value",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_act_now_plan_recommended",
+          "source_entity": "wf_billing_recon",
+          "source_kind": "intervention",
+          "source_ref": "i_platform_ops",
+          "affected_entity": "kpi_company",
+          "affected_department": null,
+          "level": "second_order",
+          "category": "business",
+          "polarity": "harm",
+          "direction": "decrease",
+          "metric": "net_value_usd",
+          "magnitude": 120000.0,
+          "unit": "usd",
+          "value_usd": 120000,
+          "severity": 3,
+          "first_effect_day": 60,
+          "peak_effect_day": 150,
+          "confidence": 0.8,
+          "dependency_path": [
+            "wf_billing_recon",
+            "kpi_company"
+          ],
+          "edge_path": [
+            "e_billing_recon_kpi"
+          ],
+          "evidence_refs": [
+            "ev_billing_recon_matrix"
+          ],
+          "assumptions": [],
+          "constraint_refs": [],
+          "origin": "engine",
+          "status": "computed"
+        },
+        {
+          "impact_id": "imp_act_now_plan_recommended_eng_cost",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_act_now_plan_recommended",
+          "source_entity": "dept_engineering",
+          "source_kind": "intervention",
+          "source_ref": "i_eng",
+          "affected_entity": "dept_engineering",
+          "affected_department": "dept_engineering",
+          "level": "direct",
+          "category": "financial",
+          "polarity": "benefit",
+          "direction": "decrease",
+          "metric": "annual_cost_usd",
+          "magnitude": 620000.0,
+          "unit": "usd",
+          "value_usd": 620000,
+          "severity": 2,
+          "first_effect_day": 0,
+          "peak_effect_day": 30,
+          "confidence": 0.8,
+          "dependency_path": [],
+          "edge_path": [],
+          "evidence_refs": [],
+          "assumptions": [],
+          "constraint_refs": [],
+          "origin": "engine",
+          "status": "computed"
+        },
+        {
+          "impact_id": "imp_act_now_plan_recommended_migration",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_act_now_plan_recommended",
+          "source_entity": "proj_warehouse_migration",
+          "source_kind": "intervention",
+          "source_ref": "i_migration",
+          "affected_entity": "proj_warehouse_migration",
+          "affected_department": "dept_engineering",
+          "level": "direct",
+          "category": "financial",
+          "polarity": "benefit",
+          "direction": "decrease",
+          "metric": "remaining_cost_usd",
+          "magnitude": 290000.0,
+          "unit": "usd",
+          "value_usd": 290000,
+          "severity": 2,
+          "first_effect_day": 0,
+          "peak_effect_day": 0,
+          "confidence": 0.8,
+          "dependency_path": [],
+          "edge_path": [],
+          "evidence_refs": [],
+          "assumptions": [],
+          "constraint_refs": [],
+          "origin": "engine",
+          "status": "computed"
+        }
+      ],
+      "workflow_coverage": [
+        {
+          "workflow_id": "wf_billing_recon",
+          "criticality": "critical",
+          "owners_before": [
+            "role_billing_ops_lead"
+          ],
+          "owners_after": [
+            "role_billing_ops_lead"
+          ],
+          "min_qualified_owners": 1,
+          "backup_count_after": 0,
+          "documented_pct": 30.0,
+          "stranded": false,
+          "reasons": [
+            "One qualified owner remains and has no backup."
+          ]
+        }
+      ],
+      "pressures_triggered": [
+        {
+          "pressure_id": "pr_cloud_growth",
+          "expected_events": 12.0,
+          "expected_cost_usd": 64000,
+          "neutralised": false
+        },
+        {
+          "pressure_id": "pr_auditlog_renewal",
+          "expected_events": 1.0,
+          "expected_cost_usd": 36000,
+          "neutralised": false
+        },
+        {
+          "pressure_id": "pr_billing_recon_hazard",
+          "expected_events": 0.48,
+          "expected_cost_usd": 310000,
+          "neutralised": false
+        }
+      ],
+      "risk": {
+        "score": 38.0,
+        "level": "medium",
+        "settings_version": 1,
+        "components": {
+          "financial": 8.0,
+          "capability_workflow": 12.0,
+          "customer_revenue": 6.0,
+          "compliance_control": 7.0,
+          "execution_uncertainty": 5.0
+        }
+      },
+      "affected_department_ids": [
+        "dept_engineering",
+        "dept_operations"
+      ],
+      "feasible": true,
+      "rejection_reasons": [],
+      "assumptions": [
+        "Expected-value mode: pressure costs use mean probabilities."
+      ],
+      "computed_at": "2026-09-26T17:00:00Z"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_26",
+    "run_id": "run_sample",
+    "sequence": 26,
+    "type": "phase_changed",
+    "actor": "orchestrator",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:26Z",
+    "payload": {
+      "from_status": "propagating",
+      "to_status": "challenging"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_27",
+    "run_id": "run_sample",
+    "sequence": 27,
+    "type": "agent_started",
+    "actor": "challenger",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:27Z",
+    "payload": {
+      "agent_id": "challenger",
+      "plan_id": "plan_recommended"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_28",
+    "run_id": "run_sample",
+    "sequence": 28,
+    "type": "agent_completed",
+    "actor": "challenger",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:28Z",
+    "payload": {
+      "assessment_id": "asm_run_sample_challenger",
+      "run_id": "run_sample",
+      "plan_id": "plan_recommended",
+      "agent_id": "challenger",
+      "pass_type": "challenge",
+      "status": "replayed",
+      "output": null,
+      "challenge": {
+        "missing_agents": [],
+        "unsupported_assumptions": [],
+        "circular_logic": [],
+        "overlooked_combinations": [],
+        "missed_dependencies": [
+          {
+            "source": "vendor_auditlog",
+            "target": "ctl_soc2_audit_logging",
+            "relation": "SUPPORTS",
+            "rationale": "The contract says the vendor stores the SOC2 audit trail.",
+            "evidence_refs": [
+              "ev_auditlog_contract"
+            ],
+            "confidence": 0.8
+          }
+        ],
+        "inaction_underestimated": [
+          {
+            "text": "The billing hazard grows as operations stays over capacity.",
+            "entity_ids": [
+              "wf_billing_recon"
+            ],
+            "severity": 3,
+            "evidence_refs": [
+              "ev_billing_recon_matrix"
+            ]
+          }
+        ],
+        "objections": [],
+        "confidence": 0.7
+      },
+      "accepted_impacts": [],
+      "validation": {
+        "rejected_entity_ids": [],
+        "downgraded_to_hypothesis": [],
+        "clamped_fields": [],
+        "retries": 0,
+        "errors": []
+      },
+      "metrics": {
+        "model_id": "replay",
+        "prompt_version": "stub",
+        "prompt_hash": "stub_challenger",
+        "latency_ms": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "tool_calls": []
+      },
+      "created_at": "2026-09-26T17:00:00Z"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_29",
+    "run_id": "run_sample",
+    "sequence": 29,
+    "type": "phase_changed",
+    "actor": "orchestrator",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:29Z",
+    "payload": {
+      "from_status": "challenging",
+      "to_status": "propagating"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_30",
+    "run_id": "run_sample",
+    "sequence": 30,
+    "type": "simulation_completed",
+    "actor": "engine",
+    "scenario_id": "scn_run_sample_act_now_plan_recommended",
+    "future": "act_now",
+    "timestamp": "2026-09-26T17:00:30Z",
+    "payload": {
+      "result_id": "res_run_sample_act_now_plan_recommended",
+      "run_id": "run_sample",
+      "scenario_id": "scn_run_sample_act_now_plan_recommended",
+      "future": "act_now",
+      "plan_id": "plan_recommended",
+      "mode": "full",
+      "seed": 42,
+      "intervention_ids": [
+        "i_platform_ops",
+        "i_migration",
+        "i_eng"
+      ],
+      "value": {
+        "gross_savings_usd": 2150000,
+        "transition_cost_usd": 220000,
+        "added_cost_usd": 0,
+        "rebound_cost_usd": 90000,
+        "expected_business_loss_usd": 120000,
+        "pressure_cost_usd": 410000,
+        "avoided_failure_cost_usd": 0,
+        "net_value_usd": 1310000,
+        "monthly_net_usd": [
+          -220000,
+          -95000,
+          20000,
+          140000,
+          255000,
+          370000,
+          480000,
+          640000,
+          800000,
+          970000,
+          1140000,
+          1310000
+        ],
+        "p10_net_value_usd": null,
+        "p50_net_value_usd": null,
+        "p90_net_value_usd": null
+      },
+      "goal_met": true,
+      "constraint_results": [
+        {
+          "constraint_id": "c_compliance",
+          "metric": "compliance_controls_broken",
+          "operator": "==",
+          "threshold": 0.0,
+          "value": 0.0,
+          "hard": true,
+          "passed": true,
+          "explanation": "Mandatory controls keep their supporting systems.",
+          "impact_ids": []
+        },
+        {
+          "constraint_id": "c_critical",
+          "metric": "critical_systems_degraded",
+          "operator": "==",
+          "threshold": 0.0,
+          "value": 0.0,
+          "hard": true,
+          "passed": true,
+          "explanation": "No critical system loses its owner.",
+          "impact_ids": []
+        },
+        {
+          "constraint_id": "c_revenue",
+          "metric": "revenue_impact_pct",
+          "operator": "<=",
+          "threshold": 3.0,
+          "value": 0.4,
+          "hard": true,
+          "passed": true,
+          "explanation": "Revenue impact stays under 3 percent.",
+          "impact_ids": []
+        },
+        {
+          "constraint_id": "c_stranded",
+          "metric": "stranded_workflows",
+          "operator": "==",
+          "threshold": 0.0,
+          "value": 0.0,
+          "hard": false,
+          "passed": true,
+          "explanation": "Billing reconciliation keeps one qualified owner.",
+          "impact_ids": []
+        }
+      ],
+      "impacts": [
+        {
+          "impact_id": "imp_act_now_plan_recommended_ops_capacity",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_act_now_plan_recommended",
+          "source_entity": "dept_operations",
+          "source_kind": "intervention",
+          "source_ref": "i_platform_ops",
+          "affected_entity": "dept_operations",
+          "affected_department": "dept_operations",
+          "level": "direct",
+          "category": "operational",
+          "polarity": "harm",
+          "direction": "decrease",
+          "metric": "capacity_fte",
+          "magnitude": 11.6,
+          "unit": "fte",
+          "value_usd": null,
+          "severity": 3,
+          "first_effect_day": 0,
+          "peak_effect_day": 30,
+          "confidence": 0.8,
+          "dependency_path": [],
+          "edge_path": [],
+          "evidence_refs": [],
+          "assumptions": [],
+          "constraint_refs": [],
+          "origin": "engine",
+          "status": "computed"
+        },
+        {
+          "impact_id": "imp_act_now_plan_recommended_billing_recon",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_act_now_plan_recommended",
+          "source_entity": "dept_operations",
+          "source_kind": "intervention",
+          "source_ref": "i_platform_ops",
+          "affected_entity": "wf_billing_recon",
+          "affected_department": "dept_operations",
+          "level": "dependent",
+          "category": "ownership",
+          "polarity": "harm",
+          "direction": "increase",
+          "metric": "failure_probability_monthly",
+          "magnitude": 0.03,
+          "unit": "ratio",
+          "value_usd": 120000,
+          "severity": 4,
+          "first_effect_day": 30,
+          "peak_effect_day": 120,
+          "confidence": 0.8,
+          "dependency_path": [
+            "role_billing_ops_lead",
+            "wf_billing_recon"
+          ],
+          "edge_path": [
+            "e_role_owns_billing_recon"
+          ],
+          "evidence_refs": [
+            "ev_billing_recon_matrix"
+          ],
+          "assumptions": [],
+          "constraint_refs": [
+            "c_stranded"
+          ],
+          "origin": "engine",
+          "status": "computed"
+        },
+        {
+          "impact_id": "imp_act_now_plan_recommended_company_value",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_act_now_plan_recommended",
+          "source_entity": "wf_billing_recon",
+          "source_kind": "intervention",
+          "source_ref": "i_platform_ops",
+          "affected_entity": "kpi_company",
+          "affected_department": null,
+          "level": "second_order",
+          "category": "business",
+          "polarity": "harm",
+          "direction": "decrease",
+          "metric": "net_value_usd",
+          "magnitude": 120000.0,
+          "unit": "usd",
+          "value_usd": 120000,
+          "severity": 3,
+          "first_effect_day": 60,
+          "peak_effect_day": 150,
+          "confidence": 0.8,
+          "dependency_path": [
+            "wf_billing_recon",
+            "kpi_company"
+          ],
+          "edge_path": [
+            "e_billing_recon_kpi"
+          ],
+          "evidence_refs": [
+            "ev_billing_recon_matrix"
+          ],
+          "assumptions": [],
+          "constraint_refs": [],
+          "origin": "engine",
+          "status": "computed"
+        },
+        {
+          "impact_id": "imp_act_now_plan_recommended_eng_cost",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_act_now_plan_recommended",
+          "source_entity": "dept_engineering",
+          "source_kind": "intervention",
+          "source_ref": "i_eng",
+          "affected_entity": "dept_engineering",
+          "affected_department": "dept_engineering",
+          "level": "direct",
+          "category": "financial",
+          "polarity": "benefit",
+          "direction": "decrease",
+          "metric": "annual_cost_usd",
+          "magnitude": 620000.0,
+          "unit": "usd",
+          "value_usd": 620000,
+          "severity": 2,
+          "first_effect_day": 0,
+          "peak_effect_day": 30,
+          "confidence": 0.8,
+          "dependency_path": [],
+          "edge_path": [],
+          "evidence_refs": [],
+          "assumptions": [],
+          "constraint_refs": [],
+          "origin": "engine",
+          "status": "computed"
+        },
+        {
+          "impact_id": "imp_act_now_plan_recommended_migration",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_act_now_plan_recommended",
+          "source_entity": "proj_warehouse_migration",
+          "source_kind": "intervention",
+          "source_ref": "i_migration",
+          "affected_entity": "proj_warehouse_migration",
+          "affected_department": "dept_engineering",
+          "level": "direct",
+          "category": "financial",
+          "polarity": "benefit",
+          "direction": "decrease",
+          "metric": "remaining_cost_usd",
+          "magnitude": 290000.0,
+          "unit": "usd",
+          "value_usd": 290000,
+          "severity": 2,
+          "first_effect_day": 0,
+          "peak_effect_day": 0,
+          "confidence": 0.8,
+          "dependency_path": [],
+          "edge_path": [],
+          "evidence_refs": [],
+          "assumptions": [],
+          "constraint_refs": [],
+          "origin": "engine",
+          "status": "computed"
+        }
+      ],
+      "workflow_coverage": [
+        {
+          "workflow_id": "wf_billing_recon",
+          "criticality": "critical",
+          "owners_before": [
+            "role_billing_ops_lead"
+          ],
+          "owners_after": [
+            "role_billing_ops_lead"
+          ],
+          "min_qualified_owners": 1,
+          "backup_count_after": 0,
+          "documented_pct": 30.0,
+          "stranded": false,
+          "reasons": [
+            "One qualified owner remains and has no backup."
+          ]
+        }
+      ],
+      "pressures_triggered": [
+        {
+          "pressure_id": "pr_cloud_growth",
+          "expected_events": 12.0,
+          "expected_cost_usd": 64000,
+          "neutralised": false
+        },
+        {
+          "pressure_id": "pr_auditlog_renewal",
+          "expected_events": 1.0,
+          "expected_cost_usd": 36000,
+          "neutralised": false
+        },
+        {
+          "pressure_id": "pr_billing_recon_hazard",
+          "expected_events": 0.48,
+          "expected_cost_usd": 310000,
+          "neutralised": false
+        }
+      ],
+      "risk": {
+        "score": 38.0,
+        "level": "medium",
+        "settings_version": 1,
+        "components": {
+          "financial": 8.0,
+          "capability_workflow": 12.0,
+          "customer_revenue": 6.0,
+          "compliance_control": 7.0,
+          "execution_uncertainty": 5.0
+        }
+      },
+      "affected_department_ids": [
+        "dept_engineering",
+        "dept_operations"
+      ],
+      "feasible": true,
+      "rejection_reasons": [],
+      "assumptions": [
+        "Expected-value mode: pressure costs use mean probabilities."
+      ],
+      "computed_at": "2026-09-26T17:00:00Z"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_31",
+    "run_id": "run_sample",
+    "sequence": 31,
+    "type": "simulation_completed",
+    "actor": "engine",
+    "scenario_id": "scn_run_sample_inaction_none",
+    "future": "inaction",
+    "timestamp": "2026-09-26T17:00:31Z",
+    "payload": {
+      "result_id": "res_run_sample_inaction_none",
+      "run_id": "run_sample",
+      "scenario_id": "scn_run_sample_inaction_none",
+      "future": "inaction",
+      "plan_id": null,
+      "mode": "full",
+      "seed": 42,
+      "intervention_ids": [],
+      "value": {
+        "gross_savings_usd": 0,
+        "transition_cost_usd": 0,
+        "added_cost_usd": 0,
+        "rebound_cost_usd": 0,
+        "expected_business_loss_usd": 0,
+        "pressure_cost_usd": 292000,
+        "avoided_failure_cost_usd": 0,
+        "net_value_usd": -292000,
+        "monthly_net_usd": [
+          -24000,
+          -48000,
+          -72000,
+          -96000,
+          -120000,
+          -144000,
+          -168000,
+          -192000,
+          -216000,
+          -240000,
+          -266000,
+          -292000
+        ],
+        "p10_net_value_usd": null,
+        "p50_net_value_usd": null,
+        "p90_net_value_usd": null
+      },
+      "goal_met": false,
+      "constraint_results": [
+        {
+          "constraint_id": "c_compliance",
+          "metric": "compliance_controls_broken",
+          "operator": "==",
+          "threshold": 0.0,
+          "value": 0.0,
+          "hard": true,
+          "passed": true,
+          "explanation": "Mandatory controls keep their supporting systems.",
+          "impact_ids": []
+        },
+        {
+          "constraint_id": "c_critical",
+          "metric": "critical_systems_degraded",
+          "operator": "==",
+          "threshold": 0.0,
+          "value": 0.0,
+          "hard": true,
+          "passed": true,
+          "explanation": "No critical system loses its owner.",
+          "impact_ids": []
+        },
+        {
+          "constraint_id": "c_revenue",
+          "metric": "revenue_impact_pct",
+          "operator": "<=",
+          "threshold": 3.0,
+          "value": 0.4,
+          "hard": true,
+          "passed": true,
+          "explanation": "Revenue impact stays under 3 percent.",
+          "impact_ids": []
+        },
+        {
+          "constraint_id": "c_stranded",
+          "metric": "stranded_workflows",
+          "operator": "==",
+          "threshold": 0.0,
+          "value": 0.0,
+          "hard": false,
+          "passed": true,
+          "explanation": "Billing reconciliation keeps one qualified owner.",
+          "impact_ids": []
+        }
+      ],
+      "impacts": [
+        {
+          "impact_id": "imp_inaction_none_cloud_growth",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_inaction_none",
+          "source_entity": "sys_cloud_platform",
+          "source_kind": "pressure",
+          "source_ref": "pr_cloud_growth",
+          "affected_entity": "sys_cloud_platform",
+          "affected_department": "dept_engineering",
+          "level": "direct",
+          "category": "financial",
+          "polarity": "harm",
+          "direction": "increase",
+          "metric": "annual_cost_usd",
+          "magnitude": 64000.0,
+          "unit": "usd",
+          "value_usd": 64000,
+          "severity": 2,
+          "first_effect_day": 30,
+          "peak_effect_day": 365,
+          "confidence": 0.8,
+          "dependency_path": [],
+          "edge_path": [],
+          "evidence_refs": [],
+          "assumptions": [],
+          "constraint_refs": [],
+          "origin": "engine",
+          "status": "computed"
+        },
+        {
+          "impact_id": "imp_inaction_none_auditlog_renewal",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_inaction_none",
+          "source_entity": "vendor_auditlog",
+          "source_kind": "pressure",
+          "source_ref": "pr_auditlog_renewal",
+          "affected_entity": "vendor_auditlog",
+          "affected_department": "dept_operations",
+          "level": "delayed",
+          "category": "financial",
+          "polarity": "harm",
+          "direction": "increase",
+          "metric": "annual_cost_usd",
+          "magnitude": 36000.0,
+          "unit": "usd",
+          "value_usd": 36000,
+          "severity": 2,
+          "first_effect_day": 120,
+          "peak_effect_day": 120,
+          "confidence": 0.8,
+          "dependency_path": [],
+          "edge_path": [],
+          "evidence_refs": [
+            "ev_auditlog_contract"
+          ],
+          "assumptions": [],
+          "constraint_refs": [],
+          "origin": "engine",
+          "status": "computed"
+        },
+        {
+          "impact_id": "imp_inaction_none_billing_hazard",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_inaction_none",
+          "source_entity": "wf_billing_recon",
+          "source_kind": "pressure",
+          "source_ref": "pr_billing_recon_hazard",
+          "affected_entity": "wf_billing_recon",
+          "affected_department": "dept_operations",
+          "level": "direct",
+          "category": "operational",
+          "polarity": "harm",
+          "direction": "increase",
+          "metric": "expected_failures",
+          "magnitude": 0.48,
+          "unit": "events",
+          "value_usd": 192000,
+          "severity": 4,
+          "first_effect_day": 0,
+          "peak_effect_day": 365,
+          "confidence": 0.8,
+          "dependency_path": [],
+          "edge_path": [],
+          "evidence_refs": [
+            "ev_billing_recon_matrix"
+          ],
+          "assumptions": [],
+          "constraint_refs": [],
+          "origin": "engine",
+          "status": "computed"
+        }
+      ],
+      "workflow_coverage": [
+        {
+          "workflow_id": "wf_billing_recon",
+          "criticality": "critical",
+          "owners_before": [
+            "role_billing_ops_lead"
+          ],
+          "owners_after": [
+            "role_billing_ops_lead"
+          ],
+          "min_qualified_owners": 1,
+          "backup_count_after": 0,
+          "documented_pct": 30.0,
+          "stranded": false,
+          "reasons": [
+            "One qualified owner remains and has no backup."
+          ]
+        }
+      ],
+      "pressures_triggered": [
+        {
+          "pressure_id": "pr_cloud_growth",
+          "expected_events": 12.0,
+          "expected_cost_usd": 64000,
+          "neutralised": false
+        },
+        {
+          "pressure_id": "pr_auditlog_renewal",
+          "expected_events": 1.0,
+          "expected_cost_usd": 36000,
+          "neutralised": false
+        },
+        {
+          "pressure_id": "pr_billing_recon_hazard",
+          "expected_events": 0.48,
+          "expected_cost_usd": 192000,
+          "neutralised": false
+        }
+      ],
+      "risk": {
+        "score": 52.0,
+        "level": "high",
+        "settings_version": 1,
+        "components": {
+          "financial": 14.0,
+          "capability_workflow": 16.0,
+          "customer_revenue": 8.0,
+          "compliance_control": 6.0,
+          "execution_uncertainty": 8.0
+        }
+      },
+      "affected_department_ids": [
+        "dept_engineering",
+        "dept_operations"
+      ],
+      "feasible": true,
+      "rejection_reasons": [],
+      "assumptions": [
+        "Expected-value mode: pressure costs use mean probabilities."
+      ],
+      "computed_at": "2026-09-26T17:00:00Z"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_32",
+    "run_id": "run_sample",
+    "sequence": 32,
+    "type": "simulation_completed",
+    "actor": "engine",
+    "scenario_id": "scn_run_sample_delay_plan_recommended",
+    "future": "delay",
+    "timestamp": "2026-09-26T17:00:32Z",
+    "payload": {
+      "result_id": "res_run_sample_delay_plan_recommended",
+      "run_id": "run_sample",
+      "scenario_id": "scn_run_sample_delay_plan_recommended",
+      "future": "delay",
+      "plan_id": "plan_recommended",
+      "mode": "full",
+      "seed": 42,
+      "intervention_ids": [
+        "i_platform_ops",
+        "i_migration",
+        "i_eng"
+      ],
+      "value": {
+        "gross_savings_usd": 1610000,
+        "transition_cost_usd": 220000,
+        "added_cost_usd": 0,
+        "rebound_cost_usd": 90000,
+        "expected_business_loss_usd": 120000,
+        "pressure_cost_usd": 458000,
+        "avoided_failure_cost_usd": 0,
+        "net_value_usd": 722000,
+        "monthly_net_usd": [
+          -24000,
+          -48000,
+          -72000,
+          -290000,
+          -200000,
+          -95000,
+          20000,
+          150000,
+          290000,
+          430000,
+          580000,
+          722000
+        ],
+        "p10_net_value_usd": null,
+        "p50_net_value_usd": null,
+        "p90_net_value_usd": null
+      },
+      "goal_met": true,
+      "constraint_results": [
+        {
+          "constraint_id": "c_compliance",
+          "metric": "compliance_controls_broken",
+          "operator": "==",
+          "threshold": 0.0,
+          "value": 0.0,
+          "hard": true,
+          "passed": true,
+          "explanation": "Mandatory controls keep their supporting systems.",
+          "impact_ids": []
+        },
+        {
+          "constraint_id": "c_critical",
+          "metric": "critical_systems_degraded",
+          "operator": "==",
+          "threshold": 0.0,
+          "value": 0.0,
+          "hard": true,
+          "passed": true,
+          "explanation": "No critical system loses its owner.",
+          "impact_ids": []
+        },
+        {
+          "constraint_id": "c_revenue",
+          "metric": "revenue_impact_pct",
+          "operator": "<=",
+          "threshold": 3.0,
+          "value": 0.4,
+          "hard": true,
+          "passed": true,
+          "explanation": "Revenue impact stays under 3 percent.",
+          "impact_ids": []
+        },
+        {
+          "constraint_id": "c_stranded",
+          "metric": "stranded_workflows",
+          "operator": "==",
+          "threshold": 0.0,
+          "value": 0.0,
+          "hard": false,
+          "passed": true,
+          "explanation": "Billing reconciliation keeps one qualified owner.",
+          "impact_ids": []
+        }
+      ],
+      "impacts": [
+        {
+          "impact_id": "imp_delay_plan_recommended_ops_capacity",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_delay_plan_recommended",
+          "source_entity": "dept_operations",
+          "source_kind": "intervention",
+          "source_ref": "i_platform_ops",
+          "affected_entity": "dept_operations",
+          "affected_department": "dept_operations",
+          "level": "direct",
+          "category": "operational",
+          "polarity": "harm",
+          "direction": "decrease",
+          "metric": "capacity_fte",
+          "magnitude": 11.6,
+          "unit": "fte",
+          "value_usd": null,
+          "severity": 3,
+          "first_effect_day": 0,
+          "peak_effect_day": 30,
+          "confidence": 0.8,
+          "dependency_path": [],
+          "edge_path": [],
+          "evidence_refs": [],
+          "assumptions": [],
+          "constraint_refs": [],
+          "origin": "engine",
+          "status": "computed"
+        },
+        {
+          "impact_id": "imp_delay_plan_recommended_billing_recon",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_delay_plan_recommended",
+          "source_entity": "dept_operations",
+          "source_kind": "intervention",
+          "source_ref": "i_platform_ops",
+          "affected_entity": "wf_billing_recon",
+          "affected_department": "dept_operations",
+          "level": "dependent",
+          "category": "ownership",
+          "polarity": "harm",
+          "direction": "increase",
+          "metric": "failure_probability_monthly",
+          "magnitude": 0.03,
+          "unit": "ratio",
+          "value_usd": 120000,
+          "severity": 4,
+          "first_effect_day": 30,
+          "peak_effect_day": 120,
+          "confidence": 0.8,
+          "dependency_path": [
+            "role_billing_ops_lead",
+            "wf_billing_recon"
+          ],
+          "edge_path": [
+            "e_role_owns_billing_recon"
+          ],
+          "evidence_refs": [
+            "ev_billing_recon_matrix"
+          ],
+          "assumptions": [],
+          "constraint_refs": [
+            "c_stranded"
+          ],
+          "origin": "engine",
+          "status": "computed"
+        },
+        {
+          "impact_id": "imp_delay_plan_recommended_company_value",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_delay_plan_recommended",
+          "source_entity": "wf_billing_recon",
+          "source_kind": "intervention",
+          "source_ref": "i_platform_ops",
+          "affected_entity": "kpi_company",
+          "affected_department": null,
+          "level": "second_order",
+          "category": "business",
+          "polarity": "harm",
+          "direction": "decrease",
+          "metric": "net_value_usd",
+          "magnitude": 120000.0,
+          "unit": "usd",
+          "value_usd": 120000,
+          "severity": 3,
+          "first_effect_day": 60,
+          "peak_effect_day": 150,
+          "confidence": 0.8,
+          "dependency_path": [
+            "wf_billing_recon",
+            "kpi_company"
+          ],
+          "edge_path": [
+            "e_billing_recon_kpi"
+          ],
+          "evidence_refs": [
+            "ev_billing_recon_matrix"
+          ],
+          "assumptions": [],
+          "constraint_refs": [],
+          "origin": "engine",
+          "status": "computed"
+        },
+        {
+          "impact_id": "imp_delay_plan_recommended_eng_cost",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_delay_plan_recommended",
+          "source_entity": "dept_engineering",
+          "source_kind": "intervention",
+          "source_ref": "i_eng",
+          "affected_entity": "dept_engineering",
+          "affected_department": "dept_engineering",
+          "level": "direct",
+          "category": "financial",
+          "polarity": "benefit",
+          "direction": "decrease",
+          "metric": "annual_cost_usd",
+          "magnitude": 620000.0,
+          "unit": "usd",
+          "value_usd": 620000,
+          "severity": 2,
+          "first_effect_day": 0,
+          "peak_effect_day": 30,
+          "confidence": 0.8,
+          "dependency_path": [],
+          "edge_path": [],
+          "evidence_refs": [],
+          "assumptions": [],
+          "constraint_refs": [],
+          "origin": "engine",
+          "status": "computed"
+        },
+        {
+          "impact_id": "imp_delay_plan_recommended_migration",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_delay_plan_recommended",
+          "source_entity": "proj_warehouse_migration",
+          "source_kind": "intervention",
+          "source_ref": "i_migration",
+          "affected_entity": "proj_warehouse_migration",
+          "affected_department": "dept_engineering",
+          "level": "direct",
+          "category": "financial",
+          "polarity": "benefit",
+          "direction": "decrease",
+          "metric": "remaining_cost_usd",
+          "magnitude": 290000.0,
+          "unit": "usd",
+          "value_usd": 290000,
+          "severity": 2,
+          "first_effect_day": 0,
+          "peak_effect_day": 0,
+          "confidence": 0.8,
+          "dependency_path": [],
+          "edge_path": [],
+          "evidence_refs": [],
+          "assumptions": [],
+          "constraint_refs": [],
+          "origin": "engine",
+          "status": "computed"
+        }
+      ],
+      "workflow_coverage": [
+        {
+          "workflow_id": "wf_billing_recon",
+          "criticality": "critical",
+          "owners_before": [
+            "role_billing_ops_lead"
+          ],
+          "owners_after": [
+            "role_billing_ops_lead"
+          ],
+          "min_qualified_owners": 1,
+          "backup_count_after": 0,
+          "documented_pct": 30.0,
+          "stranded": false,
+          "reasons": [
+            "One qualified owner remains and has no backup."
+          ]
+        }
+      ],
+      "pressures_triggered": [
+        {
+          "pressure_id": "pr_cloud_growth",
+          "expected_events": 12.0,
+          "expected_cost_usd": 64000,
+          "neutralised": false
+        },
+        {
+          "pressure_id": "pr_auditlog_renewal",
+          "expected_events": 1.0,
+          "expected_cost_usd": 36000,
+          "neutralised": false
+        },
+        {
+          "pressure_id": "pr_billing_recon_hazard",
+          "expected_events": 0.48,
+          "expected_cost_usd": 358000,
+          "neutralised": false
+        }
+      ],
+      "risk": {
+        "score": 44.0,
+        "level": "medium",
+        "settings_version": 1,
+        "components": {
+          "financial": 10.0,
+          "capability_workflow": 13.0,
+          "customer_revenue": 7.0,
+          "compliance_control": 7.0,
+          "execution_uncertainty": 7.0
+        }
+      },
+      "affected_department_ids": [
+        "dept_engineering",
+        "dept_operations"
+      ],
+      "feasible": true,
+      "rejection_reasons": [],
+      "assumptions": [
+        "Expected-value mode: pressure costs use mean probabilities."
+      ],
+      "computed_at": "2026-09-26T17:00:00Z"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_33",
+    "run_id": "run_sample",
+    "sequence": 33,
+    "type": "phase_changed",
+    "actor": "orchestrator",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:33Z",
+    "payload": {
+      "from_status": "propagating",
+      "to_status": "comparing_futures"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_34",
+    "run_id": "run_sample",
+    "sequence": 34,
+    "type": "futures_compared",
+    "actor": "engine",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:34Z",
+    "payload": {
+      "comparison_id": "cmp_run_sample",
+      "decision_id": "dec_cut_2m",
+      "run_id": "run_sample",
+      "reference_result_id": "res_run_sample_inaction_none",
+      "rows": [
+        {
+          "future": "act_now",
+          "plan_id": "plan_recommended",
+          "result_id": "res_run_sample_act_now_plan_recommended",
+          "label": "Act now",
+          "net_value_p50_usd": 1310000,
+          "delta_vs_inaction_p10_usd": 1602000,
+          "delta_vs_inaction_p50_usd": 1602000,
+          "delta_vs_inaction_p90_usd": 1602000,
+          "p_better_than_inaction": 1.0,
+          "breakeven_day": 60,
+          "cost_of_delay_usd": null,
+          "feasible": true,
+          "risk_score": 38.0,
+          "monthly_delta_usd": [
+            -196000,
+            -47000,
+            92000,
+            236000,
+            375000,
+            514000,
+            648000,
+            832000,
+            1016000,
+            1210000,
+            1406000,
+            1602000
+          ]
+        },
+        {
+          "future": "inaction",
+          "plan_id": null,
+          "result_id": "res_run_sample_inaction_none",
+          "label": "Do nothing",
+          "net_value_p50_usd": -292000,
+          "delta_vs_inaction_p10_usd": 0,
+          "delta_vs_inaction_p50_usd": 0,
+          "delta_vs_inaction_p90_usd": 0,
+          "p_better_than_inaction": 0.0,
+          "breakeven_day": null,
+          "cost_of_delay_usd": null,
+          "feasible": true,
+          "risk_score": 52.0,
+          "monthly_delta_usd": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "future": "delay",
+          "plan_id": "plan_recommended",
+          "result_id": "res_run_sample_delay_plan_recommended",
+          "label": "Wait 90 days",
+          "net_value_p50_usd": 722000,
+          "delta_vs_inaction_p10_usd": 1014000,
+          "delta_vs_inaction_p50_usd": 1014000,
+          "delta_vs_inaction_p90_usd": 1014000,
+          "p_better_than_inaction": 1.0,
+          "breakeven_day": 150,
+          "cost_of_delay_usd": 588000,
+          "feasible": true,
+          "risk_score": 44.0,
+          "monthly_delta_usd": [
+            0,
+            0,
+            0,
+            -194000,
+            -80000,
+            49000,
+            188000,
+            342000,
+            506000,
+            670000,
+            846000,
+            1014000
+          ]
+        }
+      ],
+      "best_row_index": 0,
+      "headline": "Acting now is worth $1.6M more than doing nothing; waiting 90 days costs $0.59M."
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_35",
+    "run_id": "run_sample",
+    "sequence": 35,
+    "type": "blast_radius_ready",
+    "actor": "engine",
+    "scenario_id": "scn_run_sample_act_now_plan_recommended",
+    "future": "act_now",
+    "timestamp": "2026-09-26T17:00:35Z",
+    "payload": {
+      "run_id": "run_sample",
+      "scenario_id": "scn_run_sample_act_now_plan_recommended",
+      "future": "act_now",
+      "plan_id": "plan_recommended",
+      "root_node_id": "dec_cut_2m",
+      "nodes": [
+        {
+          "node_id": "dec_cut_2m",
+          "kind": "decision",
+          "department_id": null,
+          "entity_id": null,
+          "pressure_id": null,
+          "headline": "Cut $2M in annual cost",
+          "level": null,
+          "category": null,
+          "polarity": null,
+          "severity": null,
+          "value_usd": null,
+          "first_effect_day": null,
+          "impact_ids": []
+        },
+        {
+          "node_id": "dept_operations",
+          "kind": "department",
+          "department_id": "dept_operations",
+          "entity_id": null,
+          "pressure_id": null,
+          "headline": "Operations loses 20 percent platform capacity",
+          "level": "direct",
+          "category": "operational",
+          "polarity": "harm",
+          "severity": 3,
+          "value_usd": null,
+          "first_effect_day": 0,
+          "impact_ids": [
+            "imp_act_now_plan_recommended_ops_capacity"
+          ]
+        },
+        {
+          "node_id": "wf_billing_recon",
+          "kind": "entity",
+          "department_id": "dept_operations",
+          "entity_id": "wf_billing_recon",
+          "pressure_id": null,
+          "headline": "Billing reconciliation left with one owner",
+          "level": "dependent",
+          "category": "ownership",
+          "polarity": "harm",
+          "severity": 4,
+          "value_usd": 120000,
+          "first_effect_day": 30,
+          "impact_ids": [
+            "imp_act_now_plan_recommended_billing_recon"
+          ]
+        },
+        {
+          "node_id": "dept_engineering",
+          "kind": "department",
+          "department_id": "dept_engineering",
+          "entity_id": null,
+          "pressure_id": null,
+          "headline": "Engineering saves $0.62M a year",
+          "level": "direct",
+          "category": "financial",
+          "polarity": "benefit",
+          "severity": 2,
+          "value_usd": 620000,
+          "first_effect_day": 0,
+          "impact_ids": [
+            "imp_act_now_plan_recommended_eng_cost",
+            "imp_act_now_plan_recommended_migration"
+          ]
+        },
+        {
+          "node_id": "kpi_company",
+          "kind": "outcome",
+          "department_id": null,
+          "entity_id": null,
+          "pressure_id": null,
+          "headline": "Company net value rises by $1.31M",
+          "level": null,
+          "category": null,
+          "polarity": null,
+          "severity": null,
+          "value_usd": 1310000,
+          "first_effect_day": null,
+          "impact_ids": []
+        }
+      ],
+      "edges": [
+        {
+          "source": "dec_cut_2m",
+          "target": "dept_operations",
+          "label": "reduce capacity 20%",
+          "level": "direct",
+          "critical_constraint": false,
+          "channel_id": null
+        },
+        {
+          "source": "dept_operations",
+          "target": "wf_billing_recon",
+          "label": "owner capacity drops",
+          "level": "dependent",
+          "critical_constraint": true,
+          "channel_id": null
+        },
+        {
+          "source": "dec_cut_2m",
+          "target": "dept_engineering",
+          "label": "reduce capacity 10%, stop migration",
+          "level": "direct",
+          "critical_constraint": false,
+          "channel_id": null
+        },
+        {
+          "source": "wf_billing_recon",
+          "target": "kpi_company",
+          "label": "reconciliation risk",
+          "level": "second_order",
+          "critical_constraint": false,
+          "channel_id": null
+        },
+        {
+          "source": "dept_engineering",
+          "target": "kpi_company",
+          "label": "annual savings",
+          "level": "direct",
+          "critical_constraint": false,
+          "channel_id": null
+        }
+      ],
+      "departments": [
+        {
+          "department_id": "dept_operations",
+          "headline": "Billing reconciliation risk rises",
+          "polarity": "harm",
+          "severity": 4,
+          "impact_ids": [
+            "imp_act_now_plan_recommended_ops_capacity",
+            "imp_act_now_plan_recommended_billing_recon"
+          ]
+        },
+        {
+          "department_id": "dept_engineering",
+          "headline": "Capacity and project savings",
+          "polarity": "benefit",
+          "severity": 2,
+          "impact_ids": [
+            "imp_act_now_plan_recommended_eng_cost",
+            "imp_act_now_plan_recommended_migration"
+          ]
+        }
+      ],
+      "outcome": {
+        "net_value_usd": 1310000,
+        "risk_level": "medium",
+        "headline": "Net value $1.31M with medium risk."
+      }
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_36",
+    "run_id": "run_sample",
+    "sequence": 36,
+    "type": "blast_radius_ready",
+    "actor": "engine",
+    "scenario_id": "scn_run_sample_inaction_none",
+    "future": "inaction",
+    "timestamp": "2026-09-26T17:00:36Z",
+    "payload": {
+      "run_id": "run_sample",
+      "scenario_id": "scn_run_sample_inaction_none",
+      "future": "inaction",
+      "plan_id": null,
+      "root_node_id": "dec_cut_2m",
+      "nodes": [
+        {
+          "node_id": "dec_cut_2m",
+          "kind": "decision",
+          "department_id": null,
+          "entity_id": null,
+          "pressure_id": null,
+          "headline": "Do nothing",
+          "level": null,
+          "category": null,
+          "polarity": null,
+          "severity": null,
+          "value_usd": null,
+          "first_effect_day": null,
+          "impact_ids": []
+        },
+        {
+          "node_id": "pr_cloud_growth",
+          "kind": "pressure",
+          "department_id": null,
+          "entity_id": null,
+          "pressure_id": "pr_cloud_growth",
+          "headline": "Cloud spend keeps growing",
+          "level": null,
+          "category": null,
+          "polarity": "harm",
+          "severity": 2,
+          "value_usd": 64000,
+          "first_effect_day": null,
+          "impact_ids": [
+            "imp_inaction_none_cloud_growth"
+          ]
+        },
+        {
+          "node_id": "pr_auditlog_renewal",
+          "kind": "pressure",
+          "department_id": null,
+          "entity_id": null,
+          "pressure_id": "pr_auditlog_renewal",
+          "headline": "Audit log renewal price step on day 120",
+          "level": null,
+          "category": null,
+          "polarity": "harm",
+          "severity": 2,
+          "value_usd": 36000,
+          "first_effect_day": 120,
+          "impact_ids": [
+            "imp_inaction_none_auditlog_renewal"
+          ]
+        },
+        {
+          "node_id": "pr_billing_recon_hazard",
+          "kind": "pressure",
+          "department_id": null,
+          "entity_id": null,
+          "pressure_id": "pr_billing_recon_hazard",
+          "headline": "Billing reconciliation can fail",
+          "level": null,
+          "category": null,
+          "polarity": "harm",
+          "severity": 4,
+          "value_usd": 192000,
+          "first_effect_day": null,
+          "impact_ids": [
+            "imp_inaction_none_billing_hazard"
+          ]
+        },
+        {
+          "node_id": "kpi_company",
+          "kind": "outcome",
+          "department_id": null,
+          "entity_id": null,
+          "pressure_id": null,
+          "headline": "Company net value falls by $0.29M",
+          "level": null,
+          "category": null,
+          "polarity": null,
+          "severity": null,
+          "value_usd": -292000,
+          "first_effect_day": null,
+          "impact_ids": []
+        }
+      ],
+      "edges": [
+        {
+          "source": "dec_cut_2m",
+          "target": "pr_cloud_growth",
+          "label": "pressure continues",
+          "level": null,
+          "critical_constraint": false,
+          "channel_id": null
+        },
+        {
+          "source": "dec_cut_2m",
+          "target": "pr_auditlog_renewal",
+          "label": "pressure continues",
+          "level": null,
+          "critical_constraint": false,
+          "channel_id": null
+        },
+        {
+          "source": "dec_cut_2m",
+          "target": "pr_billing_recon_hazard",
+          "label": "pressure continues",
+          "level": null,
+          "critical_constraint": false,
+          "channel_id": null
+        },
+        {
+          "source": "pr_billing_recon_hazard",
+          "target": "kpi_company",
+          "label": "expected failure cost",
+          "level": "direct",
+          "critical_constraint": false,
+          "channel_id": null
+        }
+      ],
+      "departments": [
+        {
+          "department_id": "dept_operations",
+          "headline": "Billing hazard and renewal step",
+          "polarity": "harm",
+          "severity": 4,
+          "impact_ids": [
+            "imp_inaction_none_auditlog_renewal",
+            "imp_inaction_none_billing_hazard"
+          ]
+        },
+        {
+          "department_id": "dept_engineering",
+          "headline": "Cloud cost growth",
+          "polarity": "harm",
+          "severity": 2,
+          "impact_ids": [
+            "imp_inaction_none_cloud_growth"
+          ]
+        }
+      ],
+      "outcome": {
+        "net_value_usd": -292000,
+        "risk_level": "high",
+        "headline": "Net value -$0.29M with high risk."
+      }
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_37",
+    "run_id": "run_sample",
+    "sequence": 37,
+    "type": "phase_changed",
+    "actor": "orchestrator",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:37Z",
+    "payload": {
+      "from_status": "comparing_futures",
+      "to_status": "generating_package"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_38",
+    "run_id": "run_sample",
+    "sequence": 38,
+    "type": "package_ready",
+    "actor": "orchestrator",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:38Z",
+    "payload": {
+      "schema_version": "2.1.0",
+      "package_id": "pkg_run_sample",
+      "run_id": "run_sample",
+      "decision_id": "dec_cut_2m",
+      "versions": {
+        "twin_version": "stub-twin-1",
+        "settings_version": 1,
+        "prompt_version": "stub",
+        "model_id": "stub",
+        "engine_version": "stub",
+        "created_at": "2026-09-26T17:00:00Z",
+        "as_of_date": "2026-09-26"
+      },
+      "brief": {
+        "schema_version": "2.1.0",
+        "decision_id": "dec_cut_2m",
+        "decision_type": "cost_reduction",
+        "title": "Cut $2M in annual cost",
+        "statement": "Find at least $2M of gross annual savings without breaking compliance or critical systems.",
+        "goal": {
+          "metric": "annual_savings_usd",
+          "target": 2000000.0,
+          "unit": "usd",
+          "basis": "gross",
+          "direction": "at_least"
+        },
+        "horizon_days": 365,
+        "candidate_interventions": [
+          {
+            "id": "i_platform_ops",
+            "kind": "action",
+            "type": "reduce_capacity",
+            "target_entity_id": "dept_operations",
+            "amount_pct": 20.0,
+            "amount_usd": null,
+            "start_day": 0,
+            "duration_days": null,
+            "one_time_cost_usd": 60000,
+            "new_owner_id": null,
+            "params": {
+              "scope": "platform_ops"
+            },
+            "rationale": "Platform operations is over sanctioned headcount."
+          },
+          {
+            "id": "i_auditlog",
+            "kind": "action",
+            "type": "remove_vendor",
+            "target_entity_id": "vendor_auditlog",
+            "amount_pct": null,
+            "amount_usd": null,
+            "start_day": 30,
+            "duration_days": null,
+            "one_time_cost_usd": 0,
+            "new_owner_id": null,
+            "params": {},
+            "rationale": "Audit log vendor overlaps with in-house logging."
+          },
+          {
+            "id": "i_migration",
+            "kind": "action",
+            "type": "stop_project",
+            "target_entity_id": "proj_warehouse_migration",
+            "amount_pct": null,
+            "amount_usd": null,
+            "start_day": 0,
+            "duration_days": null,
+            "one_time_cost_usd": 40000,
+            "new_owner_id": null,
+            "params": {},
+            "rationale": "Warehouse migration is behind schedule."
+          },
+          {
+            "id": "i_eng",
+            "kind": "action",
+            "type": "reduce_capacity",
+            "target_entity_id": "dept_engineering",
+            "amount_pct": 10.0,
+            "amount_usd": null,
+            "start_day": 0,
+            "duration_days": null,
+            "one_time_cost_usd": 120000,
+            "new_owner_id": null,
+            "params": {},
+            "rationale": "Engineering capacity trimmed to match roadmap."
+          }
+        ],
+        "protected_entity_ids": [
+          "ctl_soc2_audit_logging"
+        ],
+        "constraints": [
+          {
+            "id": "c_compliance",
+            "metric": "compliance_controls_broken",
+            "operator": "==",
+            "threshold": 0.0,
+            "unit": "count",
+            "hard": true,
+            "scope_entity_id": null,
+            "description": "compliance_controls_broken == 0"
+          },
+          {
+            "id": "c_critical",
+            "metric": "critical_systems_degraded",
+            "operator": "==",
+            "threshold": 0.0,
+            "unit": "count",
+            "hard": true,
+            "scope_entity_id": null,
+            "description": "critical_systems_degraded == 0"
+          },
+          {
+            "id": "c_revenue",
+            "metric": "revenue_impact_pct",
+            "operator": "<=",
+            "threshold": 3.0,
+            "unit": "pct",
+            "hard": true,
+            "scope_entity_id": null,
+            "description": "revenue_impact_pct <= 3"
+          },
+          {
+            "id": "c_stranded",
+            "metric": "stranded_workflows",
+            "operator": "==",
+            "threshold": 0.0,
+            "unit": "count",
+            "hard": false,
+            "scope_entity_id": null,
+            "description": "stranded_workflows == 0"
+          }
+        ],
+        "futures": [
+          "act_now",
+          "inaction",
+          "delay"
+        ],
+        "delay_days": 90,
+        "active_pressure_ids": [
+          "pr_cloud_growth",
+          "pr_auditlog_renewal",
+          "pr_billing_recon_hazard"
+        ],
+        "seed": 42,
+        "mc_samples": 1000,
+        "created_by": "demo_user"
+      },
+      "recommendation": {
+        "plan_id": "plan_recommended",
+        "future": "act_now",
+        "result_id": "res_run_sample_act_now_plan_recommended",
+        "headline": "Cut operations, engineering and the migration now; keep the audit log vendor.",
+        "claims": [
+          {
+            "text": "Acting now is worth $1.6M more than doing nothing.",
+            "source": "calculation",
+            "ref": "cmp_run_sample"
+          },
+          {
+            "text": "Removing the audit log vendor would break SOC2 audit logging.",
+            "source": "evidence",
+            "ref": "ev_auditlog_contract"
+          }
+        ]
+      },
+      "futures": {
+        "comparison_id": "cmp_run_sample",
+        "decision_id": "dec_cut_2m",
+        "run_id": "run_sample",
+        "reference_result_id": "res_run_sample_inaction_none",
+        "rows": [
+          {
+            "future": "act_now",
+            "plan_id": "plan_recommended",
+            "result_id": "res_run_sample_act_now_plan_recommended",
+            "label": "Act now",
+            "net_value_p50_usd": 1310000,
+            "delta_vs_inaction_p10_usd": 1602000,
+            "delta_vs_inaction_p50_usd": 1602000,
+            "delta_vs_inaction_p90_usd": 1602000,
+            "p_better_than_inaction": 1.0,
+            "breakeven_day": 60,
+            "cost_of_delay_usd": null,
+            "feasible": true,
+            "risk_score": 38.0,
+            "monthly_delta_usd": [
+              -196000,
+              -47000,
+              92000,
+              236000,
+              375000,
+              514000,
+              648000,
+              832000,
+              1016000,
+              1210000,
+              1406000,
+              1602000
+            ]
+          },
+          {
+            "future": "inaction",
+            "plan_id": null,
+            "result_id": "res_run_sample_inaction_none",
+            "label": "Do nothing",
+            "net_value_p50_usd": -292000,
+            "delta_vs_inaction_p10_usd": 0,
+            "delta_vs_inaction_p50_usd": 0,
+            "delta_vs_inaction_p90_usd": 0,
+            "p_better_than_inaction": 0.0,
+            "breakeven_day": null,
+            "cost_of_delay_usd": null,
+            "feasible": true,
+            "risk_score": 52.0,
+            "monthly_delta_usd": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "future": "delay",
+            "plan_id": "plan_recommended",
+            "result_id": "res_run_sample_delay_plan_recommended",
+            "label": "Wait 90 days",
+            "net_value_p50_usd": 722000,
+            "delta_vs_inaction_p10_usd": 1014000,
+            "delta_vs_inaction_p50_usd": 1014000,
+            "delta_vs_inaction_p90_usd": 1014000,
+            "p_better_than_inaction": 1.0,
+            "breakeven_day": 150,
+            "cost_of_delay_usd": 588000,
+            "feasible": true,
+            "risk_score": 44.0,
+            "monthly_delta_usd": [
+              0,
+              0,
+              0,
+              -194000,
+              -80000,
+              49000,
+              188000,
+              342000,
+              506000,
+              670000,
+              846000,
+              1014000
+            ]
+          }
+        ],
+        "best_row_index": 0,
+        "headline": "Acting now is worth $1.6M more than doing nothing; waiting 90 days costs $0.59M."
+      },
+      "portfolios": {
+        "evaluated_count": 15,
+        "naive": {
+          "plan_id": "plan_naive",
+          "intervention_ids": [
+            "i_platform_ops",
+            "i_auditlog",
+            "i_migration",
+            "i_eng"
+          ],
+          "rank": null,
+          "result": {
+            "result_id": "res_run_sample_act_now_plan_naive",
+            "run_id": "run_sample",
+            "scenario_id": "scn_run_sample_act_now_plan_naive",
+            "future": "act_now",
+            "plan_id": "plan_naive",
+            "mode": "full",
+            "seed": 42,
+            "intervention_ids": [
+              "i_platform_ops",
+              "i_auditlog",
+              "i_migration",
+              "i_eng"
+            ],
+            "value": {
+              "gross_savings_usd": 2480000,
+              "transition_cost_usd": 220000,
+              "added_cost_usd": 0,
+              "rebound_cost_usd": 90000,
+              "expected_business_loss_usd": 120000,
+              "pressure_cost_usd": 374000,
+              "avoided_failure_cost_usd": 0,
+              "net_value_usd": 1676000,
+              "monthly_net_usd": [
+                -220000,
+                -80000,
+                60000,
+                200000,
+                340000,
+                480000,
+                640000,
+                850000,
+                1060000,
+                1270000,
+                1470000,
+                1676000
+              ],
+              "p10_net_value_usd": null,
+              "p50_net_value_usd": null,
+              "p90_net_value_usd": null
+            },
+            "goal_met": true,
+            "constraint_results": [
+              {
+                "constraint_id": "c_compliance",
+                "metric": "compliance_controls_broken",
+                "operator": "==",
+                "threshold": 0.0,
+                "value": 1.0,
+                "hard": true,
+                "passed": false,
+                "explanation": "Removing vendor_auditlog breaks ctl_soc2_audit_logging.",
+                "impact_ids": []
+              },
+              {
+                "constraint_id": "c_critical",
+                "metric": "critical_systems_degraded",
+                "operator": "==",
+                "threshold": 0.0,
+                "value": 0.0,
+                "hard": true,
+                "passed": true,
+                "explanation": "No critical system loses its owner.",
+                "impact_ids": []
+              },
+              {
+                "constraint_id": "c_revenue",
+                "metric": "revenue_impact_pct",
+                "operator": "<=",
+                "threshold": 3.0,
+                "value": 0.4,
+                "hard": true,
+                "passed": true,
+                "explanation": "Revenue impact stays under 3 percent.",
+                "impact_ids": []
+              },
+              {
+                "constraint_id": "c_stranded",
+                "metric": "stranded_workflows",
+                "operator": "==",
+                "threshold": 0.0,
+                "value": 0.0,
+                "hard": false,
+                "passed": true,
+                "explanation": "Billing reconciliation keeps one qualified owner.",
+                "impact_ids": []
+              }
+            ],
+            "impacts": [
+              {
+                "impact_id": "imp_act_now_plan_naive_ops_capacity",
+                "decision_id": "dec_cut_2m",
+                "scenario_id": "scn_run_sample_act_now_plan_naive",
+                "source_entity": "dept_operations",
+                "source_kind": "intervention",
+                "source_ref": "i_platform_ops",
+                "affected_entity": "dept_operations",
+                "affected_department": "dept_operations",
+                "level": "direct",
+                "category": "operational",
+                "polarity": "harm",
+                "direction": "decrease",
+                "metric": "capacity_fte",
+                "magnitude": 11.6,
+                "unit": "fte",
+                "value_usd": null,
+                "severity": 3,
+                "first_effect_day": 0,
+                "peak_effect_day": 30,
+                "confidence": 0.8,
+                "dependency_path": [],
+                "edge_path": [],
+                "evidence_refs": [],
+                "assumptions": [],
+                "constraint_refs": [],
+                "origin": "engine",
+                "status": "computed"
+              },
+              {
+                "impact_id": "imp_act_now_plan_naive_billing_recon",
+                "decision_id": "dec_cut_2m",
+                "scenario_id": "scn_run_sample_act_now_plan_naive",
+                "source_entity": "dept_operations",
+                "source_kind": "intervention",
+                "source_ref": "i_platform_ops",
+                "affected_entity": "wf_billing_recon",
+                "affected_department": "dept_operations",
+                "level": "dependent",
+                "category": "ownership",
+                "polarity": "harm",
+                "direction": "increase",
+                "metric": "failure_probability_monthly",
+                "magnitude": 0.03,
+                "unit": "ratio",
+                "value_usd": 120000,
+                "severity": 4,
+                "first_effect_day": 30,
+                "peak_effect_day": 120,
+                "confidence": 0.8,
+                "dependency_path": [
+                  "role_billing_ops_lead",
+                  "wf_billing_recon"
+                ],
+                "edge_path": [
+                  "e_role_owns_billing_recon"
+                ],
+                "evidence_refs": [
+                  "ev_billing_recon_matrix"
+                ],
+                "assumptions": [],
+                "constraint_refs": [
+                  "c_stranded"
+                ],
+                "origin": "engine",
+                "status": "computed"
+              },
+              {
+                "impact_id": "imp_act_now_plan_naive_company_value",
+                "decision_id": "dec_cut_2m",
+                "scenario_id": "scn_run_sample_act_now_plan_naive",
+                "source_entity": "wf_billing_recon",
+                "source_kind": "intervention",
+                "source_ref": "i_platform_ops",
+                "affected_entity": "kpi_company",
+                "affected_department": null,
+                "level": "second_order",
+                "category": "business",
+                "polarity": "harm",
+                "direction": "decrease",
+                "metric": "net_value_usd",
+                "magnitude": 120000.0,
+                "unit": "usd",
+                "value_usd": 120000,
+                "severity": 3,
+                "first_effect_day": 60,
+                "peak_effect_day": 150,
+                "confidence": 0.8,
+                "dependency_path": [
+                  "wf_billing_recon",
+                  "kpi_company"
+                ],
+                "edge_path": [
+                  "e_billing_recon_kpi"
+                ],
+                "evidence_refs": [
+                  "ev_billing_recon_matrix"
+                ],
+                "assumptions": [],
+                "constraint_refs": [],
+                "origin": "engine",
+                "status": "computed"
+              },
+              {
+                "impact_id": "imp_act_now_plan_naive_eng_cost",
+                "decision_id": "dec_cut_2m",
+                "scenario_id": "scn_run_sample_act_now_plan_naive",
+                "source_entity": "dept_engineering",
+                "source_kind": "intervention",
+                "source_ref": "i_eng",
+                "affected_entity": "dept_engineering",
+                "affected_department": "dept_engineering",
+                "level": "direct",
+                "category": "financial",
+                "polarity": "benefit",
+                "direction": "decrease",
+                "metric": "annual_cost_usd",
+                "magnitude": 620000.0,
+                "unit": "usd",
+                "value_usd": 620000,
+                "severity": 2,
+                "first_effect_day": 0,
+                "peak_effect_day": 30,
+                "confidence": 0.8,
+                "dependency_path": [],
+                "edge_path": [],
+                "evidence_refs": [],
+                "assumptions": [],
+                "constraint_refs": [],
+                "origin": "engine",
+                "status": "computed"
+              },
+              {
+                "impact_id": "imp_act_now_plan_naive_migration",
+                "decision_id": "dec_cut_2m",
+                "scenario_id": "scn_run_sample_act_now_plan_naive",
+                "source_entity": "proj_warehouse_migration",
+                "source_kind": "intervention",
+                "source_ref": "i_migration",
+                "affected_entity": "proj_warehouse_migration",
+                "affected_department": "dept_engineering",
+                "level": "direct",
+                "category": "financial",
+                "polarity": "benefit",
+                "direction": "decrease",
+                "metric": "remaining_cost_usd",
+                "magnitude": 290000.0,
+                "unit": "usd",
+                "value_usd": 290000,
+                "severity": 2,
+                "first_effect_day": 0,
+                "peak_effect_day": 0,
+                "confidence": 0.8,
+                "dependency_path": [],
+                "edge_path": [],
+                "evidence_refs": [],
+                "assumptions": [],
+                "constraint_refs": [],
+                "origin": "engine",
+                "status": "computed"
+              }
+            ],
+            "workflow_coverage": [
+              {
+                "workflow_id": "wf_billing_recon",
+                "criticality": "critical",
+                "owners_before": [
+                  "role_billing_ops_lead"
+                ],
+                "owners_after": [
+                  "role_billing_ops_lead"
+                ],
+                "min_qualified_owners": 1,
+                "backup_count_after": 0,
+                "documented_pct": 30.0,
+                "stranded": false,
+                "reasons": [
+                  "One qualified owner remains and has no backup."
+                ]
+              }
+            ],
+            "pressures_triggered": [
+              {
+                "pressure_id": "pr_cloud_growth",
+                "expected_events": 12.0,
+                "expected_cost_usd": 64000,
+                "neutralised": false
+              },
+              {
+                "pressure_id": "pr_auditlog_renewal",
+                "expected_events": 0.0,
+                "expected_cost_usd": 0,
+                "neutralised": true
+              },
+              {
+                "pressure_id": "pr_billing_recon_hazard",
+                "expected_events": 0.48,
+                "expected_cost_usd": 310000,
+                "neutralised": false
+              }
+            ],
+            "risk": {
+              "score": 71.0,
+              "level": "high",
+              "settings_version": 1,
+              "components": {
+                "financial": 9.0,
+                "capability_workflow": 14.0,
+                "customer_revenue": 6.0,
+                "compliance_control": 35.0,
+                "execution_uncertainty": 7.0
+              }
+            },
+            "affected_department_ids": [
+              "dept_engineering",
+              "dept_operations"
+            ],
+            "feasible": false,
+            "rejection_reasons": [
+              "Removing vendor_auditlog breaks the protected control ctl_soc2_audit_logging."
+            ],
+            "assumptions": [
+              "Expected-value mode: pressure costs use mean probabilities."
+            ],
+            "computed_at": "2026-09-26T17:00:00Z"
+          }
+        },
+        "recommended": {
+          "plan_id": "plan_recommended",
+          "intervention_ids": [
+            "i_platform_ops",
+            "i_migration",
+            "i_eng"
+          ],
+          "rank": 1,
+          "result": {
+            "result_id": "res_run_sample_act_now_plan_recommended",
+            "run_id": "run_sample",
+            "scenario_id": "scn_run_sample_act_now_plan_recommended",
+            "future": "act_now",
+            "plan_id": "plan_recommended",
+            "mode": "full",
+            "seed": 42,
+            "intervention_ids": [
+              "i_platform_ops",
+              "i_migration",
+              "i_eng"
+            ],
+            "value": {
+              "gross_savings_usd": 2150000,
+              "transition_cost_usd": 220000,
+              "added_cost_usd": 0,
+              "rebound_cost_usd": 90000,
+              "expected_business_loss_usd": 120000,
+              "pressure_cost_usd": 410000,
+              "avoided_failure_cost_usd": 0,
+              "net_value_usd": 1310000,
+              "monthly_net_usd": [
+                -220000,
+                -95000,
+                20000,
+                140000,
+                255000,
+                370000,
+                480000,
+                640000,
+                800000,
+                970000,
+                1140000,
+                1310000
+              ],
+              "p10_net_value_usd": null,
+              "p50_net_value_usd": null,
+              "p90_net_value_usd": null
+            },
+            "goal_met": true,
+            "constraint_results": [
+              {
+                "constraint_id": "c_compliance",
+                "metric": "compliance_controls_broken",
+                "operator": "==",
+                "threshold": 0.0,
+                "value": 0.0,
+                "hard": true,
+                "passed": true,
+                "explanation": "Mandatory controls keep their supporting systems.",
+                "impact_ids": []
+              },
+              {
+                "constraint_id": "c_critical",
+                "metric": "critical_systems_degraded",
+                "operator": "==",
+                "threshold": 0.0,
+                "value": 0.0,
+                "hard": true,
+                "passed": true,
+                "explanation": "No critical system loses its owner.",
+                "impact_ids": []
+              },
+              {
+                "constraint_id": "c_revenue",
+                "metric": "revenue_impact_pct",
+                "operator": "<=",
+                "threshold": 3.0,
+                "value": 0.4,
+                "hard": true,
+                "passed": true,
+                "explanation": "Revenue impact stays under 3 percent.",
+                "impact_ids": []
+              },
+              {
+                "constraint_id": "c_stranded",
+                "metric": "stranded_workflows",
+                "operator": "==",
+                "threshold": 0.0,
+                "value": 0.0,
+                "hard": false,
+                "passed": true,
+                "explanation": "Billing reconciliation keeps one qualified owner.",
+                "impact_ids": []
+              }
+            ],
+            "impacts": [
+              {
+                "impact_id": "imp_act_now_plan_recommended_ops_capacity",
+                "decision_id": "dec_cut_2m",
+                "scenario_id": "scn_run_sample_act_now_plan_recommended",
+                "source_entity": "dept_operations",
+                "source_kind": "intervention",
+                "source_ref": "i_platform_ops",
+                "affected_entity": "dept_operations",
+                "affected_department": "dept_operations",
+                "level": "direct",
+                "category": "operational",
+                "polarity": "harm",
+                "direction": "decrease",
+                "metric": "capacity_fte",
+                "magnitude": 11.6,
+                "unit": "fte",
+                "value_usd": null,
+                "severity": 3,
+                "first_effect_day": 0,
+                "peak_effect_day": 30,
+                "confidence": 0.8,
+                "dependency_path": [],
+                "edge_path": [],
+                "evidence_refs": [],
+                "assumptions": [],
+                "constraint_refs": [],
+                "origin": "engine",
+                "status": "computed"
+              },
+              {
+                "impact_id": "imp_act_now_plan_recommended_billing_recon",
+                "decision_id": "dec_cut_2m",
+                "scenario_id": "scn_run_sample_act_now_plan_recommended",
+                "source_entity": "dept_operations",
+                "source_kind": "intervention",
+                "source_ref": "i_platform_ops",
+                "affected_entity": "wf_billing_recon",
+                "affected_department": "dept_operations",
+                "level": "dependent",
+                "category": "ownership",
+                "polarity": "harm",
+                "direction": "increase",
+                "metric": "failure_probability_monthly",
+                "magnitude": 0.03,
+                "unit": "ratio",
+                "value_usd": 120000,
+                "severity": 4,
+                "first_effect_day": 30,
+                "peak_effect_day": 120,
+                "confidence": 0.8,
+                "dependency_path": [
+                  "role_billing_ops_lead",
+                  "wf_billing_recon"
+                ],
+                "edge_path": [
+                  "e_role_owns_billing_recon"
+                ],
+                "evidence_refs": [
+                  "ev_billing_recon_matrix"
+                ],
+                "assumptions": [],
+                "constraint_refs": [
+                  "c_stranded"
+                ],
+                "origin": "engine",
+                "status": "computed"
+              },
+              {
+                "impact_id": "imp_act_now_plan_recommended_company_value",
+                "decision_id": "dec_cut_2m",
+                "scenario_id": "scn_run_sample_act_now_plan_recommended",
+                "source_entity": "wf_billing_recon",
+                "source_kind": "intervention",
+                "source_ref": "i_platform_ops",
+                "affected_entity": "kpi_company",
+                "affected_department": null,
+                "level": "second_order",
+                "category": "business",
+                "polarity": "harm",
+                "direction": "decrease",
+                "metric": "net_value_usd",
+                "magnitude": 120000.0,
+                "unit": "usd",
+                "value_usd": 120000,
+                "severity": 3,
+                "first_effect_day": 60,
+                "peak_effect_day": 150,
+                "confidence": 0.8,
+                "dependency_path": [
+                  "wf_billing_recon",
+                  "kpi_company"
+                ],
+                "edge_path": [
+                  "e_billing_recon_kpi"
+                ],
+                "evidence_refs": [
+                  "ev_billing_recon_matrix"
+                ],
+                "assumptions": [],
+                "constraint_refs": [],
+                "origin": "engine",
+                "status": "computed"
+              },
+              {
+                "impact_id": "imp_act_now_plan_recommended_eng_cost",
+                "decision_id": "dec_cut_2m",
+                "scenario_id": "scn_run_sample_act_now_plan_recommended",
+                "source_entity": "dept_engineering",
+                "source_kind": "intervention",
+                "source_ref": "i_eng",
+                "affected_entity": "dept_engineering",
+                "affected_department": "dept_engineering",
+                "level": "direct",
+                "category": "financial",
+                "polarity": "benefit",
+                "direction": "decrease",
+                "metric": "annual_cost_usd",
+                "magnitude": 620000.0,
+                "unit": "usd",
+                "value_usd": 620000,
+                "severity": 2,
+                "first_effect_day": 0,
+                "peak_effect_day": 30,
+                "confidence": 0.8,
+                "dependency_path": [],
+                "edge_path": [],
+                "evidence_refs": [],
+                "assumptions": [],
+                "constraint_refs": [],
+                "origin": "engine",
+                "status": "computed"
+              },
+              {
+                "impact_id": "imp_act_now_plan_recommended_migration",
+                "decision_id": "dec_cut_2m",
+                "scenario_id": "scn_run_sample_act_now_plan_recommended",
+                "source_entity": "proj_warehouse_migration",
+                "source_kind": "intervention",
+                "source_ref": "i_migration",
+                "affected_entity": "proj_warehouse_migration",
+                "affected_department": "dept_engineering",
+                "level": "direct",
+                "category": "financial",
+                "polarity": "benefit",
+                "direction": "decrease",
+                "metric": "remaining_cost_usd",
+                "magnitude": 290000.0,
+                "unit": "usd",
+                "value_usd": 290000,
+                "severity": 2,
+                "first_effect_day": 0,
+                "peak_effect_day": 0,
+                "confidence": 0.8,
+                "dependency_path": [],
+                "edge_path": [],
+                "evidence_refs": [],
+                "assumptions": [],
+                "constraint_refs": [],
+                "origin": "engine",
+                "status": "computed"
+              }
+            ],
+            "workflow_coverage": [
+              {
+                "workflow_id": "wf_billing_recon",
+                "criticality": "critical",
+                "owners_before": [
+                  "role_billing_ops_lead"
+                ],
+                "owners_after": [
+                  "role_billing_ops_lead"
+                ],
+                "min_qualified_owners": 1,
+                "backup_count_after": 0,
+                "documented_pct": 30.0,
+                "stranded": false,
+                "reasons": [
+                  "One qualified owner remains and has no backup."
+                ]
+              }
+            ],
+            "pressures_triggered": [
+              {
+                "pressure_id": "pr_cloud_growth",
+                "expected_events": 12.0,
+                "expected_cost_usd": 64000,
+                "neutralised": false
+              },
+              {
+                "pressure_id": "pr_auditlog_renewal",
+                "expected_events": 1.0,
+                "expected_cost_usd": 36000,
+                "neutralised": false
+              },
+              {
+                "pressure_id": "pr_billing_recon_hazard",
+                "expected_events": 0.48,
+                "expected_cost_usd": 310000,
+                "neutralised": false
+              }
+            ],
+            "risk": {
+              "score": 38.0,
+              "level": "medium",
+              "settings_version": 1,
+              "components": {
+                "financial": 8.0,
+                "capability_workflow": 12.0,
+                "customer_revenue": 6.0,
+                "compliance_control": 7.0,
+                "execution_uncertainty": 5.0
+              }
+            },
+            "affected_department_ids": [
+              "dept_engineering",
+              "dept_operations"
+            ],
+            "feasible": true,
+            "rejection_reasons": [],
+            "assumptions": [
+              "Expected-value mode: pressure costs use mean probabilities."
+            ],
+            "computed_at": "2026-09-26T17:00:00Z"
+          }
+        },
+        "alternatives": []
+      },
+      "blast_radius_act_now": {
+        "run_id": "run_sample",
+        "scenario_id": "scn_run_sample_act_now_plan_recommended",
+        "future": "act_now",
+        "plan_id": "plan_recommended",
+        "root_node_id": "dec_cut_2m",
+        "nodes": [
+          {
+            "node_id": "dec_cut_2m",
+            "kind": "decision",
+            "department_id": null,
+            "entity_id": null,
+            "pressure_id": null,
+            "headline": "Cut $2M in annual cost",
+            "level": null,
+            "category": null,
+            "polarity": null,
+            "severity": null,
+            "value_usd": null,
+            "first_effect_day": null,
+            "impact_ids": []
+          },
+          {
+            "node_id": "dept_operations",
+            "kind": "department",
+            "department_id": "dept_operations",
+            "entity_id": null,
+            "pressure_id": null,
+            "headline": "Operations loses 20 percent platform capacity",
+            "level": "direct",
+            "category": "operational",
+            "polarity": "harm",
+            "severity": 3,
+            "value_usd": null,
+            "first_effect_day": 0,
+            "impact_ids": [
+              "imp_act_now_plan_recommended_ops_capacity"
+            ]
+          },
+          {
+            "node_id": "wf_billing_recon",
+            "kind": "entity",
+            "department_id": "dept_operations",
+            "entity_id": "wf_billing_recon",
+            "pressure_id": null,
+            "headline": "Billing reconciliation left with one owner",
+            "level": "dependent",
+            "category": "ownership",
+            "polarity": "harm",
+            "severity": 4,
+            "value_usd": 120000,
+            "first_effect_day": 30,
+            "impact_ids": [
+              "imp_act_now_plan_recommended_billing_recon"
+            ]
+          },
+          {
+            "node_id": "dept_engineering",
+            "kind": "department",
+            "department_id": "dept_engineering",
+            "entity_id": null,
+            "pressure_id": null,
+            "headline": "Engineering saves $0.62M a year",
+            "level": "direct",
+            "category": "financial",
+            "polarity": "benefit",
+            "severity": 2,
+            "value_usd": 620000,
+            "first_effect_day": 0,
+            "impact_ids": [
+              "imp_act_now_plan_recommended_eng_cost",
+              "imp_act_now_plan_recommended_migration"
+            ]
+          },
+          {
+            "node_id": "kpi_company",
+            "kind": "outcome",
+            "department_id": null,
+            "entity_id": null,
+            "pressure_id": null,
+            "headline": "Company net value rises by $1.31M",
+            "level": null,
+            "category": null,
+            "polarity": null,
+            "severity": null,
+            "value_usd": 1310000,
+            "first_effect_day": null,
+            "impact_ids": []
+          }
+        ],
+        "edges": [
+          {
+            "source": "dec_cut_2m",
+            "target": "dept_operations",
+            "label": "reduce capacity 20%",
+            "level": "direct",
+            "critical_constraint": false,
+            "channel_id": null
+          },
+          {
+            "source": "dept_operations",
+            "target": "wf_billing_recon",
+            "label": "owner capacity drops",
+            "level": "dependent",
+            "critical_constraint": true,
+            "channel_id": null
+          },
+          {
+            "source": "dec_cut_2m",
+            "target": "dept_engineering",
+            "label": "reduce capacity 10%, stop migration",
+            "level": "direct",
+            "critical_constraint": false,
+            "channel_id": null
+          },
+          {
+            "source": "wf_billing_recon",
+            "target": "kpi_company",
+            "label": "reconciliation risk",
+            "level": "second_order",
+            "critical_constraint": false,
+            "channel_id": null
+          },
+          {
+            "source": "dept_engineering",
+            "target": "kpi_company",
+            "label": "annual savings",
+            "level": "direct",
+            "critical_constraint": false,
+            "channel_id": null
+          }
+        ],
+        "departments": [
+          {
+            "department_id": "dept_operations",
+            "headline": "Billing reconciliation risk rises",
+            "polarity": "harm",
+            "severity": 4,
+            "impact_ids": [
+              "imp_act_now_plan_recommended_ops_capacity",
+              "imp_act_now_plan_recommended_billing_recon"
+            ]
+          },
+          {
+            "department_id": "dept_engineering",
+            "headline": "Capacity and project savings",
+            "polarity": "benefit",
+            "severity": 2,
+            "impact_ids": [
+              "imp_act_now_plan_recommended_eng_cost",
+              "imp_act_now_plan_recommended_migration"
+            ]
+          }
+        ],
+        "outcome": {
+          "net_value_usd": 1310000,
+          "risk_level": "medium",
+          "headline": "Net value $1.31M with medium risk."
+        }
+      },
+      "blast_radius_inaction": {
+        "run_id": "run_sample",
+        "scenario_id": "scn_run_sample_inaction_none",
+        "future": "inaction",
+        "plan_id": null,
+        "root_node_id": "dec_cut_2m",
+        "nodes": [
+          {
+            "node_id": "dec_cut_2m",
+            "kind": "decision",
+            "department_id": null,
+            "entity_id": null,
+            "pressure_id": null,
+            "headline": "Do nothing",
+            "level": null,
+            "category": null,
+            "polarity": null,
+            "severity": null,
+            "value_usd": null,
+            "first_effect_day": null,
+            "impact_ids": []
+          },
+          {
+            "node_id": "pr_cloud_growth",
+            "kind": "pressure",
+            "department_id": null,
+            "entity_id": null,
+            "pressure_id": "pr_cloud_growth",
+            "headline": "Cloud spend keeps growing",
+            "level": null,
+            "category": null,
+            "polarity": "harm",
+            "severity": 2,
+            "value_usd": 64000,
+            "first_effect_day": null,
+            "impact_ids": [
+              "imp_inaction_none_cloud_growth"
+            ]
+          },
+          {
+            "node_id": "pr_auditlog_renewal",
+            "kind": "pressure",
+            "department_id": null,
+            "entity_id": null,
+            "pressure_id": "pr_auditlog_renewal",
+            "headline": "Audit log renewal price step on day 120",
+            "level": null,
+            "category": null,
+            "polarity": "harm",
+            "severity": 2,
+            "value_usd": 36000,
+            "first_effect_day": 120,
+            "impact_ids": [
+              "imp_inaction_none_auditlog_renewal"
+            ]
+          },
+          {
+            "node_id": "pr_billing_recon_hazard",
+            "kind": "pressure",
+            "department_id": null,
+            "entity_id": null,
+            "pressure_id": "pr_billing_recon_hazard",
+            "headline": "Billing reconciliation can fail",
+            "level": null,
+            "category": null,
+            "polarity": "harm",
+            "severity": 4,
+            "value_usd": 192000,
+            "first_effect_day": null,
+            "impact_ids": [
+              "imp_inaction_none_billing_hazard"
+            ]
+          },
+          {
+            "node_id": "kpi_company",
+            "kind": "outcome",
+            "department_id": null,
+            "entity_id": null,
+            "pressure_id": null,
+            "headline": "Company net value falls by $0.29M",
+            "level": null,
+            "category": null,
+            "polarity": null,
+            "severity": null,
+            "value_usd": -292000,
+            "first_effect_day": null,
+            "impact_ids": []
+          }
+        ],
+        "edges": [
+          {
+            "source": "dec_cut_2m",
+            "target": "pr_cloud_growth",
+            "label": "pressure continues",
+            "level": null,
+            "critical_constraint": false,
+            "channel_id": null
+          },
+          {
+            "source": "dec_cut_2m",
+            "target": "pr_auditlog_renewal",
+            "label": "pressure continues",
+            "level": null,
+            "critical_constraint": false,
+            "channel_id": null
+          },
+          {
+            "source": "dec_cut_2m",
+            "target": "pr_billing_recon_hazard",
+            "label": "pressure continues",
+            "level": null,
+            "critical_constraint": false,
+            "channel_id": null
+          },
+          {
+            "source": "pr_billing_recon_hazard",
+            "target": "kpi_company",
+            "label": "expected failure cost",
+            "level": "direct",
+            "critical_constraint": false,
+            "channel_id": null
+          }
+        ],
+        "departments": [
+          {
+            "department_id": "dept_operations",
+            "headline": "Billing hazard and renewal step",
+            "polarity": "harm",
+            "severity": 4,
+            "impact_ids": [
+              "imp_inaction_none_auditlog_renewal",
+              "imp_inaction_none_billing_hazard"
+            ]
+          },
+          {
+            "department_id": "dept_engineering",
+            "headline": "Cloud cost growth",
+            "polarity": "harm",
+            "severity": 2,
+            "impact_ids": [
+              "imp_inaction_none_cloud_growth"
+            ]
+          }
+        ],
+        "outcome": {
+          "net_value_usd": -292000,
+          "risk_level": "high",
+          "headline": "Net value -$0.29M with high risk."
+        }
+      },
+      "department_impacts": [
+        {
+          "department_id": "dept_operations",
+          "headline": "Billing reconciliation risk rises",
+          "polarity": "harm",
+          "severity": 4,
+          "impact_ids": [
+            "imp_act_now_plan_recommended_ops_capacity",
+            "imp_act_now_plan_recommended_billing_recon"
+          ]
+        },
+        {
+          "department_id": "dept_engineering",
+          "headline": "Capacity and project savings",
+          "polarity": "benefit",
+          "severity": 2,
+          "impact_ids": [
+            "imp_act_now_plan_recommended_eng_cost",
+            "imp_act_now_plan_recommended_migration"
+          ]
+        }
+      ],
+      "critical_risks": [
+        {
+          "impact_id": "imp_act_now_plan_recommended_billing_recon",
+          "decision_id": "dec_cut_2m",
+          "scenario_id": "scn_run_sample_act_now_plan_recommended",
+          "source_entity": "dept_operations",
+          "source_kind": "intervention",
+          "source_ref": "i_platform_ops",
+          "affected_entity": "wf_billing_recon",
+          "affected_department": "dept_operations",
+          "level": "dependent",
+          "category": "ownership",
+          "polarity": "harm",
+          "direction": "increase",
+          "metric": "failure_probability_monthly",
+          "magnitude": 0.03,
+          "unit": "ratio",
+          "value_usd": 120000,
+          "severity": 4,
+          "first_effect_day": 30,
+          "peak_effect_day": 120,
+          "confidence": 0.8,
+          "dependency_path": [
+            "role_billing_ops_lead",
+            "wf_billing_recon"
+          ],
+          "edge_path": [
+            "e_role_owns_billing_recon"
+          ],
+          "evidence_refs": [
+            "ev_billing_recon_matrix"
+          ],
+          "assumptions": [],
+          "constraint_refs": [
+            "c_stranded"
+          ],
+          "origin": "engine",
+          "status": "computed"
+        }
+      ],
+      "mitigations": [],
+      "counterfactuals": [],
+      "missing_information": [],
+      "implementation": [],
+      "monitoring": [],
+      "assumptions": [
+        "Expected-value mode: pressure costs use mean probabilities."
+      ],
+      "open_questions": [
+        "Can a second owner be trained on billing reconciliation before day 30?"
+      ],
+      "missing_perspectives": [],
+      "status": "awaiting_approval",
+      "created_at": "2026-09-26T17:00:00Z"
+    }
+  },
+  {
+    "schema_version": "2.1.0",
+    "event_id": "evt_run_sample_39",
+    "run_id": "run_sample",
+    "sequence": 39,
+    "type": "phase_changed",
+    "actor": "orchestrator",
+    "scenario_id": null,
+    "future": null,
+    "timestamp": "2026-09-26T17:00:39Z",
+    "payload": {
+      "from_status": "generating_package",
+      "to_status": "awaiting_approval"
+    }
+  }
+]
