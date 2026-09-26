@@ -356,16 +356,18 @@ for cid, name, fw, mand, crit in CONTROLS:
 
 # =========================================================================== PROJECTS (owned by product, R1)
 PROJECTS = [
-    # id, name, budget, completion, retires, cancel_cost
-    ("proj_warehouse_migration", "Warehouse Migration", 400_000, 0.55, ["sys_warehouse_legacy"], 40_000),
-    ("proj_billing_modernization", "Billing Modernization", 250_000, 0.30, [], 30_000),
-    ("proj_ml_dispatch", "ML Dispatch Optimization", 300_000, 0.40, [], 20_000),
-    ("proj_soc2_type2", "SOC 2 Type II Certification", 150_000, 0.60, [], 10_000),
+    # id, name, budget, completion, retires, cancel_cost, expected_completion_day
+    ("proj_warehouse_migration", "Warehouse Migration", 400_000, 0.55, ["sys_warehouse_legacy"], 40_000, 120),
+    ("proj_billing_modernization", "Billing Modernization", 250_000, 0.30, [], 30_000, 240),
+    ("proj_ml_dispatch", "ML Dispatch Optimization", 300_000, 0.40, [], 20_000, 180),
+    ("proj_soc2_type2", "SOC 2 Type II Certification", 150_000, 0.60, [], 10_000, 90),
 ]
-for pid, name, budget, comp, retires, cancel in PROJECTS:
+for pid, name, budget, comp, retires, cancel, exp_day in PROJECTS:
     ent(pid, "project", name, department_id="dept_product", criticality="medium",
         annual_cost_usd=budget, completion_pct=comp, retires_entity_ids=retires,
-        one_time_exit_cost_usd=cancel)
+        one_time_exit_cost_usd=cancel,
+        remaining_cost_usd=round(budget * (1 - comp)),   # cost left to finish (engine: rebound / inaction)
+        expected_completion_day=exp_day)
 
 # =========================================================================== KPIs
 KPIS = [

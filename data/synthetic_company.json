@@ -1736,6 +1736,8 @@
         "sys_warehouse_legacy"
       ],
       "one_time_exit_cost_usd": 40000,
+      "remaining_cost_usd": 180000,
+      "expected_completion_day": 120,
       "tags": [],
       "evidence_refs": []
     },
@@ -1750,6 +1752,8 @@
       "completion_pct": 0.3,
       "retires_entity_ids": [],
       "one_time_exit_cost_usd": 30000,
+      "remaining_cost_usd": 175000,
+      "expected_completion_day": 240,
       "tags": [],
       "evidence_refs": []
     },
@@ -1764,6 +1768,8 @@
       "completion_pct": 0.4,
       "retires_entity_ids": [],
       "one_time_exit_cost_usd": 20000,
+      "remaining_cost_usd": 180000,
+      "expected_completion_day": 180,
       "tags": [],
       "evidence_refs": []
     },
@@ -1778,6 +1784,8 @@
       "completion_pct": 0.6,
       "retires_entity_ids": [],
       "one_time_exit_cost_usd": 10000,
+      "remaining_cost_usd": 60000,
+      "expected_completion_day": 90,
       "tags": [],
       "evidence_refs": []
     },

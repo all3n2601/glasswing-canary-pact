@@ -157,6 +157,37 @@ def test_exports_are_wellformed():
     assert auditlog["irreplaceable_flag"] is True
 
 
+# ---- derived DepartmentProfile fields (computed in the loader) --------------
+def test_department_profile_derived_fields_are_populated():
+    ents = entity_map(TWIN)
+    for p in TWIN.department_profiles:
+        did = p.department_id
+        # owned = every entity with this department_id
+        assert set(p.owned_entity_ids) == {e.id for e in TWIN.entities if e.department_id == did}
+        # critical workflows subset of owned, all high/critical workflows
+        for wid in p.critical_workflow_ids:
+            assert ents[wid].type == EntityType.workflow
+            assert ents[wid].criticality.value in ("high", "critical")
+        assert set(p.kpi_ids) == {e.id for e in TWIN.entities
+                                  if e.department_id == did and e.type == EntityType.kpi}
+        assert 0.0 <= p.documentation_coverage <= 1.0
+
+
+# ---- project entity fields the engine needs --------------------------------
+def test_projects_have_remaining_cost_and_expected_completion():
+    projects = [e for e in TWIN.entities if e.type == EntityType.project]
+    assert projects
+    for pr in projects:
+        assert pr.remaining_cost_usd is not None and pr.remaining_cost_usd >= 0
+        assert pr.expected_completion_day is not None and pr.expected_completion_day > 0
+    mig = entity_map(TWIN)["proj_warehouse_migration"]
+    assert mig.remaining_cost_usd == round(mig.annual_cost_usd * (1 - mig.completion_pct))
+
+
+def test_version_has_as_of_date():
+    assert str(TWIN.version.as_of_date) == "2026-09-26"  # contracts_py coerces to date
+
+
 # ---- companion historical data ---------------------------------------------
 def test_history_is_consistent_with_twin():
     h = json.loads((DATA_DIR / "history.json").read_text())
