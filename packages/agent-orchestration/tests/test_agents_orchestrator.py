@@ -1,9 +1,14 @@
+import threading
+
 from contracts_py.agents import AgentContext, ChallengerOutput, ProposedDependency
 from contracts_py.enums import Future
 from contracts_py.events import EventType
 from contracts_py.package import DecisionPackage
 
-from agent_orchestration import AgentLLM, run_decision
+import pytest
+from canary_api.stubs import engine as stub_engine
+
+from agent_orchestration import AgentLLM, RunCancelled, run_decision
 from agent_orchestration.llm import LLMResult
 from orchestration_helpers import NOW, Recorder, ScriptedLLM, SpyEngine, metrics, person_output, person_tokens
 
@@ -109,3 +114,98 @@ def test_fallback_cached_agent_widens_uncertainty(brief, twin, settings) -> None
     assert package.missing_perspectives == ["engineering", "challenger"]
     widen = [args for name, args in engine.calls if name == "widen_uncertainty"]
     assert widen[0][1] == ["dept_engineering"]
+
+
+class CountingLLM(AgentLLM):
+    def __init__(self, settings):
+        super().__init__(settings)
+        self.calls: list[str] = []
+
+    def call(self, agent_id, *args, **kwargs):
+        self.calls.append(agent_id)
+        return super().call(agent_id, *args, **kwargs)
+
+
+def cancelled_run(brief, twin, settings, stop_when):
+    recorder, llm = Recorder(), CountingLLM(settings)
+    checks = {"count": 0, "stopped_at": None}
+    lock = threading.Lock()
+
+    def should_stop() -> bool:
+        with lock:
+            checks["count"] += 1
+            if checks["stopped_at"] is None and stop_when(recorder, checks["count"]):
+                checks["stopped_at"] = len(recorder.events)
+            return checks["stopped_at"] is not None
+
+    with pytest.raises(RunCancelled):
+        run_decision(brief, engine=SpyEngine(), settings=settings, llm=llm, emit=recorder, run_id="run_test",
+                     twin=twin, clock=lambda: NOW, should_stop=should_stop)
+    return recorder, llm, checks["stopped_at"]
+
+
+def test_should_stop_between_phases_emits_nothing_more(brief, twin, settings) -> None:
+    recorder, llm, stopped_at = cancelled_run(brief, twin, settings, lambda rec, _: "optimizing" in rec.phases())
+    assert len(recorder.events) == stopped_at
+    assert recorder.phases() == ["validating", "building_futures", "optimizing"]
+    assert llm.calls == []
+    kinds = {e.type for e in recorder.events}
+    assert not kinds & {EventType.package_ready, EventType.run_failed, EventType.agent_started}
+
+
+def test_should_stop_before_agent_calls(brief, twin, settings) -> None:
+    recorder, llm, stopped_at = cancelled_run(brief, twin, settings,
+                                              lambda rec, _: "running_agents" in rec.phases())
+    assert len(recorder.events) == stopped_at
+    assert llm.calls == [] and recorder.of(EventType.agent_completed) == []
+    assert recorder.phases()[-1] == "running_agents"
+
+
+# Checks before the agents: run_created plus the validating, building_futures, optimizing and running_agents phases.
+CHECKS_BEFORE_AGENTS = 5
+
+
+def test_should_stop_mid_agents_stops_remaining_calls(brief, twin, settings) -> None:
+    # Exactly one agent passes its check; every later check, in any thread, sees the stop.
+    recorder, llm, _ = cancelled_run(brief, twin, settings, lambda _, count: count > CHECKS_BEFORE_AGENTS + 1)
+    assert len(llm.calls) == 1
+    assert recorder.phases()[-1] == "running_agents"
+    assert not {e.type for e in recorder.events} & {EventType.package_ready, EventType.run_failed,
+                                                    EventType.challenge_raised}
+
+
+def test_should_stop_immediately_emits_nothing(brief, twin, settings) -> None:
+    recorder, llm, _ = cancelled_run(brief, twin, settings, lambda *_: True)
+    assert recorder.events == [] and llm.calls == []
+
+
+class InfeasibleOnReoptimize(SpyEngine):
+    def optimize(self, twin, brief, **kwargs):
+        self.calls.append(("optimize", (twin, brief)))
+        portfolio = stub_engine.optimize(twin, brief, **kwargs)
+        if self.names().count("optimize") < 2:
+            return portfolio
+        field = "recommended" if portfolio.recommended else "naive"
+        chosen = getattr(portfolio, field)
+        result = chosen.result.model_copy(update={"feasible": False,
+                                                  "rejection_reasons": ["The new dependency breaks a hard constraint."]})
+        return portfolio.model_copy(update={field: chosen.model_copy(update={"result": result})})
+
+
+def test_reoptimization_rejects_plan_that_became_infeasible(brief, twin, settings) -> None:
+    llm = ScriptedLLM(settings, {"challenger": challenger_with_new_edge})
+    engine = InfeasibleOnReoptimize()
+    first = stub_engine.optimize(twin, brief)
+    chosen_id = (first.recommended or first.naive).plan_id
+    assert (first.recommended or first.naive).result.feasible
+    _, recorder, _ = run(brief, twin, settings, llm, engine=engine)
+    kinds = [e.type for e in recorder.events]
+    second_ranking = [i for i, k in enumerate(kinds) if k is EventType.portfolio_ranked][1]
+    late_rejections = [e.payload for e in recorder.events[:second_ranking]
+                       if e.type is EventType.candidate_rejected and e.payload.plan_id == chosen_id]
+    assert [r.reasons for r in late_rejections] == [["The new dependency breaks a hard constraint."]]
+    generated = [e.payload.plan_id for e in recorder.of(EventType.candidate_generated)]
+    assert len(generated) == len(set(generated))
+    assert len({e.payload.plan_id for e in recorder.of(EventType.candidate_rejected)}) == \
+        len(recorder.of(EventType.candidate_rejected))
+
