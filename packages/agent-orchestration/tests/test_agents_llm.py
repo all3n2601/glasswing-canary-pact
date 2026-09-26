@@ -1,11 +1,14 @@
 import json
 import os
+from types import SimpleNamespace
 
+import httpx
+import openai
 import pytest
 from contracts_py.agents import AgentOutput
 from contracts_py.twin import OrganizationSettings
 
-from agent_orchestration.llm import DEFAULT_BASE_URL, AgentLLM, LiveReply, resolve_base_url
+from agent_orchestration.llm import DEFAULT_BASE_URL, AgentLLM, LiveReply, OutputInvalid, resolve_base_url, sciforium_call
 from orchestration_helpers import make_context
 
 VALID = {"act_now_view": {"summary": "Billing loses its owner."}, "inaction_view": {"summary": "Hazard stays."},
@@ -18,7 +21,7 @@ class FakeLive:
         self.replies = list(replies)
         self.seen: list[list[dict]] = []
 
-    def __call__(self, model_id, messages, output_model, *, timeout, temperature):
+    def __call__(self, model_id, messages, output_model, *, timeout, temperature, structured_output="auto"):
         self.seen.append(messages)
         reply = self.replies.pop(0)
         if isinstance(reply, Exception):
@@ -160,7 +163,7 @@ def test_temperature_and_timeout_from_env_unless_settings_set(tmp_path, brief, t
     clean_env.setenv("SCIFORIUM_TIMEOUT_SECONDS", "12")
     seen = []
 
-    def live(model_id, messages, output_model, *, timeout, temperature):
+    def live(model_id, messages, output_model, *, timeout, temperature, structured_output="auto"):
         seen.append((model_id, timeout, temperature))
         return LiveReply(VALID)
 
@@ -187,7 +190,7 @@ def test_missing_strong_model_falls_back_to_fast(tmp_path, brief, twin, settings
     clean_env.setenv("CANARY_MODEL_FAST", "fast-model")
     seen = []
 
-    def live(model_id, messages, output_model, *, timeout, temperature):
+    def live(model_id, messages, output_model, *, timeout, temperature, structured_output="auto"):
         seen.append(model_id)
         return LiveReply(VALID)
 
@@ -197,3 +200,123 @@ def test_missing_strong_model_falls_back_to_fast(tmp_path, brief, twin, settings
     assert result.status == "ok" and seen == ["fast-model"] and result.metrics.model_id == "fast-model"
     assert result.errors == ["strong model not configured; challenger ran on the fast model fast-model"]
     assert llm.model_label == "fast-model"
+
+
+class FakeChat:
+    """Stands in for langchain_openai.ChatOpenAI; replies come from a shared script."""
+
+    script: list = []
+    methods: list[tuple[str, object]] = []
+
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+
+    def with_structured_output(self, schema, *, method, include_raw, strict=None):
+        assert include_raw is True
+        FakeChat.methods.append((method, strict))
+        return SimpleNamespace(invoke=self._invoke)
+
+    def _invoke(self, messages):
+        reply = FakeChat.script.pop(0)
+        if isinstance(reply, Exception):
+            raise reply
+        return reply
+
+
+REQUEST = httpx.Request("POST", "https://llm.example/v1/chat/completions")
+
+
+def reply(parsed=None, parsing_error=None) -> dict:
+    return {"raw": SimpleNamespace(usage_metadata={"input_tokens": 3, "output_tokens": 2}), "parsed": parsed,
+            "parsing_error": parsing_error}
+
+
+def rejected() -> openai.BadRequestError:
+    return openai.BadRequestError("response_format is not supported", response=httpx.Response(400, request=REQUEST),
+                                  body=None)
+
+
+@pytest.fixture
+def fake_chat(monkeypatch):
+    import langchain_openai
+
+    monkeypatch.setattr(langchain_openai, "ChatOpenAI", FakeChat)
+    monkeypatch.delenv("CANARY_STRUCTURED_OUTPUT", raising=False)
+    FakeChat.script, FakeChat.methods = [], []
+    return FakeChat
+
+
+def live(mode=None):
+    kwargs = {} if mode is None else {"structured_output": mode}
+    return sciforium_call("m", MESSAGES, AgentOutput, timeout=5, temperature=0.1, **kwargs)
+
+
+def parsed_output() -> AgentOutput:
+    return AgentOutput.model_validate(VALID)
+
+
+def test_default_is_auto_and_tries_json_schema_first(fake_chat) -> None:
+    fake_chat.script = [reply(parsed_output())]
+    result = live()
+    assert fake_chat.methods == [("json_schema", False)]
+    assert result.output == parsed_output() and (result.input_tokens, result.output_tokens) == (3, 2)
+    assert AgentLLM(OrganizationSettings(llm_mode="live")).structured_output() == "auto"
+
+
+def test_auto_falls_back_when_json_schema_returns_nothing(fake_chat) -> None:
+    fake_chat.script = [reply(None), reply(parsed_output())]
+    assert live("auto").output == parsed_output()
+    assert [m for m, _ in fake_chat.methods] == ["json_schema", "function_calling"]
+
+
+def test_auto_falls_back_on_response_format_rejection(fake_chat) -> None:
+    fake_chat.script = [rejected(), reply(parsed_output())]
+    assert live("auto").output == parsed_output()
+    assert [m for m, _ in fake_chat.methods] == ["json_schema", "function_calling"]
+
+
+def test_auto_does_not_retry_timeouts(fake_chat) -> None:
+    fake_chat.script = [openai.APITimeoutError(request=REQUEST)]
+    with pytest.raises(openai.APITimeoutError):
+        live("auto")
+    assert [m for m, _ in fake_chat.methods] == ["json_schema"]
+
+
+@pytest.mark.parametrize("mode", ["json_schema", "function_calling"])
+def test_forced_mode_makes_exactly_one_call(fake_chat, mode) -> None:
+    fake_chat.script = [reply(None)]
+    assert live(mode).output is None
+    assert [m for m, _ in fake_chat.methods] == [mode]
+
+
+def test_forced_json_schema_does_not_fall_back_on_rejection(fake_chat) -> None:
+    fake_chat.script = [rejected()]
+    with pytest.raises(openai.BadRequestError):
+        live("json_schema")
+    assert len(fake_chat.methods) == 1
+
+
+@pytest.mark.parametrize("mode", ["auto", "json_schema", "function_calling"])
+def test_parsing_error_raises_output_invalid(fake_chat, mode) -> None:
+    fake_chat.script = [reply(None, parsing_error=ValueError("bad json"))]
+    with pytest.raises(OutputInvalid, match="bad json"):
+        live(mode)
+    assert len(fake_chat.methods) == 1
+
+
+def test_client_passes_env_mode_to_the_call(fake_chat, monkeypatch, tmp_path, brief, twin, settings) -> None:
+    monkeypatch.setenv("CANARY_STRUCTURED_OUTPUT", "function_calling")
+    fake_chat.script = [reply(parsed_output())]
+    llm = AgentLLM(OrganizationSettings(llm_mode="live", model_id_strong="m"), cache_dir=tmp_path)
+    result = call(llm, make_context(brief, twin, settings))
+    assert result.status == "ok" and [m for m, _ in fake_chat.methods] == ["function_calling"]
+
+
+def test_invalid_structured_output_env_raises(fake_chat, monkeypatch, tmp_path, brief, twin, settings) -> None:
+    monkeypatch.setenv("CANARY_STRUCTURED_OUTPUT", "xml")
+    llm = AgentLLM(OrganizationSettings(llm_mode="live", model_id_strong="m"), cache_dir=tmp_path)
+    with pytest.raises(ValueError, match="auto, json_schema, function_calling"):
+        llm.structured_output()
+    with pytest.raises(ValueError, match="CANARY_STRUCTURED_OUTPUT"):
+        call(llm, make_context(brief, twin, settings))
+    assert fake_chat.methods == []
