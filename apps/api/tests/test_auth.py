@@ -43,6 +43,18 @@ def test_signup_login_me_logout(client) -> None:
     assert client.get("/auth/me", headers=bearer(token.access_token)).status_code == 401
 
 
+def test_signup_cannot_create_an_approver(client) -> None:
+    email = new_email()
+    created = client.post("/auth/signup", json={"email": email, "password": "long enough", "display_name": "Eve",
+                                                "role": "approver"})
+    assert created.status_code == 201
+    assert created.json()["role"] == "viewer"
+    token = client.post("/auth/login", json={"email": email, "password": "long enough"}).json()
+    assert token["user"]["role"] == "viewer"
+    assert client.post("/runs/run_any/decision", headers=bearer(token["access_token"]),
+                       json={"decision": "approve", "decided_by": "x", "package_hash": "0" * 64}).status_code == 403
+
+
 def test_duplicate_signup_is_409(client) -> None:
     body = {"email": new_email(), "password": "long enough", "display_name": "Bo"}
     assert client.post("/auth/signup", json=body).status_code == 201

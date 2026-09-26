@@ -2,6 +2,7 @@ import asyncio
 import hashlib
 import inspect
 import json
+import re
 import threading
 import time
 
@@ -60,7 +61,7 @@ def test_thread_emitter_publishes_on_the_loop_in_order(monkeypatch) -> None:
 
     async def scenario() -> int:
         runtime.bus.create_run("run_threads", "dec_cut_2m", "stub-twin-1")
-        emit = runs.ThreadEmitter("run_threads", asyncio.get_running_loop(), [])
+        emit = runs.ThreadEmitter("run_threads", asyncio.get_running_loop(), runtime.twin())
 
         def worker(n: int) -> None:
             for i in range(25):
@@ -85,6 +86,7 @@ def test_mock_decision_runs_real_orchestrator_to_approval(client, brief_json) ->
     events = runtime.bus.runs[run_id].events
     assert events[0].type is EventType.run_created
     assert not [e for e in events if e.type is EventType.settings_updated]
+    assert runs.MOCK_FALLBACK_ASSUMPTION not in client.get(f"/runs/{run_id}/package").json()["assumptions"]
     assessments = [e.payload for e in events if e.type is EventType.agent_completed]
     assert assessments and all(a.status == "ok" and a.metrics.model_id == "mock" for a in assessments)
     EventLog.model_validate([e.model_dump(mode="json") for e in events])
@@ -116,14 +118,15 @@ def test_websocket_mid_orchestrated_run_gets_every_sequence_once(client, brief_j
     assert [e.sequence for e in received] == list(range(1, len(received) + 1))
 
 
-def test_empty_replay_cache_falls_back_to_mock_with_a_note(client, brief_json) -> None:
+def test_empty_replay_cache_falls_back_to_mock_with_a_package_assumption(client, brief_json) -> None:
     assert runtime.cache_is_empty(runtime.llm_cache_dir())
     run_id = client.post("/decisions", headers=auth_headers(client), json=brief_json).json()["run_id"]
     wait_for(client, run_id, "awaiting_approval")
     events = runtime.bus.runs[run_id].events
     assert events[0].type is EventType.run_created
-    assert events[1].type is EventType.settings_updated
-    assert events[1].payload.changed_fields == ["llm_mode"]
+    assert not [e for e in events if e.type is EventType.settings_updated]
+    package = client.get(f"/runs/{run_id}/package").json()
+    assert package["assumptions"].count(runs.MOCK_FALLBACK_ASSUMPTION) == 1
     assessments = [e.payload for e in events if e.type is EventType.agent_completed]
     assert assessments and not [a for a in assessments if a.status in ("unavailable", "fallback_cached")]
 
@@ -154,3 +157,80 @@ def test_real_mode_loads_synthetic_company_with_optional_snippets(monkeypatch) -
     assert runtime.twin() is stub
     snippets = DATA_DIR / "artifacts" / "snippets.json"
     assert calls == [(DATA_DIR / "synthetic_company.json", snippets if snippets.is_file() else None)]
+
+
+PERSON_TOKEN = re.compile(r"\bpt_[a-z0-9_]+")
+
+
+def test_failed_publish_marks_the_run_failed() -> None:
+    runtime.bus.create_run("run_publish_fails", "dec_cut_2m", "stub-twin-1")
+    twin = runtime.twin()
+    runs._publish("run_publish_fails", EventType.agent_started, AgentStarted(agent_id="finance"), "finance", None,
+                  None, twin, [])
+    # A payload of the wrong model for its event type cannot be published.
+    runs._publish("run_publish_fails", EventType.simulation_completed, AgentStarted(agent_id="finance"), "engine",
+                  None, None, twin, [])
+    runs._publish("run_publish_fails", EventType.agent_started, AgentStarted(agent_id="ops"), "ops", None, None,
+                  twin, [])
+    events = runtime.bus.runs["run_publish_fails"].events
+    assert [e.type for e in events] == [EventType.agent_started, EventType.phase_changed, EventType.run_failed]
+    assert events[1].payload.to_status is RunStatus.failed
+    assert "simulation_completed" in events[2].payload.reason
+    assert runtime.bus.runs["run_publish_fails"].state.status is RunStatus.failed
+
+
+def leak_person_tokens(monkeypatch) -> None:
+    from canary_api.stubs import engine as stub_engine
+
+    original = stub_engine.simulate
+
+    def simulate(*args, **kwargs):
+        result = original(*args, **kwargs)
+        impacts = [i.model_copy(update={"affected_entity": "pt_07", "assumptions": ["owned by pt_07"]})
+                   for i in result.impacts]
+        return result.model_copy(update={"impacts": impacts, "assumptions": [*result.assumptions, "pt_07 leaves"]})
+
+    monkeypatch.setattr(stub_engine, "simulate", simulate)
+
+
+def all_event_text(run_id: str) -> str:
+    return "\n".join(e.model_dump_json() for e in runtime.bus.runs[run_id].events)
+
+
+def test_to_role_level_keeps_person_tokens_out_of_events(client, brief_json, monkeypatch) -> None:
+    from canary_api.stubs import engine as stub_engine
+
+    leak_person_tokens(monkeypatch)
+    calls: list[str] = []
+
+    def to_role_level(obj, twin):
+        calls.append(type(obj).__name__)
+        text = obj.model_dump_json() if hasattr(obj, "model_dump_json") else json.dumps(obj)
+        return json.loads(PERSON_TOKEN.sub("role_billing_ops_lead", text))
+
+    monkeypatch.setattr(stub_engine, "to_role_level", to_role_level)
+    run_id = client.post("/decisions?llm_mode=mock", headers=auth_headers(client), json=brief_json).json()["run_id"]
+    wait_for(client, run_id, "awaiting_approval")
+    assert "SimulationResult" in calls
+    assert not PERSON_TOKEN.search(all_event_text(run_id))
+
+
+def test_person_tokens_left_by_the_engine_fail_the_run_without_leaking(client, brief_json, monkeypatch) -> None:
+    leak_person_tokens(monkeypatch)
+    run_id = client.post("/decisions?llm_mode=mock", headers=auth_headers(client), json=brief_json).json()["run_id"]
+    wait_for(client, run_id, "failed")
+    events = runtime.bus.runs[run_id].events
+    failures = [e.payload.reason for e in events if e.type is EventType.run_failed]
+    assert len(failures) == 1 and "person tokens" in failures[0]
+    assert not PERSON_TOKEN.search(all_event_text(run_id))
+
+
+def test_live_mode_needs_explicit_opt_in(client, brief_json, monkeypatch) -> None:
+    monkeypatch.delenv("CANARY_ALLOW_LIVE", raising=False)
+    denied = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=brief_json)
+    assert denied.status_code == 403
+    assert "CANARY_ALLOW_LIVE" in denied.json()["detail"]
+    monkeypatch.setenv("CANARY_ALLOW_LIVE", "true")
+    assert runs.live_allowed()
+    monkeypatch.setenv("CANARY_ALLOW_LIVE", "yes")
+    assert not runs.live_allowed()

@@ -90,7 +90,6 @@ class SignupRequest(Strict):
     email: str = Field(pattern=EMAIL_PATTERN, max_length=254)
     password: str = Field(min_length=8, max_length=256)
     display_name: str = Field(min_length=1, max_length=120)
-    role: UserRole = UserRole.viewer
 
 
 class LoginRequest(Strict):

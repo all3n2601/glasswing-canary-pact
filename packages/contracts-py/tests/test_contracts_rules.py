@@ -294,11 +294,10 @@ def test_organization_profile_view(organization: Organization) -> None:
 
 
 def test_auth_contracts() -> None:
-    from contracts_py.api import AuthToken, LoginRequest, SignupRequest, UserPublic, UserRole
+    from contracts_py.api import AuthToken, LoginRequest, SignupRequest, UserPublic
 
     signup = SignupRequest(email="ana@example.com", password="correct horse", display_name="Ana")
-    assert signup.role is UserRole.viewer
-    for bad in ({"email": "not-an-email"}, {"password": "short"}, {"display_name": ""}, {"role": "admin"}):
+    for bad in ({"email": "not-an-email"}, {"password": "short"}, {"display_name": ""}, {"role": "approver"}):
         with pytest.raises(ValidationError):
             SignupRequest.model_validate(signup.model_dump() | bad)
     LoginRequest(email="ana@example.com", password="x")

@@ -12,7 +12,7 @@ from functools import cache
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import ValidationError
 
@@ -76,12 +76,12 @@ class UserStore:
         return UserPublic(user_id=row["user_id"], email=row["email"], display_name=row["display_name"],
                           role=row["role"], created_at=datetime.fromisoformat(row["created_at"]))
 
-    def create(self, signup: SignupRequest) -> UserPublic:
+    def create(self, signup: SignupRequest, role: UserRole = UserRole.viewer) -> UserPublic:
         user = UserPublic(
             user_id=f"usr_{uuid.uuid4().hex[:16]}",
             email=signup.email.lower(),
             display_name=signup.display_name,
-            role=signup.role,
+            role=role,
             created_at=datetime.now(timezone.utc),
         )
         try:
@@ -170,11 +170,11 @@ def seed_demo_approver() -> UserPublic | None:
     if not email or not password or store().exists(email):
         return None
     try:
-        request = SignupRequest(email=email, password=password, display_name="Demo approver", role=UserRole.approver)
+        request = SignupRequest(email=email, password=password, display_name="Demo approver")
     except ValidationError:
         log.warning("CANARY_DEMO_APPROVER_EMAIL or CANARY_DEMO_APPROVER_PASSWORD is invalid; demo approver not created")
         return None
-    user = store().create(request)
+    user = store().create(request, role=UserRole.approver)
     log.info("created demo approver %s", user.user_id)
     return user
 
@@ -210,7 +210,13 @@ router = APIRouter(prefix="/auth")
 
 
 @router.post("/signup", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
-def signup(request: SignupRequest) -> UserPublic:
+def signup(body: dict[str, Any] = Body(...)) -> UserPublic:
+    # Self-service accounts are always viewers; a client-supplied role is dropped, not honoured.
+    body = {k: v for k, v in body.items() if k != "role"}
+    try:
+        request = SignupRequest.model_validate(body)
+    except ValidationError as exc:
+        raise HTTPException(422, exc.errors(include_url=False)) from exc
     try:
         return store().create(request)
     except DuplicateEmail as exc:

@@ -1,14 +1,4 @@
 {
-  "$defs": {
-    "UserRole": {
-      "enum": [
-        "viewer",
-        "approver"
-      ],
-      "title": "UserRole",
-      "type": "string"
-    }
-  },
   "additionalProperties": false,
   "properties": {
     "email": {
@@ -28,10 +18,6 @@
       "minLength": 1,
       "title": "Display Name",
       "type": "string"
-    },
-    "role": {
-      "$ref": "#/$defs/UserRole",
-      "default": "viewer"
     }
   },
   "required": [

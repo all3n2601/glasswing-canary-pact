@@ -1730,7 +1730,6 @@ export interface SignupRequest {
   email: string;
   password: string;
   display_name: string;
-  role?: UserRole;
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
