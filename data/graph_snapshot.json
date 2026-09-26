@@ -1,6 +1,6 @@
 {
-  "company": "Halcyon Freight",
-  "twin_version": "twin_halcyon_v2",
+  "company": "Northstar Technologies",
+  "twin_version": "twin_northstar_v1",
   "nodes": [
     {
       "id": "dept_engineering",
@@ -73,6 +73,34 @@
       "criticality": "medium"
     },
     {
+      "id": "role_staff_eng",
+      "type": "role",
+      "name": "Staff Software Engineer",
+      "department_id": "dept_engineering",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_security_eng",
+      "type": "role",
+      "name": "Security Engineer",
+      "department_id": "dept_engineering",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_eng_manager",
+      "type": "role",
+      "name": "Engineering Manager",
+      "department_id": "dept_engineering",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_qa_eng",
+      "type": "role",
+      "name": "QA Engineer",
+      "department_id": "dept_engineering",
+      "criticality": "medium"
+    },
+    {
       "id": "role_billing_ops_lead",
       "type": "role",
       "name": "Billing Operations Lead",
@@ -94,23 +122,9 @@
       "criticality": "medium"
     },
     {
-      "id": "role_staff_eng",
-      "type": "role",
-      "name": "Staff Software Engineer",
-      "department_id": "dept_engineering",
-      "criticality": "medium"
-    },
-    {
-      "id": "role_security_eng",
-      "type": "role",
-      "name": "Security Engineer",
-      "department_id": "dept_engineering",
-      "criticality": "medium"
-    },
-    {
       "id": "role_data_lead",
       "type": "role",
-      "name": "Data Platform Lead",
+      "name": "Head of AI and Data",
       "department_id": "dept_ai_data",
       "criticality": "medium"
     },
@@ -122,66 +136,17 @@
       "criticality": "medium"
     },
     {
-      "id": "role_pm",
-      "type": "role",
-      "name": "Product Manager",
-      "department_id": "dept_product",
-      "criticality": "medium"
-    },
-    {
-      "id": "role_ae",
-      "type": "role",
-      "name": "Account Executive",
-      "department_id": "dept_sales",
-      "criticality": "medium"
-    },
-    {
-      "id": "role_pmm",
-      "type": "role",
-      "name": "Product Marketing Manager",
-      "department_id": "dept_marketing",
-      "criticality": "medium"
-    },
-    {
-      "id": "role_csm",
-      "type": "role",
-      "name": "Customer Success Manager",
-      "department_id": "dept_customer_success",
-      "criticality": "medium"
-    },
-    {
-      "id": "role_finance_analyst",
-      "type": "role",
-      "name": "Finance Analyst",
-      "department_id": "dept_finance",
-      "criticality": "medium"
-    },
-    {
-      "id": "role_grc_lead",
-      "type": "role",
-      "name": "GRC Lead",
-      "department_id": "dept_compliance",
-      "criticality": "medium"
-    },
-    {
-      "id": "role_eng_manager",
-      "type": "role",
-      "name": "Engineering Manager",
-      "department_id": "dept_engineering",
-      "criticality": "medium"
-    },
-    {
-      "id": "role_qa_eng",
-      "type": "role",
-      "name": "QA Engineer",
-      "department_id": "dept_engineering",
-      "criticality": "medium"
-    },
-    {
       "id": "role_analytics_eng",
       "type": "role",
       "name": "Analytics Engineer",
       "department_id": "dept_ai_data",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_pm",
+      "type": "role",
+      "name": "Product Manager",
+      "department_id": "dept_product",
       "criticality": "medium"
     },
     {
@@ -199,6 +164,13 @@
       "criticality": "medium"
     },
     {
+      "id": "role_ae",
+      "type": "role",
+      "name": "Account Executive",
+      "department_id": "dept_sales",
+      "criticality": "medium"
+    },
+    {
       "id": "role_sales_eng",
       "type": "role",
       "name": "Solutions Engineer",
@@ -213,6 +185,13 @@
       "criticality": "medium"
     },
     {
+      "id": "role_pmm",
+      "type": "role",
+      "name": "Product Marketing Manager",
+      "department_id": "dept_marketing",
+      "criticality": "medium"
+    },
+    {
       "id": "role_demand_gen",
       "type": "role",
       "name": "Demand Gen Manager",
@@ -222,8 +201,15 @@
     {
       "id": "role_brand",
       "type": "role",
-      "name": "Brand & Comms Manager",
+      "name": "Brand and Comms Manager",
       "department_id": "dept_marketing",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_csm",
+      "type": "role",
+      "name": "Customer Success Manager",
+      "department_id": "dept_customer_success",
       "criticality": "medium"
     },
     {
@@ -241,6 +227,13 @@
       "criticality": "medium"
     },
     {
+      "id": "role_finance_analyst",
+      "type": "role",
+      "name": "Finance Analyst",
+      "department_id": "dept_finance",
+      "criticality": "medium"
+    },
+    {
       "id": "role_procurement",
       "type": "role",
       "name": "Procurement Manager",
@@ -255,10 +248,66 @@
       "criticality": "medium"
     },
     {
+      "id": "role_grc_lead",
+      "type": "role",
+      "name": "GRC Lead",
+      "department_id": "dept_compliance",
+      "criticality": "medium"
+    },
+    {
       "id": "role_privacy_counsel",
       "type": "role",
       "name": "Privacy Counsel",
       "department_id": "dept_compliance",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_close_accountant",
+      "type": "role",
+      "name": "Close Accountant",
+      "department_id": "dept_finance",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_gl_accountant",
+      "type": "role",
+      "name": "General Ledger Accountant",
+      "department_id": "dept_finance",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_reporting_analyst",
+      "type": "role",
+      "name": "Financial Reporting Analyst",
+      "department_id": "dept_finance",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_data_platform_lead",
+      "type": "role",
+      "name": "Data Platform Lead",
+      "department_id": "dept_ai_data",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_billing_specialist",
+      "type": "role",
+      "name": "Billing Specialist",
+      "department_id": "dept_operations",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_revenue_accountant",
+      "type": "role",
+      "name": "Revenue Accountant",
+      "department_id": "dept_finance",
+      "criticality": "medium"
+    },
+    {
+      "id": "role_ar_specialist",
+      "type": "role",
+      "name": "Accounts Receivable Specialist",
+      "department_id": "dept_finance",
       "criticality": "medium"
     },
     {
@@ -272,13 +321,6 @@
       "id": "sys_customer_portal",
       "type": "system",
       "name": "customer-portal",
-      "department_id": "dept_engineering",
-      "criticality": "high"
-    },
-    {
-      "id": "sys_dispatch_engine",
-      "type": "system",
-      "name": "dispatch-engine",
       "department_id": "dept_engineering",
       "criticality": "high"
     },
@@ -311,20 +353,6 @@
       "criticality": "high"
     },
     {
-      "id": "sys_warehouse_legacy",
-      "type": "system",
-      "name": "warehouse-legacy",
-      "department_id": "dept_operations",
-      "criticality": "medium"
-    },
-    {
-      "id": "sys_warehouse_new",
-      "type": "system",
-      "name": "warehouse-new",
-      "department_id": "dept_ai_data",
-      "criticality": "medium"
-    },
-    {
       "id": "sys_data_pipeline",
       "type": "system",
       "name": "data-pipeline",
@@ -346,6 +374,20 @@
       "criticality": "high"
     },
     {
+      "id": "sys_data_warehouse",
+      "type": "system",
+      "name": "data-warehouse",
+      "department_id": "dept_ai_data",
+      "criticality": "medium"
+    },
+    {
+      "id": "sys_crm",
+      "type": "system",
+      "name": "crm",
+      "department_id": "dept_sales",
+      "criticality": "high"
+    },
+    {
       "id": "ds_audit_log",
       "type": "dataset",
       "name": "Audit-log event stream",
@@ -353,74 +395,116 @@
       "criticality": "critical"
     },
     {
-      "id": "ds_telematics",
+      "id": "ds_firmographics",
       "type": "dataset",
-      "name": "Telematics / GPS feed",
-      "department_id": "dept_ai_data",
-      "criticality": "high"
+      "name": "Firmographics",
+      "department_id": "dept_sales",
+      "criticality": "medium"
     },
     {
-      "id": "ds_enrichment",
+      "id": "ds_contact_data",
       "type": "dataset",
-      "name": "Account enrichment data",
-      "department_id": "dept_ai_data",
-      "criticality": "low"
+      "name": "Contact data",
+      "department_id": "dept_sales",
+      "criticality": "medium"
+    },
+    {
+      "id": "ds_corporate_linkage",
+      "type": "dataset",
+      "name": "Corporate linkage",
+      "department_id": "dept_compliance",
+      "criticality": "critical"
+    },
+    {
+      "id": "ds_intent_signals",
+      "type": "dataset",
+      "name": "Intent signals",
+      "department_id": "dept_marketing",
+      "criticality": "medium"
+    },
+    {
+      "id": "ds_identity_verification",
+      "type": "dataset",
+      "name": "Identity verification",
+      "department_id": "dept_compliance",
+      "criticality": "critical"
+    },
+    {
+      "id": "ds_market_intel",
+      "type": "dataset",
+      "name": "Market intelligence",
+      "department_id": "dept_marketing",
+      "criticality": "medium"
+    },
+    {
+      "id": "ds_account_intel",
+      "type": "dataset",
+      "name": "Account intelligence",
+      "department_id": "dept_sales",
+      "criticality": "medium"
     },
     {
       "id": "ds_usage",
       "type": "dataset",
-      "name": "Customer usage events",
-      "department_id": "dept_ai_data",
+      "name": "Product usage signals",
+      "department_id": "dept_product",
       "criticality": "medium"
     },
     {
-      "id": "ds_shipments",
+      "id": "ds_geo_risk",
       "type": "dataset",
-      "name": "Shipment & dispatch records",
-      "department_id": "dept_ai_data",
+      "name": "Geographic and macroeconomic risk",
+      "department_id": "dept_operations",
+      "criticality": "medium"
+    },
+    {
+      "id": "vendor_apex",
+      "type": "vendor",
+      "name": "ApexData",
+      "department_id": "dept_sales",
       "criticality": "high"
     },
     {
-      "id": "vendor_auditlog",
+      "id": "vendor_beacon",
       "type": "vendor",
-      "name": "SentinelAudit (audit logging)",
-      "department_id": "dept_finance",
+      "name": "BeaconIQ",
+      "department_id": "dept_sales",
+      "criticality": "medium"
+    },
+    {
+      "id": "vendor_cinder",
+      "type": "vendor",
+      "name": "CinderSignals",
+      "department_id": "dept_marketing",
+      "criticality": "medium"
+    },
+    {
+      "id": "vendor_delta",
+      "type": "vendor",
+      "name": "DeltaVerify",
+      "department_id": "dept_compliance",
       "criticality": "critical"
     },
     {
-      "id": "vendor_cloud",
+      "id": "vendor_echo",
       "type": "vendor",
-      "name": "CloudScale (cloud infra)",
-      "department_id": "dept_finance",
-      "criticality": "high"
-    },
-    {
-      "id": "vendor_telematics",
-      "type": "vendor",
-      "name": "Telemetrix (telematics)",
-      "department_id": "dept_finance",
-      "criticality": "high"
-    },
-    {
-      "id": "vendor_enrichiq",
-      "type": "vendor",
-      "name": "EnrichIQ (enrichment)",
-      "department_id": "dept_finance",
-      "criticality": "low"
-    },
-    {
-      "id": "vendor_observability",
-      "type": "vendor",
-      "name": "ObserveNow (observability)",
-      "department_id": "dept_finance",
+      "name": "EchoMarket",
+      "department_id": "dept_product",
       "criticality": "medium"
     },
     {
-      "id": "vendor_identity",
+      "id": "vendor_flux",
       "type": "vendor",
-      "name": "IdentityHub (SSO)",
-      "department_id": "dept_finance",
-      "criticality": "high"
+      "name": "FluxBehavior",
+      "department_id": "dept_product",
+      "criticality": "low"
+    },
+    {
+      "id": "vendor_granite",
+      "type": "vendor",
+      "name": "GraniteGeo",
+      "department_id": "dept_operations",
+      "criticality": "medium"
     },
     {
       "id": "wf_billing_recon",
@@ -432,22 +516,15 @@
     {
       "id": "wf_invoicing",
       "type": "workflow",
-      "name": "Invoice generation & dispatch",
+      "name": "Invoice generation and dispatch",
       "department_id": "dept_operations",
       "criticality": "critical"
     },
     {
       "id": "wf_incident_mgmt",
       "type": "workflow",
-      "name": "Incident response / on-call",
+      "name": "Incident response and on-call",
       "department_id": "dept_operations",
-      "criticality": "high"
-    },
-    {
-      "id": "wf_dispatch_opt",
-      "type": "workflow",
-      "name": "Dispatch optimisation",
-      "department_id": "dept_engineering",
       "criticality": "high"
     },
     {
@@ -476,7 +553,56 @@
       "type": "workflow",
       "name": "Monthly financial close",
       "department_id": "dept_finance",
+      "criticality": "critical"
+    },
+    {
+      "id": "wf_lead_scoring",
+      "type": "workflow",
+      "name": "Lead scoring",
+      "department_id": "dept_sales",
       "criticality": "medium"
+    },
+    {
+      "id": "wf_campaign_targeting",
+      "type": "workflow",
+      "name": "Campaign targeting",
+      "department_id": "dept_marketing",
+      "criticality": "medium"
+    },
+    {
+      "id": "wf_account_planning",
+      "type": "workflow",
+      "name": "Account planning",
+      "department_id": "dept_sales",
+      "criticality": "medium"
+    },
+    {
+      "id": "wf_kyc_screening",
+      "type": "workflow",
+      "name": "KYC screening",
+      "department_id": "dept_compliance",
+      "criticality": "critical"
+    },
+    {
+      "id": "wf_vendor_reconciliation",
+      "type": "workflow",
+      "name": "Vendor reconciliation",
+      "department_id": "dept_operations",
+      "criticality": "high"
+    },
+    {
+      "id": "wf_product_analytics",
+      "type": "workflow",
+      "name": "Product analytics",
+      "department_id": "dept_product",
+      "criticality": "medium"
+    },
+    {
+      "id": "wf_risk_monitoring",
+      "type": "workflow",
+      "name": "Risk monitoring",
+      "department_id": "dept_operations",
+      "criticality": "high"
     },
     {
       "id": "kn_billing_exception",
@@ -486,11 +612,11 @@
       "criticality": "critical"
     },
     {
-      "id": "kn_warehouse_cutover",
+      "id": "kn_warehouse_lineage",
       "type": "knowledge_asset",
-      "name": "Warehouse migration cutover plan",
+      "name": "Warehouse lineage knowledge",
       "department_id": "dept_ai_data",
-      "criticality": "high"
+      "criticality": "critical"
     },
     {
       "id": "kn_soc2_mapping",
@@ -509,7 +635,7 @@
     {
       "id": "kn_oncall",
       "type": "knowledge_asset",
-      "name": "On-call escalation & recovery",
+      "name": "On-call escalation and recovery",
       "department_id": "dept_operations",
       "criticality": "medium"
     },
@@ -523,35 +649,35 @@
     {
       "id": "kn_release_eng",
       "type": "knowledge_asset",
-      "name": "Release & deploy engineering",
+      "name": "Release and deploy engineering",
       "department_id": "dept_engineering",
       "criticality": "medium"
     },
     {
       "id": "kn_ml_modeling",
       "type": "knowledge_asset",
-      "name": "Dispatch ML modeling",
+      "name": "ML scoring model knowledge",
       "department_id": "dept_ai_data",
       "criticality": "medium"
     },
     {
       "id": "kn_roadmap_context",
       "type": "knowledge_asset",
-      "name": "Product roadmap & customer context",
+      "name": "Product roadmap and customer context",
       "department_id": "dept_product",
       "criticality": "medium"
     },
     {
       "id": "kn_enterprise_deals",
       "type": "knowledge_asset",
-      "name": "Enterprise deal & pricing know-how",
+      "name": "Enterprise deal and pricing know-how",
       "department_id": "dept_sales",
       "criticality": "medium"
     },
     {
       "id": "kn_segmentation",
       "type": "knowledge_asset",
-      "name": "Audience segmentation & attribution",
+      "name": "Audience segmentation and attribution",
       "department_id": "dept_marketing",
       "criticality": "medium"
     },
@@ -572,7 +698,7 @@
     {
       "id": "kn_vendor_contracts",
       "type": "knowledge_asset",
-      "name": "Vendor contract & renewal know-how",
+      "name": "Vendor contract and renewal know-how",
       "department_id": "dept_finance",
       "criticality": "medium"
     },
@@ -605,11 +731,11 @@
       "criticality": "high"
     },
     {
-      "id": "ctl_change_mgmt",
+      "id": "ctl_pci_carddata",
       "type": "control",
-      "name": "Change management",
+      "name": "PCI DSS cardholder data",
       "department_id": "dept_compliance",
-      "criticality": "medium"
+      "criticality": "high"
     },
     {
       "id": "ctl_incident_mgmt",
@@ -619,30 +745,30 @@
       "criticality": "high"
     },
     {
-      "id": "ctl_pci_carddata",
+      "id": "ctl_change_mgmt",
       "type": "control",
-      "name": "PCI DSS cardholder data",
+      "name": "Change management",
       "department_id": "dept_compliance",
-      "criticality": "high"
+      "criticality": "medium"
     },
     {
-      "id": "proj_warehouse_migration",
-      "type": "project",
-      "name": "Warehouse Migration",
-      "department_id": "dept_product",
-      "criticality": "medium"
+      "id": "ctl_kyc_screening",
+      "type": "control",
+      "name": "KYC screening control",
+      "department_id": "dept_compliance",
+      "criticality": "critical"
+    },
+    {
+      "id": "ctl_sox_reconciliation",
+      "type": "control",
+      "name": "SOX vendor-spend reconciliation",
+      "department_id": "dept_compliance",
+      "criticality": "high"
     },
     {
       "id": "proj_billing_modernization",
       "type": "project",
       "name": "Billing Modernization",
-      "department_id": "dept_product",
-      "criticality": "medium"
-    },
-    {
-      "id": "proj_ml_dispatch",
-      "type": "project",
-      "name": "ML Dispatch Optimization",
       "department_id": "dept_product",
       "criticality": "medium"
     },
@@ -661,13 +787,6 @@
       "criticality": "medium"
     },
     {
-      "id": "kpi_on_time_delivery",
-      "type": "kpi",
-      "name": "On-time delivery %",
-      "department_id": "dept_customer_success",
-      "criticality": "medium"
-    },
-    {
       "id": "kpi_net_retention",
       "type": "kpi",
       "name": "Net revenue retention",
@@ -682,6 +801,13 @@
       "criticality": "medium"
     },
     {
+      "id": "kpi_uptime_sla",
+      "type": "kpi",
+      "name": "System uptime / SLA",
+      "department_id": "dept_operations",
+      "criticality": "medium"
+    },
+    {
       "id": "kpi_soc2_coverage",
       "type": "kpi",
       "name": "SOC 2 compliance coverage",
@@ -689,10 +815,17 @@
       "criticality": "medium"
     },
     {
-      "id": "kpi_uptime_sla",
+      "id": "kpi_cac",
       "type": "kpi",
-      "name": "System uptime / SLA",
-      "department_id": "dept_operations",
+      "name": "Customer acquisition cost",
+      "department_id": "dept_marketing",
+      "criticality": "medium"
+    },
+    {
+      "id": "kpi_close_cycle_days",
+      "type": "kpi",
+      "name": "Close cycle days",
+      "department_id": "dept_finance",
       "criticality": "medium"
     },
     {
@@ -712,61 +845,106 @@
   ],
   "edges": [
     {
-      "id": "e_pt_billing01_owns",
-      "source": "role_billing_ops_lead",
-      "target": "wf_billing_recon",
+      "id": "e_close_accountant_owns_close",
+      "source": "role_close_accountant",
+      "target": "wf_financial_close",
       "relation": "OWNS",
       "label": null,
-      "strength": 0.9,
+      "strength": 0.5,
       "criticality": "critical"
     },
     {
-      "id": "e_pt_billing01_knows",
-      "source": "role_billing_ops_lead",
-      "target": "kn_billing_exception",
+      "id": "e_gl_accountant_owns_close",
+      "source": "role_gl_accountant",
+      "target": "wf_financial_close",
+      "relation": "OWNS",
+      "label": null,
+      "strength": 0.5,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_reporting_analyst_backs_close",
+      "source": "role_reporting_analyst",
+      "target": "wf_financial_close",
+      "relation": "BACKS_UP",
+      "label": null,
+      "strength": 0.3,
+      "criticality": "high"
+    },
+    {
+      "id": "e_data_platform_lead_knows_lineage",
+      "source": "role_data_platform_lead",
+      "target": "kn_warehouse_lineage",
       "relation": "KNOWS",
       "label": null,
       "strength": 0.95,
       "criticality": "critical"
     },
     {
-      "id": "e_pt_grc_knows",
-      "source": "role_grc_lead",
-      "target": "kn_soc2_mapping",
-      "relation": "KNOWS",
+      "id": "e_lineage_supports_close",
+      "source": "kn_warehouse_lineage",
+      "target": "wf_financial_close",
+      "relation": "SUPPORTS",
       "label": null,
-      "strength": 0.9,
-      "criticality": "high"
+      "strength": 0.8,
+      "criticality": "critical"
     },
     {
-      "id": "e_pt_data_knows_cutover",
-      "source": "role_data_lead",
-      "target": "kn_warehouse_cutover",
-      "relation": "KNOWS",
-      "label": null,
-      "strength": 0.85,
-      "criticality": "high"
-    },
-    {
-      "id": "e_pt_data_knows_format",
-      "source": "role_data_lead",
-      "target": "kn_data_format",
-      "relation": "KNOWS",
-      "label": null,
-      "strength": 0.9,
-      "criticality": "high"
-    },
-    {
-      "id": "e_pt_sre_owns_incident",
-      "source": "role_sre",
-      "target": "wf_incident_mgmt",
+      "id": "e_billing_ops_lead_owns_recon",
+      "source": "role_billing_ops_lead",
+      "target": "wf_billing_recon",
       "relation": "OWNS",
       "label": null,
-      "strength": 0.7,
+      "strength": 0.6,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_billing_specialist_owns_recon",
+      "source": "role_billing_specialist",
+      "target": "wf_billing_recon",
+      "relation": "OWNS",
+      "label": null,
+      "strength": 0.5,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_revenue_accountant_backs_recon",
+      "source": "role_revenue_accountant",
+      "target": "wf_billing_recon",
+      "relation": "BACKS_UP",
+      "label": null,
+      "strength": 0.3,
       "criticality": "high"
     },
     {
-      "id": "e_kn_billing_supports",
+      "id": "e_ar_specialist_backs_recon",
+      "source": "role_ar_specialist",
+      "target": "wf_billing_recon",
+      "relation": "BACKS_UP",
+      "label": null,
+      "strength": 0.3,
+      "criticality": "high"
+    },
+    {
+      "id": "e_billing_ops_lead_knows_exception",
+      "source": "role_billing_ops_lead",
+      "target": "kn_billing_exception",
+      "relation": "KNOWS",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_billing_specialist_knows_exception",
+      "source": "role_billing_specialist",
+      "target": "kn_billing_exception",
+      "relation": "KNOWS",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_kn_billing_supports_recon",
       "source": "kn_billing_exception",
       "target": "wf_billing_recon",
       "relation": "SUPPORTS",
@@ -775,7 +953,25 @@
       "criticality": "critical"
     },
     {
-      "id": "e_kn_soc2_supports",
+      "id": "e_sre_owns_incident",
+      "source": "role_sre",
+      "target": "wf_incident_mgmt",
+      "relation": "OWNS",
+      "label": null,
+      "strength": 0.7,
+      "criticality": "high"
+    },
+    {
+      "id": "e_grc_lead_knows_soc2_mapping",
+      "source": "role_grc_lead",
+      "target": "kn_soc2_mapping",
+      "relation": "KNOWS",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "high"
+    },
+    {
+      "id": "e_kn_soc2_supports_evidence",
       "source": "kn_soc2_mapping",
       "target": "wf_soc2_evidence",
       "relation": "SUPPORTS",
@@ -784,22 +980,31 @@
       "criticality": "high"
     },
     {
-      "id": "e_kn_cutover_supports",
-      "source": "kn_warehouse_cutover",
-      "target": "proj_warehouse_migration",
-      "relation": "SUPPORTS",
+      "id": "e_data_lead_knows_format",
+      "source": "role_data_lead",
+      "target": "kn_data_format",
+      "relation": "KNOWS",
       "label": null,
-      "strength": 0.7,
+      "strength": 0.85,
       "criticality": "high"
     },
     {
-      "id": "e_kn_format_supports",
+      "id": "e_kn_format_supports_refresh",
       "source": "kn_data_format",
       "target": "wf_data_refresh",
       "relation": "SUPPORTS",
       "label": null,
       "strength": 0.8,
       "criticality": "high"
+    },
+    {
+      "id": "e_privacy_counsel_knows_privacy",
+      "source": "role_privacy_counsel",
+      "target": "kn_privacy_program",
+      "relation": "KNOWS",
+      "label": null,
+      "strength": 0.8,
+      "criticality": "medium"
     },
     {
       "id": "e_billing_platform_recon",
@@ -838,35 +1043,26 @@
       "criticality": "critical"
     },
     {
-      "id": "e_telematics_dispatch",
-      "source": "sys_data_pipeline",
-      "target": "sys_dispatch_engine",
+      "id": "e_crm_lead_scoring",
+      "source": "sys_crm",
+      "target": "wf_lead_scoring",
       "relation": "SUPPORTS",
       "label": null,
-      "strength": 0.6,
+      "strength": 0.8,
       "criticality": "medium"
     },
     {
-      "id": "e_pipeline_ml",
-      "source": "sys_data_pipeline",
-      "target": "sys_ml_scoring",
+      "id": "e_crm_account_planning",
+      "source": "sys_crm",
+      "target": "wf_account_planning",
       "relation": "SUPPORTS",
       "label": null,
-      "strength": 0.65,
+      "strength": 0.7,
       "criticality": "medium"
     },
     {
-      "id": "e_core_dispatchwf",
-      "source": "sys_dispatch_engine",
-      "target": "wf_dispatch_opt",
-      "relation": "SUPPORTS",
-      "label": null,
-      "strength": 0.9,
-      "criticality": "high"
-    },
-    {
-      "id": "e_auditlog_provides",
-      "source": "vendor_auditlog",
+      "id": "e_auditsvc_provides_auditlog",
+      "source": "sys_audit_service",
       "target": "ds_audit_log",
       "relation": "PROVIDES",
       "label": null,
@@ -874,94 +1070,301 @@
       "criticality": "critical"
     },
     {
-      "id": "e_cloud_provides",
-      "source": "vendor_cloud",
-      "target": "sys_cloud_platform",
-      "relation": "PROVIDES",
-      "label": null,
-      "strength": 0.9,
-      "criticality": "critical"
-    },
-    {
-      "id": "e_telemetrix_provides",
-      "source": "vendor_telematics",
-      "target": "ds_telematics",
-      "relation": "PROVIDES",
-      "label": null,
-      "strength": 0.85,
-      "criticality": "high"
-    },
-    {
-      "id": "e_enrichiq_provides",
-      "source": "vendor_enrichiq",
-      "target": "ds_enrichment",
-      "relation": "PROVIDES",
-      "label": null,
-      "strength": 0.4,
-      "criticality": "medium"
-    },
-    {
-      "id": "e_identity_provides",
-      "source": "vendor_identity",
-      "target": "sys_sso_gateway",
-      "relation": "PROVIDES",
-      "label": null,
-      "strength": 0.9,
-      "criticality": "high"
-    },
-    {
-      "id": "e_observe_supports",
-      "source": "vendor_observability",
-      "target": "sys_core_api",
-      "relation": "SUPPORTS",
-      "label": null,
-      "strength": 0.4,
-      "criticality": "medium"
-    },
-    {
-      "id": "e_auditds_service",
-      "source": "ds_audit_log",
-      "target": "sys_audit_service",
-      "relation": "SUPPORTS",
-      "label": null,
-      "strength": 0.95,
-      "criticality": "critical"
-    },
-    {
-      "id": "e_telematics_ingest",
-      "source": "ds_telematics",
-      "target": "sys_dispatch_engine",
-      "relation": "SUPPORTS",
-      "label": null,
-      "strength": 0.7,
-      "criticality": "high"
-    },
-    {
-      "id": "e_shipments_pipeline",
-      "source": "ds_shipments",
-      "target": "sys_data_pipeline",
-      "relation": "SUPPORTS",
-      "label": null,
-      "strength": 0.6,
-      "criticality": "medium"
-    },
-    {
-      "id": "e_ctl_cc72_auditsvc",
-      "source": "sys_audit_service",
-      "target": "ctl_soc2_audit_logging",
-      "relation": "SUPPORTS",
-      "label": null,
-      "strength": 0.95,
-      "criticality": "critical"
-    },
-    {
-      "id": "e_ctl_cc72_auditds",
+      "id": "e_auditlog_supports_soc2",
       "source": "ds_audit_log",
       "target": "ctl_soc2_audit_logging",
       "relation": "SUPPORTS",
       "label": null,
       "strength": 1.0,
       "criticality": "critical"
+    },
+    {
+      "id": "e_auditlog_consumed_by_recon",
+      "source": "ds_audit_log",
+      "target": "wf_vendor_reconciliation",
+      "relation": "CONSUMES",
+      "label": null,
+      "strength": 0.6,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_apex_provides_firmographics",
+      "source": "vendor_apex",
+      "target": "ds_firmographics",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.8,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_beacon_provides_firmographics",
+      "source": "vendor_beacon",
+      "target": "ds_firmographics",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.7,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_echo_provides_firmographics",
+      "source": "vendor_echo",
+      "target": "ds_firmographics",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_apex_provides_contact_data",
+      "source": "vendor_apex",
+      "target": "ds_contact_data",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.8,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_beacon_provides_contact_data",
+      "source": "vendor_beacon",
+      "target": "ds_contact_data",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.7,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_apex_provides_corporate_linkage",
+      "source": "vendor_apex",
+      "target": "ds_corporate_linkage",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.95,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_cinder_provides_intent",
+      "source": "vendor_cinder",
+      "target": "ds_intent_signals",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.8,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_echo_provides_intent",
+      "source": "vendor_echo",
+      "target": "ds_intent_signals",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.6,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_delta_provides_identity",
+      "source": "vendor_delta",
+      "target": "ds_identity_verification",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.95,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_apex_provides_market_intel",
+      "source": "vendor_apex",
+      "target": "ds_market_intel",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.7,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_cinder_provides_market_intel",
+      "source": "vendor_cinder",
+      "target": "ds_market_intel",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.7,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_echo_provides_market_intel",
+      "source": "vendor_echo",
+      "target": "ds_market_intel",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.7,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_echo_provides_account_intel",
+      "source": "vendor_echo",
+      "target": "ds_account_intel",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "high"
+    },
+    {
+      "id": "e_flux_provides_usage",
+      "source": "vendor_flux",
+      "target": "ds_usage",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_granite_provides_geo_risk",
+      "source": "vendor_granite",
+      "target": "ds_geo_risk",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.8,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_delta_provides_geo_risk",
+      "source": "vendor_delta",
+      "target": "ds_geo_risk",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.6,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_firmographics_consumed_leadscoring",
+      "source": "ds_firmographics",
+      "target": "wf_lead_scoring",
+      "relation": "CONSUMES",
+      "label": null,
+      "strength": 0.7,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_firmographics_consumed_campaign",
+      "source": "ds_firmographics",
+      "target": "wf_campaign_targeting",
+      "relation": "CONSUMES",
+      "label": null,
+      "strength": 0.6,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_contactdata_consumed_leadscoring",
+      "source": "ds_contact_data",
+      "target": "wf_lead_scoring",
+      "relation": "CONSUMES",
+      "label": null,
+      "strength": 0.7,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_corporate_linkage_consumed_kyc",
+      "source": "ds_corporate_linkage",
+      "target": "wf_kyc_screening",
+      "relation": "CONSUMES",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_intent_consumed_campaign",
+      "source": "ds_intent_signals",
+      "target": "wf_campaign_targeting",
+      "relation": "CONSUMES",
+      "label": null,
+      "strength": 0.7,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_identity_consumed_kyc",
+      "source": "ds_identity_verification",
+      "target": "wf_kyc_screening",
+      "relation": "CONSUMES",
+      "label": null,
+      "strength": 0.95,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_market_intel_consumed_campaign",
+      "source": "ds_market_intel",
+      "target": "wf_campaign_targeting",
+      "relation": "CONSUMES",
+      "label": null,
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_market_intel_consumed_account_planning",
+      "source": "ds_market_intel",
+      "target": "wf_account_planning",
+      "relation": "CONSUMES",
+      "label": null,
+      "strength": 0.6,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_account_intel_consumed_account_planning",
+      "source": "ds_account_intel",
+      "target": "wf_account_planning",
+      "relation": "CONSUMES",
+      "label": null,
+      "strength": 0.8,
+      "criticality": "high"
+    },
+    {
+      "id": "e_usage_consumed_product_analytics",
+      "source": "ds_usage",
+      "target": "wf_product_analytics",
+      "relation": "CONSUMES",
+      "label": null,
+      "strength": 0.8,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_geo_risk_consumed_risk_monitoring",
+      "source": "ds_geo_risk",
+      "target": "wf_risk_monitoring",
+      "relation": "CONSUMES",
+      "label": null,
+      "strength": 0.7,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_market_intel_consumed_ml_scoring",
+      "source": "ds_market_intel",
+      "target": "sys_ml_scoring",
+      "relation": "CONSUMES",
+      "label": null,
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_intent_consumed_ml_scoring",
+      "source": "ds_intent_signals",
+      "target": "sys_ml_scoring",
+      "relation": "CONSUMES",
+      "label": null,
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_kyc_supports_control",
+      "source": "wf_kyc_screening",
+      "target": "ctl_kyc_screening",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.9,
+      "criticality": "critical"
+    },
+    {
+      "id": "e_recon_supports_sox",
+      "source": "wf_vendor_reconciliation",
+      "target": "ctl_sox_reconciliation",
+      "relation": "SUPPORTS",
+      "label": null,
+      "strength": 0.85,
+      "criticality": "high"
     },
     {
       "id": "e_ctl_access_sso",
@@ -1018,13 +1421,49 @@
       "criticality": "critical"
     },
     {
-      "id": "e_migration_replaces_legacy",
-      "source": "proj_warehouse_migration",
-      "target": "sys_warehouse_legacy",
-      "relation": "SUBSTITUTES_FOR",
+      "id": "e_leadscoring_pipeline",
+      "source": "wf_lead_scoring",
+      "target": "kpi_pipeline",
+      "relation": "CONTRIBUTES_TO",
       "label": null,
-      "strength": 0.9,
-      "criticality": "high"
+      "strength": 0.7,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_campaign_pipeline",
+      "source": "wf_campaign_targeting",
+      "target": "kpi_pipeline",
+      "relation": "CONTRIBUTES_TO",
+      "label": null,
+      "strength": 0.6,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_account_planning_retention",
+      "source": "wf_account_planning",
+      "target": "kpi_net_retention",
+      "relation": "CONTRIBUTES_TO",
+      "label": null,
+      "strength": 0.6,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_product_analytics_retention",
+      "source": "wf_product_analytics",
+      "target": "kpi_net_retention",
+      "relation": "CONTRIBUTES_TO",
+      "label": null,
+      "strength": 0.5,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_risk_monitoring_margin",
+      "source": "wf_risk_monitoring",
+      "target": "kpi_gross_margin",
+      "relation": "CONTRIBUTES_TO",
+      "label": null,
+      "strength": 0.5,
+      "criticality": "medium"
     },
     {
       "id": "e_invoicing_margin",
@@ -1033,15 +1472,6 @@
       "relation": "CONTRIBUTES_TO",
       "label": null,
       "strength": 0.8,
-      "criticality": "high"
-    },
-    {
-      "id": "e_dispatch_ontime",
-      "source": "wf_dispatch_opt",
-      "target": "kpi_on_time_delivery",
-      "relation": "CONTRIBUTES_TO",
-      "label": null,
-      "strength": 0.85,
       "criticality": "high"
     },
     {
@@ -1146,7 +1576,7 @@
     {
       "id": "e_kn_vendorcontracts",
       "source": "kn_vendor_contracts",
-      "target": "vendor_cloud",
+      "target": "wf_vendor_reconciliation",
       "relation": "SUPPORTS",
       "label": null,
       "strength": 0.4,

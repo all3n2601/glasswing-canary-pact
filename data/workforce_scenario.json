@@ -1,0 +1,31 @@
+{
+  "schema_version": "2.1.0",
+  "decision_id": "dec_workforce_knowledge",
+  "decision_type": "restructure",
+  "title": "Eliminate eight staff roles",
+  "statement": "Evaluate the operational consequences of eliminating eight staff roles that currently support two workflows.",
+  "goal": {"metric": "annual_savings_usd", "target": 1070000, "unit": "usd", "basis": "gross", "direction": "at_least"},
+  "horizon_days": 365,
+  "candidate_interventions": [
+    {"id": "remove_close_accountant", "kind": "action", "type": "remove_roles", "target_entity_id": "role_close_accountant", "start_day": 30, "one_time_cost_usd": 40000, "params": {}, "rationale": "Role elimination under review"},
+    {"id": "remove_gl_accountant", "kind": "action", "type": "remove_roles", "target_entity_id": "role_gl_accountant", "start_day": 30, "one_time_cost_usd": 40000, "params": {}, "rationale": "Role elimination under review"},
+    {"id": "remove_reporting_analyst", "kind": "action", "type": "remove_roles", "target_entity_id": "role_reporting_analyst", "start_day": 30, "one_time_cost_usd": 30000, "params": {}, "rationale": "Role elimination under review"},
+    {"id": "remove_data_platform_lead", "kind": "action", "type": "remove_roles", "target_entity_id": "role_data_platform_lead", "start_day": 30, "one_time_cost_usd": 60000, "params": {}, "rationale": "Role elimination under review"},
+    {"id": "remove_billing_ops_lead", "kind": "action", "type": "remove_roles", "target_entity_id": "role_billing_ops_lead", "start_day": 30, "one_time_cost_usd": 50000, "params": {}, "rationale": "Role elimination under review"},
+    {"id": "remove_billing_specialist", "kind": "action", "type": "remove_roles", "target_entity_id": "role_billing_specialist", "start_day": 30, "one_time_cost_usd": 30000, "params": {}, "rationale": "Role elimination under review"},
+    {"id": "remove_revenue_accountant", "kind": "action", "type": "remove_roles", "target_entity_id": "role_revenue_accountant", "start_day": 30, "one_time_cost_usd": 40000, "params": {}, "rationale": "Role elimination under review"},
+    {"id": "remove_ar_specialist", "kind": "action", "type": "remove_roles", "target_entity_id": "role_ar_specialist", "start_day": 30, "one_time_cost_usd": 30000, "params": {}, "rationale": "Role elimination under review"}
+  ],
+  "protected_entity_ids": [],
+  "constraints": [
+    {"id": "c_compliance", "metric": "compliance_controls_broken", "operator": "==", "threshold": 0, "unit": "count", "hard": true, "description": "No mandatory control may break"},
+    {"id": "c_stranded", "metric": "stranded_workflows", "operator": "==", "threshold": 0, "unit": "count", "hard": true, "description": "Every critical workflow keeps its minimum qualified owners"},
+    {"id": "c_customer", "metric": "customer_impact_pct", "operator": "<=", "threshold": 2, "unit": "percent", "hard": true, "description": "Customer impact within 2%"}
+  ],
+  "futures": ["act_now", "inaction", "delay"],
+  "delay_days": 90,
+  "active_pressure_ids": ["pr_billing_recon_hazard", "pr_lineage_holder_attrition", "pr_contractor_cost_growth"],
+  "seed": 42,
+  "mc_samples": 1000,
+  "created_by": "demo_user"
+}

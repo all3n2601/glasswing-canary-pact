@@ -6,7 +6,8 @@
       "department_id": "dept_operations",
       "documented_pct": 0.35,
       "holder_roles": [
-        "role_billing_ops_lead"
+        "role_billing_ops_lead",
+        "role_billing_specialist"
       ],
       "bus_factor": 2,
       "enables_workflows": [
@@ -15,16 +16,18 @@
       "single_point_of_failure": true
     },
     {
-      "knowledge_id": "kn_warehouse_cutover",
-      "name": "Warehouse migration cutover plan",
+      "knowledge_id": "kn_warehouse_lineage",
+      "name": "Warehouse lineage knowledge",
       "department_id": "dept_ai_data",
-      "documented_pct": 0.5,
+      "documented_pct": 0.2,
       "holder_roles": [
-        "role_data_lead"
+        "role_data_platform_lead"
       ],
       "bus_factor": 1,
-      "enables_workflows": [],
-      "single_point_of_failure": false
+      "enables_workflows": [
+        "wf_financial_close"
+      ],
+      "single_point_of_failure": true
     },
     {
       "knowledge_id": "kn_soc2_mapping",
@@ -56,7 +59,7 @@
     },
     {
       "knowledge_id": "kn_oncall",
-      "name": "On-call escalation & recovery",
+      "name": "On-call escalation and recovery",
       "department_id": "dept_operations",
       "documented_pct": 0.7,
       "holder_roles": [],
@@ -76,7 +79,7 @@
     },
     {
       "knowledge_id": "kn_release_eng",
-      "name": "Release & deploy engineering",
+      "name": "Release and deploy engineering",
       "department_id": "dept_engineering",
       "documented_pct": 0.75,
       "holder_roles": [],
@@ -86,7 +89,7 @@
     },
     {
       "knowledge_id": "kn_ml_modeling",
-      "name": "Dispatch ML modeling",
+      "name": "ML scoring model knowledge",
       "department_id": "dept_ai_data",
       "documented_pct": 0.6,
       "holder_roles": [],
@@ -96,7 +99,7 @@
     },
     {
       "knowledge_id": "kn_roadmap_context",
-      "name": "Product roadmap & customer context",
+      "name": "Product roadmap and customer context",
       "department_id": "dept_product",
       "documented_pct": 0.7,
       "holder_roles": [],
@@ -106,7 +109,7 @@
     },
     {
       "knowledge_id": "kn_enterprise_deals",
-      "name": "Enterprise deal & pricing know-how",
+      "name": "Enterprise deal and pricing know-how",
       "department_id": "dept_sales",
       "documented_pct": 0.65,
       "holder_roles": [],
@@ -116,7 +119,7 @@
     },
     {
       "knowledge_id": "kn_segmentation",
-      "name": "Audience segmentation & attribution",
+      "name": "Audience segmentation and attribution",
       "department_id": "dept_marketing",
       "documented_pct": 0.7,
       "holder_roles": [],
@@ -150,12 +153,14 @@
     },
     {
       "knowledge_id": "kn_vendor_contracts",
-      "name": "Vendor contract & renewal know-how",
+      "name": "Vendor contract and renewal know-how",
       "department_id": "dept_finance",
       "documented_pct": 0.6,
       "holder_roles": [],
       "bus_factor": null,
-      "enables_workflows": [],
+      "enables_workflows": [
+        "wf_vendor_reconciliation"
+      ],
       "single_point_of_failure": false
     },
     {
@@ -163,8 +168,10 @@
       "name": "Privacy program operation",
       "department_id": "dept_compliance",
       "documented_pct": 0.7,
-      "holder_roles": [],
-      "bus_factor": null,
+      "holder_roles": [
+        "role_privacy_counsel"
+      ],
+      "bus_factor": 1,
       "enables_workflows": [],
       "single_point_of_failure": false
     }
@@ -176,7 +183,8 @@
       "criticality": "critical",
       "min_qualified_owners": 2,
       "owner_roles": [
-        "role_billing_ops_lead"
+        "role_billing_ops_lead",
+        "role_billing_specialist"
       ],
       "documented_pct": 0.35,
       "ownership_modeled": true,
@@ -184,7 +192,7 @@
     },
     {
       "workflow_id": "wf_invoicing",
-      "name": "Invoice generation & dispatch",
+      "name": "Invoice generation and dispatch",
       "criticality": "critical",
       "min_qualified_owners": 2,
       "owner_roles": [],
@@ -194,7 +202,7 @@
     },
     {
       "workflow_id": "wf_incident_mgmt",
-      "name": "Incident response / on-call",
+      "name": "Incident response and on-call",
       "criticality": "high",
       "min_qualified_owners": 2,
       "owner_roles": [
@@ -203,16 +211,6 @@
       "documented_pct": 0.7,
       "ownership_modeled": true,
       "stranded_if_owners_removed": true
-    },
-    {
-      "workflow_id": "wf_dispatch_opt",
-      "name": "Dispatch optimisation",
-      "criticality": "high",
-      "min_qualified_owners": 2,
-      "owner_roles": [],
-      "documented_pct": 0.6,
-      "ownership_modeled": false,
-      "stranded_if_owners_removed": false
     },
     {
       "workflow_id": "wf_soc2_evidence",
@@ -247,10 +245,83 @@
     {
       "workflow_id": "wf_financial_close",
       "name": "Monthly financial close",
-      "criticality": "medium",
+      "criticality": "critical",
       "min_qualified_owners": 2,
+      "owner_roles": [
+        "role_close_accountant",
+        "role_gl_accountant"
+      ],
+      "documented_pct": 0.6,
+      "ownership_modeled": true,
+      "stranded_if_owners_removed": true
+    },
+    {
+      "workflow_id": "wf_lead_scoring",
+      "name": "Lead scoring",
+      "criticality": "medium",
+      "min_qualified_owners": 1,
       "owner_roles": [],
       "documented_pct": 0.7,
+      "ownership_modeled": false,
+      "stranded_if_owners_removed": false
+    },
+    {
+      "workflow_id": "wf_campaign_targeting",
+      "name": "Campaign targeting",
+      "criticality": "medium",
+      "min_qualified_owners": 1,
+      "owner_roles": [],
+      "documented_pct": 0.65,
+      "ownership_modeled": false,
+      "stranded_if_owners_removed": false
+    },
+    {
+      "workflow_id": "wf_account_planning",
+      "name": "Account planning",
+      "criticality": "medium",
+      "min_qualified_owners": 1,
+      "owner_roles": [],
+      "documented_pct": 0.6,
+      "ownership_modeled": false,
+      "stranded_if_owners_removed": false
+    },
+    {
+      "workflow_id": "wf_kyc_screening",
+      "name": "KYC screening",
+      "criticality": "critical",
+      "min_qualified_owners": 1,
+      "owner_roles": [],
+      "documented_pct": 0.8,
+      "ownership_modeled": false,
+      "stranded_if_owners_removed": false
+    },
+    {
+      "workflow_id": "wf_vendor_reconciliation",
+      "name": "Vendor reconciliation",
+      "criticality": "high",
+      "min_qualified_owners": 2,
+      "owner_roles": [],
+      "documented_pct": 0.55,
+      "ownership_modeled": false,
+      "stranded_if_owners_removed": false
+    },
+    {
+      "workflow_id": "wf_product_analytics",
+      "name": "Product analytics",
+      "criticality": "medium",
+      "min_qualified_owners": 1,
+      "owner_roles": [],
+      "documented_pct": 0.6,
+      "ownership_modeled": false,
+      "stranded_if_owners_removed": false
+    },
+    {
+      "workflow_id": "wf_risk_monitoring",
+      "name": "Risk monitoring",
+      "criticality": "high",
+      "min_qualified_owners": 1,
+      "owner_roles": [],
+      "documented_pct": 0.5,
       "ownership_modeled": false,
       "stranded_if_owners_removed": false
     }
