@@ -14,9 +14,12 @@ In the vendor demo it protects DeltaVerify; it enforces that no cut breaks a man
 - `vendor_delta` (DeltaVerify)
 
 ## Hidden dependencies it uniquely knows (defense)
-- **DeltaVerify is compliance-critical.** It provides `ds_identity_verification`, the sole feed for KYC
+- **DeltaVerify is compliance-critical.** It provides `ds_identity_verification` for KYC
   screening (`ctl_kyc_screening`) and identity checks. Low overlap, mandatory - it cannot be cut, even
   though it looks small on the spend table.
+- **KYC also needs corporate linkage.** `ctl_kyc_screening` additionally depends on `ds_corporate_linkage`,
+  which only **ApexData** provides - so the naive plan (Apex + Cinder) is infeasible. Compliance defends
+  ApexData too, not just DeltaVerify.
 - `ds_audit_log` (via `sys_audit_service`) is the evidence source for `ctl_soc2_audit_logging`; losing it
   breaks CC7.2.
 - `ctl_sox_reconciliation` depends on the financial close, so the workforce strand also has a compliance edge.

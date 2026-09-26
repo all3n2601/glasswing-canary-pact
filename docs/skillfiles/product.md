@@ -13,13 +13,12 @@ demo it owns two of the seven vendors and the unique account-intelligence data.
 ## Hidden dependencies it uniquely knows (defense)
 - **EchoMarket is redundant on most of its data but unique on one.** Its firmographics, intent and
   market-intel overlap ApexData and CinderSignals, but `ds_account_intel` is unique to EchoMarket and
-  feeds Operations' `wf_vendor_reconciliation` and product analytics. So EchoMarket can be terminated
+  feeds product analytics. So EchoMarket can be terminated
   only after `ds_account_intel` is migrated (the plan's migrate-before-terminate step).
 - **FluxBehavior is genuinely unique** (`ds_usage` for product analytics) and low overlap - not a safe cut.
 
 ## Failure modes
-- Terminating EchoMarket without migrating `ds_account_intel` strands vendor reconciliation and loses
-  account intelligence.
+- Terminating EchoMarket without migrating `ds_account_intel` loses account intelligence.
 - Cutting FluxBehavior removes product-usage data with no substitute.
 
 ## Negotiation posture

@@ -11,18 +11,17 @@ together. Runs one challenge pass.
 - **Optimism:** high confidence on low-evidence edges; rebound set too low.
 - **Unsafe combinations:** cuts individually feasible that jointly breach a constraint.
 
-## The planted catch (must find it)
-Terminating **EchoMarket** looks safe because its firmographics, intent and market-intel overlap
-ApexData and CinderSignals. But EchoMarket uniquely provides `ds_account_intel`, and Operations'
-`wf_vendor_reconciliation` quietly consumes it. That link is **not present in the dependency graph** - it
-lives only in the evidence (`ev_echo_account_intel_feed`, which names both endpoints). No single
-department agent sees the whole chain (Product owns Echo, Operations owns the workflow), so the
-Challenger must surface it: cutting Echo without migrating `ds_account_intel` first strands vendor
-reconciliation. Once raised, the engine adds the edge and re-runs.
+## Finding missed dependencies (method, not answers)
+A real dependency can be absent from the dependency graph yet named in the evidence. Hunt for it; never
+assume it. Look specifically for:
+- evidence snippets that name two entities with no edge between them in the twin;
+- a unique dataset from one vendor that feeds another department's workflow.
+When you find one, propose the missing dependency with its evidence ref so the engine can add it and
+re-run. Derive the entities from the evidence on each run - do not carry a fixed answer.
 
 ## Also surfaces
-- Hidden costs the naive vendor cut misses: Echo field-migration cost, and the boomerang of a
-  workforce reduction that strands `wf_financial_close` or `wf_billing_recon`.
+- Hidden costs the naive vendor cut misses: migrating any unique data before termination, and the
+  boomerang of a workforce reduction that strands a critical workflow.
 - Portfolios that hit the gross target but fail on net.
 
 ## Negotiation posture

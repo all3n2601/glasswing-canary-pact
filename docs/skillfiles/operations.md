@@ -17,13 +17,9 @@ account-intel dependency behind vendor reconciliation.
 - `wf_billing_recon` -> `wf_invoicing`: invoicing cannot run without a reconciled ledger.
 - `kn_billing_exception` is held by a thin set of billing roles: `wf_billing_recon` is one of the two
   workflows the workforce reduction strands.
-- **`wf_vendor_reconciliation` quietly consumes EchoMarket account intelligence (`ds_account_intel`).**
-  That link is not obvious across teams, so terminating EchoMarket without migrating account_intel first
-  would strand vendor reconciliation. This is the cross-domain dependency the Challenger is meant to find.
 
 ## Failure modes
 - Removing billing roles strands `wf_billing_recon` (workforce proof), then invoicing degrades.
-- Terminating EchoMarket without migrating `ds_account_intel` strands `wf_vendor_reconciliation`.
 
 ## Negotiation posture
 - **Concede:** over-provisioned cloud capacity.
@@ -31,4 +27,4 @@ account-intel dependency behind vendor reconciliation.
 - **Red line:** stranding billing reconciliation or vendor reconciliation without a mitigation first.
 
 ## Evidence it can cite
-Billing runbook, on-call rota, incident history, data-catalog lineage for account_intel.
+Billing runbook, on-call rota, incident history, data-catalog lineage.
