@@ -10,8 +10,10 @@
   "assembly_order": [
     "base",
     "department_knowledge",
-    "agent_context"
+    "agent_context",
+    "output_schema"
   ],
+  "output_schema_note": "output_schema is the JSON Schema of the agent's output_model, generated from contracts_py at load time",
   "agents": {
     "finance": {
       "display_name": "Finance",

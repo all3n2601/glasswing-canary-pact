@@ -47,6 +47,10 @@ def test_prompt_manifest_structure():
     assert "challenger_base" not in manifest, "Top-level challenger_base should be removed"
     prompts_root = repo_root / manifest.get("prompts_root", "packages/agent-orchestration/prompts")
     assert prompts_root.is_dir(), f"prompts_root {prompts_root} not found"
+    assembly_order = manifest.get("assembly_order", [])
+    assert assembly_order and assembly_order[-1] == "output_schema", (
+        f"output_schema must be the last step of assembly_order, got: {assembly_order}"
+    )
 
     # 2. Every base and fallback file exists under prompts_root
     for agent_id, agent_config in manifest["agents"].items():
@@ -58,7 +62,7 @@ def test_prompt_manifest_structure():
         fallback_path = prompts_root / agent_config["fallback"]
         assert fallback_path.is_file(), f"Fallback file for {agent_id} not found: {fallback_path}"
 
-    # 3. Every output_model imports and is a pydantic model
+    # 3. Every output_model imports and is a pydantic model producing schema with properties
     for agent_id, agent_config in manifest["agents"].items():
         assert "output_model" in agent_config, f"Missing output_model for {agent_id}"
         model_path = agent_config["output_model"]
@@ -66,6 +70,10 @@ def test_prompt_manifest_structure():
         mod = importlib.import_module(module_name)
         cls = getattr(mod, class_name)
         assert issubclass(cls, BaseModel), f"{model_path} for {agent_id} is not a Pydantic BaseModel"
+        schema = cls.model_json_schema()
+        assert isinstance(schema, dict) and "properties" in schema, (
+            f"{model_path} for {agent_id} model_json_schema() does not contain 'properties'"
+        )
 
     # 4. Check prompt files: no em dash (U+2014) and only {display_name} placeholder
     prompt_files = list(prompts_root.glob("*.txt")) + list((prompts_root / "fallback").glob("*.txt"))
