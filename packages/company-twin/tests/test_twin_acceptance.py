@@ -2,32 +2,28 @@
 
 Covers the work-division Person-1 acceptance checks, merged-schema v2 section 12,
 the four planted decision traps, the planted challenger dependency, and the derived
-exports. Runnable with pytest, or directly:  python tests/test_twin_acceptance.py
+exports. Runs under the repo toolchain:  uv run pytest
 """
 
 from __future__ import annotations
 
 import json
-import sys
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "packages/company-twin/src"))
+import networkx as nx
 
-import networkx as nx  # noqa: E402
-
-from company_twin.export import knowledge_map, vendor_report, graph_snapshot  # noqa: E402
-from company_twin.graph import affected_departments, build_graph  # noqa: E402
-from company_twin.loader import load_company_twin  # noqa: E402
-from company_twin.models import EntityType, Relation  # noqa: E402
-from company_twin.validate import validate_twin  # noqa: E402
+from company_twin.export import graph_snapshot, knowledge_map, vendor_report
+from company_twin.graph import affected_departments, build_graph
+from company_twin.loader import default_fixture_path, load_company_twin
+from company_twin.models import EntityType, Relation
+from company_twin.validate import validate_twin
 
 TWIN = load_company_twin()
 G = build_graph(TWIN)
 IDS = {e.id for e in TWIN.entities}
+DATA_DIR = default_fixture_path().parent
 
 
-# ---- work-division §4 acceptance -------------------------------------------
+# ---- work-division section 4 acceptance ------------------------------------
 def test_every_edge_has_valid_endpoints():
     for e in TWIN.edges:
         assert e.source in IDS and e.target in IDS, e.id
@@ -39,10 +35,10 @@ def test_every_vendor_has_cost_consumers_and_replacement_info():
     assert vendors
     for v in vendors:
         r = rep[v.id]
-        assert v.annual_cost_usd and v.annual_cost_usd > 0            # cost
-        assert r["consumers"]                                          # consumers (from edges)
-        assert "min_substitutability" in r and "replaceable" in r     # replacement info
-        assert r["coverage"] >= 1                                      # downstream coverage
+        assert v.annual_cost_usd and v.annual_cost_usd > 0
+        assert r["consumers"]
+        assert "min_substitutability" in r and "replaceable" in r
+        assert r["coverage"] >= 1
 
 
 def test_every_critical_workflow_has_owner_or_is_flagged_knowledge_risk():
@@ -54,7 +50,6 @@ def test_every_critical_workflow_has_owner_or_is_flagged_knowledge_risk():
 
 
 def test_removing_a_node_finds_downstream_departments_and_kpis():
-    # cutting the audit vendor must reach the compliance department and the SOC2 KPI
     depts = affected_departments(G, "vendor_auditlog")
     assert "dept_compliance" in depts
     assert nx.has_path(G, "vendor_auditlog", "kpi_soc2_coverage")
@@ -93,7 +88,9 @@ def test_person_tokens_are_anonymised_and_not_in_strengths():
 # ---- "skills at every level" -----------------------------------------------
 def test_every_department_has_roles_strengths_knowledge_and_a_document():
     from collections import defaultdict
-    roles = defaultdict(int); know = defaultdict(int); docs = defaultdict(int)
+    roles: dict = defaultdict(int)
+    know: dict = defaultdict(int)
+    docs: dict = defaultdict(int)
     for e in TWIN.entities:
         if e.type == EntityType.ROLE:
             roles[e.department_id] += 1
@@ -125,7 +122,7 @@ def test_trap_1_platform_ops_billing_stranding():
 
 def test_trap_2_cancel_auditlog_breaks_soc2():
     assert _reaches("vendor_auditlog", "ds_audit_log")
-    assert _reaches("ctl_soc2_audit_logging", "kpi_soc2_coverage")
+    assert _reaches("vendor_auditlog", "kpi_soc2_coverage")  # full chain through the control
     assert TWIN.entity_map()["ctl_soc2_audit_logging"].mandatory is True
 
 
@@ -140,11 +137,10 @@ def test_trap_4_reduce_engineering_hits_uptime():
 
 
 def test_planted_challenger_dependency_identity_access():
-    manifest = json.loads((ROOT / "data/planted_items.json").read_text())
+    manifest = json.loads((DATA_DIR / "planted_items.json").read_text())
     chain = manifest["missed_dependency"]["chain"]
     for a, b in zip(chain, chain[1:]):
         assert _reaches(a, b), (a, b)
-    # backed by evidence
     ev_ids = {v.id for v in TWIN.evidence}
     assert set(manifest["missed_dependency"]["evidence_refs"]) <= ev_ids
 
@@ -159,19 +155,3 @@ def test_exports_are_wellformed():
     vr = vendor_report(TWIN)
     auditlog = next(v for v in vr["vendors"] if v["vendor_id"] == "vendor_auditlog")
     assert auditlog["irreplaceable_flag"] is True
-
-
-if __name__ == "__main__":
-    fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
-    passed = 0
-    for fn in fns:
-        try:
-            fn()
-            print(f"PASS  {fn.__name__}")
-            passed += 1
-        except AssertionError as e:
-            print(f"FAIL  {fn.__name__}: {e}")
-        except Exception as e:  # noqa: BLE001
-            print(f"ERROR {fn.__name__}: {e!r}")
-    print(f"\n{passed}/{len(fns)} acceptance tests passed")
-    sys.exit(0 if passed == len(fns) else 1)

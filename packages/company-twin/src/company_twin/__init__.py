@@ -11,11 +11,16 @@ from .models import (
     Twin,
 )
 
+# Backward-compat alias during the v2 migration: simulation-engine / agent-orchestration
+# still import `EntityKind`. Remove once those packages migrate to `EntityType`.
+EntityKind = EntityType
+
 __all__ = [
     "CompanyTwin",
     "Twin",
     "Entity",
     "EntityType",
+    "EntityKind",
     "Edge",
     "Relation",
     "Organization",
