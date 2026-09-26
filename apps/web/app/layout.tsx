@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import "@xyflow/react/dist/style.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Canary Pact",
-  description: "See the organizational blast radius before committing to a decision.",
+  title: "Canary Pact · Organizational simulation",
+  description: "Explore the organizational blast radius of a decision before committing.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -14,4 +13,3 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     </html>
   );
 }
-

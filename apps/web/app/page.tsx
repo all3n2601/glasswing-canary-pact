@@ -1,6 +1,5 @@
-import { DecisionDashboard } from "@/components/decision-dashboard";
+import { LandingExperience } from "@/components/landing-experience";
 
 export default function Home() {
-  return <DecisionDashboard />;
+  return <LandingExperience />;
 }
-

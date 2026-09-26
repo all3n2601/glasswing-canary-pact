@@ -1,0 +1,62 @@
+{
+  "schema_version": "2.0.0",
+  "organization": {
+    "id": "org_northstar",
+    "legal_name": "Northstar Technologies, Inc.",
+    "display_name": "Northstar",
+    "sector": "technology_saas",
+    "sub_sector": "B2B revenue intelligence software",
+    "secondary_sectors": [],
+    "business_model": "b2b",
+    "size_band": "mid_market",
+    "headquarters_country": "US",
+    "operating_regions": ["US", "EU"],
+    "annual_revenue_usd": 72000000,
+    "total_annual_budget_usd": 31200000,
+    "total_headcount_fte": 486,
+    "fiscal_year_start_month": 1,
+    "regulatory_frameworks": ["SOC2", "GDPR"],
+    "strategic_priorities": [
+      { "id": "sp_retention", "text": "Protect enterprise customer retention", "rank": 1, "kpi_ids": ["kpi_retention"] },
+      { "id": "sp_margin", "text": "Reach sustainable operating margin", "rank": 2, "kpi_ids": ["kpi_operating_margin"] },
+      { "id": "sp_delivery", "text": "Improve roadmap delivery reliability", "rank": 3, "kpi_ids": ["kpi_delivery"] }
+    ],
+    "description": "Northstar is a mid-market B2B SaaS company serving revenue teams across the United States and Europe. Its growth depends on reliable customer data, fast product delivery, and enterprise trust.",
+    "evidence_refs": ["ev_strategy_memo_1", "ev_org_chart_1"]
+  },
+  "departments": [
+    { "department_id": "dept_finance", "name": "Finance", "mission": "Protect financial resilience and capital efficiency.", "actual_fte": 32, "annual_budget_usd": 3100000, "utilisation": 0.86, "maturity_level": 4, "enabled": true },
+    { "department_id": "dept_sales", "name": "Sales", "mission": "Create predictable enterprise revenue growth.", "actual_fte": 76, "annual_budget_usd": 6200000, "utilisation": 0.94, "maturity_level": 3, "enabled": true },
+    { "department_id": "dept_marketing", "name": "Marketing", "mission": "Build demand and sharpen market positioning.", "actual_fte": 41, "annual_budget_usd": 3900000, "utilisation": 0.92, "maturity_level": 3, "enabled": true },
+    { "department_id": "dept_operations", "name": "Operations", "mission": "Keep critical business workflows reliable.", "actual_fte": 58, "annual_budget_usd": 4100000, "utilisation": 1.12, "maturity_level": 3, "enabled": true },
+    { "department_id": "dept_engineering", "name": "Engineering", "mission": "Build and operate the Northstar platform.", "actual_fte": 124, "annual_budget_usd": 7600000, "utilisation": 1.04, "maturity_level": 4, "enabled": true },
+    { "department_id": "dept_ai_data", "name": "AI & Data", "mission": "Turn trusted data into differentiated intelligence.", "actual_fte": 46, "annual_budget_usd": 2800000, "utilisation": 1.08, "maturity_level": 3, "enabled": true },
+    { "department_id": "dept_people", "name": "People", "mission": "Build healthy teams and protect institutional knowledge.", "actual_fte": 24, "annual_budget_usd": 1200000, "utilisation": 0.89, "maturity_level": 3, "enabled": true },
+    { "department_id": "dept_compliance", "name": "Risk & Compliance", "mission": "Preserve customer trust and control integrity.", "actual_fte": 21, "annual_budget_usd": 1100000, "utilisation": 0.98, "maturity_level": 4, "enabled": true },
+    { "department_id": "dept_customer", "name": "Customer Success", "mission": "Help customers realize durable value.", "actual_fte": 64, "annual_budget_usd": 1200000, "utilisation": 1.01, "maturity_level": 4, "enabled": true }
+  ],
+  "settings": {
+    "settings_id": "set_northstar_default",
+    "organization_id": "org_northstar",
+    "settings_version": 1,
+    "updated_by": "demo_admin",
+    "updated_at": "2026-09-26T14:00:00Z",
+    "display_currency": "USD",
+    "money_display_scale": "auto",
+    "timezone": "America/New_York",
+    "locale": "en-US",
+    "default_horizon_days": 365,
+    "default_futures": ["act_now", "inaction", "delay"],
+    "default_delay_days": 90,
+    "propagation_max_hops": 4,
+    "min_impact_threshold": 0.02,
+    "risk_appetite": "balanced",
+    "risk_weights": { "financial": 25, "capability_workflow": 25, "customer_revenue": 20, "compliance_control": 20, "execution_uncertainty": 10 },
+    "optimizer_objective": "balanced",
+    "always_protected_entity_ids": [],
+    "require_human_approval": true,
+    "anonymize_people": true,
+    "llm_mode": "replay",
+    "doc_staleness_days": 365
+  }
+}
