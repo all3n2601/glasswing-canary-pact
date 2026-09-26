@@ -1,6 +1,10 @@
 {
-  "base": "base.txt",
-  "challenger_base": "base_challenger.txt",
+  "prompts_root": "packages/agent-orchestration/prompts",
+  "repo_root_paths": [
+    "skill",
+    "skills_dir"
+  ],
+  "path_note": "base and fallback paths are relative to prompts_root and skill paths to the repo root",
   "skills_dir": "docs/skillfiles",
   "skill_include": "whole_file_without_title",
   "assembly_order": [
@@ -11,58 +15,80 @@
   "agents": {
     "finance": {
       "display_name": "Finance",
+      "base": "base.txt",
       "skill": "docs/skillfiles/finance.md",
-      "fallback": "fallback/finance.txt"
+      "fallback": "fallback/finance.txt",
+      "output_model": "contracts_py.agents.AgentOutput"
     },
     "engineering": {
       "display_name": "Engineering",
+      "base": "base.txt",
       "skill": "docs/skillfiles/engineering.md",
-      "fallback": "fallback/engineering.txt"
+      "fallback": "fallback/engineering.txt",
+      "output_model": "contracts_py.agents.AgentOutput"
     },
     "ai_data": {
       "display_name": "AI and Data",
+      "base": "base.txt",
       "skill": "docs/skillfiles/ai_data.md",
-      "fallback": "fallback/ai_data.txt"
+      "fallback": "fallback/ai_data.txt",
+      "output_model": "contracts_py.agents.AgentOutput"
     },
     "operations": {
       "display_name": "Operations",
+      "base": "base.txt",
       "skill": "docs/skillfiles/operations.md",
-      "fallback": "fallback/operations.txt"
+      "fallback": "fallback/operations.txt",
+      "output_model": "contracts_py.agents.AgentOutput"
     },
     "product": {
       "display_name": "Product",
+      "base": "base.txt",
       "skill": "docs/skillfiles/product.md",
-      "fallback": "fallback/product.txt"
+      "fallback": "fallback/product.txt",
+      "output_model": "contracts_py.agents.AgentOutput"
     },
     "marketing": {
       "display_name": "Marketing",
+      "base": "base.txt",
       "skill": "docs/skillfiles/marketing.md",
-      "fallback": "fallback/marketing.txt"
+      "fallback": "fallback/marketing.txt",
+      "output_model": "contracts_py.agents.AgentOutput"
     },
     "sales": {
       "display_name": "Sales",
+      "base": "base.txt",
       "skill": "docs/skillfiles/sales.md",
-      "fallback": "fallback/sales.txt"
+      "fallback": "fallback/sales.txt",
+      "output_model": "contracts_py.agents.AgentOutput"
     },
     "customer_success": {
       "display_name": "Customer Success",
+      "base": "base.txt",
       "skill": "docs/skillfiles/customer_success.md",
-      "fallback": "fallback/customer_success.txt"
+      "fallback": "fallback/customer_success.txt",
+      "output_model": "contracts_py.agents.AgentOutput"
     },
     "compliance": {
       "display_name": "Compliance",
+      "base": "base.txt",
       "skill": "docs/skillfiles/compliance.md",
-      "fallback": "fallback/compliance.txt"
+      "fallback": "fallback/compliance.txt",
+      "output_model": "contracts_py.agents.AgentOutput"
     },
     "people_knowledge": {
       "display_name": "People and Knowledge",
+      "base": "base.txt",
       "skill": "docs/skillfiles/people_knowledge.md",
-      "fallback": "fallback/people_knowledge.txt"
+      "fallback": "fallback/people_knowledge.txt",
+      "output_model": "contracts_py.agents.AgentOutput"
     },
     "challenger": {
       "display_name": "Challenger",
+      "base": "base_challenger.txt",
       "skill": "docs/skillfiles/challenger.md",
-      "fallback": "fallback/challenger.txt"
+      "fallback": "fallback/challenger.txt",
+      "output_model": "contracts_py.agents.ChallengerOutput"
     }
   }
 }

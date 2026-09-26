@@ -52,6 +52,7 @@ version = "0.1.0"
 source = { editable = "packages/agent-orchestration" }
 dependencies = [
     { name = "canary-company-twin" },
+    { name = "canary-contracts" },
     { name = "canary-simulation-engine" },
     { name = "langgraph" },
 ]
@@ -59,6 +60,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "canary-company-twin", editable = "packages/company-twin" },
+    { name = "canary-contracts", editable = "packages/contracts-py" },
     { name = "canary-simulation-engine", editable = "packages/simulation-engine" },
     { name = "langgraph", specifier = ">=1.0" },
 ]
