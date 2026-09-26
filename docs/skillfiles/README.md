@@ -26,6 +26,7 @@ agent, named `<agent_id>.md`, matching the schema v2 agent roster.
 | sales | [sales.md](sales.md) | Enterprise renewals; downstream of billing |
 | customer_success | [customer_success.md](customer_success.md) | Churn/SLA voice; second-order customer impact |
 | compliance | [compliance.md](compliance.md) | **Decision 2** feed; SOC 2/PCI hard constraints |
+| people_knowledge | [people_knowledge.md](people_knowledge.md) | Backup coverage, bus factor, knowledge-loss proof (role level only) |
 | challenger | [challenger.md](challenger.md) | Audits the plan; finds the planted cross-domain dependency |
 
 ## The four demo decisions
