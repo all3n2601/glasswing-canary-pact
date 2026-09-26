@@ -31,7 +31,7 @@ export function DepartmentMetricsSidebar({ departments, department, scenarioStar
     >
       <header className="flex items-start justify-between gap-4 border-b border-zinc-100 p-5">
         <div className="min-w-0">
-          <Badge className="border-0 bg-zinc-100 text-[9px] uppercase tracking-[.12em] text-zinc-500">Sample scenario data</Badge>
+          <Badge className="border-0 bg-zinc-100 text-[9px] uppercase tracking-[.12em] text-zinc-500">Company API data</Badge>
           <h2 className="mt-3 truncate text-2xl font-semibold tracking-[-.04em]">{department.name}</h2>
           <p className="mt-1 text-[11px] leading-5 text-zinc-500">{department.mission}</p>
         </div>
@@ -60,7 +60,7 @@ export function DepartmentMetricsSidebar({ departments, department, scenarioStar
           <div className="mt-3 rounded-2xl bg-zinc-50 p-4">
             <strong className="text-sm">{scenarioStarted ? department.label : "Run the simulation to reveal impact"}</strong>
             <p className="mt-2 text-[11px] leading-5 text-zinc-500">{scenarioStarted ? department.summary : "Baseline department metrics are available now. Scenario-specific impacts, evidence, and mitigations appear after the sample run starts."}</p>
-            {scenarioStarted ? <div className="mt-3 flex items-center justify-between border-t border-zinc-200 pt-3 text-[10px]"><span className="text-zinc-500">Confidence</span><strong>{Math.round(department.confidence * 100)}%</strong></div> : null}
+            {scenarioStarted && department.confidence !== undefined ? <div className="mt-3 flex items-center justify-between border-t border-zinc-200 pt-3 text-[10px]"><span className="text-zinc-500">Confidence</span><strong>{Math.round(department.confidence * 100)}%</strong></div> : null}
           </div>
         </section>
 

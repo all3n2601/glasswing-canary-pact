@@ -7,9 +7,9 @@ from contracts_py.twin import OrganizationSettings, Twin
 
 from canary_api import engine_port
 from canary_api.events import EventBus
-from canary_api.paths import DATA_DIR, runs_dir
+from canary_api.paths import DATA_DIR
 
-bus = EventBus(runs_dir())
+bus = EventBus()
 _twins: dict[str, Twin] = {}
 
 

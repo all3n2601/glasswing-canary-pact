@@ -14,8 +14,10 @@ ReplaySpeed = Literal[1, 2, 4]
 
 
 class HealthResponse(Strict):
-    status: Literal["ok"] = "ok"
+    status: Literal["ok", "degraded"] = "ok"
     schema_version: SchemaVersion = SCHEMA_VERSION
+    storage: Literal["file", "postgres"] = "file"
+    storage_write_failures: int = Field(default=0, ge=0)
 
 
 class DecisionCreated(Strict):
@@ -24,7 +26,8 @@ class DecisionCreated(Strict):
 
 class HumanDecisionRequest(Strict):
     decision: Literal["approve", "reject", "request_scenario"]
-    decided_by: str
+    # Ignored when sent: the server records the logged-in user.
+    decided_by: str | None = None
     notes: str = ""
     package_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
 

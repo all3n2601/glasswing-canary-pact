@@ -1,3 +1,5 @@
+from typing import Literal
+
 from contracts_py.agents import AgentSpec
 from contracts_py.enums import DecisionType, EntityType, Sensitivity
 from contracts_py.twin import ALWAYS_ENABLED_AGENTS, CORE_AGENT_IDS
@@ -5,6 +7,15 @@ from contracts_py.twin import ALWAYS_ENABLED_AGENTS, CORE_AGENT_IDS
 PROMPT_VERSION = "p1"
 CHALLENGER = "challenger"
 ALWAYS_RUN = ALWAYS_ENABLED_AGENTS
+
+ModelTier = Literal["strong", "fast"]
+# Department first passes run in parallel on the fast slot; the challenger does the hardest cross-domain reasoning.
+MODEL_TIER: dict[str, ModelTier] = {CHALLENGER: "strong"}
+DEFAULT_MODEL_TIER: ModelTier = "fast"
+
+
+def model_tier(agent_id: str) -> ModelTier:
+    return MODEL_TIER.get(agent_id, DEFAULT_MODEL_TIER)
 
 ALL = "all"
 VENDOR = DecisionType.vendor_consolidation

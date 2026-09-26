@@ -5,7 +5,6 @@ import json
 import logging
 import os
 import secrets
-import sqlite3
 import uuid
 from datetime import datetime, timedelta, timezone
 from functools import cache
@@ -18,7 +17,8 @@ from pydantic import ValidationError
 
 from contracts_py.api import AuthToken, LoginRequest, SignupRequest, UserPublic, UserRole
 
-from canary_api.paths import runs_dir
+from canary_api import storage
+from canary_api.storage import DuplicateEmail, FileStorage, Storage
 
 log = logging.getLogger(__name__)
 
@@ -52,29 +52,15 @@ def verify_password(password: str, stored: str) -> bool:
 _DUMMY_HASH = hash_password(secrets.token_hex(16))
 
 
-class DuplicateEmail(ValueError):
-    pass
-
-
 class UserStore:
-    def __init__(self, path: Path) -> None:
-        self.path = path
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with self._connect() as db:
-            db.execute(
-                "CREATE TABLE IF NOT EXISTS users (user_id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, "
-                "display_name TEXT NOT NULL, role TEXT NOT NULL, password_hash TEXT NOT NULL, created_at TEXT NOT NULL)"
-            )
+    """Password hashing lives here; rows live in whichever storage backend is active."""
 
-    def _connect(self) -> sqlite3.Connection:
-        db = sqlite3.connect(self.path)
-        db.row_factory = sqlite3.Row
-        return db
+    def __init__(self, backend: Storage) -> None:
+        self.backend = backend
 
-    @staticmethod
-    def _public(row: sqlite3.Row) -> UserPublic:
-        return UserPublic(user_id=row["user_id"], email=row["email"], display_name=row["display_name"],
-                          role=row["role"], created_at=datetime.fromisoformat(row["created_at"]))
+    @property
+    def path(self) -> Path | None:
+        return self.backend.users_path if isinstance(self.backend, FileStorage) else None
 
     def create(self, signup: SignupRequest, role: UserRole = UserRole.viewer) -> UserPublic:
         user = UserPublic(
@@ -84,38 +70,27 @@ class UserStore:
             role=role,
             created_at=datetime.now(timezone.utc),
         )
-        try:
-            with self._connect() as db:
-                db.execute(
-                    "INSERT INTO users VALUES (?, ?, ?, ?, ?, ?)",
-                    (user.user_id, user.email, user.display_name, user.role.value, hash_password(signup.password),
-                     user.created_at.isoformat()),
-                )
-        except sqlite3.IntegrityError as exc:
-            raise DuplicateEmail(user.email) from exc
+        self.backend.create_user(user, hash_password(signup.password))
         return user
 
     def get(self, user_id: str) -> UserPublic | None:
-        with self._connect() as db:
-            row = db.execute("SELECT * FROM users WHERE user_id = ?", (user_id,)).fetchone()
-        return self._public(row) if row else None
+        return self.backend.user_by_id(user_id)
 
     def exists(self, email: str) -> bool:
-        with self._connect() as db:
-            return db.execute("SELECT 1 FROM users WHERE email = ?", (email.lower(),)).fetchone() is not None
+        return self.backend.user_by_email(email.lower()) is not None
 
     def authenticate(self, email: str, password: str) -> UserPublic | None:
-        with self._connect() as db:
-            row = db.execute("SELECT * FROM users WHERE email = ?", (email.lower(),)).fetchone()
-        if row is None:
+        stored = self.backend.user_by_email(email.lower())
+        if stored is None:
             verify_password(password, _DUMMY_HASH)
             return None
-        return self._public(row) if verify_password(password, row["password_hash"]) else None
+        return stored.user if verify_password(password, stored.password_hash) else None
 
 
 class TokenSigner:
-    def __init__(self, secret: bytes) -> None:
+    def __init__(self, secret: bytes, backend: Storage | None = None) -> None:
         self.secret = secret
+        self.backend = backend
         self.revoked: set[str] = set()
 
     def _sign(self, body: str) -> str:
@@ -136,14 +111,18 @@ class TokenSigner:
             claims = json.loads(_b64decode(body))
         except ValueError:
             return None
-        if not isinstance(claims, dict) or claims.get("jti") in self.revoked:
+        if not isinstance(claims, dict) or not isinstance(claims.get("jti"), str):
             return None
         if not isinstance(claims.get("exp"), int) or claims["exp"] <= datetime.now(timezone.utc).timestamp():
+            return None
+        if claims["jti"] in self.revoked or (self.backend is not None and self.backend.is_revoked(claims["jti"])):
             return None
         return claims
 
     def revoke(self, claims: dict[str, Any]) -> None:
         self.revoked.add(claims["jti"])
+        if self.backend is not None:
+            self.backend.revoke_token(claims["jti"], datetime.fromtimestamp(claims["exp"], timezone.utc))
 
 
 def _secret() -> bytes:
@@ -154,14 +133,23 @@ def _secret() -> bytes:
     return secrets.token_bytes(32)
 
 
-@cache
 def store() -> UserStore:
-    return UserStore(runs_dir() / "users.sqlite3")
+    return UserStore(storage.current())
 
 
 @cache
+def _secret_bytes() -> bytes:
+    return _secret()
+
+
 def signer() -> TokenSigner:
-    return TokenSigner(_secret())
+    backend = storage.current()
+    if _signer.get("backend") is not backend:
+        _signer.update(backend=backend, signer=TokenSigner(_secret_bytes(), backend))
+    return _signer["signer"]
+
+
+_signer: dict[str, Any] = {}
 
 
 def seed_demo_approver() -> UserPublic | None:
@@ -177,6 +165,14 @@ def seed_demo_approver() -> UserPublic | None:
     user = store().create(request, role=UserRole.approver)
     log.info("created demo approver %s", user.user_id)
     return user
+
+
+def warn_if_no_approver() -> bool:
+    if store().backend.has_role(UserRole.approver.value):
+        return False
+    log.warning("No approver account exists, so no decision can be approved. Set CANARY_DEMO_APPROVER_EMAIL and "
+                "CANARY_DEMO_APPROVER_PASSWORD to create the demo approver at startup.")
+    return True
 
 
 _bearer = HTTPBearer(auto_error=False)

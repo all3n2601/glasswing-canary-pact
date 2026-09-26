@@ -47,13 +47,30 @@ class LLMClient(Protocol):
              context: AgentContext, fast: bool = False) -> LLMResult: ...
 
 
+def env_first(*names: str) -> str | None:
+    for name in names:
+        value = os.environ.get(name)
+        if value:
+            return value
+    return None
+
+
+def resolve_base_url() -> str:
+    """SCIFORIUM_API_URL is the full completions endpoint; the OpenAI client wants the base before it."""
+    url = os.environ.get("SCIFORIUM_API_URL")
+    if url:
+        url = url.rstrip("/")
+        return url.removesuffix("/chat/completions")
+    return os.environ.get("SCIFORIUM_BASE_URL") or DEFAULT_BASE_URL
+
+
 def sciforium_call(model_id: str, messages: Messages, output_model: type[BaseModel], *, timeout: float,
                    temperature: float) -> LiveReply:
     from langchain_openai import ChatOpenAI
 
     chat = ChatOpenAI(
         model=model_id,
-        base_url=os.environ.get("SCIFORIUM_BASE_URL", DEFAULT_BASE_URL),
+        base_url=resolve_base_url(),
         api_key=os.environ.get("SCIFORIUM_API_KEY"),
         timeout=timeout,
         temperature=temperature,
@@ -96,16 +113,36 @@ class AgentLLM:
 
     @property
     def model_label(self) -> str:
-        return self.model_id() or self.mode
+        return self.model_id() or self.model_id(fast=True) or self.mode
 
     def model_id(self, fast: bool = False) -> str | None:
         if fast:
-            return self.settings.model_id_fast or os.environ.get("CANARY_MODEL_FAST")
-        return self.settings.model_id_strong or os.environ.get("CANARY_MODEL_STRONG")
+            return self.settings.model_id_fast or env_first("CANARY_MODEL_FAST", "MODEL_FAST", "SCIFORIUM_MODEL")
+        return self.settings.model_id_strong or env_first("CANARY_MODEL_STRONG", "MODEL_STRONG", "SCIFORIUM_MODEL")
+
+    def _number(self, field: str, env_name: str) -> float:
+        # Settings always carry a default, so only an explicitly set value beats the team .env.
+        if field not in self.settings.model_fields_set and os.environ.get(env_name):
+            try:
+                return float(os.environ[env_name])
+            except ValueError:
+                pass
+        return float(getattr(self.settings, field))
+
+    def temperature(self) -> float:
+        return self._number("temperature", "SCIFORIUM_TEMPERATURE")
+
+    def timeout(self) -> float:
+        return self._number("agent_timeout_seconds", "SCIFORIUM_TIMEOUT_SECONDS")
 
     def call(self, agent_id: str, messages: Messages, output_model: type[BaseModel], *, prompt_version: str,
              context: AgentContext, fast: bool = False) -> LLMResult:
-        model_id = self.model_id(fast) or "unconfigured"
+        notes: list[str] = []
+        model_id = self.model_id(fast)
+        if model_id is None and not fast and self.model_id(fast=True):
+            model_id = self.model_id(fast=True)
+            notes.append(f"strong model not configured; {agent_id} ran on the fast model {model_id}")
+        model_id = model_id or "unconfigured"
         digest = prompt_hash(model_id, prompt_version, messages, output_model, context.run_id)
         metrics = CallMetrics(model_id=model_id, prompt_version=prompt_version, prompt_hash=digest, latency_ms=0,
                               input_tokens=0, output_tokens=0)
@@ -114,8 +151,11 @@ class AgentLLM:
             return LLMResult(mock_output(output_model, context), "ok", metrics)
         decision_id = context.brief.decision_id
         if self.mode == "replay":
-            return self._from_cache(agent_id, decision_id, digest, output_model, metrics, [])
-        return self._live(agent_id, decision_id, model_id, digest, messages, output_model, metrics)
+            result = self._from_cache(agent_id, decision_id, digest, output_model, metrics, [])
+        else:
+            result = self._live(agent_id, decision_id, model_id, digest, messages, output_model, metrics)
+        result.errors = [*notes, *result.errors]
+        return result
 
     def _live(self, agent_id: str, decision_id: str, model_id: str, digest: str, messages: Messages, output_model: type[BaseModel],
               metrics: CallMetrics) -> LLMResult:
@@ -125,10 +165,10 @@ class AgentLLM:
         for attempt in range(2):
             try:
                 if model_id == "unconfigured":
-                    raise RuntimeError("no model id: set model_id_strong/model_id_fast or CANARY_MODEL_STRONG/FAST")
+                    raise RuntimeError("no model id: set model_id_strong/model_id_fast, CANARY_MODEL_STRONG/FAST, "
+                                       "MODEL_STRONG/FAST or SCIFORIUM_MODEL")
                 reply = self.live_call(model_id, attempt_messages, output_model,
-                                       timeout=float(self.settings.agent_timeout_seconds),
-                                       temperature=self.settings.temperature)
+                                       timeout=self.timeout(), temperature=self.temperature())
                 output = output_model.model_validate(
                     reply.output.model_dump() if isinstance(reply.output, BaseModel) else reply.output
                 )

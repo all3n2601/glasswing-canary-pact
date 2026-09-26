@@ -28,7 +28,7 @@ from agent_orchestration.llm import LLMClient
 from agent_orchestration.merge import MergeOutcome, merge
 from agent_orchestration.ports import EnginePort
 from agent_orchestration.prompts import assemble
-from agent_orchestration.roster import CHALLENGER, PROMPT_VERSION, ROSTER
+from agent_orchestration.roster import CHALLENGER, PROMPT_VERSION, ROSTER, model_tier
 from agent_orchestration.router import route_agents
 
 FAILED_STATUSES = {"fallback_cached", "unavailable", "invalid"}
@@ -60,27 +60,47 @@ class RunFailure(RuntimeError):
     pass
 
 
+class RunCancelled(RuntimeError):
+    pass
+
+
 def _unique(items: list[str]) -> list[str]:
     return list(dict.fromkeys(items))
 
 
 class _Run:
     def __init__(self, brief: DecisionBrief, twin: Twin, engine: EnginePort, settings: OrganizationSettings,
-                 llm: LLMClient, emit: Emit, run_id: str, clock: Callable[[], datetime]) -> None:
+                 llm: LLMClient, emit: Emit, run_id: str, clock: Callable[[], datetime],
+                 should_stop: Callable[[], bool] | None = None) -> None:
         self.brief, self.twin, self.engine, self.settings = brief, twin, engine, settings
         self.llm, self.emit, self.run_id, self.clock = llm, emit, run_id, clock
         self.status = RunStatus.created
         self.scenarios: dict[tuple[Future, str | None], Scenario] = {}
         self.engine_issues: list[str] = []
         self.emitted_plans: set[str] = set()
+        self.rejected_plans: set[str] = set()
+        self.should_stop = should_stop
+        self.cancelled = False
         self.lock = threading.Lock()
 
     def publish(self, kind: EventType, payload: BaseModel, *, actor: str = "orchestrator",
                 scenario_id: str | None = None, future: Future | None = None) -> None:
         with self.lock:
+            if self.cancelled:
+                return
             self.emit(kind, payload, actor=actor, scenario_id=scenario_id, future=future)
 
+    def stop_if_requested(self, where: str) -> None:
+        if self.cancelled or (self.should_stop is not None and self.should_stop()):
+            # Set under the lock so agents still running in parallel cannot publish afterwards.
+            with self.lock:
+                self.cancelled = True
+            raise RunCancelled(f"run {self.run_id} cancelled before {where}")
+
     def phase(self, status: RunStatus) -> None:
+        # awaiting_approval follows package_ready directly; the package is already out by then.
+        if status not in (RunStatus.awaiting_approval, RunStatus.failed):
+            self.stop_if_requested(status.value)
         self.publish(EventType.phase_changed, PhaseChanged(from_status=self.status, to_status=status))
         self.status = status
 
@@ -132,8 +152,9 @@ class _Run:
                                 inaction=results[Future.inaction], settings=self.settings,
                                 known_impact_summaries=summaries)
         prompt = assemble(agent_id, context)
+        self.stop_if_requested(f"the {agent_id} agent call")
         result = self.llm.call(agent_id, prompt.messages, prompt.output_model, prompt_version=PROMPT_VERSION,
-                               context=context)
+                               context=context, fast=model_tier(agent_id) == "fast")
         outcome = merge(agent_id, result, context=context, pass_type=pass_type,  # type: ignore[arg-type]
                         scenario_ids=self.scenario_ids(plan), created_at=self.clock())
         assessment = outcome.assessment
@@ -190,11 +211,12 @@ class _Run:
         self.check(portfolio, twin)
         plans = self.plans(portfolio)
         for plan, item in plans:
-            if plan.plan_id in self.emitted_plans:
-                continue
-            self.emitted_plans.add(plan.plan_id)
-            self.publish(EventType.candidate_generated, plan, actor="engine")
-            if not item.result.feasible:
+            if plan.plan_id not in self.emitted_plans:
+                self.emitted_plans.add(plan.plan_id)
+                self.publish(EventType.candidate_generated, plan, actor="engine")
+            # A plan announced as feasible can become infeasible after re-optimization, so rejection is tracked apart.
+            if not item.result.feasible and plan.plan_id not in self.rejected_plans:
+                self.rejected_plans.add(plan.plan_id)
                 reasons = item.result.rejection_reasons or [
                     c.explanation for c in item.result.constraint_results if c.hard and not c.passed
                 ]
@@ -373,11 +395,16 @@ class _Run:
 
 def run_decision(brief: DecisionBrief, *, engine: EnginePort, settings: OrganizationSettings, llm: LLMClient,
                  emit: Emit, run_id: str, twin: Twin,
-                 clock: Callable[[], datetime] = lambda: datetime.now(timezone.utc)) -> DecisionPackage:
-    run = _Run(brief, twin, engine, settings, llm, emit, run_id, clock)
+                 clock: Callable[[], datetime] = lambda: datetime.now(timezone.utc),
+                 should_stop: Callable[[], bool] | None = None) -> DecisionPackage:
+    """Raises RunCancelled, with no further events and no package, once should_stop returns True."""
+    run = _Run(brief, twin, engine, settings, llm, emit, run_id, clock, should_stop)
+    run.stop_if_requested("run_created")
     run.publish(EventType.run_created, brief)
     try:
         final = run.graph().invoke({}, {"recursion_limit": 50})
+    except RunCancelled:
+        raise
     except Exception as exc:
         run.phase(RunStatus.failed)
         run.publish(EventType.run_failed, RunFailed(reason=str(exc)))

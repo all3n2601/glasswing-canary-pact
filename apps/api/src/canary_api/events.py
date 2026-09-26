@@ -1,14 +1,16 @@
 import asyncio
-import json
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, AsyncIterator
+from typing import Any, AsyncIterator, Callable
 
 from contracts_py.enums import Future, RunStatus
 from contracts_py.events import Event, EventType, RunState
 from contracts_py.package import DecisionPackage, HumanDecision
+
+from canary_api import storage
+from canary_api.storage import FileStorage, Storage
 
 
 RUN_ID = re.compile(r"^run_[a-z0-9_]+$")
@@ -33,14 +35,34 @@ class Run:
 
 
 class EventBus:
-    def __init__(self, root: Path) -> None:
-        self.root = root
+    def __init__(self) -> None:
         self.runs: dict[str, Run] = {}
 
-    def _dir(self, run_id: str) -> Path:
+    @property
+    def backend(self) -> Storage:
+        # Looked up per call so a lifespan close and reopen never leaves the bus on a stale backend.
+        return storage.current()
+
+    @staticmethod
+    def _write(action: Callable[[Storage], None]) -> None:
+        storage.writer.submit(lambda: action(storage.current()))
+
+    def flush(self) -> None:
+        storage.writer.flush()
+
+    @property
+    def root(self) -> Path:
+        # Only the file backend has a runs directory; tests and tools read events.jsonl from it.
+        self.flush()
+        backend = self.backend
+        if not isinstance(backend, FileStorage):
+            raise AttributeError("root is only available with the file storage backend")
+        return backend.root
+
+    @staticmethod
+    def _check(run_id: str) -> None:
         if not is_run_id(run_id):
             raise ValueError(f"invalid run id {run_id!r}")
-        return self.root / run_id
 
     def create_run(self, run_id: str, decision_id: str, baseline_twin_version: str) -> RunState:
         now = utc_now()
@@ -52,9 +74,9 @@ class EventBus:
             created_at=now,
             updated_at=now,
         )
+        self._check(run_id)
         self.runs[run_id] = Run(state=state)
-        self._dir(run_id).mkdir(parents=True, exist_ok=True)
-        self._write_state(run_id)
+        self._write(lambda backend: backend.save_state(state))
         return state
 
     def get(self, run_id: str) -> Run | None:
@@ -81,11 +103,12 @@ class EventBus:
             timestamp=utc_now(),
             payload=payload,
         )
+        # Queued in sequence order on the single writer; the (run_id, sequence) key rejects a duplicate.
+        self._write(lambda backend: backend.append_event(event))
         run.events.append(event)
         self._apply(run, event)
-        with (self._dir(run_id) / "events.jsonl").open("a") as handle:
-            handle.write(event.model_dump_json() + "\n")
-        self._write_state(run_id)
+        state = run.state
+        self._write(lambda backend: backend.save_state(state))
         for queue in run.subscribers:
             queue.put_nowait(event)
         return event
@@ -130,26 +153,29 @@ class EventBus:
             run.package = payload
         elif event.type is EventType.human_decision_recorded:
             run.decision = payload
+            self._write(lambda backend: backend.save_decision(payload))
         run.state = state.model_copy(update=updates)
 
-    def _write_state(self, run_id: str) -> None:
-        (self._dir(run_id) / "state.json").write_text(self.runs[run_id].state.model_dump_json(indent=2))
+    def record_served_package(self, run_id: str, package: DecisionPackage, package_hash: str) -> None:
+        self.runs[run_id].served_package_hash = package_hash
+        self._write(lambda backend: backend.save_package(run_id, package, package_hash))
 
     def _load(self, run_id: str) -> Run | None:
-        directory = self._dir(run_id)
-        state_path = directory / "state.json"
-        if not state_path.is_file():
+        self._check(run_id)
+        self.flush()
+        backend = self.backend
+        state = backend.load_state(run_id)
+        if state is None:
             return None
-        run = Run(state=RunState.model_validate_json(state_path.read_text()))
-        events_path = directory / "events.jsonl"
-        if events_path.is_file():
-            for line in events_path.read_text().splitlines():
-                if line.strip():
-                    event = Event.model_validate(json.loads(line))
-                    run.events.append(event)
-                    if event.type is EventType.package_ready:
-                        run.package = event.payload  # type: ignore[assignment]
-                    elif event.type is EventType.human_decision_recorded:
-                        run.decision = event.payload  # type: ignore[assignment]
+        run = Run(state=state)
+        for event in backend.read_events(run_id):
+            run.events.append(event)
+            if event.type is EventType.package_ready:
+                run.package = event.payload  # type: ignore[assignment]
+            elif event.type is EventType.human_decision_recorded:
+                run.decision = event.payload  # type: ignore[assignment]
+        served = backend.load_package(run_id)
+        if served is not None:
+            run.served_package_hash = served[1]
         self.runs[run_id] = run
         return run

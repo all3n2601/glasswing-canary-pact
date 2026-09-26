@@ -19,7 +19,7 @@ const steps = [
 const fieldLabel = "mb-2 block text-[11px] font-semibold text-zinc-600";
 const fieldClass = "h-11 rounded-xl border-zinc-200 bg-white text-sm shadow-none focus-visible:border-zinc-400 focus-visible:ring-zinc-200";
 
-export function OrganizationOnboarding({ profile }: { profile: OrganizationProfile }) {
+export function OrganizationOnboarding({ profile, connection }: { profile: OrganizationProfile; connection: "live" | "offline_fallback" }) {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [organization, setOrganization] = useState(profile.organization);
@@ -42,6 +42,7 @@ export function OrganizationOnboarding({ profile }: { profile: OrganizationProfi
       <div className="mx-auto grid min-h-[calc(100vh-24px)] max-w-[1440px] overflow-hidden rounded-[28px] border border-zinc-200 bg-white lg:grid-cols-[290px_1fr] sm:min-h-[calc(100vh-40px)]">
         <aside className="border-b border-zinc-200 bg-zinc-950 p-6 text-white lg:border-b-0 lg:border-r lg:p-8">
           <div className="flex items-center gap-2.5 font-semibold"><span className="grid size-8 place-items-center rounded-lg bg-white text-zinc-950"><Network className="size-4" /></span>Canary Pact</div>
+          <p className="mt-3 text-[10px] text-zinc-500">{connection === "live" ? "Connected to the company API" : "Using the offline baseline"}</p>
           <div className="mt-8 lg:mt-20"><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">Set up your twin</p><h1 className="mt-3 text-2xl font-semibold leading-tight tracking-[-0.035em]">Give every simulation the right company context.</h1></div>
           <nav className="mt-7 grid grid-cols-4 gap-2 lg:mt-10 lg:grid-cols-1" aria-label="Onboarding progress">
             {steps.map((item, index) => {

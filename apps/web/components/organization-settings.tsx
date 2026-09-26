@@ -20,7 +20,7 @@ type TabId = (typeof tabs)[number]["id"];
 const labelClass = "mb-2 block text-[11px] font-semibold text-zinc-600";
 const fieldClass = "h-11 rounded-xl border-zinc-200 bg-white text-sm shadow-none focus-visible:border-zinc-400 focus-visible:ring-zinc-200";
 
-export function OrganizationSettings({ profile }: { profile: OrganizationProfile }) {
+export function OrganizationSettings({ profile, connection }: { profile: OrganizationProfile; connection: "live" | "offline_fallback" }) {
   const [activeTab, setActiveTab] = useState<TabId>("general");
   const [organization, setOrganization] = useState(profile.organization);
   const [departments, setDepartments] = useState(profile.departments);
@@ -40,7 +40,7 @@ export function OrganizationSettings({ profile }: { profile: OrganizationProfile
     <main className="min-h-screen bg-white p-3 text-zinc-950 sm:p-5">
       <div className="mx-auto min-h-[calc(100vh-24px)] max-w-[1500px] overflow-hidden rounded-[28px] border border-zinc-200 bg-white sm:min-h-[calc(100vh-40px)]">
         <header className="flex h-20 items-center justify-between border-b border-zinc-200 px-5 sm:px-8">
-          <div className="flex items-center gap-4"><Link href="/" className="grid size-9 place-items-center rounded-xl bg-zinc-950 text-white" aria-label="Canary Pact home"><Network className="size-4" /></Link><div><div className="flex items-center gap-2"><strong className="text-sm">{organization.display_name}</strong><Badge variant="outline" className="border-zinc-200 bg-zinc-50 text-[9px] text-zinc-500">Mock organization</Badge></div><span className="text-[10px] text-zinc-400">Organization settings · v{settings.settings_version}</span></div></div>
+          <div className="flex items-center gap-4"><Link href="/" className="grid size-9 place-items-center rounded-xl bg-zinc-950 text-white" aria-label="Canary Pact home"><Network className="size-4" /></Link><div><div className="flex items-center gap-2"><strong className="text-sm">{organization.display_name}</strong><Badge variant="outline" className="border-zinc-200 bg-zinc-50 text-[9px] text-zinc-500">{connection === "live" ? "API connected" : "Offline baseline"}</Badge></div><span className="text-[10px] text-zinc-400">Organization settings · v{settings.settings_version}</span></div></div>
           <div className="flex items-center gap-2"><Button asChild variant="ghost" className="hidden text-zinc-500 sm:inline-flex"><Link href="/simulate"><ArrowLeft />Back to simulator</Link></Button><Button onClick={save} disabled={riskTotal !== 100} className="bg-zinc-950 text-white hover:bg-zinc-800">{saved ? <Check /> : <Save />}{saved ? "Saved" : "Save changes"}</Button></div>
         </header>
 

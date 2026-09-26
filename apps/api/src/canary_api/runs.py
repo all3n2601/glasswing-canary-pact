@@ -1,11 +1,12 @@
 import asyncio
 import functools
+import inspect
 import logging
 import os
 import re
 import uuid
 from pathlib import Path
-from typing import Any, Coroutine, Literal
+from typing import Any, Callable, Coroutine, Literal
 
 from agent_orchestration import run_decision
 from pydantic import BaseModel
@@ -149,6 +150,20 @@ def _publish(run_id: str, kind: EventType, payload: BaseModel, actor: str, scena
         fail_run(run_id, f"could not publish {kind.value}: {exc}")
 
 
+def cancelled_for(run_id: str) -> Callable[[], bool]:
+    def cancelled() -> bool:
+        run = runtime.bus.runs.get(run_id)
+        return run is not None and (run.state.status is RunStatus.failed
+                                    or any(e.type is EventType.run_failed for e in run.events))
+
+    return cancelled
+
+
+def _accepts_should_stop() -> bool:
+    # The orchestrator gains should_stop in a parallel change; pass it only once run_decision accepts it.
+    return "should_stop" in inspect.signature(run_decision).parameters
+
+
 class ThreadEmitter:
     """Called from orchestrator worker threads; every publish is queued onto the event loop thread."""
 
@@ -156,9 +171,13 @@ class ThreadEmitter:
                  extra_assumptions: list[str] | None = None) -> None:
         self.run_id, self.loop, self.twin = run_id, loop, twin
         self.extra_assumptions = extra_assumptions or []
+        self.cancelled = cancelled_for(run_id)
 
     def __call__(self, type: EventType, payload: BaseModel, *, actor: str, scenario_id: str | None = None,
                  future: Future | None = None) -> None:
+        if self.cancelled():
+            log.info("run %s has failed; dropping %s from its worker", self.run_id, type)
+            return
         # call_soon_threadsafe runs callbacks in submission order, so sequence follows emit order.
         self.loop.call_soon_threadsafe(functools.partial(
             _publish, self.run_id, type, payload, actor, scenario_id, future, self.twin, self.extra_assumptions
@@ -173,8 +192,9 @@ async def orchestrate(run_id: str, brief: DecisionBrief, twin: Twin, settings: O
         emit = ThreadEmitter(run_id, loop, twin, [MOCK_FALLBACK_ASSUMPTION] if fell_back else [])
         # AgentLLM.model_label is a property, which pyright treats as not matching the LLMClient attribute.
         llm: Any = runtime.build_llm(run_settings)
+        extra: dict[str, Any] = {"should_stop": emit.cancelled} if _accepts_should_stop() else {}
         await asyncio.to_thread(run_decision, brief, engine=engine_port, settings=run_settings, llm=llm, emit=emit,
-                                run_id=run_id, twin=twin)
+                                run_id=run_id, twin=twin, **extra)
     except Exception as exc:
         await asyncio.sleep(0)
         fail_run(run_id, str(exc))

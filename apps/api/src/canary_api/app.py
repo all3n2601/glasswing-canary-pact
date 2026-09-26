@@ -41,7 +41,7 @@ from contracts_py.twin import (
     Twin,
 )
 
-from canary_api import auth, engine_port, runs, runtime
+from canary_api import auth, engine_port, runs, runtime, storage
 from canary_api.engine_port import EngineNotReady
 from canary_api.events import Run, utc_now
 
@@ -50,7 +50,12 @@ from canary_api.events import Run, utc_now
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     auth.signer()
     auth.seed_demo_approver()
-    yield
+    auth.warn_if_no_approver()
+    try:
+        yield
+    finally:
+        runtime.bus.flush()
+        storage.close()
 
 
 app = FastAPI(
@@ -92,7 +97,9 @@ def _brief_plan(brief: DecisionBrief, intervention_ids: list[str] | None) -> Can
 
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
-    return HealthResponse()
+    failures = storage.writer.failures
+    return HealthResponse(status="degraded" if failures else "ok", storage=storage.backend_name(),  # type: ignore[arg-type]
+                          storage_write_failures=failures)
 
 
 @app.get("/company", response_model=Twin)
@@ -237,7 +244,7 @@ def run_package(run_id: str) -> Response:
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=f"Package rejected: {exc.errors()[0]['msg']}") from exc
     body = package.model_dump_json().encode()
-    run.served_package_hash = hashlib.sha256(body).hexdigest()
+    runtime.bus.record_served_package(run_id, package, hashlib.sha256(body).hexdigest())
     return Response(content=body, media_type="application/json")
 
 
