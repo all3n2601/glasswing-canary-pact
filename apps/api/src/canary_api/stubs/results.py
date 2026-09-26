@@ -1,3 +1,4 @@
+# story_values.json was generated once by a throwaway script from these stories; by rule its values stay literals.
 """Fixed stub engine outputs for the Northstar vendor and workforce briefs; no calculation happens here."""
 
 import json

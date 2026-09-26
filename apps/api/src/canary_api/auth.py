@@ -167,6 +167,14 @@ def seed_demo_approver() -> UserPublic | None:
     return user
 
 
+def warn_if_no_approver() -> bool:
+    if store().backend.has_role(UserRole.approver.value):
+        return False
+    log.warning("No approver account exists, so no decision can be approved. Set CANARY_DEMO_APPROVER_EMAIL and "
+                "CANARY_DEMO_APPROVER_PASSWORD to create the demo approver at startup.")
+    return True
+
+
 _bearer = HTTPBearer(auto_error=False)
 
 
