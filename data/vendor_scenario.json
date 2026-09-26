@@ -1,0 +1,32 @@
+{
+  "schema_version": "2.1.1",
+  "decision_id": "dec_vendor_reduction",
+  "decision_type": "vendor_consolidation",
+  "title": "Consolidate external data vendors",
+  "statement": "Reduce annual external-data spending from $8B to no more than $6B without breaking compliance, reducing critical data coverage below 100%, reducing sales performance by more than 3%, or creating unacceptable customer impact.",
+  "goal": {"metric": "annual_savings_usd", "target": 2000000000, "unit": "usd", "basis": "gross", "direction": "at_least"},
+  "horizon_days": 365,
+  "candidate_interventions": [
+    {"id": "remove_apex", "kind": "action", "type": "remove_vendor", "target_entity_id": "vendor_apex", "start_day": 30, "one_time_cost_usd": 0, "params": {}, "rationale": "Candidate for consolidation"},
+    {"id": "remove_beacon", "kind": "action", "type": "remove_vendor", "target_entity_id": "vendor_beacon", "start_day": 30, "one_time_cost_usd": 0, "params": {}, "rationale": "Candidate for consolidation"},
+    {"id": "remove_cinder", "kind": "action", "type": "remove_vendor", "target_entity_id": "vendor_cinder", "start_day": 30, "one_time_cost_usd": 0, "params": {}, "rationale": "Candidate for consolidation"},
+    {"id": "remove_delta", "kind": "action", "type": "remove_vendor", "target_entity_id": "vendor_delta", "start_day": 30, "one_time_cost_usd": 0, "params": {}, "rationale": "Candidate for consolidation"},
+    {"id": "remove_echo", "kind": "action", "type": "remove_vendor", "target_entity_id": "vendor_echo", "start_day": 30, "one_time_cost_usd": 0, "params": {}, "rationale": "Candidate for consolidation"},
+    {"id": "remove_flux", "kind": "action", "type": "remove_vendor", "target_entity_id": "vendor_flux", "start_day": 30, "one_time_cost_usd": 0, "params": {}, "rationale": "Candidate for consolidation"},
+    {"id": "remove_granite", "kind": "action", "type": "remove_vendor", "target_entity_id": "vendor_granite", "start_day": 30, "one_time_cost_usd": 0, "params": {}, "rationale": "Candidate for consolidation"}
+  ],
+  "protected_entity_ids": [],
+  "constraints": [
+    {"id": "c_compliance", "metric": "compliance_controls_broken", "operator": "==", "threshold": 0, "unit": "count", "hard": true, "description": "No mandatory control may break"},
+    {"id": "c_sales", "metric": "revenue_impact_pct", "operator": "<=", "threshold": 3, "unit": "percent", "hard": true, "scope_entity_id": "kpi_pipeline", "description": "Sales performance falls by no more than 3%"},
+    {"id": "c_customer", "metric": "customer_impact_pct", "operator": "<=", "threshold": 2, "unit": "percent", "hard": true, "description": "Customer impact within 2%"},
+    {"id": "c_stranded", "metric": "stranded_workflows", "operator": "==", "threshold": 0, "unit": "count", "hard": false, "description": "Prefer no stranded workflows"},
+    {"id": "c_coverage", "metric": "critical_coverage_pct", "operator": ">=", "threshold": 100, "unit": "percent", "hard": true, "description": "Every critical dataset keeps a provider"}
+  ],
+  "futures": ["act_now", "inaction", "delay"],
+  "delay_days": 90,
+  "active_pressure_ids": ["pr_apex_renewal", "pr_echo_renewal", "pr_flux_usage_growth", "pr_vendor_recon_hazard"],
+  "seed": 42,
+  "mc_samples": 1000,
+  "created_by": "demo_user"
+}

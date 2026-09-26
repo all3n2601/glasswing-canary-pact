@@ -1,108 +1,143 @@
 {
   "vendors": [
     {
-      "vendor_id": "vendor_cloud",
-      "name": "CloudScale (cloud infra)",
-      "annual_cost_usd": 520000,
-      "one_time_exit_cost_usd": 120000,
+      "vendor_id": "vendor_apex",
+      "name": "ApexData",
+      "annual_cost_usd": 1600000000,
+      "one_time_exit_cost_usd": 60000000,
       "consumers": [
-        "sys_cloud_platform"
+        "ds_firmographics",
+        "ds_contact_data",
+        "ds_corporate_linkage",
+        "ds_market_intel"
       ],
       "consuming_departments": [
-        "dept_engineering",
-        "dept_operations"
+        "dept_ai_data",
+        "dept_compliance",
+        "dept_customer_success",
+        "dept_marketing",
+        "dept_sales"
       ],
-      "coverage": 3,
-      "min_substitutability": 0.5,
-      "replaceable": true,
-      "irreplaceable_flag": false,
-      "replacement_candidates": []
-    },
-    {
-      "vendor_id": "vendor_auditlog",
-      "name": "SentinelAudit (audit logging)",
-      "annual_cost_usd": 300000,
-      "one_time_exit_cost_usd": 90000,
-      "consumers": [
-        "ds_audit_log"
-      ],
-      "consuming_departments": [
-        "dept_compliance"
-      ],
-      "coverage": 4,
-      "min_substitutability": 0.1,
+      "coverage": 12,
+      "min_substitutability": 0.05,
       "replaceable": false,
       "irreplaceable_flag": true,
       "replacement_candidates": []
     },
     {
-      "vendor_id": "vendor_telematics",
-      "name": "Telemetrix (telematics)",
-      "annual_cost_usd": 180000,
-      "one_time_exit_cost_usd": 60000,
+      "vendor_id": "vendor_cinder",
+      "name": "CinderSignals",
+      "annual_cost_usd": 1400000000,
+      "one_time_exit_cost_usd": 50000000,
       "consumers": [
-        "ds_telematics"
+        "ds_intent_signals",
+        "ds_market_intel"
       ],
       "consuming_departments": [
         "dept_ai_data",
         "dept_customer_success",
-        "dept_engineering"
+        "dept_marketing",
+        "dept_sales"
       ],
-      "coverage": 4,
+      "coverage": 7,
       "min_substitutability": 0.4,
       "replaceable": false,
       "irreplaceable_flag": false,
       "replacement_candidates": []
     },
     {
-      "vendor_id": "vendor_enrichiq",
-      "name": "EnrichIQ (enrichment)",
-      "annual_cost_usd": 140000,
-      "one_time_exit_cost_usd": 20000,
+      "vendor_id": "vendor_beacon",
+      "name": "BeaconIQ",
+      "annual_cost_usd": 1200000000,
+      "one_time_exit_cost_usd": 40000000,
       "consumers": [
-        "ds_enrichment"
+        "ds_firmographics",
+        "ds_contact_data"
       ],
       "consuming_departments": [
-        "dept_ai_data"
+        "dept_marketing",
+        "dept_sales"
       ],
-      "coverage": 1,
-      "min_substitutability": 0.85,
-      "replaceable": true,
+      "coverage": 5,
+      "min_substitutability": 0.4,
+      "replaceable": false,
       "irreplaceable_flag": false,
       "replacement_candidates": []
     },
     {
-      "vendor_id": "vendor_observability",
-      "name": "ObserveNow (observability)",
-      "annual_cost_usd": 90000,
-      "one_time_exit_cost_usd": 15000,
+      "vendor_id": "vendor_echo",
+      "name": "EchoMarket",
+      "annual_cost_usd": 1100000000,
+      "one_time_exit_cost_usd": 50000000,
       "consumers": [
-        "sys_core_api"
+        "ds_firmographics",
+        "ds_intent_signals",
+        "ds_market_intel",
+        "ds_account_intel"
       ],
       "consuming_departments": [
-        "dept_engineering",
+        "dept_ai_data",
+        "dept_customer_success",
+        "dept_marketing",
+        "dept_sales"
+      ],
+      "coverage": 10,
+      "min_substitutability": 0.15,
+      "replaceable": false,
+      "irreplaceable_flag": true,
+      "replacement_candidates": []
+    },
+    {
+      "vendor_id": "vendor_granite",
+      "name": "GraniteGeo",
+      "annual_cost_usd": 1000000000,
+      "one_time_exit_cost_usd": 35000000,
+      "consumers": [
+        "ds_geo_risk"
+      ],
+      "consuming_departments": [
+        "dept_finance",
         "dept_operations"
       ],
-      "coverage": 2,
-      "min_substitutability": 0.7,
-      "replaceable": true,
+      "coverage": 3,
+      "min_substitutability": 0.4,
+      "replaceable": false,
       "irreplaceable_flag": false,
       "replacement_candidates": []
     },
     {
-      "vendor_id": "vendor_identity",
-      "name": "IdentityHub (SSO)",
-      "annual_cost_usd": 70000,
-      "one_time_exit_cost_usd": 40000,
+      "vendor_id": "vendor_delta",
+      "name": "DeltaVerify",
+      "annual_cost_usd": 900000000,
+      "one_time_exit_cost_usd": 30000000,
       "consumers": [
-        "sys_sso_gateway"
+        "ds_identity_verification",
+        "ds_geo_risk"
       ],
       "consuming_departments": [
         "dept_compliance",
-        "dept_engineering",
+        "dept_finance",
         "dept_operations"
       ],
-      "coverage": 4,
+      "coverage": 6,
+      "min_substitutability": 0.05,
+      "replaceable": false,
+      "irreplaceable_flag": true,
+      "replacement_candidates": []
+    },
+    {
+      "vendor_id": "vendor_flux",
+      "name": "FluxBehavior",
+      "annual_cost_usd": 800000000,
+      "one_time_exit_cost_usd": 25000000,
+      "consumers": [
+        "ds_usage"
+      ],
+      "consuming_departments": [
+        "dept_customer_success",
+        "dept_product"
+      ],
+      "coverage": 3,
       "min_substitutability": 0.3,
       "replaceable": false,
       "irreplaceable_flag": false,

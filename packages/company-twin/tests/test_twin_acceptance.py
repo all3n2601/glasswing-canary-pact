@@ -1,13 +1,15 @@
 """Person 1 acceptance tests - every requirement, and a few beyond.
 
 Covers the work-division Person-1 acceptance checks, merged-schema v2 section 12,
-the four planted decision traps, the planted challenger dependency, and the derived
-exports. Runs under the repo toolchain:  uv run pytest
+the Northstar plan story (vendor consolidation and workforce knowledge loss, plan
+Milestone A), the planted vendor-reconciliation dependency, the frozen ID registry,
+and the derived exports. Runs under the repo toolchain:  uv run pytest
 """
 
 from __future__ import annotations
 
 import json
+import re
 
 import networkx as nx
 
@@ -50,9 +52,9 @@ def test_every_critical_workflow_has_owner_or_is_flagged_knowledge_risk():
 
 
 def test_removing_a_node_finds_downstream_departments_and_kpis():
-    depts = affected_departments(G, "vendor_auditlog")
+    depts = affected_departments(G, "sys_audit_service")
     assert "dept_compliance" in depts
-    assert nx.has_path(G, "vendor_auditlog", "kpi_soc2_coverage")
+    assert nx.has_path(G, "sys_audit_service", "kpi_soc2_coverage")
 
 
 def test_fixture_validates_without_manual_correction():
@@ -72,9 +74,9 @@ def test_money_is_integer_usd():
 
 def test_org_totals_reconcile():
     dept_budget = sum(e.annual_cost_usd or 0 for e in TWIN.entities if e.type == EntityType.department)
-    assert TWIN.organization.total_annual_budget_usd == dept_budget == 8_000_000
+    assert TWIN.organization.total_annual_budget_usd == dept_budget == 40_000_000_000
     fte = sum(p.staffing.actual_fte + p.staffing.contractors_fte for p in TWIN.department_profiles)
-    assert TWIN.organization.total_headcount_fte == fte == 420
+    assert TWIN.organization.total_headcount_fte == fte == 60_000
 
 
 def test_person_tokens_are_anonymised_and_not_in_strengths():
@@ -108,42 +110,58 @@ def test_every_department_has_roles_strengths_knowledge_and_a_document():
         assert docs[de.id] >= 1, f"{de.id} current document"
 
 
-# ---- the four planted decision traps + planted challenger find --------------
+# ---- the plan story: vendor consolidation (A-03) + workforce knowledge loss (A-04) ----
 def _reaches(a, b):
     return nx.has_path(G, a, b)
 
 
-def test_trap_1_platform_ops_billing_stranding():
-    assert _reaches("pt_billing_01", "kn_billing_exception")
-    assert _reaches("wf_billing_recon", "wf_invoicing")
-    wf = entity_map(TWIN)["wf_billing_recon"]
-    owners = [e.source for e in TWIN.edges if e.target == "wf_billing_recon" and e.relation == Relation.OWNS]
-    assert len(owners) == wf.min_qualified_owners == 2 and wf.documented_pct < 0.5
+def test_vendor_costs_total_exactly_8b():
+    vendor_total = sum(e.annual_cost_usd or 0 for e in TWIN.entities if e.type == EntityType.vendor)
+    assert vendor_total == 8_000_000_000
+    vendors = {e.id for e in TWIN.entities if e.type == EntityType.vendor}
+    assert vendors == {
+        "vendor_apex", "vendor_beacon", "vendor_cinder", "vendor_delta",
+        "vendor_echo", "vendor_flux", "vendor_granite",
+    }
 
 
-def test_trap_2_cancel_auditlog_breaks_soc2():
-    assert _reaches("vendor_auditlog", "ds_audit_log")
-    assert _reaches("vendor_auditlog", "kpi_soc2_coverage")  # full chain through the control
-    assert entity_map(TWIN)["ctl_soc2_audit_logging"].mandatory is True
+def test_only_the_eight_workforce_roles_own_or_back_up_the_two_stranded_workflows():
+    workforce_roles = {
+        "role_close_accountant", "role_gl_accountant", "role_reporting_analyst",
+        "role_data_platform_lead", "role_billing_ops_lead", "role_billing_specialist",
+        "role_revenue_accountant", "role_ar_specialist",
+    }
+    strand_targets = {"wf_financial_close", "wf_billing_recon"}
+    owners = {e.source for e in TWIN.edges
+              if e.relation in (Relation.OWNS, Relation.BACKS_UP) and e.target in strand_targets}
+    assert owners
+    assert owners <= workforce_roles
+    # the outside backups (W-4, W-5) must not own/back these workflows on the base twin
+    assert "role_controller" not in owners and "role_finance_analyst" not in owners
 
 
-def test_trap_3_stop_migration_carry_cost():
-    proj = entity_map(TWIN)["proj_warehouse_migration"]
-    assert proj.retires_entity_ids == ["sys_warehouse_legacy"]
-    assert entity_map(TWIN)["sys_warehouse_legacy"].annual_cost_usd == 400_000
-
-
-def test_trap_4_reduce_engineering_hits_uptime():
-    assert _reaches("sys_core_api", "kpi_uptime_sla")
-
-
-def test_planted_challenger_dependency_identity_access():
+def test_planted_edge_is_absent_and_its_evidence_names_both_endpoints():
+    planted_source, planted_target = "ds_account_intel", "wf_vendor_reconciliation"
+    assert not any(e.source == planted_source and e.target == planted_target for e in TWIN.edges)
     manifest = json.loads((DATA_DIR / "planted_items.json").read_text())
-    chain = manifest["missed_dependency"]["chain"]
-    for a, b in zip(chain, chain[1:]):
-        assert _reaches(a, b), (a, b)
-    ev_ids = {v.id for v in TWIN.evidence}
-    assert set(manifest["missed_dependency"]["evidence_refs"]) <= ev_ids
+    assert manifest["planted_edge"]["source"] == planted_source
+    assert manifest["planted_edge"]["target"] == planted_target
+    ents = entity_map(TWIN)
+    ev = next(v for v in TWIN.evidence if v.id == "ev_echo_account_intel_feed")
+    assert ents[planted_source].name in ev.snippet
+    assert ents[planted_target].name in ev.snippet
+    assert manifest["planted_edge"]["evidence_refs"] == ["ev_echo_account_intel_feed"]
+
+
+def test_delta_sole_provider_identity_apex_sole_provider_corporate_linkage():
+    providers_identity = {e.source for e in TWIN.edges
+                          if e.relation == Relation.PROVIDES and e.target == "ds_identity_verification"}
+    providers_linkage = {e.source for e in TWIN.edges
+                         if e.relation == Relation.PROVIDES and e.target == "ds_corporate_linkage"}
+    assert providers_identity == {"vendor_delta"}
+    assert providers_linkage == {"vendor_apex"}
+    assert entity_map(TWIN)["ds_identity_verification"].criticality.value == "critical"
+    assert entity_map(TWIN)["ds_corporate_linkage"].criticality.value == "critical"
 
 
 # ---- derived exports well-formed -------------------------------------------
@@ -161,8 +179,8 @@ def test_exports_are_wellformed():
     for e in gs["edges"]:
         assert not e["source"].startswith("pt_") and not e["target"].startswith("pt_")
     vr = vendor_report(TWIN)
-    auditlog = next(v for v in vr["vendors"] if v["vendor_id"] == "vendor_auditlog")
-    assert auditlog["irreplaceable_flag"] is True
+    delta = next(v for v in vr["vendors"] if v["vendor_id"] == "vendor_delta")
+    assert delta["irreplaceable_flag"] is True
 
 
 # ---- derived DepartmentProfile fields (computed in the loader) --------------
@@ -188,7 +206,7 @@ def test_projects_have_remaining_cost_and_expected_completion():
     for pr in projects:
         assert pr.remaining_cost_usd is not None and pr.remaining_cost_usd >= 0
         assert pr.expected_completion_day is not None and pr.expected_completion_day > 0
-    mig = entity_map(TWIN)["proj_warehouse_migration"]
+    mig = entity_map(TWIN)["proj_billing_modernization"]
     assert mig.remaining_cost_usd == round(mig.annual_cost_usd * (1 - mig.completion_pct))
 
 
@@ -196,19 +214,65 @@ def test_version_has_as_of_date():
     assert str(TWIN.version.as_of_date) == "2026-09-26"  # contracts_py coerces to date
 
 
-# ---- companion historical data ---------------------------------------------
-def test_history_is_consistent_with_twin():
-    h = json.loads((DATA_DIR / "history.json").read_text())
-    twin_kpis = {e.id: e for e in TWIN.entities if e.type == EntityType.kpi}
-    assert h["kpi_history"], "no kpi history"
-    for row in h["kpi_history"]:
-        assert row["kpi_id"] in twin_kpis, row["kpi_id"]
-        # last historical point must equal the current twin baseline
-        assert row["values"][-1] == twin_kpis[row["kpi_id"]].kpi_baseline, row["kpi_id"]
-        assert len(row["values"]) == len(row["quarters"])
-    spend = h["monthly_controllable_spend_usd"]
-    assert len(spend["values"]) == len(spend["months"]) == 12
-    wf_ids = {e.id for e in TWIN.entities if e.type == EntityType.workflow}
-    for inc in h["incident_log"]:
-        assert inc["workflow_id"] in wf_ids, inc["workflow_id"]
-    assert h["prior_cost_programs"][0]["realized_usd"] < h["prior_cost_programs"][0]["target_usd"]
+# ---- documentation coverage (task item 3): every critical workflow has current runbook/sop
+# coverage, except the two deliberate story gaps -----------------------------
+def test_every_critical_workflow_has_current_runbook_or_sop_except_the_story_gaps():
+    # wf_billing_recon: its only covering document (doc_billing_recon_runbook) is deliberately
+    # outdated (W-3). kn_warehouse_lineage, the other story gap, is a knowledge asset behind
+    # wf_financial_close, not a workflow-level doc gap, so wf_financial_close itself (documented
+    # via doc_sop_financial_close) is not exempted here.
+    story_gap_workflows = {"wf_billing_recon"}
+    current_doc_types_by_entity: dict[str, set[str]] = {}
+    for d in TWIN.documents:
+        if d.status.value == "current":
+            for cid in d.covers_entity_ids:
+                current_doc_types_by_entity.setdefault(cid, set()).add(d.doc_type.value)
+
+    critical_workflows = [
+        e for e in TWIN.entities
+        if e.type == EntityType.workflow and e.criticality.value in ("high", "critical")
+    ]
+    assert critical_workflows
+    for w in critical_workflows:
+        if w.id in story_gap_workflows:
+            continue
+        covering = current_doc_types_by_entity.get(w.id, set())
+        assert covering & {"runbook", "sop"}, f"{w.id} has no current runbook or sop"
+
+
+# ---- A-01: frozen ID registry -----------------------------------------------
+ID_REGEX = re.compile(r"^[a-z][a-z0-9_]*$")
+
+
+def _registry_ids(registry: dict, group: str) -> set[str]:
+    return {it["id"] for it in registry.get(group, []) if isinstance(it, dict) and "id" in it}
+
+
+def test_id_registry_covers_every_fixture_id_and_matches_the_schema_regex():
+    registry = json.loads((DATA_DIR / "id_registry.json").read_text())
+    for group, items in registry.items():
+        if not isinstance(items, list):
+            continue
+        for it in items:
+            if isinstance(it, dict) and "id" in it:
+                assert ID_REGEX.match(it["id"]) and len(it["id"]) <= 80, (group, it["id"])
+
+    fixture_entity_ids = {e.id for e in TWIN.entities if e.type != EntityType.person_token}
+    registry_entity_ids: set[str] = set()
+    for group in ("departments", "kpis", "customer_segments", "controls", "roles", "systems",
+                  "vendors", "datasets", "workflows", "knowledge", "projects"):
+        registry_entity_ids |= _registry_ids(registry, group)
+    assert fixture_entity_ids <= registry_entity_ids, fixture_entity_ids - registry_entity_ids
+
+    assert {d.id for d in TWIN.documents} == _registry_ids(registry, "documents")
+    assert {v.id for v in TWIN.evidence} == _registry_ids(registry, "evidence")
+    assert {p.id for p in TWIN.pressures} == _registry_ids(registry, "pressures")
+    channel_ids = {e.id for e in TWIN.edges if e.relation == Relation.FLOWS_TO}
+    assert channel_ids == _registry_ids(registry, "channels")
+
+    vendor_brief = json.loads((DATA_DIR / "vendor_scenario.json").read_text())
+    workforce_brief = json.loads((DATA_DIR / "workforce_scenario.json").read_text())
+    brief_intervention_ids = {i["id"] for i in vendor_brief["candidate_interventions"]} | {
+        i["id"] for i in workforce_brief["candidate_interventions"]
+    }
+    assert brief_intervention_ids == _registry_ids(registry, "interventions")
