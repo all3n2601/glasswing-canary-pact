@@ -1,13 +1,14 @@
 from canary_api.stubs import engine as stub_engine
 from contracts_py.enums import DecisionType
-from contracts_py.twin import OrganizationSettings
+from contracts_py.twin import CORE_AGENT_IDS, OrganizationSettings
 
 from agent_orchestration.roster import ROSTER
 from agent_orchestration.router import route_agents, routing_sources
 
 
-def test_roster_has_eleven_specs() -> None:
-    assert len(ROSTER) == 11
+def test_roster_follows_contract_agent_ids() -> None:
+    assert tuple(ROSTER) == CORE_AGENT_IDS
+    assert ROSTER["people_knowledge"].routes_for == ["capacity_change", "restructure", "cost_reduction"]
     assert ROSTER["people_knowledge"].visible_sensitivity == ["general", "hr"]
     assert ROSTER["operations"].routes_for == [t for t in DecisionType if t is not DecisionType.investment]
     assert "person_token" not in ROSTER["finance"].visible_entity_types
@@ -21,7 +22,7 @@ def test_routing_sources_are_intervention_and_pressure_targets(brief, twin) -> N
 def test_route_uses_reachability_and_types(brief, twin, settings) -> None:
     routed = route_agents(brief, twin=twin, engine=stub_engine, settings=settings)
     # Stub reachability: compliance, engineering, finance, operations. Challenger runs later.
-    assert routed == ["finance", "engineering", "operations", "compliance"]
+    assert routed == ["finance", "engineering", "operations", "compliance", "people_knowledge"]
 
 
 def test_route_respects_enabled_agents_but_keeps_mandatory(brief, twin) -> None:

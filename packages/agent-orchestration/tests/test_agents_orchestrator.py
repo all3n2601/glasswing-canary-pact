@@ -5,9 +5,6 @@ from contracts_py.package import DecisionPackage
 
 from agent_orchestration import AgentLLM, run_decision
 from agent_orchestration.llm import LLMResult
-from contracts_py.twin import OrganizationSettings
-
-from agent_orchestration.roster import ROSTER
 from orchestration_helpers import NOW, Recorder, ScriptedLLM, SpyEngine, metrics, person_output, person_tokens
 
 BASE_PHASES = ["validating", "building_futures", "optimizing", "running_agents", "propagating", "challenging",
@@ -37,7 +34,7 @@ def test_full_mock_run_returns_package_and_exact_phase_order(brief, twin, settin
     assert engine.names().count("optimize") == 1
     assert "to_role_level" in engine.names()
     started = [e.payload.agent_id for e in recorder.of(EventType.agent_started)]
-    assert started == ["finance", "engineering", "operations", "compliance", "challenger"]
+    assert started == ["finance", "engineering", "operations", "compliance", "people_knowledge", "challenger"]
 
 
 def challenger_with_new_edge(context: AgentContext) -> LLMResult:
@@ -80,12 +77,18 @@ def test_futures_cover_inaction_and_delay(brief, twin, settings) -> None:
     assert futures == {Future.act_now, Future.inaction, Future.delay}
 
 
-def test_person_tokens_never_leave_the_agent_layer(brief, hr_twin) -> None:
-    settings = OrganizationSettings(llm_mode="mock", enabled_agent_ids=list(ROSTER))
-    people = lambda context: LLMResult(person_output(), "ok", metrics("people_knowledge"))
+def test_person_tokens_never_leave_the_agent_layer(brief, hr_twin, settings) -> None:
+    seen: list[set[str]] = []
+
+    def people(context: AgentContext) -> LLMResult:
+        seen.append({e.id for e in context.view.entities})
+        return LLMResult(person_output(), "ok", metrics("people_knowledge"))
+
+    # Default settings: people_knowledge runs as a CORE agent and its HR view really contains the token.
     package, recorder, engine = run(brief, hr_twin, settings, ScriptedLLM(settings, {"people_knowledge": people}))
+    assert seen and "pt_07" in seen[0]
     completed = [e for e in recorder.of(EventType.agent_completed) if e.payload.agent_id == "people_knowledge"]
-    assert completed, "people_knowledge was not routed"
+    assert len(completed) == 1
     assert completed[0].payload.validation.rejected_entity_ids == ["[role]"]
     assert person_tokens(completed[0].model_dump_json()) == []
     assert person_tokens(package.model_dump_json()) == []
