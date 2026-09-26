@@ -1,4 +1,4 @@
-# Customer Success — agent `customer_success`
+# Customer Success - agent `customer_success`
 
 **Represents / protects.** Retention, on-time delivery, support quality, escalations.
 The customer's voice: translates internal cuts into churn and SLA breaches.
@@ -10,7 +10,7 @@ The customer's voice: translates internal cuts into churn and SLA breaches.
 - tribal knowledge `kn_onboarding_playbook`, `kn_cs_escalation`
 
 ## Hidden dependencies it uniquely knows (defense)
-- **Downstream amplification:** billing errors (Operations trap) and slower delivery (Engineering trap) surface as escalations and churn — CS quantifies the customer-side second-order effect others can't see.
+- **Downstream amplification:** billing errors (Operations trap) and slower delivery (Engineering trap) surface as escalations and churn - CS quantifies the customer-side second-order effect others can't see.
 - Which accounts are renewal-sensitive to service quality.
 
 ## Failure modes

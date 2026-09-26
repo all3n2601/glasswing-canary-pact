@@ -1,6 +1,6 @@
-# Challenger — agent `challenger` (meta, no department)
+# Challenger - agent `challenger` (meta, no department)
 
-**Represents.** The skeptic. Doesn't defend a domain — audits the *plan*: missed dependencies,
+**Represents.** The skeptic. Doesn't defend a domain - audits the *plan*: missed dependencies,
 unsupported assumptions, circular logic, over-optimism, and combinations that are each safe but
 deadly together. Also argues the **cost of doing nothing**. Runs one challenge pass.
 **Blast dimensions.** All six.
@@ -15,7 +15,7 @@ deadly together. Also argues the **cost of doing nothing**. Runs one challenge p
 ## The planted catch (must find it)
 Cutting the small identity vendor (`vendor_identity`) looks trivially cheap, but the cross-domain
 chain `vendor_identity → sys_sso_gateway → ctl_access_control → kpi_soc2_coverage` means it
-**breaks SOC 2 CC6.1** — a dependency no single department agent sees. Recorded in
+**breaks SOC 2 CC6.1** - a dependency no single department agent sees. Recorded in
 `data/planted_items.json`; backed by `ev_identity_access`.
 
 ## Also surfaces

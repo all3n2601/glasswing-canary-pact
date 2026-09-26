@@ -1,4 +1,4 @@
-# Sales — agent `sales`
+# Sales - agent `sales`
 
 **Represents / protects.** Pipeline, enterprise renewals, deal engineering.
 **Blast dimensions.** Business (primary), Operational.
@@ -9,7 +9,7 @@
 - tribal knowledge `kn_enterprise_deals`
 
 ## Hidden dependencies it uniquely knows (defense)
-- Enterprise renewals ride on portal uptime and accurate invoicing — the billing trap reaches Sales indirectly (invoice disputes → churn risk).
+- Enterprise renewals ride on portal uptime and accurate invoicing - the billing trap reaches Sales indirectly (invoice disputes → churn risk).
 - Which vendor data is genuinely load-bearing for targeting vs redundant (agrees enrichment is cuttable).
 
 ## Failure modes

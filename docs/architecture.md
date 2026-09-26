@@ -1,4 +1,4 @@
-# Blast Radius — Canonical Architecture
+# Blast Radius - Canonical Architecture
 
 > **Source of truth.** These two diagrams are authoritative and used strictly as given.
 > Diagram A (master architecture) governs the system's structure end-to-end. Diagram B
@@ -6,13 +6,13 @@
 > from these; where the fixture is finer-grained than a diagram box, it rolls up into it
 > (see the mapping at the bottom).
 
-## Diagram A — Master architecture (6 stages)
+## Diagram A - Master architecture (6 stages)
 
 ```mermaid
 flowchart LR
 
 %% =====================================================
-%% BLAST RADIUS — CLEAN MASTER ARCHITECTURE
+%% BLAST RADIUS - CLEAN MASTER ARCHITECTURE
 %% =====================================================
 
 GOAL["🎯 COMPANY OBJECTIVE<br/><br/><b>Reduce Cost by $2M</b><br/>Protect Revenue • Operations • Compliance"]
@@ -223,7 +223,7 @@ class SIM engine
 class PLAN,MIT,VALUE output
 ```
 
-## Diagram B — Department influence + Company KPIs
+## Diagram B - Department influence + Company KPIs
 
 ```mermaid
 flowchart LR
@@ -280,13 +280,13 @@ flowchart LR
 
 | Diagram A element | Where it lives |
 |---|---|
-| Stage 1 ORG — 8 domains | `department` entities (domain view) |
-| Stage 2 ASSETS — People/Knowledge/Systems/Workflows/Controls | `EntityKind`: person, knowledge, system, workflow, control |
-| Stage 3 DECISION — C1..C4 | `Intervention` (reduce / remove / stop) |
-| Stage 4 BLAST RADIUS — Q1..Q6 | `Impact.dimension`: ownership, technical, operational, business, compliance, financial |
-| Stage 5 EXAMPLES — E1..E4 | the 4 planted traps in `data/synthetic_company.json` |
-| Stage 5 ENGINE — SIM steps | `simulation-engine`: trace → detect → savings → downstream → constraints → 12-month rebound |
-| Stage 6 OUTPUT — PLAN/MIT/VALUE | `ScenarioResult`, `MitigationComparison`, `ValueBreakdown` |
+| Stage 1 ORG - 8 domains | `department` entities (domain view) |
+| Stage 2 ASSETS - People/Knowledge/Systems/Workflows/Controls | `EntityKind`: person, knowledge, system, workflow, control |
+| Stage 3 DECISION - C1..C4 | `Intervention` (reduce / remove / stop) |
+| Stage 4 BLAST RADIUS - Q1..Q6 | `Impact.dimension`: ownership, technical, operational, business, compliance, financial |
+| Stage 5 EXAMPLES - E1..E4 | the 4 planted traps in `data/synthetic_company.json` |
+| Stage 5 ENGINE - SIM steps | `simulation-engine`: trace → detect → savings → downstream → constraints → 12-month rebound |
+| Stage 6 OUTPUT - PLAN/MIT/VALUE | `ScenarioResult`, `MitigationComparison`, `ValueBreakdown` |
 
 **Diagram A domain → fixture department roll-up** (fixture may be finer; it aggregates up):
 

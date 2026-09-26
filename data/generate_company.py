@@ -1,4 +1,4 @@
-"""Generate the Halcyon Freight company twin — conformant to Merged Schema v2.1.0.
+"""Generate the Halcyon Freight company twin - conformant to Merged Schema v2.1.0.
 
 Deterministic, standard-library only. Emits ``data/synthetic_company.json`` as a full
 v2 ``Twin``: schema_version, version, organization, department_profiles, entities, edges,
@@ -343,8 +343,8 @@ for kid, name, did, docp, crit in KNOWLEDGE:
 
 # =========================================================================== CONTROLS
 CONTROLS = [
-    ("ctl_soc2_audit_logging", "SOC 2 CC7.2 – audit logging", "SOC2", True, "critical"),
-    ("ctl_access_control", "SOC 2 CC6.1 – logical access", "SOC2", True, "high"),
+    ("ctl_soc2_audit_logging", "SOC 2 CC7.2 - audit logging", "SOC2", True, "critical"),
+    ("ctl_access_control", "SOC 2 CC6.1 - logical access", "SOC2", True, "high"),
     ("ctl_data_retention", "GDPR data retention", "GDPR", True, "high"),
     ("ctl_change_mgmt", "Change management", "SOC2", False, "medium"),
     ("ctl_incident_mgmt", "Incident management", "SOC2", True, "high"),
@@ -794,7 +794,7 @@ KPI_START = {
 
 
 def build_history() -> dict:
-    """Companion historical dataset — NOT part of the frozen twin schema.
+    """Companion historical dataset - NOT part of the frozen twin schema.
 
     Deterministic dummy history for demo realism and observed-vs-predicted framing.
     """
@@ -824,7 +824,7 @@ def build_history() -> dict:
         {"id": "prog_fy24_cuts", "name": "FY24 cost program", "target_usd": 1_500_000,
          "realized_usd": 1_100_000, "leakage_pct": 0.27,
          "note": "Across-the-board cuts; ~27% leaked back via contractor rehires and a stranded "
-                 "workflow — the reason leadership wants to simulate this time."},
+                 "workflow - the reason leadership wants to simulate this time."},
     ]
 
     return {

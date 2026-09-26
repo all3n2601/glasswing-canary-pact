@@ -262,41 +262,6 @@
       "criticality": "medium"
     },
     {
-      "id": "pt_billing_01",
-      "type": "person_token",
-      "name": "Billing owner A",
-      "department_id": "dept_operations",
-      "criticality": "medium"
-    },
-    {
-      "id": "pt_billing_02",
-      "type": "person_token",
-      "name": "Billing owner B",
-      "department_id": "dept_operations",
-      "criticality": "medium"
-    },
-    {
-      "id": "pt_grc_01",
-      "type": "person_token",
-      "name": "GRC owner",
-      "department_id": "dept_compliance",
-      "criticality": "medium"
-    },
-    {
-      "id": "pt_data_01",
-      "type": "person_token",
-      "name": "Data platform owner",
-      "department_id": "dept_ai_data",
-      "criticality": "medium"
-    },
-    {
-      "id": "pt_sre_01",
-      "type": "person_token",
-      "name": "Primary on-call",
-      "department_id": "dept_operations",
-      "criticality": "medium"
-    },
-    {
       "id": "sys_core_api",
       "type": "system",
       "name": "core-api",
@@ -621,14 +586,14 @@
     {
       "id": "ctl_soc2_audit_logging",
       "type": "control",
-      "name": "SOC 2 CC7.2 \u2013 audit logging",
+      "name": "SOC 2 CC7.2 - audit logging",
       "department_id": "dept_compliance",
       "criticality": "critical"
     },
     {
       "id": "ctl_access_control",
       "type": "control",
-      "name": "SOC 2 CC6.1 \u2013 logical access",
+      "name": "SOC 2 CC6.1 - logical access",
       "department_id": "dept_compliance",
       "criticality": "high"
     },
@@ -748,16 +713,7 @@
   "edges": [
     {
       "id": "e_pt_billing01_owns",
-      "source": "pt_billing_01",
-      "target": "wf_billing_recon",
-      "relation": "OWNS",
-      "label": null,
-      "strength": 0.9,
-      "criticality": "critical"
-    },
-    {
-      "id": "e_pt_billing02_owns",
-      "source": "pt_billing_02",
+      "source": "role_billing_ops_lead",
       "target": "wf_billing_recon",
       "relation": "OWNS",
       "label": null,
@@ -766,16 +722,7 @@
     },
     {
       "id": "e_pt_billing01_knows",
-      "source": "pt_billing_01",
-      "target": "kn_billing_exception",
-      "relation": "KNOWS",
-      "label": null,
-      "strength": 0.95,
-      "criticality": "critical"
-    },
-    {
-      "id": "e_pt_billing02_knows",
-      "source": "pt_billing_02",
+      "source": "role_billing_ops_lead",
       "target": "kn_billing_exception",
       "relation": "KNOWS",
       "label": null,
@@ -784,7 +731,7 @@
     },
     {
       "id": "e_pt_grc_knows",
-      "source": "pt_grc_01",
+      "source": "role_grc_lead",
       "target": "kn_soc2_mapping",
       "relation": "KNOWS",
       "label": null,
@@ -793,7 +740,7 @@
     },
     {
       "id": "e_pt_data_knows_cutover",
-      "source": "pt_data_01",
+      "source": "role_data_lead",
       "target": "kn_warehouse_cutover",
       "relation": "KNOWS",
       "label": null,
@@ -802,7 +749,7 @@
     },
     {
       "id": "e_pt_data_knows_format",
-      "source": "pt_data_01",
+      "source": "role_data_lead",
       "target": "kn_data_format",
       "relation": "KNOWS",
       "label": null,
@@ -811,7 +758,7 @@
     },
     {
       "id": "e_pt_sre_owns_incident",
-      "source": "pt_sre_01",
+      "source": "role_sre",
       "target": "wf_incident_mgmt",
       "relation": "OWNS",
       "label": null,

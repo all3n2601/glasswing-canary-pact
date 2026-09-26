@@ -37,8 +37,8 @@ agent, named `<agent_id>.md`, matching the schema v2 agent roster.
 Planted challenger find + hidden costs: `data/planted_items.json`.
 
 ## Data the agents read (produced by Person 1)
-- `data/synthetic_company.json` — the twin (entities, edges, pressures, documents, evidence, profiles)
-- `data/knowledge_map.json` — person→knowledge→workflow, bus factor, stranding risk
-- `data/vendor_report.json` — per-vendor consumers, substitutability, coverage, replacement
-- `data/graph_snapshot.json` — nodes + edges for the graph view
-- `data/planted_items.json` — the challenger's missed dependency + hidden costs
+- `data/synthetic_company.json` - the twin (entities, edges, pressures, documents, evidence, profiles)
+- `data/knowledge_map.json` - person→knowledge→workflow, bus factor, stranding risk
+- `data/vendor_report.json` - per-vendor consumers, substitutability, coverage, replacement
+- `data/graph_snapshot.json` - nodes + edges for the graph view
+- `data/planted_items.json` - the challenger's missed dependency + hidden costs

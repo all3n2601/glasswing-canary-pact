@@ -1,4 +1,4 @@
-"""Person 1 acceptance tests — every requirement, and a few beyond.
+"""Person 1 acceptance tests - every requirement, and a few beyond.
 
 Covers the work-division Person-1 acceptance checks, merged-schema v2 section 12,
 the four planted decision traps, the planted challenger dependency, and the derived
@@ -56,8 +56,9 @@ def test_removing_a_node_finds_downstream_departments_and_kpis():
 
 
 def test_fixture_validates_without_manual_correction():
-    report = validate_twin(TWIN)
-    assert report.ok, report.errors
+    issues = validate_twin(TWIN)
+    errors = [i for i in issues if i.severity == "error"]
+    assert not errors, errors
 
 
 # ---- schema v2 structural / cross-field ------------------------------------
@@ -151,7 +152,14 @@ def test_exports_are_wellformed():
     assert any(k["single_point_of_failure"] for k in km["knowledge_assets"])
     assert any(w["stranded_if_owners_removed"] for w in km["workflows"])
     gs = graph_snapshot(TWIN)
-    assert len(gs["nodes"]) == len(TWIN.entities) and len(gs["edges"]) == len(TWIN.edges)
+    non_tokens = [e for e in TWIN.entities if e.type != EntityType.person_token]
+    assert len(gs["nodes"]) == len(non_tokens)          # person tokens mapped to roles
+    assert 0 < len(gs["edges"]) <= len(TWIN.edges)      # remapped, self-loops/dupes dropped
+    # no person tokens leak to the frontend
+    node_ids = {n["id"] for n in gs["nodes"]}
+    assert not any(n.startswith("pt_") for n in node_ids)
+    for e in gs["edges"]:
+        assert not e["source"].startswith("pt_") and not e["target"].startswith("pt_")
     vr = vendor_report(TWIN)
     auditlog = next(v for v in vr["vendors"] if v["vendor_id"] == "vendor_auditlog")
     assert auditlog["irreplaceable_flag"] is True

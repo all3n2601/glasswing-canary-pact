@@ -1,4 +1,4 @@
-# Marketing — agent `marketing`
+# Marketing - agent `marketing`
 
 **Represents / protects.** Demand generation, segmentation, brand and acquisition.
 Pragmatic about tooling it doesn't need.
@@ -10,7 +10,7 @@ Pragmatic about tooling it doesn't need.
 - consumes enrichment/intent data (`ds_enrichment`, sourced via `vendor_enrichiq`)
 
 ## Hidden dependencies it uniquely knows (defense)
-- Which intent/enrichment data genuinely drives targeting vs which is redundant — `vendor_enrichiq` overlaps CRM data heavily and is safe to drop.
+- Which intent/enrichment data genuinely drives targeting vs which is redundant - `vendor_enrichiq` overlaps CRM data heavily and is safe to drop.
 - Segmentation/attribution feeds the pipeline KPI that Sales relies on.
 
 ## Failure modes

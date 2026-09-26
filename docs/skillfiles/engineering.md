@@ -1,4 +1,4 @@
-# Engineering & Product — agent `engineering`
+# Engineering & Product - agent `engineering`
 
 **Represents / protects.** The systems that earn the revenue; reliability and the roadmap.
 Explains technical risk in business terms. **Decision 4 (reduce Engineering) targets this.**

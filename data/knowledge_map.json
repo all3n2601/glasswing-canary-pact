@@ -5,9 +5,8 @@
       "name": "Billing-recon exception handling",
       "department_id": "dept_operations",
       "documented_pct": 0.35,
-      "holders": [
-        "pt_billing_01",
-        "pt_billing_02"
+      "holder_roles": [
+        "role_billing_ops_lead"
       ],
       "bus_factor": 2,
       "enables_workflows": [
@@ -20,8 +19,8 @@
       "name": "Warehouse migration cutover plan",
       "department_id": "dept_ai_data",
       "documented_pct": 0.5,
-      "holders": [
-        "pt_data_01"
+      "holder_roles": [
+        "role_data_lead"
       ],
       "bus_factor": 1,
       "enables_workflows": [],
@@ -32,8 +31,8 @@
       "name": "SOC 2 control-to-evidence mapping",
       "department_id": "dept_compliance",
       "documented_pct": 0.4,
-      "holders": [
-        "pt_grc_01"
+      "holder_roles": [
+        "role_grc_lead"
       ],
       "bus_factor": 1,
       "enables_workflows": [
@@ -46,8 +45,8 @@
       "name": "Upstream data-format quirk handling",
       "department_id": "dept_ai_data",
       "documented_pct": 0.3,
-      "holders": [
-        "pt_data_01"
+      "holder_roles": [
+        "role_data_lead"
       ],
       "bus_factor": 1,
       "enables_workflows": [
@@ -60,7 +59,7 @@
       "name": "On-call escalation & recovery",
       "department_id": "dept_operations",
       "documented_pct": 0.7,
-      "holders": [],
+      "holder_roles": [],
       "bus_factor": null,
       "enables_workflows": [],
       "single_point_of_failure": false
@@ -70,7 +69,7 @@
       "name": "Core-API architecture knowledge",
       "department_id": "dept_engineering",
       "documented_pct": 0.7,
-      "holders": [],
+      "holder_roles": [],
       "bus_factor": null,
       "enables_workflows": [],
       "single_point_of_failure": false
@@ -80,7 +79,7 @@
       "name": "Release & deploy engineering",
       "department_id": "dept_engineering",
       "documented_pct": 0.75,
-      "holders": [],
+      "holder_roles": [],
       "bus_factor": null,
       "enables_workflows": [],
       "single_point_of_failure": false
@@ -90,7 +89,7 @@
       "name": "Dispatch ML modeling",
       "department_id": "dept_ai_data",
       "documented_pct": 0.6,
-      "holders": [],
+      "holder_roles": [],
       "bus_factor": null,
       "enables_workflows": [],
       "single_point_of_failure": false
@@ -100,7 +99,7 @@
       "name": "Product roadmap & customer context",
       "department_id": "dept_product",
       "documented_pct": 0.7,
-      "holders": [],
+      "holder_roles": [],
       "bus_factor": null,
       "enables_workflows": [],
       "single_point_of_failure": false
@@ -110,7 +109,7 @@
       "name": "Enterprise deal & pricing know-how",
       "department_id": "dept_sales",
       "documented_pct": 0.65,
-      "holders": [],
+      "holder_roles": [],
       "bus_factor": null,
       "enables_workflows": [],
       "single_point_of_failure": false
@@ -120,7 +119,7 @@
       "name": "Audience segmentation & attribution",
       "department_id": "dept_marketing",
       "documented_pct": 0.7,
-      "holders": [],
+      "holder_roles": [],
       "bus_factor": null,
       "enables_workflows": [],
       "single_point_of_failure": false
@@ -130,7 +129,7 @@
       "name": "Customer onboarding playbook",
       "department_id": "dept_customer_success",
       "documented_pct": 0.75,
-      "holders": [],
+      "holder_roles": [],
       "bus_factor": null,
       "enables_workflows": [
         "wf_customer_onboarding"
@@ -142,7 +141,7 @@
       "name": "CS escalation handling",
       "department_id": "dept_customer_success",
       "documented_pct": 0.7,
-      "holders": [],
+      "holder_roles": [],
       "bus_factor": null,
       "enables_workflows": [
         "wf_customer_onboarding"
@@ -154,7 +153,7 @@
       "name": "Vendor contract & renewal know-how",
       "department_id": "dept_finance",
       "documented_pct": 0.6,
-      "holders": [],
+      "holder_roles": [],
       "bus_factor": null,
       "enables_workflows": [],
       "single_point_of_failure": false
@@ -164,7 +163,7 @@
       "name": "Privacy program operation",
       "department_id": "dept_compliance",
       "documented_pct": 0.7,
-      "holders": [],
+      "holder_roles": [],
       "bus_factor": null,
       "enables_workflows": [],
       "single_point_of_failure": false
@@ -176,9 +175,8 @@
       "name": "Billing reconciliation",
       "criticality": "critical",
       "min_qualified_owners": 2,
-      "owners": [
-        "pt_billing_01",
-        "pt_billing_02"
+      "owner_roles": [
+        "role_billing_ops_lead"
       ],
       "documented_pct": 0.35,
       "ownership_modeled": true,
@@ -189,7 +187,7 @@
       "name": "Invoice generation & dispatch",
       "criticality": "critical",
       "min_qualified_owners": 2,
-      "owners": [],
+      "owner_roles": [],
       "documented_pct": 0.6,
       "ownership_modeled": false,
       "stranded_if_owners_removed": false
@@ -199,8 +197,8 @@
       "name": "Incident response / on-call",
       "criticality": "high",
       "min_qualified_owners": 2,
-      "owners": [
-        "pt_sre_01"
+      "owner_roles": [
+        "role_sre"
       ],
       "documented_pct": 0.7,
       "ownership_modeled": true,
@@ -211,7 +209,7 @@
       "name": "Dispatch optimisation",
       "criticality": "high",
       "min_qualified_owners": 2,
-      "owners": [],
+      "owner_roles": [],
       "documented_pct": 0.6,
       "ownership_modeled": false,
       "stranded_if_owners_removed": false
@@ -221,7 +219,7 @@
       "name": "SOC 2 audit-evidence collection",
       "criticality": "high",
       "min_qualified_owners": 1,
-      "owners": [],
+      "owner_roles": [],
       "documented_pct": 0.8,
       "ownership_modeled": false,
       "stranded_if_owners_removed": false
@@ -231,7 +229,7 @@
       "name": "Customer onboarding",
       "criticality": "medium",
       "min_qualified_owners": 2,
-      "owners": [],
+      "owner_roles": [],
       "documented_pct": 0.5,
       "ownership_modeled": false,
       "stranded_if_owners_removed": false
@@ -241,7 +239,7 @@
       "name": "Data pipeline refresh",
       "criticality": "high",
       "min_qualified_owners": 2,
-      "owners": [],
+      "owner_roles": [],
       "documented_pct": 0.6,
       "ownership_modeled": false,
       "stranded_if_owners_removed": false
@@ -251,7 +249,7 @@
       "name": "Monthly financial close",
       "criticality": "medium",
       "min_qualified_owners": 2,
-      "owners": [],
+      "owner_roles": [],
       "documented_pct": 0.7,
       "ownership_modeled": false,
       "stranded_if_owners_removed": false

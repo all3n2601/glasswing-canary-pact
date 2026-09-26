@@ -1654,7 +1654,7 @@
     {
       "id": "ctl_soc2_audit_logging",
       "type": "control",
-      "name": "SOC 2 CC7.2 \u2013 audit logging",
+      "name": "SOC 2 CC7.2 - audit logging",
       "criticality": "critical",
       "sensitivity": "general",
       "department_id": "dept_compliance",
@@ -1666,7 +1666,7 @@
     {
       "id": "ctl_access_control",
       "type": "control",
-      "name": "SOC 2 CC6.1 \u2013 logical access",
+      "name": "SOC 2 CC6.1 - logical access",
       "criticality": "high",
       "sensitivity": "general",
       "department_id": "dept_compliance",
