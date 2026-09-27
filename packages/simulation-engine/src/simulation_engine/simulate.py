@@ -126,6 +126,8 @@ def simulate(twin: Twin, brief: DecisionBrief, scenario: Scenario, plan: Candida
         pressure_cost_usd=priced.total_usd, avoided_failure_cost_usd=v.avoided_failure_cost_usd, net_value_usd=net,
         monthly_net_usd=[n - p for n, p in zip(before_pressure, priced.monthly_usd)],
         p10_net_value_usd=percentile, p50_net_value_usd=percentile, p90_net_value_usd=percentile,
+        termination_cost_usd=v.termination_cost_usd, migration_cost_usd=v.migration_cost_usd,
+        displaced_work_cost_usd=v.displaced_work_cost_usd,
     )
     if mode == "full":
         assumptions += EXPECTED_VALUE_ASSUMPTIONS

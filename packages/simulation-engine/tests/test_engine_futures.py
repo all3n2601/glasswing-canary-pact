@@ -303,3 +303,19 @@ def test_orchestrator_call_sequence_runs_end_to_end(brief):
         assert row.net_value_p50_usd == results[row.future].value.net_value_usd
     for future in (Future.act_now, Future.inaction):
         assert check_result(blast_radius(results[future], TWIN), TWIN) == []
+
+
+def test_cost_split_fields_break_down_transition_and_added_cost_without_changing_net():
+    ents = ENTS
+    for future in (Future.act_now, Future.delay):
+        v = run(future).value
+        assert v.termination_cost_usd == ents["vendor_beacon"].one_time_exit_cost_usd + \
+            ents["vendor_echo"].one_time_exit_cost_usd
+        assert v.migration_cost_usd == ents["vendor_beacon"].migration_cost_usd + ents["vendor_echo"].migration_cost_usd
+        # The plan has no other one-off costs or investments, so the split is exact here.
+        assert v.termination_cost_usd + v.migration_cost_usd == v.transition_cost_usd
+        assert v.displaced_work_cost_usd == v.added_cost_usd > 0
+    inaction = run(Future.inaction).value
+    assert (inaction.termination_cost_usd, inaction.migration_cost_usd, inaction.displaced_work_cost_usd) == (0, 0, 0)
+    optimized = optimize(TWIN, VENDOR, run_id=RUN).recommended.result.value
+    assert optimized.termination_cost_usd + optimized.migration_cost_usd == optimized.transition_cost_usd

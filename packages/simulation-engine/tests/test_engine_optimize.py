@@ -63,7 +63,8 @@ def test_v4_recommended_is_beacon_plus_echo_ranked_first_with_every_line_separat
     v = result.value
     assert v.gross_savings_usd == 2_300_000_000
     assert v.transition_cost_usd == 220_000_000
-    assert "$90,000,000 vendor termination and $130,000,000 migration" in " ".join(result.assumptions)
+    assert "$90,000,000 termination and $130,000,000 migration" in " ".join(result.assumptions)
+    assert (result.value.termination_cost_usd, result.value.migration_cost_usd) == (90_000_000, 130_000_000)
     assert 100_000_000 <= v.added_cost_usd <= 140_000_000
     assert v.expected_business_loss_usd == 0
     assert 1_900_000_000 <= v.net_value_usd <= 2_000_000_000

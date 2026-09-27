@@ -85,7 +85,7 @@ def evaluate(twin: Twin, interventions: list[Intervention], *, brief: DecisionBr
 
     assumptions = [QUICK_ASSUMPTION, *applied.assumptions]
     if applied.termination_cost_usd or applied.migration_cost_usd:
-        assumptions.append(f"transition_cost_usd includes ${applied.termination_cost_usd:,} vendor termination and "
+        assumptions.append(f"transition_cost_usd includes ${applied.termination_cost_usd:,} termination and "
                            f"${applied.migration_cost_usd:,} migration")
     if priced.displaced_work_usd:
         assumptions.append(f"added_cost_usd includes ${priced.displaced_work_usd:,} displaced work: harmed workflows "

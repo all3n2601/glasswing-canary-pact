@@ -18,6 +18,9 @@ Every line of ``ValueBreakdown`` is priced separately and the net is their exact
   (``pressures.py``); zero in the pressure-free quick evaluation the optimizer ranks on.
 - avoided_failure: hazard costs prevented by mitigations (plan E-07); zero until then.
 
+``termination_cost_usd`` and ``migration_cost_usd`` break ``transition_cost_usd`` down, and
+``displaced_work_cost_usd`` breaks down ``added_cost_usd``; they are detail, not extra terms.
+
 ``monthly_net_usd`` is cumulative: one-off costs land in the month the first intervention
 starts, recurring lines accrue evenly after it, and the last month equals the net exactly.
 """
@@ -90,4 +93,6 @@ def value_breakdown(applied: AppliedScenario, priced: PricedLines, *, start_day:
         rebound_cost_usd=applied.rebound_cost_usd, expected_business_loss_usd=priced.business_loss_usd,
         pressure_cost_usd=0, avoided_failure_cost_usd=0, net_value_usd=net,
         monthly_net_usd=monthly_net(recurring, applied.transition_cost_usd, start_day, horizon_days),
+        termination_cost_usd=applied.termination_cost_usd, migration_cost_usd=applied.migration_cost_usd,
+        displaced_work_cost_usd=priced.displaced_work_usd,
     )
