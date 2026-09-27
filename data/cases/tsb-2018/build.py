@@ -93,9 +93,9 @@ DOCS = [
 EVIDENCE = [
     ("ev_tsb_customers", "doc_fca_final_notice", "audit_report_summary", "Regulator summary: about 5.2 million customers were moved to the new platform in April 2018."),
     ("ev_tsb_fourth_parties", "doc_fca_final_notice", "workflow_map",
-     "Regulator summary: the new platform provider relied on 85 third parties of its own, which the bank had not assessed before migration."),
+     "Regulator summary: the new platform provider relied on 85 third parties of its own that the bank had not assessed, so Customer service recovery could not count on the new platform alone."),
     ("ev_tsb_no_rollback", "doc_fca_final_notice", "workflow_map",
-     "Regulator summary: once customer data moved there was no way back to the old platform, so customer service recovery depended on a fallback that would no longer exist."),
+     "Regulator findings mapped to this twin: Customer service recovery depends on the Old platform fallback copy. Once customers move there is no way back, and the new provider's own recovery rests on sub-suppliers nobody assessed."),
     ("ev_tsb_provider_experience", "doc_fca_final_notice", "architecture_note",
      "Regulator summary: the provider had not run a UK bank platform of this kind before."),
     ("ev_tsb_complaints", "doc_fca_final_notice", "incident", "Regulator summary: 225,492 complaints and about GBP 32.7M redress to customers."),
@@ -240,7 +240,7 @@ def build_entities(budgets, ftes):
     E += [
         ent("ds_customer_ledger", "dataset", "Customer accounts and transaction ledger (5.2M customers)", "dept_ai_data", "critical",
             attribute_group="core_ledger", evidence_refs=["ev_tsb_customers"]),
-        ent("ds_fallback_service", "dataset", "Working copy of customer services on the old platform (the rollback path)", "dept_engineering", "high",
+        ent("ds_fallback_service", "dataset", "Old platform fallback copy", "dept_engineering", "high",
             attribute_group="fallback", evidence_refs=["ev_tsb_lbg_exit_terms"]),
         ent("ds_payment_messages", "dataset", "Payment messages and standing orders", "dept_operations", "high",
             attribute_group="payments", evidence_refs=["ev_tsb_platform_map"]),
@@ -248,7 +248,7 @@ def build_entities(budgets, ftes):
     prov("ds_customer_ledger.customers", F["customers_migrated"], "sourced", "fca_press")
 
     workflows = [
-        ("wf_service_recovery", "Customer service recovery and rollback", "dept_operations", "critical", 2, 1_600_000, False),
+        ("wf_service_recovery", "Customer service recovery", "dept_operations", "critical", 2, 1_600_000, False),
         ("wf_digital_banking", "Internet and mobile banking service", "dept_product", "critical", 2, 700_000, True),
         ("wf_telephone_banking", "Telephone banking service", "dept_customer_success", "high", 2, 250_000, True),
         ("wf_branch_servicing", "Branch customer servicing", "dept_sales", "high", 2, 300_000, True),

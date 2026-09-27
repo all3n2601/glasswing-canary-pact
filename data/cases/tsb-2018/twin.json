@@ -935,7 +935,7 @@
   {
    "id": "ds_fallback_service",
    "type": "dataset",
-   "name": "Working copy of customer services on the old platform (the rollback path)",
+   "name": "Old platform fallback copy",
    "criticality": "high",
    "sensitivity": "general",
    "tags": [],
@@ -961,7 +961,7 @@
   {
    "id": "wf_service_recovery",
    "type": "workflow",
-   "name": "Customer service recovery and rollback",
+   "name": "Customer service recovery",
    "criticality": "critical",
    "sensitivity": "general",
    "tags": [],
@@ -2519,7 +2519,7 @@
    "source_type": "workflow_map",
    "document_id": "doc_fca_final_notice",
    "location": null,
-   "snippet": "Regulator summary: the new platform provider relied on 85 third parties of its own, which the bank had not assessed before migration.",
+   "snippet": "Regulator summary: the new platform provider relied on 85 third parties of its own that the bank had not assessed, so Customer service recovery could not count on the new platform alone.",
    "synthetic": false
   },
   {
@@ -2527,7 +2527,7 @@
    "source_type": "workflow_map",
    "document_id": "doc_fca_final_notice",
    "location": null,
-   "snippet": "Regulator summary: once customer data moved there was no way back to the old platform, so customer service recovery depended on a fallback that would no longer exist.",
+   "snippet": "Regulator findings mapped to this twin: Customer service recovery depends on the Old platform fallback copy. Once customers move there is no way back, and the new provider's own recovery rests on sub-suppliers nobody assessed.",
    "synthetic": false
   },
   {
