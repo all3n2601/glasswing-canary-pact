@@ -351,6 +351,8 @@ DATASETS = [
     ("ds_account_intel", "Account intelligence", "dept_sales", "medium"),
     ("ds_usage", "Product usage signals", "dept_product", "medium"),
     ("ds_geo_risk", "Geographic and macroeconomic risk", "dept_operations", "medium"),
+    # Granite-only emerging-market (APAC, LATAM) slice: what makes GraniteGeo genuinely irreplaceable.
+    ("ds_geo_risk_emerging", "Emerging-market geographic risk (APAC, LATAM)", "dept_operations", "medium"),
 ]
 # attribute_group per dataset (2.1.1 CR3) - drives the engine's attribute_coverage overlap
 DATASET_GROUP = {
@@ -358,6 +360,7 @@ DATASET_GROUP = {
     "ds_corporate_linkage": "corporate_linkage", "ds_intent_signals": "intent",
     "ds_identity_verification": "identity", "ds_market_intel": "market_intel",
     "ds_account_intel": "account_intel", "ds_usage": "usage", "ds_geo_risk": "geo_risk",
+    "ds_geo_risk_emerging": "geo_risk",
 }
 for dsid, name, did, crit in DATASETS:
     ent(dsid, "dataset", name, department_id=did, criticality=crit,
@@ -672,10 +675,13 @@ doc("doc_data_vendor_inventory", "External data vendor inventory", "architecture
     covers=["vendor_apex", "vendor_beacon", "vendor_cinder", "vendor_delta", "vendor_echo",
             "vendor_flux", "vendor_granite", "ds_firmographics", "ds_contact_data",
             "ds_corporate_linkage", "ds_intent_signals", "ds_identity_verification",
-            "ds_market_intel", "ds_account_intel", "ds_usage", "ds_geo_risk"],
+            "ds_market_intel", "ds_account_intel", "ds_usage", "ds_geo_risk", "ds_geo_risk_emerging"],
     summary="Vendor-to-dataset feed matrix with attribute groups and consuming workflows.")
 evi("ev_vendor_dataset_matrix", "architecture_note", "doc_data_vendor_inventory",
     "Vendor-to-dataset feed matrix with attribute groups and consuming workflows.", location="table 1")
+evi("ev_granite_emerging_geo_risk", "architecture_note", "doc_data_vendor_inventory",
+    "GraniteGeo alone supplies emerging-market (APAC, LATAM) geo-risk data, which risk monitoring reads.",
+    location="table 2")
 
 doc("doc_vendor_recon_workflow_map", "Vendor reconciliation workflow map", "workflow_map",
     department_id="dept_operations", status="current",
@@ -817,10 +823,12 @@ edge("e_echo_provides_account_intel", "vendor_echo", "ds_account_intel", "PROVID
      substitutability=0.15, criticality="high", evidence_refs=["ev_vendor_dataset_matrix"])
 edge("e_flux_provides_usage", "vendor_flux", "ds_usage", "PROVIDES", strength=0.9, substitutability=0.1,
      evidence_refs=["ev_vendor_dataset_matrix"])
-edge("e_granite_provides_geo_risk", "vendor_granite", "ds_geo_risk", "PROVIDES", strength=0.9,
-     substitutability=0.1, evidence_refs=["ev_vendor_dataset_matrix"])
-edge("e_delta_provides_geo_risk", "vendor_delta", "ds_geo_risk", "PROVIDES", strength=0.3,
+edge("e_granite_provides_geo_risk", "vendor_granite", "ds_geo_risk", "PROVIDES", strength=0.8,
      substitutability=0.4, evidence_refs=["ev_vendor_dataset_matrix"])
+edge("e_delta_provides_geo_risk", "vendor_delta", "ds_geo_risk", "PROVIDES", strength=0.6,
+     substitutability=0.4, evidence_refs=["ev_vendor_dataset_matrix"])
+edge("e_granite_provides_geo_risk_emerging", "vendor_granite", "ds_geo_risk_emerging", "PROVIDES", strength=0.9,
+     substitutability=0.05, evidence_refs=["ev_granite_emerging_geo_risk"])
 
 # --- datasets CONSUMED by workflows / systems (base twin; the planted edge is NOT here) ---
 edge("e_firmographics_consumed_leadscoring", "ds_firmographics", "wf_lead_scoring", "CONSUMES",
@@ -844,7 +852,9 @@ edge("e_account_intel_consumed_account_planning", "ds_account_intel", "wf_accoun
 edge("e_usage_consumed_product_analytics", "ds_usage", "wf_product_analytics", "CONSUMES",
      strength=0.9, substitutability=0.1, criticality="medium")
 edge("e_geo_risk_consumed_risk_monitoring", "ds_geo_risk", "wf_risk_monitoring", "CONSUMES",
-     strength=0.9, substitutability=0.1, criticality="medium")
+     strength=0.7, substitutability=0.4, criticality="medium")
+edge("e_geo_risk_emerging_consumed_risk_monitoring", "ds_geo_risk_emerging", "wf_risk_monitoring", "CONSUMES",
+     strength=0.9, substitutability=0.05, criticality="medium", evidence_refs=["ev_granite_emerging_geo_risk"])
 edge("e_market_intel_consumed_ml_scoring", "ds_market_intel", "sys_ml_scoring", "CONSUMES",
      strength=0.5, substitutability=0.5, criticality="medium")
 edge("e_intent_consumed_ml_scoring", "ds_intent_signals", "sys_ml_scoring", "CONSUMES",

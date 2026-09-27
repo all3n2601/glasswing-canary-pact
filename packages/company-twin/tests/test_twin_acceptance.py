@@ -164,6 +164,21 @@ def test_delta_sole_provider_identity_apex_sole_provider_corporate_linkage():
     assert entity_map(TWIN)["ds_corporate_linkage"].criticality.value == "critical"
 
 
+def test_granite_is_irreplaceable_through_its_own_emerging_market_slice():
+    providers = {e.source for e in TWIN.edges
+                 if e.relation == Relation.PROVIDES and e.target == "ds_geo_risk_emerging"}
+    assert providers == {"vendor_granite"}
+    feeds = [e for e in TWIN.edges if e.source == "ds_geo_risk_emerging"]
+    assert [(e.relation, e.target) for e in feeds] == [(Relation.CONSUMES, "wf_risk_monitoring")]
+    assert all(e.evidence_refs == ["ev_granite_emerging_geo_risk"] for e in TWIN.edges
+               if "ds_geo_risk_emerging" in (e.source, e.target))
+    granite = next(r for r in vendor_report(TWIN)["vendors"] if r["vendor_id"] == "vendor_granite")
+    assert granite["irreplaceable_flag"] and "ds_geo_risk_emerging" in granite["consumers"]
+    # Without the unique slice, the shared ds_geo_risk feed alone would not make Granite irreplaceable.
+    shared = next(e for e in TWIN.edges if e.id == "e_granite_provides_geo_risk")
+    assert granite["min_substitutability"] == 0.05 < shared.substitutability
+
+
 # ---- derived exports well-formed -------------------------------------------
 def test_exports_are_wellformed():
     km = knowledge_map(TWIN)
