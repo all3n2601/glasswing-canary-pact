@@ -373,7 +373,7 @@ class OrganizationSettings(Strict):
     require_human_approval: Literal[True] = True
     anonymize_people: Literal[True] = True
     enabled_agent_ids: list[ID] = Field(default_factory=lambda: list(CORE_AGENT_IDS))
-    llm_mode: Literal["live"] = "live"
+    llm_mode: Literal["live", "replay", "mock"] = "replay"
     model_id_strong: str | None = None
     model_id_fast: str | None = None
     max_tool_calls: int = Field(default=3, ge=0, le=5)

@@ -351,6 +351,8 @@ export interface CanaryContracts {
   QuickSimulateRequest: QuickSimulateRequest;
   FuturesRequest: FuturesRequest;
   OptimizeRequest: OptimizeRequest;
+  ReplayInfo: ReplayInfo;
+  ReplayStarted: ReplayStarted;
   OrganizationProfileView: OrganizationProfileView;
   SignupRequest: SignupRequest;
   LoginRequest: LoginRequest;
@@ -662,7 +664,7 @@ export interface OrganizationSettings {
   require_human_approval?: true;
   anonymize_people?: true;
   enabled_agent_ids?: string[];
-  llm_mode?: "live";
+  llm_mode?: "live" | "replay" | "mock";
   model_id_strong?: string | null;
   model_id_fast?: string | null;
   max_tool_calls?: number;
@@ -1388,7 +1390,7 @@ export interface AgentAssessment {
   plan_id?: string | null;
   agent_id: string;
   pass_type: "first_pass" | "challenge";
-  status: "ok" | "unavailable" | "invalid";
+  status: "ok" | "replayed" | "fallback_cached" | "unavailable" | "invalid";
   output?: AgentOutput | null;
   challenge?: ChallengerOutput | null;
   accepted_impacts?: Impact[];
@@ -1716,6 +1718,24 @@ export interface FuturesRequest {
  */
 export interface OptimizeRequest {
   brief: DecisionBrief;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "ReplayInfo".
+ */
+export interface ReplayInfo {
+  name: string;
+  decision_id?: string | null;
+  event_count: number;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "ReplayStarted".
+ */
+export interface ReplayStarted {
+  run_id: string;
+  name: string;
+  speed: 1 | 2 | 4;
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
