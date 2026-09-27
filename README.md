@@ -18,13 +18,14 @@ The evidence that this goes wrong is public:
 - Only **14%** of companies fully captured the value of their top cost initiative in 2025, and only
   **24%** account for value leakage when they set targets
   ([Deloitte 2026](https://www.prnewswire.com/news-releases/organizations-are-betting-on-cost-transformation-to-fund-growth--but-few-are-capturing-the-full-value-302875992.html)).
-- Only about **10%** of cost programs still show results three years later
+- Only about **10%** of cost-reduction programs show sustained results three years later (2010)
   ([McKinsey](https://www.mckinsey.com/capabilities/strategy-and-corporate-finance/our-insights/five-ways-cfos-can-make-cost-cuts-stick)).
-- **55%** of executives say they made wrong redundancy decisions
+- Of leaders who made staff redundant because of AI, **55%** admit they made wrong decisions about
+  those redundancies (2025)
   ([Orgvue](https://www.orgvue.com/news/55-of-businesses-admit-wrong-decisions-in-making-employees-redundant-when-bringing-ai-into-the-workforce/)).
 - High performers are rehired **120%** more often, often at about **25%** higher pay
   ([Visier, 142 enterprises](https://www.visier.com/blog/true-cost-layoff-boomerangs/)).
-- **42%** of role knowledge is known only to the person in that role
+- **42%** of institutional knowledge is unique to the individual employee
   ([Panopto](https://www.panopto.com/company/news/inefficient-knowledge-sharing-costs-large-businesses-47-million-per-year/)).
 - There were **1.2M** announced US job cuts in 2025
   ([Challenger](https://www.challengergray.com/blog/2025-year-end-challenger-report-highest-q4-layoffs-since-2008-lowest-ytd-hiring-since-2010/)).
