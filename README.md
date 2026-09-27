@@ -98,15 +98,20 @@ Real today:
   `data/workforce_scenario.json` (eliminate eight roles behind two critical workflows).
 - **Live LLM agents** served through Sciforium's OpenAI-compatible API, with structured output,
   one retry and a timeout. Agent failures are surfaced; recorded advice is never substituted.
+- **The deterministic engine,** `packages/simulation-engine`: `simulate` for every future (act now,
+  do nothing, wait), `quick_impact`, `compare_futures`, `optimize`, `blast_radius`,
+  `vendor_overlap` and `check_result`. Full mode falls back to expected value (p10 = p50 = p90)
+  until Monte Carlo sampling lands; quick mode reports point values without percentiles.
 - **The orchestration, routing, merge and validation rules,** and the person-token guard.
 - **Authentication:** sign-up creates viewers; only an approver can record a decision. There is
   one demo approver, created from environment variables at startup.
 - **Storage:** files and SQLite by default, or Postgres when `DATABASE_URL` is set.
 - **A live-agent eval harness.**
 
-Synthetic today:
+Synthetic or not yet built:
 
 - **The company.** Northstar Technologies is synthetic, and so are its documents and evidence.
+- **Uncertainty ranges.** Every value is an expected value until Monte Carlo sampling lands.
 
 Measured agent ablations can be produced with `uv run python -m canary_api.eval_cli`, which writes
 `data/artifacts/eval/ablation.csv`.
@@ -128,18 +133,19 @@ pnpm dev:api    # FastAPI on http://localhost:8000, docs at /docs
 pnpm dev:web    # Next.js on http://localhost:3000
 ```
 
-Important environment variables (see `.env.example`; names only here):
-
 The API reads its active, versioned company twin from storage. The deterministic simulation engine runs
 directly against that record. Company twins, run events, decision packages, users, and approvals use
 PostgreSQL when `DATABASE_URL` is configured; the test/local fallback uses files and SQLite under `runs/`.
 The AdventureWorks importer streams Microsoft's public CSV source into memory and persists only the
 validated twin in the database; it does not generate a local company JSON fixture.
 
+Important environment variables (see `.env.example`; names only here):
+
 - `SCIFORIUM_API_KEY`, `SCIFORIUM_BASE_URL`, `MODEL_STRONG`, `MODEL_FAST`: live model access.
 - `CANARY_ALLOW_LIVE`: must be `true` before a decision run may call live agents.
 - `CANARY_STRUCTURED_OUTPUT`: `auto` (default), `json_schema` or `function_calling`.
-- `CANARY_SIM_MODE`: `full` (default) or `quick`.
+- `CANARY_SIM_MODE`: `full` (default; expected value with p10 = p50 = p90 until Monte Carlo lands)
+  or `quick` (point values, no percentiles).
 - `CANARY_AUTH_SECRET`: token signing secret. If blank, tokens reset on every restart.
 - `CANARY_DEMO_APPROVER_EMAIL`, `CANARY_DEMO_APPROVER_PASSWORD`: create the demo approver.
 - `DATABASE_URL`, `CANARY_DB_SCHEMA`: optional Postgres (tables live in a private `canary` schema).

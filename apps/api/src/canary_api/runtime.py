@@ -23,26 +23,37 @@ sim_mode_error: str | None = None
 _twin: Twin | None = None
 
 
+SNIPPETS_PATH = DATA_DIR / "artifacts" / "snippets.json"
+
+
+def seed_twin() -> Twin:
+    # Snippets are overlaid here, once, so the stored twin already carries the final evidence text.
+    seed_path = Path(os.environ.get("CANARY_TWIN_SEED_PATH") or DATA_DIR / "synthetic_company.json")
+    try:
+        seed = engine_port.load_twin(seed_path, SNIPPETS_PATH if SNIPPETS_PATH.is_file() else None)
+    except Exception as exc:
+        raise EngineNotReady(f"No active company twin exists and seed loading failed: {type(exc).__name__}") from exc
+    errors = [issue for issue in engine_port.validate_twin(seed) if issue.severity == "error"]
+    if errors:
+        raise EngineNotReady(f"Company twin seed failed validation: {errors[0].message}")
+    return seed
+
+
 def twin() -> Twin:
     global _twin
     if _twin is None:
         backend = storage.current()
-        _twin = backend.load_active_twin()
-        if _twin is None:
-            seed_path = Path(os.environ.get("CANARY_TWIN_SEED_PATH") or DATA_DIR / "synthetic_company.json")
-            try:
-                seed = engine_port.load_twin(seed_path)
-            except Exception as exc:
-                raise EngineNotReady(
-                    f"No active company twin exists and seed loading failed: {type(exc).__name__}"
-                ) from exc
-            errors = [issue for issue in engine_port.validate_twin(seed) if issue.severity == "error"]
-            if errors:
-                raise EngineNotReady(f"Company twin seed failed validation: {errors[0].message}")
-            backend.save_twin(seed, active=True)
-            _twin = backend.load_active_twin()
-        if _twin is None:
+        stored = backend.load_active_twin()
+        if stored is None:
+            backend.save_twin(seed_twin(), active=True)
+            stored = backend.load_active_twin()
+        if stored is None:
             raise EngineNotReady("No active company twin exists in the configured database")
+        # A stored twin may predate the derived profile fields; rebuilding fills them without new snippets.
+        try:
+            _twin = engine_port.build_twin(stored)
+        except Exception as exc:
+            raise EngineNotReady(f"The stored company twin failed to build: {type(exc).__name__}") from exc
     return _twin
 
 

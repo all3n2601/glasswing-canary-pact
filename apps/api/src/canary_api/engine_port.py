@@ -74,6 +74,10 @@ def load_twin(twin_path: Path, snippets_path: Path | None = None) -> Twin:
     return company_twin.load_twin(twin_path, snippets_path)
 
 
+def build_twin(data: Twin | dict[str, Any], snippets: dict[str, str] | None = None) -> Twin:
+    return company_twin.build_twin(data, snippets)
+
+
 def validate_twin(twin: Twin) -> list[ValidationIssue]:
     return company_twin.validate_twin(twin)
 
