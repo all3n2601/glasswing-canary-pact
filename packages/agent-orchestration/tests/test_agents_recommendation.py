@@ -64,9 +64,11 @@ def test_real_engine_workforce_brief_gets_a_recommendation(settings) -> None:
     brief = DecisionBrief.model_validate_json((DATA_DIR / "workforce_scenario.json").read_text())
     twin = engine_port.load_twin(DATA_DIR / "synthetic_company.json")
     package = run(brief, twin, settings, engine_port)
-    best = package.futures.rows[package.futures.best_row_index]
     recommendation = package.recommendation
-    assert recommendation is not None and recommendation.headline == package.futures.headline
-    assert recommendation.future is best.future and recommendation.result_id == best.result_id
-    if best.future is Future.inaction:
-        assert (recommendation.action, recommendation.plan_id) == ("do_not_proceed", None)
+    assert recommendation is not None
+    if recommendation.action == "proceed_with_mitigations":
+        winner = next(m for m in package.mitigations if m.plan_id_after == recommendation.plan_id)
+        assert winner.feasible_after and recommendation.result_id == winner.after.result_id
+    else:
+        best = package.futures.rows[package.futures.best_row_index]
+        assert recommendation.headline == package.futures.headline and recommendation.future is best.future

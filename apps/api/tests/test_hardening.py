@@ -173,3 +173,20 @@ def test_invalid_sim_mode_blocks_all_runs_at_startup(client, brief_json, monkeyp
         monkeypatch.delenv("CANARY_SIM_MODE", raising=False)
         runtime.check_sim_mode()
     assert runtime.sim_mode_error is None
+
+
+def test_engine_port_mitigation_functions_follow_the_switches(monkeypatch) -> None:
+    from contracts_py.decision import CandidatePlan
+
+    brief = sample_brief()
+    plan = CandidatePlan(plan_id="plan_x", label="x", intervention_ids=[brief.candidate_interventions[0].id],
+                         source="optimizer")
+    monkeypatch.setenv("ENGINE_IMPL", "stub")
+    monkeypatch.setenv("TWIN_IMPL", "stub")
+    assert engine_port.load_mitigation_catalog(None, stub_twin()) == []
+    assert engine_port.missing_questions(stub_twin(), brief, plan) == []
+    with pytest.raises(engine_port.EngineNotReady, match="mitigation"):
+        engine_port.mitigate(stub_twin(), brief, plan, [])
+    monkeypatch.setenv("TWIN_IMPL", "real")
+    catalog = engine_port.load_mitigation_catalog()
+    assert catalog and all(m.kind == "mitigation" for m in catalog)
