@@ -3,15 +3,16 @@
 from __future__ import annotations
 
 import json
+import re
 
 import networkx as nx
 import pytest
 from contracts_py.decision import CandidatePlan, Constraint, DecisionBrief, Goal, Intervention
 from contracts_py.enums import ActionType, InterventionKind, MitigationType, Polarity, Relation
 
-from company_twin import entity_map, load_twin
+from company_twin import clone_with_edges, edge_from_agent_dependency, entity_map, load_mitigation_catalog, load_twin
 from company_twin.loader import default_fixture_path
-from simulation_engine import apply_interventions, check_result, mitigate
+from simulation_engine import apply_interventions, check_result, mitigate, optimize
 
 TWIN = load_twin(default_fixture_path())
 WORKFORCE = DecisionBrief.model_validate(
@@ -213,3 +214,92 @@ def test_invalid_mitigations_are_rejected():
     with pytest.raises(ValueError, match="needs a workflow"):
         mitigate(TWIN, brief, plan, [mitigation("mit_bad", MitigationType.reassign_owner, "kn_warehouse_lineage",
                                                 new_owner_id="role_controller")])
+
+
+# ---- the two demo stories with the real catalog (data/mitigations.json) -------------------------------------------
+CATALOG = {m.id: m for m in load_mitigation_catalog(twin=TWIN)}
+WORKFORCE_MITIGATIONS = ["mit_reassign_financial_close", "mit_reassign_billing_recon", "mit_runbook_billing_recon",
+                         "mit_runbook_warehouse_lineage"]
+VENDOR = DecisionBrief.model_validate(json.loads((default_fixture_path().parent / "vendor_scenario.json").read_text()))
+BEACON_ECHO = CandidatePlan(plan_id="plan_beacon_echo", label="Beacon + Echo",
+                            intervention_ids=["remove_beacon", "remove_echo"], source="optimizer")
+PLANTED = json.loads((default_fixture_path().parent / "planted_items.json").read_text())["planted_edge"]
+RECONCILIATION = ("wf_vendor_reconciliation", "ctl_sox_reconciliation")
+
+
+def eight_roles() -> CandidatePlan:
+    return CandidatePlan(plan_id="plan_naive", label="Remove the eight roles", source="naive",
+                         intervention_ids=[i.id for i in WORKFORCE.candidate_interventions])
+
+
+def planted_twin():
+    # The Challenger's validated edge, built exactly as the orchestrator builds agent edges (agent defaults).
+    edge = edge_from_agent_dependency(PLANTED["source"], PLANTED["target"], Relation.CONSUMES,
+                                      PLANTED["evidence_refs"], 0.8, edge_id=PLANTED["id"])
+    return clone_with_edges(TWIN, [edge])
+
+
+def reconciliation_harms(result) -> dict[str, tuple[float, int]]:
+    return {i.affected_entity: (i.magnitude, i.severity) for i in result.impacts
+            if i.polarity is Polarity.harm and i.unit == "ratio" and i.affected_entity in RECONCILIATION}
+
+
+def test_role_level_mitigation_restores_both_stranded_workflows_and_makes_the_plan_conditionally_feasible():
+    comparison = mitigate(TWIN, WORKFORCE, eight_roles(), [CATALOG[m] for m in WORKFORCE_MITIGATIONS])
+    assert check_result(comparison, TWIN) == []
+    before, after = comparison.before, comparison.after
+    # Removing all eight roles strands exactly the two workflows and is infeasible (plan 19.3, C-07).
+    assert sorted(c.workflow_id for c in before.workflow_coverage if c.stranded) == ["wf_billing_recon",
+                                                                                     "wf_financial_close"]
+    assert not comparison.feasible_before and any(r.startswith("c_stranded:") for r in before.rejection_reasons)
+    # Backup owners and documented exception handling restore minimum coverage (Gate 5) ...
+    assert not any(c.stranded for c in after.workflow_coverage)
+    assert {"wf_billing_recon", "wf_financial_close"} <= set(comparison.restored_entity_ids)
+    # ... so the scenario moves from infeasible to conditionally feasible (plan 13.8).
+    assert comparison.feasible_after
+    assert any(a.startswith("Conditionally feasible: only if mit_reassign_financial_close") for a in after.assumptions)
+    # Knowledge transfer changes the risk result, and the mitigation reports its time and cost (plan 19.3).
+    assert [k.knowledge_id for k in before.knowledge_coverage if k.lost] == ["kn_billing_exception",
+                                                                             "kn_warehouse_lineage"]
+    assert not any(k.lost for k in after.knowledge_coverage)
+    assert after.risk.score < before.risk.score and "risk_score" in comparison.changed_metrics
+    assert "Mitigations take 25 days (day 0 to day 25) and cost $115,000 one-time" in after.assumptions
+    # No output names a person (plan 19.3, Gate 5).
+    assert not re.search(r"pt_\d", comparison.model_dump_json())
+
+
+def test_the_planted_dependency_is_a_compliance_risk_on_beacon_and_echo_that_stays_feasible_and_recommended():
+    twin = planted_twin()
+    edge = next(e for e in twin.edges if e.id == PLANTED["id"])
+    assert edge.extraction_method == "agent" and (edge.strength, edge.substitutability) == (0.6, 0.4)
+    base = mitigate(TWIN, VENDOR, BEACON_ECHO, [CATALOG["mit_replacement_feed_account_intel"]]).before
+    planted = mitigate(twin, VENDOR, BEACON_ECHO, [CATALOG["mit_replacement_feed_account_intel"]]).before
+    assert reconciliation_harms(base) == {}
+    # ds_account_intel now feeds vendor reconciliation and the mandatory SOX control: a compliance risk.
+    harms = reconciliation_harms(planted)
+    assert set(harms) == set(RECONCILIATION) and all(severity >= 2 for _, severity in harms.values())
+    assert entity_map(twin)["ctl_sox_reconciliation"].mandatory
+    sox = next(i for i in planted.impacts if i.affected_entity == "ctl_sox_reconciliation")
+    assert sox.dependency_path[-3:] == ["ds_account_intel", *RECONCILIATION] and PLANTED["id"] in sox.edge_path
+    assert planted.risk.components.compliance_control > base.risk.components.compliance_control == 0
+    assert planted.risk.score > base.risk.score
+    # Beacon + Echo is still feasible and still the recommended portfolio (plan 4.1).
+    assert planted.feasible
+    assert optimize(twin, VENDOR).recommended.intervention_ids == ["remove_beacon", "remove_echo"]
+
+
+def test_migrating_the_unique_echo_attributes_clears_the_planted_exposure():
+    twin = planted_twin()
+    comparison = mitigate(twin, VENDOR, BEACON_ECHO, [CATALOG["mit_replacement_feed_account_intel"]])
+    assert check_result(comparison, twin) == []
+    before, after = comparison.before, comparison.after
+    assert comparison.feasible_before and comparison.feasible_after
+    # The account-intel migration runs first: Echo and Beacon are removed once it completes (plan 4.1).
+    assert any(a.startswith("Readiness gate: the plan's actions remove_beacon, remove_echo move to day 60")
+               for a in after.assumptions)
+    assert after.value.migration_cost_usd - before.value.migration_cost_usd == 30_000_000
+    # No critical exposure remains: the reconciliation workflow and SOX control fall to the lowest severity.
+    assert set(RECONCILIATION) <= set(comparison.restored_entity_ids)
+    assert all(severity == 1 for _, severity in reconciliation_harms(after).values())
+    assert after.risk.components.compliance_control < before.risk.components.compliance_control / 10
+    assert after.risk.score < before.risk.score and after.risk.level.value == "low"

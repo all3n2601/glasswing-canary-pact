@@ -1143,7 +1143,8 @@ PLANTED_ITEMS = {
         "description": ("Account intelligence (vendor_echo's unique dataset) also feeds Vendor "
                          "reconciliation, which supports the SOX reconciliation control. Left out of "
                          "edges[] so the Challenger must find it; once validated, removing Beacon + Echo "
-                         "breaks ctl_sox_reconciliation until add_replacement_feed is applied."),
+                         "puts the mandatory ctl_sox_reconciliation at risk (Beacon + Echo stays feasible and "
+                         "recommended) until add_replacement_feed moves ds_account_intel to vendor_cinder."),
         "challenger_should_flag": True,
     },
     "planted_unknown": {

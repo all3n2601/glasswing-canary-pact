@@ -264,7 +264,7 @@
       "target": "wf_vendor_reconciliation",
       "evidence_id": "ev_echo_account_intel_feed",
       "document_id": "doc_vendor_recon_workflow_map",
-      "description": "Account intelligence (EchoMarket's unique dataset) also feeds Vendor reconciliation, which supports ctl_sox_reconciliation. Left out of edges[] so the Challenger must find it (plan D-06); once validated, removing Beacon + Echo breaks ctl_sox_reconciliation (V-10) until add_replacement_feed is applied and re-simulated, after which it is feasible again and still the best plan."
+      "description": "Account intelligence (EchoMarket's unique dataset) also feeds Vendor reconciliation, which supports ctl_sox_reconciliation. Left out of edges[] so the Challenger must find it (plan D-06); once validated, removing Beacon + Echo puts the mandatory ctl_sox_reconciliation at risk (V-10: a compliance risk on the recommended plan, which stays feasible and best) until add_replacement_feed (mit_replacement_feed_account_intel, vendor_cinder) is applied and re-simulated, after which no mandatory control is harmed."
     },
     {
       "ref": "vendor_echo.retains_history_after_termination",
@@ -283,14 +283,14 @@
     },
     {
       "id": "dec_workforce_knowledge",
-      "description": "Secondary scenario (plan section 4.2, A-04 acceptance): remove the 8 workforce roles in one plan (plan_remove_eight_roles, no subset search), save at least $165,360,000 gross (sum of the 8 roles' annual_cost_usd). Strands exactly wf_financial_close (loses its only kn_warehouse_lineage holder, role_data_platform_lead) and wf_billing_recon (loses both owners, role_billing_ops_lead and role_billing_specialist, whose exception-path knowledge was never documented); infeasible against c_stranded (W-2). plan_remove_eight_roles_mitigated (reassign_owner to role_controller and role_finance_analyst, document_runbook, retain_capacity_temporarily) restores stranded_workflows == 0 and is conditionally feasible (W-4, W-5)."
+      "description": "Secondary scenario (plan section 4.2, A-04 acceptance): remove the 8 workforce roles in one plan (plan_remove_eight_roles, no subset search), save at least $165,360,000 gross (sum of the 8 roles' annual_cost_usd). Strands exactly wf_financial_close (loses its only kn_warehouse_lineage holder, role_data_platform_lead) and wf_billing_recon (loses both owners, role_billing_ops_lead and role_billing_specialist, whose exception-path knowledge was never documented); infeasible against c_stranded (W-2). plan_remove_eight_roles_mitigated (reassign_owner to role_controller and role_finance_analyst, document_runbook; data/mitigations.json) restores stranded_workflows == 0 and is conditionally feasible (W-4, W-5)."
     }
   ],
   "plans": [
     {"id": "plan_beacon_echo", "decision_id": "dec_vendor_reduction", "description": "Recommended: remove_beacon + remove_echo"},
     {"id": "plan_naive", "decision_id": "dec_vendor_reduction", "description": "Naive/greedy: remove_apex + remove_cinder; infeasible (V-3)"},
     {"id": "plan_remove_eight_roles", "decision_id": "dec_workforce_knowledge", "description": "All 8 candidate interventions; infeasible before mitigation (W-2)"},
-    {"id": "plan_remove_eight_roles_mitigated", "decision_id": "dec_workforce_knowledge", "description": "plan_remove_eight_roles plus reassign_owner/document_runbook/retain_capacity_temporarily mitigations; conditionally feasible (W-5)"}
+    {"id": "plan_remove_eight_roles_mitigated", "decision_id": "dec_workforce_knowledge", "description": "plan_remove_eight_roles plus the reassign_owner/document_runbook mitigations in data/mitigations.json; conditionally feasible (W-5)"}
   ],
   "interventions": [
     {"id": "remove_apex", "decision_id": "dec_vendor_reduction", "description": "remove_vendor vendor_apex"},
