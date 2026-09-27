@@ -95,8 +95,34 @@ def _structured_invoke(chat: Any, output_model: type[BaseModel], messages: Messa
     return structured.invoke([(m["role"], m["content"]) for m in messages])
 
 
+THINKING_VALUES = ("on", "off")
+# Sciforium's DeepSeek honours only this switch; reasoning_effort and reasoning.enabled are ignored.
+THINKING_OFF_BODY = {"chat_template_kwargs": {"thinking": False}}
+
+
+def _thinking_setting(name: str, default: str) -> str:
+    value = os.environ.get(name, "").strip().lower() or default
+    if value not in THINKING_VALUES:
+        raise ValueError(f"{name} must be on or off, got {value!r}")
+    return value
+
+
+def thinking_enabled(agent_id: str | None = None) -> bool:
+    """CANARY_LLM_THINKING (on by default); the challenger may override it with CANARY_CHALLENGER_THINKING."""
+    default = _thinking_setting("CANARY_LLM_THINKING", "on")
+    if agent_id == "challenger":
+        return _thinking_setting("CANARY_CHALLENGER_THINKING", default) == "on"
+    return default == "on"
+
+
+def thinking_kwargs(agent_id: str | None = None) -> dict[str, Any]:
+    # Thinking on sends nothing extra, so live calls are unchanged unless someone turns it off.
+    return {} if thinking_enabled(agent_id) else {"thinking": False}
+
+
 def sciforium_call(model_id: str, messages: Messages, output_model: type[BaseModel], *, timeout: float,
-                   temperature: float, structured_output: StructuredOutput = "auto") -> LiveReply:
+                   temperature: float, structured_output: StructuredOutput = "auto",
+                   thinking: bool = True) -> LiveReply:
     from langchain_openai import ChatOpenAI
 
     chat = ChatOpenAI(
@@ -106,6 +132,7 @@ def sciforium_call(model_id: str, messages: Messages, output_model: type[BaseMod
         timeout=timeout,
         temperature=temperature,
         max_retries=0,
+        **({} if thinking else {"extra_body": THINKING_OFF_BODY}),
     )
     method = "json_schema" if structured_output == "auto" else structured_output
     try:
@@ -190,6 +217,7 @@ class AgentLLM:
               metrics: CallMetrics) -> LLMResult:
         # Resolved before the attempts so a misconfigured mode fails loudly instead of looking like an outage.
         structured_output = self.structured_output()
+        thinking = thinking_kwargs(agent_id)
         errors: list[str] = []
         attempt_messages = list(messages)
         started = time.monotonic()
@@ -200,7 +228,7 @@ class AgentLLM:
                                        "MODEL_STRONG/FAST or SCIFORIUM_MODEL")
                 reply = self.live_call(model_id, attempt_messages, output_model,
                                        timeout=self.timeout(), temperature=self.temperature(),
-                                       structured_output=structured_output)
+                                       structured_output=structured_output, **thinking)
                 output = output_model.model_validate(
                     reply.output.model_dump() if isinstance(reply.output, BaseModel) else reply.output
                 )

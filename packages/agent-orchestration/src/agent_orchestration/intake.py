@@ -12,7 +12,7 @@ from contracts_py.enums import ActionType, DecisionType, EntityType, Interventio
 from contracts_py.twin import OrganizationSettings, Twin
 from simulation_engine import capacity_percentage
 
-from agent_orchestration.llm import AgentLLM, LiveCall, OutputInvalid, sciforium_call
+from agent_orchestration.llm import AgentLLM, LiveCall, OutputInvalid, sciforium_call, thinking_kwargs
 
 
 class IntakeUnavailable(RuntimeError):
@@ -287,6 +287,7 @@ class DecisionIntake:
                     timeout=self.client.timeout(),
                     temperature=self.client.temperature(),
                     structured_output=self.client.structured_output(),
+                    **thinking_kwargs(),
                 )
                 proposal = IntakeProposal.model_validate(
                     reply.output.model_dump() if isinstance(reply.output, IntakeProposal) else reply.output

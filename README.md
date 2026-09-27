@@ -175,6 +175,7 @@ Important environment variables (see `.env.example`; names only here):
 - `SCIFORIUM_API_KEY`, `SCIFORIUM_BASE_URL`, `MODEL_STRONG`, `MODEL_FAST`: live model access.
 - `CANARY_ALLOW_LIVE`: must be `true` before a decision run may call live agents.
 - `CANARY_STRUCTURED_OUTPUT`: `auto` (default), `json_schema` or `function_calling`.
+- `CANARY_LLM_THINKING`: DeepSeek thinking for live agents, `on` (default, more accurate) or `off` (about 2x faster); `CANARY_CHALLENGER_THINKING` overrides it for the challenger.
 - `CANARY_SIM_MODE`: `full` (default; expected value with p10 = p50 = p90 until Monte Carlo lands)
   or `quick` (point values, no percentiles).
 - `CANARY_AUTH_SECRET`: shared token signing secret for deployments. If blank, a private local key

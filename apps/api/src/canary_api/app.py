@@ -65,6 +65,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     auth.seed_demo_approver()
     auth.warn_if_no_approver()
     runtime.check_structured_output()
+    runtime.check_thinking()
     runtime.check_sim_mode()
     try:
         yield
@@ -322,6 +323,8 @@ async def create_decision(brief: DecisionBrief, llm_mode: Literal["live"] | None
         raise HTTPException(status_code=503, detail="Live agents are disabled; set CANARY_ALLOW_LIVE=true to enable them")
     if runtime.structured_output_error:
         raise HTTPException(status_code=503, detail=f"Live runs are disabled: {runtime.structured_output_error}")
+    if runtime.thinking_error:
+        raise HTTPException(status_code=503, detail=f"Live runs are disabled: {runtime.thinking_error}")
     return DecisionCreated(run_id=runs.start_run(brief))
 
 
@@ -332,6 +335,8 @@ def draft_decision(request: DecisionPromptRequest,
         raise HTTPException(status_code=503, detail="Live agents are disabled; set CANARY_ALLOW_LIVE=true to enable them")
     if runtime.structured_output_error:
         raise HTTPException(status_code=503, detail=f"Live runs are disabled: {runtime.structured_output_error}")
+    if runtime.thinking_error:
+        raise HTTPException(status_code=503, detail=f"Live runs are disabled: {runtime.thinking_error}")
     try:
         return runtime.build_intake(runtime.settings()).draft(
             request.prompt,
