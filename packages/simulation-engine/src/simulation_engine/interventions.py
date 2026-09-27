@@ -40,6 +40,7 @@ extraction) and IDs ``e_{intervention_id}_{n}``.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from math import isfinite
 
 from contracts_py.decision import Intervention
 from contracts_py.enums import ActionType, EntityType, InterventionKind, MitigationType, Relation
@@ -125,6 +126,50 @@ def _roles_in_scope(twin: Twin, target: Entity) -> list[Entity]:
     return [target] if target.type is EntityType.role else []
 
 
+def capacity_percentage(twin: Twin, target_entity_id: str, *, amount_usd: int | None = None,
+                        amount_fte: float | None = None, reducing: bool = True) -> tuple[float, str]:
+    """Normalize an explicit annual staffing-cost or FTE delta for the existing operators.
+
+    General budget targets are not staffing-cost deltas. Intake must establish that distinction
+    before calling this function. Missing baselines and unsupported sizes remain unquantified.
+    """
+    target = entity_map(twin).get(target_entity_id)
+    if target is None or target.type not in {EntityType.department, EntityType.role}:
+        raise ValueError("Capacity changes need a known department or role.")
+    if (amount_usd is None) == (amount_fte is None):
+        raise ValueError("Specify one capacity change in annual staffing dollars or FTE.")
+    roles = _roles_in_scope(twin, target)
+    values = [r.annual_cost_usd if amount_usd is not None else r.capacity_fte for r in roles]
+    unit = "annual staffing cost" if amount_usd is not None else "FTE capacity"
+    if not values or any(v is None or not isfinite(v) or v < 0 for v in values):
+        raise ValueError(f"{target.name} needs a complete {unit} baseline before this change can be quantified.")
+    baseline = sum(v for v in values if v is not None)
+    if baseline <= 0:
+        raise ValueError(f"{target.name} needs a positive {unit} baseline before this change can be quantified.")
+    amount = amount_usd if amount_usd is not None else amount_fte
+    assert amount is not None
+    if not isfinite(amount) or amount < 0:
+        raise ValueError("The requested capacity change must be finite and non-negative.")
+    percentage = amount / baseline * 100
+    if percentage > 100:
+        raise ValueError(f"The requested change exceeds {target.name}'s modelled {unit} baseline; "
+                         "the current capacity model supports changes up to 100% of that baseline.")
+    if reducing and amount_usd is not None and target.type is EntityType.department:
+        profile = next((p for p in twin.department_profiles if p.department_id == target.id), None)
+        if profile is not None:
+            cap = round(profile.budget.annual_budget_usd * (1 - profile.budget.fixed_cost_pct))
+            if amount_usd > cap:
+                raise ValueError(f"The requested staffing savings exceed {target.name}'s ${cap:,} "
+                                 "reducible annual budget after fixed costs.")
+    requested = f"${amount_usd:,}" if amount_usd is not None else f"{amount_fte:g} FTE"
+    baseline_label = f"${baseline:,.0f}" if amount_usd is not None else f"{baseline:g} FTE"
+    assumption = (f"{target.name}: {requested} / {baseline_label} modelled {unit} = {percentage:.6g}% "
+                  "capacity change. Assumes proportional staffing cost and capacity")
+    if target.type is EntityType.department:
+        assumption += ", spread uniformly across the department's modelled roles"
+    return percentage, assumption + "."
+
+
 def _remove_vendor(s: AppliedScenario, i: Intervention, target: Entity) -> None:
     """Stop the vendor's cost and lose everything it supplies from the start day.
 
@@ -152,6 +197,9 @@ def _remove_vendor(s: AppliedScenario, i: Intervention, target: Entity) -> None:
 
 
 def _change_capacity(s: AppliedScenario, i: Intervention, target: Entity, sign: int) -> None:
+    normalization = i.params.get("capacity_normalization")
+    if isinstance(normalization, str):
+        s.assumptions.append(normalization)
     share = (i.amount_pct or 0) / 100
     roles = _roles_in_scope(s.twin, target)
     # A department cut applies the same percentage to every role in it (schema A5).
@@ -162,6 +210,10 @@ def _change_capacity(s: AppliedScenario, i: Intervention, target: Entity, sign: 
     if target.type is not EntityType.role and target.type is not EntityType.department and target.annual_cost_usd:
         target.annual_cost_usd = round(target.annual_cost_usd * (1 + sign * share))
     if sign < 0:
+        if share == 1:
+            role_ids = {r.id for r in roles}
+            tokens = {e.id for e in s.twin.entities if e.role_id in role_ids}
+            s.twin.edges = [e for e in s.twin.edges if not (e.source in tokens and e.relation in PERSON_TOKEN_RELATIONS)]
         profiles = {p.department_id: p for p in s.twin.department_profiles}
         department_id = target.id if target.type is EntityType.department else target.department_id
         profile = profiles.get(department_id or "")

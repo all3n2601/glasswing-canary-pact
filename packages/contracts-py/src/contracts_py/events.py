@@ -1,10 +1,10 @@
 from datetime import datetime
 from enum import StrEnum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import Field, RootModel, model_validator
 
-from contracts_py.agents import AgentAssessment
+from contracts_py.agents import AgentAssessment, ReviewIssue
 from contracts_py.common import ID, SCHEMA_VERSION, USD, SchemaVersion, Strict
 from contracts_py.decision import CandidatePlan, DecisionBrief, Scenario
 from contracts_py.engine import (
@@ -70,12 +70,16 @@ class CandidateRejected(Strict):
 class AgentStarted(Strict):
     agent_id: ID
     plan_id: ID | None = None
+    pass_type: Literal["first_pass", "challenge", "response"] = "first_pass"
+    review_issues: list[ReviewIssue] = Field(default_factory=list)
 
 
 class AgentFailed(Strict):
     agent_id: ID
     reason: str
     fallback_used: bool
+    plan_id: ID | None = None
+    pass_type: Literal["first_pass", "challenge", "response"] = "first_pass"
 
 
 class DependencyValidated(Strict):

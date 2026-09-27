@@ -317,6 +317,43 @@
       ],
       "title": "Relation",
       "type": "string"
+    },
+    "ReviewReply": {
+      "properties": {
+        "issue_id": {
+          "title": "Issue Id",
+          "type": "string"
+        },
+        "position": {
+          "enum": [
+            "revised",
+            "supported",
+            "unresolved"
+          ],
+          "title": "Position",
+          "type": "string"
+        },
+        "explanation": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "issue_id",
+        "position",
+        "explanation"
+      ],
+      "title": "ReviewReply",
+      "type": "object"
     }
   },
   "properties": {
@@ -371,6 +408,13 @@
     "confidence": {
       "title": "Confidence",
       "type": "number"
+    },
+    "review_replies": {
+      "items": {
+        "$ref": "#/$defs/ReviewReply"
+      },
+      "title": "Review Replies",
+      "type": "array"
     }
   },
   "required": [

@@ -7,7 +7,7 @@ from functools import cache
 from pathlib import Path
 from typing import Any, Literal
 
-from contracts_py.agents import AgentContext
+from contracts_py.agents import AgentContext, AgentSkillFile
 from pydantic import BaseModel
 
 log = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ MANIFEST_RELATIVE = Path("packages/agent-orchestration/prompts/manifest.json")
 PERSON_TOKEN = re.compile(r"(?<![a-z0-9])pt_[a-z0-9_]+")
 SECTION_TITLES = {
     "department_knowledge": "DEPARTMENT KNOWLEDGE",
-    "agent_context": "AGENT CONTEXT (JSON)",
+    "agent_context": "AGENT CONTEXT (JSON; edge and effect table rows follow the listed columns; null means absent)",
     "output_schema": "OUTPUT SCHEMA (JSON Schema)",
 }
 
@@ -72,9 +72,20 @@ def slim_context(context: dict[str, Any]) -> dict[str, Any]:
     # Agents propose dependencies by source, relation and target, so an edge id is only noise.
     view["edges"] = [{k: v for k, v in e.items() if k != "id" and not (k == "lag_days" and v == 0)}
                      for e in view["edges"]]
+    # A column header avoids repeating edge field names while retaining every value.
+    edges = prune(view["edges"])
+    if edges:
+        columns = sorted({key for edge in edges for key in edge})
+        view["edges"] = {"columns": columns, "rows": [[edge.get(key) for key in columns] for edge in edges]}
     slim = {**context, "view": view}
     for key in ("act_now_effects", "inaction_effects"):
-        slim[key] = [{k: v for k, v in i.items() if k not in OMIT_FIELDS["impacts"]} for i in context.get(key, [])]
+        effects = prune([{k: v for k, v in i.items() if k not in OMIT_FIELDS["impacts"]}
+                         for i in context.get(key, [])])
+        if effects:
+            columns = sorted({key for effect in effects for key in effect})
+            slim[key] = {"columns": columns, "rows": [[effect.get(key) for key in columns] for effect in effects]}
+        else:
+            slim[key] = []
     return slim
 
 
@@ -119,6 +130,28 @@ def department_knowledge(agent_id: str, root: Path | None = None) -> tuple[str, 
     if redacted:
         log.warning("redacted %d person tokens from the %s %s text", len(redacted), agent_id, source)
     return text, source, redacted  # type: ignore[return-value]
+
+
+def agent_skill_files(root: Path | None = None) -> list[AgentSkillFile]:
+    """Return the effective, redacted knowledge file used by every configured agent."""
+    root = root or find_repo_root()
+    manifest = load_manifest(root)
+    from agent_orchestration.roster import ROSTER
+
+    result = []
+    for agent_id, entry in manifest["agents"].items():
+        content, source, _ = department_knowledge(agent_id, root)
+        relative_path = entry["skill"] if source == "skill" else str(Path(manifest["prompts_root"]) / entry["fallback"])
+        spec = ROSTER[agent_id]
+        result.append(AgentSkillFile(
+            agent_id=agent_id,
+            display_name=spec.display_name,
+            department_id=spec.department_id,
+            source=source,
+            file_path=relative_path,
+            content=content,
+        ))
+    return result
 
 
 @dataclass

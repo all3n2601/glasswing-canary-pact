@@ -47,9 +47,33 @@ def scripted(settings):
                                   "operations": operations_asks_about_unknown})
 
 
+def baseline_claim(context: AgentContext) -> LLMResult:
+    entity_id = context.view.entities[0].id
+    evidence_refs = [context.view.evidence[0].id] if context.view.evidence else []
+    output = AgentOutput.model_validate({
+        "act_now_view": {
+            "summary": "A grounded baseline assessment.",
+            "failure_modes": [{
+                "text": "The proposed decision can affect this entity.",
+                "entity_ids": [entity_id],
+                "severity": 2,
+                "evidence_refs": evidence_refs,
+            }],
+        },
+        "inaction_view": {"summary": "No change."},
+        "confidence": 0.6,
+    })
+    return LLMResult(output, "ok", metrics("finance"))
+
+
+def baseline(settings):
+    return ScriptedLLM(settings, {"finance": baseline_claim})
+
+
 def run(brief, twin, settings, tmp_path, **kwargs):
     return evals.run_eval(engine=stub_engine, twin=twin, brief=brief, settings=settings, engine_impl="stub",
-                          planted_path=kwargs.pop("planted_path", tmp_path / "absent.json"), **kwargs)
+                          planted_path=kwargs.pop("planted_path", tmp_path / "absent.json"),
+                          llm_factory=kwargs.pop("llm_factory", baseline), **kwargs)
 
 
 def test_every_config_runs_to_a_package_with_all_metrics(brief, twin, settings, tmp_path) -> None:
@@ -98,7 +122,7 @@ def test_planted_items_are_measured_from_the_run(brief, twin, settings, tmp_path
 
 def test_corrupting_an_evidence_ref_lowers_resolving_pct(brief, twin, settings) -> None:
     recorder = evals._Recorder()
-    package = run_decision(brief, engine=stub_engine, settings=settings, llm=evals.AgentLLM(settings), emit=recorder,
+    package = run_decision(brief, engine=stub_engine, settings=settings, llm=scripted(settings), emit=recorder,
                            run_id="run_eval_probe", twin=twin, clock=lambda: NOW)
     assessments = recorder.of(EventType.agent_completed)
     before = evals.compute_metrics(package, assessments, [], twin, {})
@@ -139,7 +163,7 @@ def test_module_entry_points_to_api_cli() -> None:
 
 def test_rejected_items_counts_only_rejections(brief, twin, settings) -> None:
     recorder = evals._Recorder()
-    package = run_decision(brief, engine=stub_engine, settings=settings, llm=evals.AgentLLM(settings), emit=recorder,
+    package = run_decision(brief, engine=stub_engine, settings=settings, llm=scripted(settings), emit=recorder,
                            run_id="run_eval_probe", twin=twin, clock=lambda: NOW)
     first = recorder.of(EventType.agent_completed)[0]
     errors = ["cache miss for abc; using def", "attempt 1: validation failed",

@@ -16,7 +16,7 @@ from contracts_py.common import (
     max_words,
     prefixed,
 )
-from contracts_py.decision import Constraint
+from contracts_py.decision import Constraint, DepartmentEdit
 from contracts_py.enums import (
     ActionType,
     BusinessModel,
@@ -226,6 +226,7 @@ class DepartmentGap(Strict):
 
 
 class DepartmentProfile(Strict):
+    active: bool = True
     department_id: ID
     mission: str
     head_role_id: RoleID | None = None
@@ -266,6 +267,7 @@ class Document(Strict):
 
 
 class Twin(Strict):
+    organization_settings: "OrganizationSettings | None" = None
     schema_version: SchemaVersion = SCHEMA_VERSION
     version: VersionInfo
     organization: Organization
@@ -373,7 +375,7 @@ class OrganizationSettings(Strict):
     require_human_approval: Literal[True] = True
     anonymize_people: Literal[True] = True
     enabled_agent_ids: list[ID] = Field(default_factory=lambda: list(CORE_AGENT_IDS))
-    llm_mode: Literal["live", "replay", "mock"] = "replay"
+    llm_mode: Literal["live"] = "live"
     model_id_strong: str | None = None
     model_id_fast: str | None = None
     max_tool_calls: int = Field(default=3, ge=0, le=5)
@@ -422,3 +424,6 @@ class DepartmentDetail(Strict):
     documents: list[Document] = Field(default_factory=list)
     channels_in: list[Edge] = Field(default_factory=list)
     channels_out: list[Edge] = Field(default_factory=list)
+
+
+Twin.model_rebuild()

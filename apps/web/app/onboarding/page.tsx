@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { BackendUnavailable } from "@/components/backend-unavailable";
 import { OrganizationOnboarding } from "@/components/organization-onboarding";
 import { getOrganizationProfile } from "@/lib/canary-api-server";
+import { requireUser } from "@/lib/auth-server";
 
 export const metadata: Metadata = {
   title: "Organization setup · Canary Pact",
@@ -10,6 +11,8 @@ export const metadata: Metadata = {
 };
 
 export default async function OnboardingPage() {
+  if (!await requireUser("/onboarding")) return <BackendUnavailable resource="account verification" />;
+
   try {
     return <OrganizationOnboarding profile={await getOrganizationProfile()} />;
   } catch {

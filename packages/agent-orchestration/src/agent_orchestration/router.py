@@ -30,6 +30,10 @@ def routing_sources(brief: DecisionBrief, twin: Twin) -> list[str]:
     active = brief.active_pressure_ids
     pressures = [p for p in twin.pressures if active is None or p.id in active]
     sources = [i.target_entity_id for i in brief.candidate_interventions] + [p.target_entity_id for p in pressures]
+    sources += [c.destination_department_id for c in brief.organization_changes if c.destination_department_id]
+    proposed = {c.department_id for c in brief.organization_changes if c.operation == "create"}
+    # New departments have no baseline graph yet. Their explicit perspective is routed below.
+    sources = [source for source in sources if source not in proposed]
     return list(dict.fromkeys(sources))
 
 
@@ -50,7 +54,12 @@ def route_agents(brief: DecisionBrief, *, twin: Twin, engine: EnginePort, settin
             routed.append(agent_id)
             continue
         type_match = ALL in spec.routes_for or bool(types & set(spec.routes_for))
-        department_match = spec.department_id in reachable if spec.department_id else bool(reachable)
-        if type_match and department_match:
+        mapped = {p.department_id for p in twin.department_profiles if p.active and p.agent_id == agent_id}
+        proposed_match = any(c.operation == "create" and c.new_department and c.new_department.agent_id == agent_id
+                             for c in brief.organization_changes)
+        if not mapped and spec.department_id:
+            mapped = {spec.department_id}
+        department_match = bool(mapped & reachable) if mapped else bool(reachable)
+        if proposed_match or (type_match and department_match):
             routed.append(agent_id)
     return routed

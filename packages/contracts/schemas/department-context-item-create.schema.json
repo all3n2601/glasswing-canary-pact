@@ -1,0 +1,236 @@
+{
+  "$defs": {
+    "Criticality": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Criticality",
+      "type": "string"
+    },
+    "EvidenceSource": {
+      "enum": [
+        "contract",
+        "workflow_map",
+        "system_ownership",
+        "kpi_definition",
+        "runbook",
+        "architecture_note",
+        "activity_log",
+        "knowledge_matrix",
+        "policy",
+        "incident",
+        "finance_forecast"
+      ],
+      "title": "EvidenceSource",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "entity_type": {
+      "enum": [
+        "role",
+        "knowledge_asset",
+        "system",
+        "project",
+        "workflow",
+        "kpi"
+      ],
+      "title": "Entity Type",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 120,
+      "minLength": 2,
+      "title": "Name",
+      "type": "string"
+    },
+    "criticality": {
+      "$ref": "#/$defs/Criticality",
+      "default": "medium"
+    },
+    "evidence_title": {
+      "maxLength": 160,
+      "minLength": 2,
+      "title": "Evidence Title",
+      "type": "string"
+    },
+    "evidence_source": {
+      "$ref": "#/$defs/EvidenceSource"
+    },
+    "evidence_snippet": {
+      "maxLength": 300,
+      "minLength": 10,
+      "title": "Evidence Snippet",
+      "type": "string"
+    },
+    "annual_cost_usd": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Annual Cost Usd"
+    },
+    "capacity_fte": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Capacity Fte"
+    },
+    "min_qualified_owners": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Min Qualified Owners"
+    },
+    "documented_pct": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Documented Pct"
+    },
+    "failure_cost_per_day_usd": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Failure Cost Per Day Usd"
+    },
+    "completion_pct": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Completion Pct"
+    },
+    "remaining_cost_usd": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Remaining Cost Usd"
+    },
+    "expected_completion_day": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expected Completion Day"
+    },
+    "time_to_train_days": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Time To Train Days"
+    },
+    "kpi_baseline": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Kpi Baseline"
+    },
+    "kpi_unit": {
+      "anyOf": [
+        {
+          "maxLength": 40,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Kpi Unit"
+    },
+    "higher_is_better": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Higher Is Better"
+    }
+  },
+  "required": [
+    "entity_type",
+    "name",
+    "evidence_title",
+    "evidence_source",
+    "evidence_snippet"
+  ],
+  "title": "DepartmentContextItemCreate",
+  "type": "object"
+}

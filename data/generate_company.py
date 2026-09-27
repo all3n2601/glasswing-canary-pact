@@ -526,6 +526,7 @@ KPIS = [
     ("kpi_pipeline", "Qualified pipeline", "dept_marketing", 4_500_000_000.0, "usd", True),
     ("kpi_uptime_sla", "System uptime / SLA", "dept_operations", 99.9, "percent", True),
     ("kpi_soc2_coverage", "SOC 2 compliance coverage", "dept_compliance", 100.0, "percent", True),
+    ("kpi_data_refresh_sla", "Data refresh SLA", "dept_ai_data", 99.5, "percent", True),
     ("kpi_cac", "Customer acquisition cost", "dept_marketing", 42_000.0, "usd", False),
     ("kpi_close_cycle_days", "Close cycle days", "dept_finance", 6.5, "days", False),
 ]
@@ -601,7 +602,7 @@ evi("ev_knowledge_matrix_3", "knowledge_matrix", "doc_knowledge_matrix",
     "Warehouse lineage is held by one role and is about 20% documented.")
 
 doc("doc_data_pipeline_runbook", "Data pipeline runbook", "runbook", department_id="dept_ai_data",
-    status="current", covers=["wf_data_refresh", "sys_data_pipeline"],
+    status="current", covers=["wf_data_refresh", "sys_data_pipeline", "kpi_data_refresh_sla"],
     summary="Refresh schedule, backfills and failure recovery for the data pipeline.")
 evi("ev_data_pipeline_runbook", "runbook", "doc_data_pipeline_runbook",
     "Refresh recovers from a failed batch via replay.")
@@ -614,25 +615,37 @@ evi("ev_architecture_core", "architecture_note", "doc_architecture",
     "Invoicing consumes the reconciled ledger from billing-recon; billing runs on billing-platform.")
 
 doc("doc_eng_release", "Release engineering guide", "runbook", department_id="dept_engineering",
-    status="current", covers=["kn_release_eng", "sys_core_api"],
+    status="current", covers=["role_eng_manager", "kn_release_eng", "sys_core_api", "kpi_uptime_sla"],
     summary="Build, test and deploy pipeline for core services.")
+evi("ev_eng_release_context", "runbook", "doc_eng_release",
+    "Engineering owns the core API release path; the Engineering Manager coordinates releases and rollback readiness.")
 
 doc("doc_product_roadmap", "Product roadmap", "strategy_memo", department_id="dept_product",
-    status="current", covers=["proj_billing_modernization", "kn_roadmap_context"],
+    status="current", covers=["proj_billing_modernization", "proj_soc2_type2", "wf_product_analytics",
+                                "kn_roadmap_context"],
     summary="Sequenced roadmap of transformation projects and releases.")
+evi("ev_product_roadmap_context", "policy", "doc_product_roadmap",
+    "Product analytics informs roadmap sequencing and the Billing Modernization delivery plan.")
 
 doc("doc_mkt_attribution", "Marketing attribution model", "kpi_report", department_id="dept_marketing",
-    status="current", covers=["kpi_pipeline", "kn_segmentation"],
+    status="current", covers=["wf_campaign_targeting", "kpi_pipeline", "kpi_cac", "kn_segmentation"],
     summary="Multi-touch attribution feeding qualified pipeline.")
+evi("ev_marketing_attribution_context", "kpi_definition", "doc_mkt_attribution",
+    "Campaign targeting uses audience segmentation and is measured through qualified pipeline and acquisition cost.")
 
 doc("doc_sales_playbook", "Enterprise sales playbook", "sop", department_id="dept_sales",
-    status="current", covers=["seg_enterprise", "kn_enterprise_deals"],
+    status="current", covers=["wf_lead_scoring", "wf_account_planning", "seg_enterprise", "seg_midmarket",
+                                "kn_enterprise_deals"],
     summary="Enterprise qualification, pricing and close motion.")
+evi("ev_sales_playbook_context", "workflow_map", "doc_sales_playbook",
+    "Sales uses lead scoring for qualification and account planning for enterprise expansion and retention.")
 
 doc("doc_cs_runbook", "Customer onboarding and escalation runbook", "runbook",
     department_id="dept_customer_success", status="current",
-    covers=["wf_customer_onboarding", "kn_onboarding_playbook"],
+    covers=["wf_customer_onboarding", "kn_onboarding_playbook", "kn_cs_escalation", "kpi_net_retention"],
     summary="Onboarding steps and escalation paths for enterprise accounts.")
+evi("ev_customer_success_context", "runbook", "doc_cs_runbook",
+    "Customer Success owns onboarding and escalation readiness, with net revenue retention as the outcome measure.")
 
 doc("doc_sop_financial_close", "Monthly financial close SOP", "sop", department_id="dept_finance",
     status="current", covers=["wf_financial_close"],
@@ -735,9 +748,44 @@ doc("doc_risk_monitoring_runbook", "Risk monitoring runbook", "runbook",
 evi("ev_risk_monitoring_runbook_steps", "runbook", "doc_risk_monitoring_runbook",
     "PLACEHOLDER: final wording pending - risk monitoring detection and response steps.")
 
+# Make the department records themselves evidence-addressable. This lets a routed
+# agent defend the ownership, workflow, system, knowledge and KPI facts shown in
+# the department workspace without relying on display-name inference.
+DEPARTMENT_CONTEXT_EVIDENCE = {
+    "dept_engineering": ("ev_eng_release_context", ["role_eng_manager", "sys_core_api", "kn_release_eng"]),
+    "dept_operations": ("ev_incident_review_q2", ["role_sre", "wf_incident_mgmt", "kn_oncall", "kpi_uptime_sla"]),
+    "dept_ai_data": ("ev_data_pipeline_runbook", ["role_data_lead", "sys_data_pipeline", "wf_data_refresh", "kn_data_format", "kpi_data_refresh_sla"]),
+    "dept_product": ("ev_product_roadmap_context", ["role_product_lead", "wf_product_analytics", "kn_roadmap_context", "proj_billing_modernization"]),
+    "dept_sales": ("ev_sales_playbook_context", ["role_ae", "wf_lead_scoring", "wf_account_planning", "kn_enterprise_deals", "seg_enterprise"]),
+    "dept_marketing": ("ev_marketing_attribution_context", ["role_pmm", "wf_campaign_targeting", "kn_segmentation", "kpi_pipeline", "kpi_cac"]),
+    "dept_customer_success": ("ev_customer_success_context", ["role_support_lead", "wf_customer_onboarding", "kn_onboarding_playbook", "kn_cs_escalation", "kpi_net_retention"]),
+    "dept_finance": ("ev_sop_financial_close_lineage", ["role_controller", "wf_financial_close", "kn_vendor_contracts", "kpi_close_cycle_days"]),
+    "dept_compliance": ("ev_soc2_register_intro", ["role_grc_lead", "wf_soc2_evidence", "kn_soc2_mapping", "kpi_soc2_coverage"]),
+}
+entity_by_id = {item["id"]: item for item in entities}
+for evidence_id, entity_ids in DEPARTMENT_CONTEXT_EVIDENCE.values():
+    for entity_id in entity_ids:
+        entity_by_id[entity_id]["evidence_refs"] = sorted(
+            set([*entity_by_id[entity_id].get("evidence_refs", []), evidence_id])
+        )
+
 
 # =========================================================================== EDGES
 # --- role-level ownership / knowledge (A5: role-level logic only) ---
+edge("e_eng_manager_owns_core_api", "role_eng_manager", "sys_core_api", "OWNS",
+     strength=0.8, substitutability=0.3, criticality="high", evidence_refs=["ev_eng_release_context"])
+edge("e_data_lead_owns_refresh", "role_data_lead", "wf_data_refresh", "OWNS",
+     strength=0.8, substitutability=0.25, criticality="high", evidence_refs=["ev_data_pipeline_runbook"])
+edge("e_product_lead_owns_analytics", "role_product_lead", "wf_product_analytics", "OWNS",
+     strength=0.75, substitutability=0.35, evidence_refs=["ev_product_roadmap_context"])
+edge("e_ae_owns_account_planning", "role_ae", "wf_account_planning", "OWNS",
+     strength=0.75, substitutability=0.4, evidence_refs=["ev_sales_playbook_context"])
+edge("e_pmm_owns_campaign_targeting", "role_pmm", "wf_campaign_targeting", "OWNS",
+     strength=0.75, substitutability=0.4, evidence_refs=["ev_marketing_attribution_context"])
+edge("e_support_lead_owns_onboarding", "role_support_lead", "wf_customer_onboarding", "OWNS",
+     strength=0.8, substitutability=0.3, evidence_refs=["ev_customer_success_context"])
+edge("e_grc_lead_owns_kyc", "role_grc_lead", "wf_kyc_screening", "OWNS",
+     strength=0.85, substitutability=0.2, criticality="critical", evidence_refs=["ev_kyc_screening_inputs"])
 edge("e_close_accountant_owns_close", "role_close_accountant", "wf_financial_close", "OWNS",
      strength=0.5, substitutability=0.2, criticality="critical",
      evidence_refs=["ev_sop_financial_close_lineage"])
@@ -795,6 +843,8 @@ edge("e_crm_lead_scoring", "sys_crm", "wf_lead_scoring", "SUPPORTS", strength=0.
      criticality="medium", evidence_refs=["ev_architecture_core"])
 edge("e_crm_account_planning", "sys_crm", "wf_account_planning", "SUPPORTS", strength=0.7,
      substitutability=0.3, criticality="medium", evidence_refs=["ev_architecture_core"])
+edge("e_data_pipeline_refresh", "sys_data_pipeline", "wf_data_refresh", "SUPPORTS", strength=0.9,
+     substitutability=0.15, criticality="high", evidence_refs=["ev_data_pipeline_runbook"])
 
 # --- internal audit-log dataset (produced by sys_audit_service, not vendor-provided) ---
 edge("e_auditsvc_provides_auditlog", "sys_audit_service", "ds_audit_log", "PROVIDES", strength=0.95,
@@ -883,20 +933,24 @@ edge("e_access_soc2_coverage", "ctl_access_control", "kpi_soc2_coverage", "CONTR
      substitutability=0.2, criticality="high", evidence_refs=["ev_architecture_core"])
 edge("e_ctl_incident_wf", "wf_incident_mgmt", "ctl_incident_mgmt", "SUPPORTS", strength=0.85,
      substitutability=0.3, criticality="high", evidence_refs=["ev_incident_review_q2"])
+edge("e_incident_uptime", "wf_incident_mgmt", "kpi_uptime_sla", "CONTRIBUTES_TO", strength=0.75,
+     substitutability=0.25, criticality="high", evidence_refs=["ev_incident_review_q2"])
 edge("e_ctl_pci_billing", "sys_billing_platform", "ctl_pci_carddata", "SUPPORTS", strength=0.8,
      substitutability=0.3, criticality="high", evidence_refs=["ev_architecture_core"])
 edge("e_soc2evidence_coverage", "wf_soc2_evidence", "kpi_soc2_coverage", "CONTRIBUTES_TO", strength=0.9,
      substitutability=0.1, criticality="high", evidence_refs=["ev_soc2_register_intro"])
+edge("e_data_refresh_sla", "wf_data_refresh", "kpi_data_refresh_sla", "CONTRIBUTES_TO", strength=0.9,
+     substitutability=0.15, criticality="high", evidence_refs=["ev_data_pipeline_runbook"])
 edge("e_cc72_coverage", "ctl_soc2_audit_logging", "kpi_soc2_coverage", "CONTRIBUTES_TO", strength=1.0,
      substitutability=0.05, criticality="critical", evidence_refs=["ev_soc2_register_intro"])
 edge("e_leadscoring_pipeline", "wf_lead_scoring", "kpi_pipeline", "CONTRIBUTES_TO", strength=0.7,
      substitutability=0.3, criticality="medium")
 edge("e_campaign_pipeline", "wf_campaign_targeting", "kpi_pipeline", "CONTRIBUTES_TO", strength=0.5,
-     substitutability=0.3, criticality="medium")
+     substitutability=0.3, criticality="medium", evidence_refs=["ev_marketing_attribution_context"])
 edge("e_account_planning_retention", "wf_account_planning", "kpi_net_retention", "CONTRIBUTES_TO",
-     strength=0.6, substitutability=0.4, criticality="medium")
+     strength=0.6, substitutability=0.4, criticality="medium", evidence_refs=["ev_sales_playbook_context"])
 edge("e_product_analytics_retention", "wf_product_analytics", "kpi_net_retention", "CONTRIBUTES_TO",
-     strength=0.5, substitutability=0.4, criticality="medium")
+     strength=0.5, substitutability=0.4, criticality="medium", evidence_refs=["ev_product_roadmap_context"])
 edge("e_risk_monitoring_margin", "wf_risk_monitoring", "kpi_gross_margin", "CONTRIBUTES_TO",
      strength=0.5, substitutability=0.4, criticality="medium")
 edge("e_invoicing_margin", "wf_invoicing", "kpi_gross_margin", "CONTRIBUTES_TO", strength=0.8,
@@ -904,22 +958,28 @@ edge("e_invoicing_margin", "wf_invoicing", "kpi_gross_margin", "CONTRIBUTES_TO",
 edge("e_core_uptime", "sys_core_api", "kpi_uptime_sla", "CONTRIBUTES_TO", strength=0.9,
      substitutability=0.2, criticality="critical", evidence_refs=["ev_architecture_core"])
 edge("e_onboarding_retention", "wf_customer_onboarding", "kpi_net_retention", "CONTRIBUTES_TO",
-     strength=0.6, substitutability=0.4)
+     strength=0.6, substitutability=0.4, evidence_refs=["ev_customer_success_context"])
+edge("e_close_cycle", "wf_financial_close", "kpi_close_cycle_days", "CONTRIBUTES_TO",
+     strength=0.9, substitutability=0.15, criticality="high", evidence_refs=["ev_sop_financial_close_lineage"])
 edge("e_enterprise_margin", "seg_enterprise", "kpi_gross_margin", "CONTRIBUTES_TO", strength=0.7,
      substitutability=0.3, criticality="high", evidence_refs=["ev_finance_forecast_q3"])
 
 # --- breadth: every department's tribal knowledge wired into what it supports ---
-edge("e_kn_core_arch", "kn_core_arch", "sys_core_api", "SUPPORTS", strength=0.5, substitutability=0.5)
-edge("e_kn_release", "kn_release_eng", "sys_core_api", "SUPPORTS", strength=0.4, substitutability=0.6)
+edge("e_kn_core_arch", "kn_core_arch", "sys_core_api", "SUPPORTS", strength=0.5, substitutability=0.5,
+     evidence_refs=["ev_architecture_core"])
+edge("e_kn_release", "kn_release_eng", "sys_core_api", "SUPPORTS", strength=0.4, substitutability=0.6,
+     evidence_refs=["ev_eng_release_context"])
 edge("e_kn_mlmodel", "kn_ml_modeling", "sys_ml_scoring", "SUPPORTS", strength=0.5, substitutability=0.5)
 edge("e_kn_roadmap", "kn_roadmap_context", "proj_billing_modernization", "SUPPORTS", strength=0.4,
-     substitutability=0.6)
-edge("e_kn_deals", "kn_enterprise_deals", "seg_enterprise", "SUPPORTS", strength=0.4, substitutability=0.5)
-edge("e_kn_segmentation", "kn_segmentation", "kpi_pipeline", "SUPPORTS", strength=0.4, substitutability=0.6)
+     substitutability=0.6, evidence_refs=["ev_product_roadmap_context"])
+edge("e_kn_deals", "kn_enterprise_deals", "seg_enterprise", "SUPPORTS", strength=0.4, substitutability=0.5,
+     evidence_refs=["ev_sales_playbook_context"])
+edge("e_kn_segmentation", "kn_segmentation", "kpi_pipeline", "SUPPORTS", strength=0.4, substitutability=0.6,
+     evidence_refs=["ev_marketing_attribution_context"])
 edge("e_kn_onboarding", "kn_onboarding_playbook", "wf_customer_onboarding", "SUPPORTS", strength=0.5,
-     substitutability=0.5)
+     substitutability=0.5, evidence_refs=["ev_customer_success_context"])
 edge("e_kn_cs_escalation", "kn_cs_escalation", "wf_customer_onboarding", "SUPPORTS", strength=0.4,
-     substitutability=0.6)
+     substitutability=0.6, evidence_refs=["ev_customer_success_context"])
 edge("e_kn_vendorcontracts", "kn_vendor_contracts", "wf_vendor_reconciliation", "SUPPORTS", strength=0.4,
      substitutability=0.6)
 edge("e_kn_privacy", "kn_privacy_program", "ctl_data_retention", "SUPPORTS", strength=0.5,

@@ -4,9 +4,9 @@ import operator
 import os
 import threading
 from datetime import datetime, timezone
-from typing import Annotated, Any, Callable, Protocol, TypedDict
+from typing import Annotated, Any, Callable, Literal, Protocol, TypedDict
 
-from contracts_py.agents import ChallengerOutput, Claim
+from contracts_py.agents import AgentContext, ChallengerOutput, Claim
 from contracts_py.decision import CandidatePlan, DecisionBrief, Scenario
 from contracts_py.engine import (
     BlastRadius,
@@ -34,6 +34,7 @@ from langgraph.types import Send
 from pydantic import BaseModel, TypeAdapter
 
 from agent_orchestration.context import build_context
+from agent_orchestration.discussion import MAX_ISSUES_PER_AGENT, MAX_RESPONSE_AGENTS, review_issues, visible_issues
 from agent_orchestration.llm import LLMClient
 from agent_orchestration.merge import MergeOutcome, merge
 from agent_orchestration.ports import EnginePort
@@ -64,6 +65,7 @@ class RunGraphState(TypedDict, total=False):
     comparison: FutureComparison
     blasts: dict[Future, BlastRadius]
     package: DecisionPackage
+    response_contexts: dict[str, AgentContext]
 
 
 log = logging.getLogger(__name__)
@@ -183,10 +185,11 @@ class _Run:
         return {"act_now": self.scenario(Future.act_now, plan).scenario_id,
                 "inaction": self.scenario(Future.inaction, None).scenario_id}
 
-    def run_agent(self, agent_id: str, state: RunGraphState, pass_type: str, summaries: list[str]) -> MergeOutcome:
+    def run_agent(self, agent_id: str, state: RunGraphState, pass_type: Literal["first_pass", "challenge", "response"], summaries: list[str],
+                  response_context: AgentContext | None = None) -> MergeOutcome:
         spec = ROSTER[agent_id]
         plan, results = state["plan"], state["results"]
-        context = build_context(spec, run_id=self.run_id, brief=self.brief, plan=plan, twin=state["twin"],
+        context = response_context or build_context(spec, run_id=self.run_id, brief=self.brief, plan=plan, twin=state["twin"],
                                 engine=self.engine, act_now=results[Future.act_now],
                                 inaction=results[Future.inaction], settings=self.settings,
                                 known_impact_summaries=summaries)
@@ -202,6 +205,7 @@ class _Run:
         if assessment.status in FAILED_STATUSES:
             reason = "; ".join(assessment.validation.errors) or assessment.status
             self.publish(EventType.agent_failed, AgentFailed(agent_id=agent_id, reason=reason,
+                                                             plan_id=plan.plan_id, pass_type=pass_type,
                                                              fallback_used=assessment.status == "fallback_cached"),
                          actor=agent_id)
         self.publish(EventType.agent_completed, assessment, actor=agent_id)
@@ -227,6 +231,7 @@ class _Run:
     def validating(self, state: RunGraphState) -> RunGraphState:
         self.phase(RunStatus.validating)
         known = {e.id for e in self.twin.entities}
+        known.update(c.department_id for c in self.brief.organization_changes if c.operation == "create")
         pressures = {p.id for p in self.twin.pressures}
         missing = [i.target_entity_id for i in self.brief.candidate_interventions if i.target_entity_id not in known]
         missing += [p for p in self.brief.active_pressure_ids or [] if p not in pressures]
@@ -311,17 +316,56 @@ class _Run:
     def challenging(self, state: RunGraphState) -> RunGraphState:
         self.phase(RunStatus.challenging)
         summaries = [
-            f"{o.assessment.agent_id}: act now: {o.assessment.output.act_now_view.summary} "
+            f"{o.assessment.agent_id} (assessment_id={o.assessment.assessment_id}): act now: {o.assessment.output.act_now_view.summary} "
             f"inaction: {o.assessment.output.inaction_view.summary}"
             for o in state["outcomes"] if o.assessment.output is not None
         ]
-        self.publish(EventType.agent_started, AgentStarted(agent_id=CHALLENGER, plan_id=state["plan"].plan_id),
+        self.publish(EventType.agent_started, AgentStarted(agent_id=CHALLENGER, plan_id=state["plan"].plan_id,
+                                                         pass_type="challenge"),
                      actor=CHALLENGER)
         outcome = self.run_agent(CHALLENGER, state, "challenge", summaries)
         challenge = outcome.assessment.challenge
         if challenge is not None and challenge != ChallengerOutput(confidence=challenge.confidence):
             self.publish(EventType.challenge_raised, outcome.assessment, actor=CHALLENGER)
         return {"outcomes": [outcome]}
+
+    def preparing_responses(self, state: RunGraphState) -> RunGraphState:
+        assessments = [o.assessment for o in state["outcomes"]]
+        issues = review_issues(assessments)
+        originals = {a.assessment_id: a for a in assessments}
+        contexts: dict[str, AgentContext] = {}
+        for issue in issues:
+            prior = originals[issue.target_assessment_id]
+            if prior.agent_id in contexts:
+                continue
+            context = build_context(ROSTER[prior.agent_id], run_id=self.run_id, brief=self.brief,
+                                    plan=state["plan"], twin=state["twin"], engine=self.engine,
+                                    act_now=state["results"][Future.act_now],
+                                    inaction=state["results"][Future.inaction], settings=self.settings)
+            assigned = visible_issues([i for i in issues if i.target_assessment_id == prior.assessment_id], context)
+            if not assigned:
+                continue
+            contexts[prior.agent_id] = context.model_copy(update={
+                "review_issues": assigned[:MAX_ISSUES_PER_AGENT],
+                "previous_assessment_id": prior.assessment_id, "previous_output": prior.output,
+            })
+            if len(contexts) == MAX_RESPONSE_AGENTS:
+                break
+        if contexts:
+            self.phase(RunStatus.running_agents)
+        for agent_id, context in contexts.items():
+            self.publish(EventType.agent_started, AgentStarted(agent_id=agent_id, plan_id=state["plan"].plan_id,
+                         pass_type="response", review_issues=context.review_issues), actor=agent_id)
+        return {"response_contexts": contexts}
+
+    def response_routes(self, state: RunGraphState) -> list[Send] | str:
+        if not state["response_contexts"]:
+            return self.after_challenge(state)
+        return [Send("response", {**state, "agent_id": agent_id, "response_context": context})
+                for agent_id, context in state["response_contexts"].items()]
+
+    def response(self, task: dict[str, Any]) -> RunGraphState:
+        return {"outcomes": [self.run_agent(task["agent_id"], task, "response", [], task["response_context"])]}  # type: ignore[arg-type]
 
     def after_challenge(self, state: RunGraphState) -> str:
         return "reoptimizing" if state.get("twin_changed") else "comparing_futures"
@@ -389,6 +433,18 @@ class _Run:
                                             headline=comparison.headline, claims=claims)
         assessments = [o.assessment for o in state["outcomes"]]
         questions = [q.text for a in assessments if a.output for q in a.output.questions]
+        # Retain unanswered and unrouted criticisms; a model's supported/revised position is not a resolution.
+        for assessment in assessments:
+            review = assessment.challenge or assessment.output
+            if review is not None:
+                questions += [f"Review concern ({assessment.agent_id}): {o.text}" for o in review.objections]
+            if assessment.challenge:
+                questions += [f"Review concern ({assessment.agent_id}): {f.text}" for f in [
+                    *assessment.challenge.unsupported_assumptions, *assessment.challenge.circular_logic,
+                    *assessment.challenge.inaction_underestimated]]
+            if assessment.output:
+                questions += [f"Unresolved response ({assessment.agent_id}): {r.explanation}"
+                              for r in assessment.output.review_replies if r.position == "unresolved"]
         twin = state["twin"]
         fields = {
             "package_id": f"pkg_{self.run_id}",
@@ -432,6 +488,9 @@ class _Run:
             "propagating_first_pass": self.propagate("first_pass"),
             "challenging": self.challenging,
             "propagating_challenge": self.propagate("challenge"),
+            "preparing_responses": self.preparing_responses,
+            "response": self.response,
+            "propagating_response": self.propagate("response"),
             "reoptimizing": self.optimizing,
             "comparing_futures": self.comparing_futures,
             "generating_package": self.generating_package,
@@ -450,9 +509,12 @@ class _Run:
         if self.challenger:
             graph.add_edge("propagating_first_pass", "challenging")
             graph.add_edge("challenging", "propagating_challenge")
-            graph.add_conditional_edges("propagating_challenge", self.after_challenge, targets)
+            graph.add_edge("propagating_challenge", "preparing_responses")
         else:
-            graph.add_conditional_edges("propagating_first_pass", self.after_challenge, targets)
+            graph.add_edge("propagating_first_pass", "preparing_responses")
+        graph.add_conditional_edges("preparing_responses", self.response_routes, ["response", *targets])
+        graph.add_edge("response", "propagating_response")
+        graph.add_conditional_edges("propagating_response", self.after_challenge, targets)
         graph.add_edge("reoptimizing", "comparing_futures")
         graph.add_edge("comparing_futures", "generating_package")
         graph.add_edge("generating_package", END)

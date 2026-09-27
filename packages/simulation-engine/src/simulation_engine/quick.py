@@ -65,6 +65,10 @@ def evaluate(twin: Twin, interventions: list[Intervention], *, brief: DecisionBr
     decision_id = brief.decision_id if brief else "dec_adhoc"
     constraints = brief.constraints if brief else []
 
+    from .organization import prepare_organization, department_states
+    baseline = twin
+    twin, interventions = prepare_organization(twin, interventions, brief)
+    office_states = department_states(baseline, twin, interventions, brief)
     applied = apply_interventions(twin, interventions, horizon_days=horizon)
     losses = propagate(applied.twin, applied.losses, settings=settings)
     gains = (propagate(applied.twin, applied.gains, settings=settings, coverage_share=False) if applied.gains
@@ -114,6 +118,7 @@ def evaluate(twin: Twin, interventions: list[Intervention], *, brief: DecisionBr
     departments = sorted({i.affected_department for i in impacts if i.affected_department})
     return SimulationResult(
         result_id=result_id, run_id=run_id, scenario_id=scenario_id, future=future, plan_id=plan_id,
+        department_states=office_states,
         mode="quick", intervention_ids=[i.id for i in interventions], value=value, goal_met=met,
         constraint_results=results, impacts=impacts, workflow_coverage=coverage, knowledge_coverage=knowledge,
         risk=risk_score(metrics, impacts, goal_missed=brief is not None and not met, constraints=constraints,

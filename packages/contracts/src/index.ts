@@ -77,6 +77,8 @@ export interface Organization {
 }
 
 export interface DepartmentProfile {
+  agent_id?: string | null;
+  active?: boolean;
   department_id: string;
   name: string;
   mission: string;
@@ -114,11 +116,12 @@ export interface OrganizationSettings {
   always_protected_entity_ids: string[];
   require_human_approval: true;
   anonymize_people: true;
-  llm_mode: "live" | "replay" | "mock";
+  llm_mode: "live";
   doc_staleness_days: number;
 }
 
 export interface OrganizationProfile {
+  twin_version?: string;
   schema_version: "2.0.0";
   organization: Organization;
   departments: DepartmentProfile[];

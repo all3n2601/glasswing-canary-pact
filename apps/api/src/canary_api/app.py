@@ -3,8 +3,9 @@
 import asyncio
 import hashlib
 import logging
+import uuid
 from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator, get_args
+from typing import Any, AsyncIterator, Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,8 +13,13 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ValidationError
 
 from contracts_py.api import (
+    QuickOfficePreview,
+    DepartmentSave,
+    OrganizationSave,
+    RunEventPage,
     DecisionDraft,
     DecisionCreated,
+    DepartmentContextItemCreate,
     DecisionPromptRequest,
     FuturesRequest,
     GraphLevel,
@@ -23,15 +29,12 @@ from contracts_py.api import (
     OrganizationDepartmentSummary,
     OrganizationProfileView,
     QuickSimulateRequest,
-    ReplayInfo,
-    ReplaySpeed,
-    ReplayStarted,
     UserPublic,
 )
-from contracts_py.agents import AgentAssessment
+from contracts_py.agents import AgentAssessment, AgentSkillFile
 from contracts_py.decision import CandidatePlan, DecisionBrief
 from contracts_py.engine import FutureComparison, PortfolioComparison, SimulationResult
-from contracts_py.enums import DocumentStatus, DocumentType, EntityType, RunStatus
+from contracts_py.enums import DocumentStatus, DocumentType, EntityType, RunStatus, Sensitivity
 from contracts_py.events import EventType, PhaseChanged, RunState
 from contracts_py.package import DecisionPackage, HumanDecision, find_person_tokens
 from contracts_py.twin import (
@@ -39,13 +42,15 @@ from contracts_py.twin import (
     DepartmentProfile,
     Document,
     DomainGraph,
+    Entity,
+    Evidence,
     Organization,
     OrganizationSettings,
     Pressure,
     Twin,
 )
 
-from agent_orchestration import interpret_decision_prompt
+from agent_orchestration import IntakeInvalid, IntakeUnavailable, agent_skill_files
 
 from canary_api import auth, engine_port, runs, runtime, storage
 from canary_api.engine_port import EngineNotReady
@@ -143,10 +148,14 @@ def organization_settings() -> OrganizationSettings:
 
 @app.get("/organization/profile", response_model=OrganizationProfileView)
 def organization_profile() -> OrganizationProfileView:
-    twin = runtime.twin()
-    settings = runtime.settings()
+    return _profile(runtime.twin())
+
+
+def _profile(twin: Twin, settings: OrganizationSettings | None = None) -> OrganizationProfileView:
+    settings = settings or twin.organization_settings or runtime.settings()
     names = {e.id: e.name for e in twin.entities if e.type is EntityType.department}
     return OrganizationProfileView(
+        twin_version=twin.version.twin_version,
         organization=twin.organization,
         departments=[
             OrganizationDepartmentSummary(
@@ -157,12 +166,19 @@ def organization_profile() -> OrganizationProfileView:
                 annual_budget_usd=p.budget.annual_budget_usd,
                 utilisation=p.staffing.utilisation,
                 maturity_level=p.maturity_level,
-                enabled=p.agent_id is None or p.agent_id in settings.enabled_agent_ids,
+                enabled=p.active and (p.agent_id is None or p.agent_id in settings.enabled_agent_ids),
+                active=p.active,
+                agent_id=p.agent_id,
             )
             for p in twin.department_profiles
         ],
         settings=settings,
     )
+
+
+@app.get("/organization/agent-skills", response_model=list[AgentSkillFile])
+def organization_agent_skills() -> list[AgentSkillFile]:
+    return agent_skill_files()
 
 
 @app.get("/departments", response_model=list[DepartmentProfile])
@@ -176,6 +192,98 @@ def department(department_id: str) -> DepartmentDetail:
     if not any(e.id == department_id and e.type is EntityType.department for e in twin.entities):
         raise HTTPException(status_code=404, detail="Department not found")
     return engine_port.department_detail(twin, department_id)
+
+
+@app.post("/departments/{department_id}/context", response_model=DepartmentDetail)
+def add_department_context(
+    department_id: str,
+    request: DepartmentContextItemCreate,
+    user: UserPublic = Depends(auth.require_approver),
+) -> DepartmentDetail:
+    current = runtime.twin()
+    if not any(e.id == department_id and e.type is EntityType.department for e in current.entities):
+        raise HTTPException(status_code=404, detail="Department not found")
+
+    suffix = uuid.uuid4().hex[:12]
+    entity_type = EntityType(request.entity_type)
+    entity_id = f"{entity_type.value}_{suffix}"
+    document_id = f"doc_context_{suffix}"
+    evidence_id = f"ev_context_{suffix}"
+    now = utc_now()
+    name = request.name.strip()
+    evidence_title = request.evidence_title.strip()
+    evidence_snippet = request.evidence_snippet.strip()
+    if len(name) < 2 or len(evidence_title) < 2 or len(evidence_snippet) < 10:
+        raise HTTPException(status_code=422, detail="Context name, evidence title, and evidence excerpt cannot be blank")
+    summary = " ".join(evidence_snippet.split()[:60])
+
+    entity = Entity(
+        id=entity_id,
+        type=entity_type,
+        name=name,
+        department_id=department_id,
+        criticality=request.criticality,
+        sensitivity=Sensitivity.general,
+        evidence_refs=[evidence_id],
+        annual_cost_usd=request.annual_cost_usd,
+        capacity_fte=request.capacity_fte,
+        min_qualified_owners=request.min_qualified_owners,
+        documented_pct=request.documented_pct,
+        failure_cost_per_day_usd=request.failure_cost_per_day_usd,
+        completion_pct=request.completion_pct,
+        remaining_cost_usd=request.remaining_cost_usd,
+        expected_completion_day=request.expected_completion_day,
+        time_to_train_days=request.time_to_train_days,
+        kpi_baseline=request.kpi_baseline,
+        kpi_unit=request.kpi_unit,
+        higher_is_better=request.higher_is_better,
+    )
+    document = Document(
+        id=document_id,
+        title=evidence_title,
+        doc_type=DocumentType.other,
+        department_id=department_id,
+        uri=f"canary://departments/{department_id}/context/{document_id}",
+        mime_type="text/plain",
+        status=DocumentStatus.current,
+        sensitivity=Sensitivity.general,
+        covers_entity_ids=[entity_id],
+        summary=summary,
+        checksum_sha256=hashlib.sha256(evidence_snippet.encode("utf-8")).hexdigest(),
+        synthetic=False,
+        ingested=True,
+        uploaded_at=now,
+    )
+    evidence = Evidence(
+        id=evidence_id,
+        source_type=request.evidence_source,
+        document_id=document_id,
+        snippet=evidence_snippet,
+        synthetic=False,
+    )
+
+    candidate = current.model_copy(deep=True)
+    candidate.entities.append(entity)
+    candidate.documents.append(document)
+    candidate.evidence.append(evidence)
+    profile = next(p for p in candidate.department_profiles if p.department_id == department_id)
+    profile.owned_entity_ids.append(entity_id)
+    profile.document_ids.append(document_id)
+    if entity_type is EntityType.workflow and request.criticality.value in {"high", "critical"}:
+        profile.critical_workflow_ids.append(entity_id)
+    if entity_type is EntityType.kpi:
+        profile.kpi_ids.append(entity_id)
+    candidate.version = candidate.version.model_copy(update={
+        "twin_version": f"twin_context_{now.strftime('%Y%m%d%H%M%S%f')}",
+        "created_at": now,
+        "as_of_date": now.date(),
+        "created_by": user.user_id,
+    })
+    errors = [issue for issue in engine_port.validate_twin(candidate) if issue.severity == "error"]
+    if errors:
+        raise HTTPException(status_code=422, detail=errors[0].message)
+    runtime.activate_twin(candidate)
+    return engine_port.department_detail(candidate, department_id)
 
 
 @app.get("/documents", response_model=list[Document])
@@ -202,7 +310,7 @@ def document(document_id: str) -> Document:
 
 
 @app.post("/decisions", response_model=DecisionCreated)
-async def create_decision(brief: DecisionBrief, llm_mode: runs.LlmMode | None = None,
+async def create_decision(brief: DecisionBrief, llm_mode: Literal["live"] | None = None,
                           user: UserPublic = Depends(auth.current_user)) -> DecisionCreated:
     try:
         brief = runs.apply_settings_defaults(brief, runtime.settings())
@@ -210,19 +318,31 @@ async def create_decision(brief: DecisionBrief, llm_mode: runs.LlmMode | None = 
         raise HTTPException(status_code=422, detail=exc.errors(include_url=False)) from exc
     if runtime.sim_mode_error:
         raise HTTPException(status_code=503, detail=f"Decision runs are disabled: {runtime.sim_mode_error}")
-    if (llm_mode or runs.default_llm_mode()) == "live":
-        if not runs.live_allowed():
-            raise HTTPException(status_code=403, detail="llm_mode=live is disabled; set CANARY_ALLOW_LIVE=true to allow it")
-        if runtime.structured_output_error:
-            raise HTTPException(status_code=503, detail=f"Live runs are disabled: {runtime.structured_output_error}")
-    return DecisionCreated(run_id=runs.start_run(brief, llm_mode))
+    if not runs.live_allowed():
+        raise HTTPException(status_code=503, detail="Live agents are disabled; set CANARY_ALLOW_LIVE=true to enable them")
+    if runtime.structured_output_error:
+        raise HTTPException(status_code=503, detail=f"Live runs are disabled: {runtime.structured_output_error}")
+    return DecisionCreated(run_id=runs.start_run(brief))
 
 
 @app.post("/decisions/draft", response_model=DecisionDraft)
 def draft_decision(request: DecisionPromptRequest,
                    user: UserPublic = Depends(auth.current_user)) -> DecisionDraft:
-    return interpret_decision_prompt(request.prompt, twin=runtime.twin(), created_by=user.user_id,
-                                     horizon_days=request.horizon_days)
+    if not runs.live_allowed():
+        raise HTTPException(status_code=503, detail="Live agents are disabled; set CANARY_ALLOW_LIVE=true to enable them")
+    if runtime.structured_output_error:
+        raise HTTPException(status_code=503, detail=f"Live runs are disabled: {runtime.structured_output_error}")
+    try:
+        return runtime.build_intake(runtime.settings()).draft(
+            request.prompt,
+            twin=runtime.twin(),
+            created_by=user.user_id,
+            horizon_days=request.horizon_days,
+        )
+    except IntakeUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except IntakeInvalid as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @app.get("/runs/{run_id}", response_model=RunState)
@@ -326,9 +446,27 @@ async def record_decision(run_id: str, request: HumanDecisionRequest,
 def simulate_quick(request: QuickSimulateRequest) -> SimulationResult:
     plan = _brief_plan(request.brief, request.intervention_ids)
     interventions = [i for i in request.brief.candidate_interventions if i.id in plan.intervention_ids]
-    return engine_port.quick_impact(
-        runtime.twin(), interventions, brief=request.brief, settings=runtime.settings()
-    )
+    try:
+        return engine_port.quick_impact(
+            runtime.twin(), interventions, brief=request.brief, settings=runtime.settings()
+        )
+    except (ValueError, KeyError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/simulate/office-preview", response_model=QuickOfficePreview)
+def office_preview(request: QuickSimulateRequest, user: UserPublic = Depends(auth.current_user)) -> QuickOfficePreview:
+    baseline = runtime.twin()
+    if request.expected_twin_version and baseline.version.twin_version != request.expected_twin_version:
+        raise HTTPException(status_code=409, detail="Company changed. Reload before previewing.")
+    plan = _brief_plan(request.brief, request.intervention_ids)
+    interventions = [i for i in request.brief.candidate_interventions if i.id in plan.intervention_ids]
+    try:
+        result = engine_port.quick_impact(baseline, interventions, brief=request.brief, settings=runtime.settings())
+        return QuickOfficePreview(baseline_twin_version=baseline.version.twin_version, result=result,
+                                  blast_radius=engine_port.blast_radius(result, baseline))
+    except (ValueError, KeyError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @app.post("/simulate/futures", response_model=FutureComparison)
@@ -345,17 +483,84 @@ def simulate_optimize(request: OptimizeRequest) -> PortfolioComparison:
     return engine_port.optimize(runtime.twin(), request.brief, settings=runtime.settings())
 
 
-@app.get("/replays", response_model=list[ReplayInfo])
-def replays() -> list[ReplayInfo]:
-    return runs.list_replays()
+@app.post("/departments/save", response_model=OrganizationProfileView)
+def save_department(request: DepartmentSave, user: UserPublic = Depends(auth.require_approver)) -> OrganizationProfileView:
+    from company_twin import edit_department
+    with runtime.twin_lock:
+        current = runtime.twin()
+        if current.version.twin_version != request.expected_twin_version:
+            raise HTTPException(status_code=409, detail="Company changed. Reload the department before saving.")
+        try:
+            candidate = edit_department(current, request.department, actor=user.user_id)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        runtime.activate_twin(candidate)
+        return _profile(candidate)
 
 
-@app.post("/replays/{name}/play", response_model=ReplayStarted)
-async def play_replay(name: str, speed: int = Query(1)) -> ReplayStarted:
-    # Query strings arrive as text, which a Literal[1, 2, 4] parameter would reject.
-    if speed not in get_args(ReplaySpeed):
-        raise HTTPException(status_code=422, detail="speed must be 1, 2 or 4")
-    log = runs.load_replay(name)
-    if log is None:
-        raise HTTPException(status_code=404, detail="Replay not found")
-    return ReplayStarted(run_id=runs.play_replay(log, speed), name=name, speed=speed)  # type: ignore[arg-type]
+@app.get("/runs/{run_id}/office-profile", response_model=OrganizationProfileView)
+def run_office_profile(run_id: str, user: UserPublic = Depends(auth.current_user)) -> OrganizationProfileView:
+    run = _run(run_id)
+    snapshot = storage.current().load_twin_version(run.state.baseline_twin_version)
+    if snapshot is None:
+        raise HTTPException(status_code=409, detail="The baseline snapshot for this run is unavailable")
+    return _profile(snapshot, snapshot.organization_settings or OrganizationSettings(organization_id=snapshot.organization.id))
+
+
+@app.get("/runs/{run_id}/event-log", response_model=RunEventPage)
+def run_event_log(run_id: str, after_sequence: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=250),
+                  user: UserPublic = Depends(auth.current_user)) -> RunEventPage:
+    run = _run(run_id)
+    remaining = [e for e in run.events if e.sequence > after_sequence]
+    page = sorted(remaining, key=lambda e: e.sequence)[:limit]
+    if find_person_tokens([e.model_dump(mode="json") for e in page]):
+        raise HTTPException(status_code=409, detail="Event history withheld: person tokens in output")
+    return RunEventPage(events=page, next_sequence=page[-1].sequence if page else after_sequence,
+                        has_more=len(remaining) > len(page),
+                        terminal=run.state.status.value in {"completed", "failed", "awaiting_approval"} or run.state.package_id is not None)
+
+
+@app.get("/runs/{run_id}/office-evidence/{evidence_id}", response_model=Evidence)
+def run_office_evidence(run_id: str, evidence_id: str, user: UserPublic = Depends(auth.current_user)) -> Evidence:
+    snapshot = storage.current().load_twin_version(_run(run_id).state.baseline_twin_version)
+    if snapshot is None:
+        raise HTTPException(status_code=409, detail="Run baseline unavailable")
+    evidence = next((e for e in snapshot.evidence if e.id == evidence_id), None)
+    if evidence is None:
+        raise HTTPException(status_code=404, detail="Evidence is absent from this run baseline")
+    if find_person_tokens(evidence.model_dump(mode="json")):
+        raise HTTPException(status_code=409, detail="Evidence withheld: person tokens in source")
+    return evidence
+
+
+@app.get("/runs/{run_id}/office-departments/{department_id}", response_model=DepartmentDetail)
+def run_office_department(run_id: str, department_id: str, user: UserPublic = Depends(auth.current_user)) -> DepartmentDetail:
+    snapshot = storage.current().load_twin_version(_run(run_id).state.baseline_twin_version)
+    if snapshot is None:
+        raise HTTPException(status_code=409, detail="Run baseline unavailable")
+    if not any(p.department_id == department_id for p in snapshot.department_profiles):
+        raise HTTPException(status_code=404, detail="Department is absent from this baseline; inspect its scenario declaration")
+    return engine_port.department_detail(snapshot, department_id)
+
+
+@app.get("/runs/{run_id}/office-graph", response_model=DomainGraph)
+def run_office_graph(run_id: str, user: UserPublic = Depends(auth.current_user)) -> DomainGraph:
+    snapshot = storage.current().load_twin_version(_run(run_id).state.baseline_twin_version)
+    if snapshot is None:
+        raise HTTPException(status_code=409, detail="Run baseline unavailable")
+    return DomainGraph(nodes=snapshot.entities, edges=snapshot.edges)
+
+
+@app.post("/organization/profile", response_model=OrganizationProfileView)
+def save_organization(request: OrganizationSave, user: UserPublic = Depends(auth.require_approver)) -> OrganizationProfileView:
+    from company_twin import edit_organization
+    with runtime.twin_lock:
+        current = runtime.twin()
+        if current.version.twin_version != request.expected_twin_version:
+            raise HTTPException(status_code=409, detail="Company changed. Reload before saving.")
+        try:
+            candidate = edit_organization(current, request.organization, request.departments, request.settings, actor=user.user_id)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        runtime.activate_twin(candidate)
+        return _profile(candidate)

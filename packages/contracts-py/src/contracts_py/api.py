@@ -4,10 +4,12 @@ from typing import Literal
 
 from pydantic import Field
 
-from contracts_py.common import ID, SCHEMA_VERSION, USD, SchemaVersion, Severity, Strict
+from contracts_py.common import ID, SCHEMA_VERSION, USD, Ratio, SchemaVersion, Severity, Strict
 from contracts_py.decision import DecisionBrief
-from contracts_py.enums import Future
-from contracts_py.twin import Organization, OrganizationSettings
+from contracts_py.enums import Criticality, EvidenceSource, Future
+from contracts_py.twin import Organization, OrganizationSettings, DepartmentProfile, DepartmentEdit
+from contracts_py.events import Event
+from contracts_py.engine import SimulationResult, BlastRadius
 
 GraphLevel = Literal["entity", "domain"]
 ReplaySpeed = Literal[1, 2, 4]
@@ -48,10 +50,17 @@ class HumanDecisionRequest(Strict):
 
 
 class QuickSimulateRequest(Strict):
+    expected_twin_version: str | None = None
     brief: DecisionBrief
     # None means every candidate intervention in the brief.
     intervention_ids: list[ID] | None = None
     future: Future = Future.act_now
+
+
+class QuickOfficePreview(Strict):
+    baseline_twin_version: str
+    result: SimulationResult
+    blast_radius: BlastRadius
 
 
 class FuturesRequest(Strict):
@@ -87,13 +96,39 @@ class OrganizationDepartmentSummary(Strict):
     utilisation: float = Field(ge=0, le=1.5)
     maturity_level: Severity
     enabled: bool
+    active: bool = True
+    agent_id: ID | None = None
 
 
 class OrganizationProfileView(Strict):
+    twin_version: str | None = None
     schema_version: SchemaVersion = SCHEMA_VERSION
     organization: Organization
     departments: list[OrganizationDepartmentSummary]
     settings: OrganizationSettings
+
+
+class DepartmentContextItemCreate(Strict):
+    entity_type: Literal[
+        "role", "knowledge_asset", "system", "project", "workflow", "kpi",
+    ]
+    name: str = Field(min_length=2, max_length=120)
+    criticality: Criticality = Criticality.medium
+    evidence_title: str = Field(min_length=2, max_length=160)
+    evidence_source: EvidenceSource
+    evidence_snippet: str = Field(min_length=10, max_length=300)
+    annual_cost_usd: USD | None = Field(default=None, ge=0)
+    capacity_fte: float | None = Field(default=None, ge=0)
+    min_qualified_owners: int | None = Field(default=None, ge=0)
+    documented_pct: Ratio | None = None
+    failure_cost_per_day_usd: USD | None = Field(default=None, ge=0)
+    completion_pct: Ratio | None = None
+    remaining_cost_usd: USD | None = Field(default=None, ge=0)
+    expected_completion_day: int | None = Field(default=None, ge=0)
+    time_to_train_days: int | None = Field(default=None, ge=0)
+    kpi_baseline: float | None = None
+    kpi_unit: str | None = Field(default=None, max_length=40)
+    higher_is_better: bool | None = None
 
 
 EMAIL_PATTERN = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
@@ -128,3 +163,24 @@ class AuthToken(Strict):
     token_type: Literal["bearer"] = "bearer"
     expires_at: datetime
     user: UserPublic
+
+
+
+
+class DepartmentSave(Strict):
+    expected_twin_version: str
+    department: DepartmentEdit
+
+
+class RunEventPage(Strict):
+    events: list[Event]
+    next_sequence: int = Field(ge=0)
+    has_more: bool
+    terminal: bool
+
+
+class OrganizationSave(Strict):
+    expected_twin_version: str
+    organization: Organization
+    departments: list[DepartmentEdit]
+    settings: OrganizationSettings

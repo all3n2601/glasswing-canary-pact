@@ -124,15 +124,34 @@ def test_the_twin_is_built_from_the_rows():
     assert production.owned_entity_ids == [] and production.critical_workflow_ids == []
 
 
-def test_build_twin_rejects_the_adventureworks_twin_on_data_rules():
-    """build_twin raises on the importer's output; the rules it breaks are pinned here (finding for B-01)."""
+def test_build_twin_accepts_the_imported_twin_with_context_and_checksums():
+    twin = build_twin(build_adventureworks_twin(aw_tables(), created_at=CREATED_AT))
+    assert not [issue for issue in validate_twin(twin) if issue.severity == "error"]
+    assert all(doc.checksum_sha256 for doc in twin.documents if not doc.synthetic)
+    assert all(profile.owned_entity_ids for profile in twin.department_profiles)
+    assert {e.id for e in twin.entities if e.type.value == "department"} == {
+        profile.department_id for profile in twin.department_profiles
+    }
+
+
+def test_build_twin_still_rejects_missing_import_fields_and_checksums():
     twin = build_adventureworks_twin(aw_tables(), created_at=CREATED_AT)
+    required = {
+        "vendor": ["migration_cost_usd", "geographies", "history_years", "freshness_days", "accuracy", "permitted_uses"],
+        "workflow": ["failure_cost_per_day_usd"],
+        "role": ["time_to_train_days"],
+    }
+    for entity in twin.entities:
+        for field in required.get(entity.type.value, []):
+            setattr(entity, field, [] if field in {"geographies", "permitted_uses"} else None)
+    for document in twin.documents:
+        if not document.synthetic:
+            document.checksum_sha256 = None
     with pytest.raises(company_twin.TwinValidationError) as raised:
         build_twin(twin.model_dump(mode="json"))
     errors = raised.value.issues
     assert errors == [i for i in validate_twin(twin) if i.severity == "error"]
     assert {i.rule for i in errors} == {1, 19}
     missing = {i.message.split("missing required field ")[1] for i in errors if i.rule == 1}
-    assert missing == {"migration_cost_usd", "geographies", "history_years", "freshness_days", "accuracy",
-                       "permitted_uses", "failure_cost_per_day_usd", "time_to_train_days"}
+    assert missing == {field for fields in required.values() for field in fields}
     assert all("checksum_sha256" in i.message for i in errors if i.rule == 19)

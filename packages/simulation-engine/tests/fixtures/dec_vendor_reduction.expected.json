@@ -1162,6 +1162,116 @@
      "value": 100.0
     }
    ],
+   "department_states": [
+    {
+     "baseline_budget_usd": 9000000000,
+     "baseline_fte": 16300.0,
+     "department_id": "dept_engineering",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Engineering",
+     "scenario_budget_usd": 9000000000,
+     "scenario_fte": 16300.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3100000000,
+     "baseline_fte": 5800.0,
+     "department_id": "dept_operations",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Operations",
+     "scenario_budget_usd": 3100000000,
+     "scenario_fte": 5800.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4000000000,
+     "baseline_fte": 4500.0,
+     "department_id": "dept_ai_data",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "AI and Data",
+     "scenario_budget_usd": 4000000000,
+     "scenario_fte": 4500.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3500000000,
+     "baseline_fte": 4000.0,
+     "department_id": "dept_product",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Product",
+     "scenario_budget_usd": 3500000000,
+     "scenario_fte": 4000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 8000000000,
+     "baseline_fte": 9000.0,
+     "department_id": "dept_sales",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Sales",
+     "scenario_budget_usd": 8000000000,
+     "scenario_fte": 9000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2500000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_marketing",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Marketing",
+     "scenario_budget_usd": 2500000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4500000000,
+     "baseline_fte": 8000.0,
+     "department_id": "dept_customer_success",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Customer Success",
+     "scenario_budget_usd": 4500000000,
+     "scenario_fte": 8000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3400000000,
+     "baseline_fte": 3000.0,
+     "department_id": "dept_finance",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Finance",
+     "scenario_budget_usd": 3400000000,
+     "scenario_fte": 3000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2000000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_compliance",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Compliance",
+     "scenario_budget_usd": 2000000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
+    }
+   ],
    "feasible": true,
    "future": "act_now",
    "goal_met": true,
@@ -1393,7 +1503,8 @@
       "e_account_planning_retention"
      ],
      "evidence_refs": [
-      "ev_vendor_dataset_matrix"
+      "ev_vendor_dataset_matrix",
+      "ev_sales_playbook_context"
      ],
      "first_effect_day": 60,
      "impact_id": "imp_kpi_net_retention_loss",
@@ -1900,6 +2011,116 @@
      "value": 100.0
     }
    ],
+   "department_states": [
+    {
+     "baseline_budget_usd": 9000000000,
+     "baseline_fte": 16300.0,
+     "department_id": "dept_engineering",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Engineering",
+     "scenario_budget_usd": 9000000000,
+     "scenario_fte": 16300.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3100000000,
+     "baseline_fte": 5800.0,
+     "department_id": "dept_operations",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Operations",
+     "scenario_budget_usd": 3100000000,
+     "scenario_fte": 5800.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4000000000,
+     "baseline_fte": 4500.0,
+     "department_id": "dept_ai_data",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "AI and Data",
+     "scenario_budget_usd": 4000000000,
+     "scenario_fte": 4500.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3500000000,
+     "baseline_fte": 4000.0,
+     "department_id": "dept_product",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Product",
+     "scenario_budget_usd": 3500000000,
+     "scenario_fte": 4000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 8000000000,
+     "baseline_fte": 9000.0,
+     "department_id": "dept_sales",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Sales",
+     "scenario_budget_usd": 8000000000,
+     "scenario_fte": 9000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2500000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_marketing",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Marketing",
+     "scenario_budget_usd": 2500000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4500000000,
+     "baseline_fte": 8000.0,
+     "department_id": "dept_customer_success",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Customer Success",
+     "scenario_budget_usd": 4500000000,
+     "scenario_fte": 8000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3400000000,
+     "baseline_fte": 3000.0,
+     "department_id": "dept_finance",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Finance",
+     "scenario_budget_usd": 3400000000,
+     "scenario_fte": 3000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2000000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_compliance",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Compliance",
+     "scenario_budget_usd": 2000000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
+    }
+   ],
    "feasible": true,
    "future": "act_now",
    "goal_met": true,
@@ -2131,7 +2352,8 @@
       "e_account_planning_retention"
      ],
      "evidence_refs": [
-      "ev_vendor_dataset_matrix"
+      "ev_vendor_dataset_matrix",
+      "ev_sales_playbook_context"
      ],
      "first_effect_day": 30,
      "impact_id": "imp_kpi_net_retention_loss",
@@ -4761,6 +4983,116 @@
       "value": 66.6667
      }
     ],
+    "department_states": [
+     {
+      "baseline_budget_usd": 9000000000,
+      "baseline_fte": 16300.0,
+      "department_id": "dept_engineering",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Engineering",
+      "scenario_budget_usd": 9000000000,
+      "scenario_fte": 16300.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 3100000000,
+      "baseline_fte": 5800.0,
+      "department_id": "dept_operations",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Operations",
+      "scenario_budget_usd": 3100000000,
+      "scenario_fte": 5800.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 4000000000,
+      "baseline_fte": 4500.0,
+      "department_id": "dept_ai_data",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "AI and Data",
+      "scenario_budget_usd": 4000000000,
+      "scenario_fte": 4500.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 3500000000,
+      "baseline_fte": 4000.0,
+      "department_id": "dept_product",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Product",
+      "scenario_budget_usd": 3500000000,
+      "scenario_fte": 4000.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 8000000000,
+      "baseline_fte": 9000.0,
+      "department_id": "dept_sales",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Sales",
+      "scenario_budget_usd": 8000000000,
+      "scenario_fte": 9000.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 2500000000,
+      "baseline_fte": 2500.0,
+      "department_id": "dept_marketing",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Marketing",
+      "scenario_budget_usd": 2500000000,
+      "scenario_fte": 2500.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 4500000000,
+      "baseline_fte": 8000.0,
+      "department_id": "dept_customer_success",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Customer Success",
+      "scenario_budget_usd": 4500000000,
+      "scenario_fte": 8000.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 3400000000,
+      "baseline_fte": 3000.0,
+      "department_id": "dept_finance",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Finance",
+      "scenario_budget_usd": 3400000000,
+      "scenario_fte": 3000.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 2000000000,
+      "baseline_fte": 2500.0,
+      "department_id": "dept_compliance",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Compliance",
+      "scenario_budget_usd": 2000000000,
+      "scenario_fte": 2500.0,
+      "transferred_workflow_ids": []
+     }
+    ],
     "feasible": false,
     "future": "act_now",
     "goal_met": true,
@@ -5496,6 +5828,116 @@
       "value": 100.0
      }
     ],
+    "department_states": [
+     {
+      "baseline_budget_usd": 9000000000,
+      "baseline_fte": 16300.0,
+      "department_id": "dept_engineering",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Engineering",
+      "scenario_budget_usd": 9000000000,
+      "scenario_fte": 16300.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 3100000000,
+      "baseline_fte": 5800.0,
+      "department_id": "dept_operations",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Operations",
+      "scenario_budget_usd": 3100000000,
+      "scenario_fte": 5800.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 4000000000,
+      "baseline_fte": 4500.0,
+      "department_id": "dept_ai_data",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "AI and Data",
+      "scenario_budget_usd": 4000000000,
+      "scenario_fte": 4500.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 3500000000,
+      "baseline_fte": 4000.0,
+      "department_id": "dept_product",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Product",
+      "scenario_budget_usd": 3500000000,
+      "scenario_fte": 4000.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 8000000000,
+      "baseline_fte": 9000.0,
+      "department_id": "dept_sales",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Sales",
+      "scenario_budget_usd": 8000000000,
+      "scenario_fte": 9000.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 2500000000,
+      "baseline_fte": 2500.0,
+      "department_id": "dept_marketing",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Marketing",
+      "scenario_budget_usd": 2500000000,
+      "scenario_fte": 2500.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 4500000000,
+      "baseline_fte": 8000.0,
+      "department_id": "dept_customer_success",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Customer Success",
+      "scenario_budget_usd": 4500000000,
+      "scenario_fte": 8000.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 3400000000,
+      "baseline_fte": 3000.0,
+      "department_id": "dept_finance",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Finance",
+      "scenario_budget_usd": 3400000000,
+      "scenario_fte": 3000.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 2000000000,
+      "baseline_fte": 2500.0,
+      "department_id": "dept_compliance",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Compliance",
+      "scenario_budget_usd": 2000000000,
+      "scenario_fte": 2500.0,
+      "transferred_workflow_ids": []
+     }
+    ],
     "feasible": true,
     "future": "act_now",
     "goal_met": true,
@@ -5727,7 +6169,8 @@
        "e_account_planning_retention"
       ],
       "evidence_refs": [
-       "ev_vendor_dataset_matrix"
+       "ev_vendor_dataset_matrix",
+       "ev_sales_playbook_context"
       ],
       "first_effect_day": 30,
       "impact_id": "imp_kpi_net_retention_loss",
@@ -6101,6 +6544,116 @@
     "value": 100.0
    }
   ],
+  "department_states": [
+   {
+    "baseline_budget_usd": 9000000000,
+    "baseline_fte": 16300.0,
+    "department_id": "dept_engineering",
+    "effective_day": 0,
+    "lifecycle": "active",
+    "modeling_notes": [],
+    "name": "Engineering",
+    "scenario_budget_usd": 9000000000,
+    "scenario_fte": 16300.0,
+    "transferred_workflow_ids": []
+   },
+   {
+    "baseline_budget_usd": 3100000000,
+    "baseline_fte": 5800.0,
+    "department_id": "dept_operations",
+    "effective_day": 0,
+    "lifecycle": "active",
+    "modeling_notes": [],
+    "name": "Operations",
+    "scenario_budget_usd": 3100000000,
+    "scenario_fte": 5800.0,
+    "transferred_workflow_ids": []
+   },
+   {
+    "baseline_budget_usd": 4000000000,
+    "baseline_fte": 4500.0,
+    "department_id": "dept_ai_data",
+    "effective_day": 0,
+    "lifecycle": "active",
+    "modeling_notes": [],
+    "name": "AI and Data",
+    "scenario_budget_usd": 4000000000,
+    "scenario_fte": 4500.0,
+    "transferred_workflow_ids": []
+   },
+   {
+    "baseline_budget_usd": 3500000000,
+    "baseline_fte": 4000.0,
+    "department_id": "dept_product",
+    "effective_day": 0,
+    "lifecycle": "active",
+    "modeling_notes": [],
+    "name": "Product",
+    "scenario_budget_usd": 3500000000,
+    "scenario_fte": 4000.0,
+    "transferred_workflow_ids": []
+   },
+   {
+    "baseline_budget_usd": 8000000000,
+    "baseline_fte": 9000.0,
+    "department_id": "dept_sales",
+    "effective_day": 0,
+    "lifecycle": "active",
+    "modeling_notes": [],
+    "name": "Sales",
+    "scenario_budget_usd": 8000000000,
+    "scenario_fte": 9000.0,
+    "transferred_workflow_ids": []
+   },
+   {
+    "baseline_budget_usd": 2500000000,
+    "baseline_fte": 2500.0,
+    "department_id": "dept_marketing",
+    "effective_day": 0,
+    "lifecycle": "active",
+    "modeling_notes": [],
+    "name": "Marketing",
+    "scenario_budget_usd": 2500000000,
+    "scenario_fte": 2500.0,
+    "transferred_workflow_ids": []
+   },
+   {
+    "baseline_budget_usd": 4500000000,
+    "baseline_fte": 8000.0,
+    "department_id": "dept_customer_success",
+    "effective_day": 0,
+    "lifecycle": "active",
+    "modeling_notes": [],
+    "name": "Customer Success",
+    "scenario_budget_usd": 4500000000,
+    "scenario_fte": 8000.0,
+    "transferred_workflow_ids": []
+   },
+   {
+    "baseline_budget_usd": 3400000000,
+    "baseline_fte": 3000.0,
+    "department_id": "dept_finance",
+    "effective_day": 0,
+    "lifecycle": "active",
+    "modeling_notes": [],
+    "name": "Finance",
+    "scenario_budget_usd": 3400000000,
+    "scenario_fte": 3000.0,
+    "transferred_workflow_ids": []
+   },
+   {
+    "baseline_budget_usd": 2000000000,
+    "baseline_fte": 2500.0,
+    "department_id": "dept_compliance",
+    "effective_day": 0,
+    "lifecycle": "active",
+    "modeling_notes": [],
+    "name": "Compliance",
+    "scenario_budget_usd": 2000000000,
+    "scenario_fte": 2500.0,
+    "transferred_workflow_ids": []
+   }
+  ],
   "feasible": true,
   "future": "act_now",
   "goal_met": true,
@@ -6332,7 +6885,8 @@
      "e_account_planning_retention"
     ],
     "evidence_refs": [
-     "ev_vendor_dataset_matrix"
+     "ev_vendor_dataset_matrix",
+     "ev_sales_playbook_context"
     ],
     "first_effect_day": 30,
     "impact_id": "imp_kpi_net_retention_loss",
@@ -6710,6 +7264,116 @@
      "value": 100.0
     }
    ],
+   "department_states": [
+    {
+     "baseline_budget_usd": 9000000000,
+     "baseline_fte": 16300.0,
+     "department_id": "dept_engineering",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Engineering",
+     "scenario_budget_usd": 9000000000,
+     "scenario_fte": 16300.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3100000000,
+     "baseline_fte": 5800.0,
+     "department_id": "dept_operations",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Operations",
+     "scenario_budget_usd": 3100000000,
+     "scenario_fte": 5800.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4000000000,
+     "baseline_fte": 4500.0,
+     "department_id": "dept_ai_data",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "AI and Data",
+     "scenario_budget_usd": 4000000000,
+     "scenario_fte": 4500.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3500000000,
+     "baseline_fte": 4000.0,
+     "department_id": "dept_product",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Product",
+     "scenario_budget_usd": 3500000000,
+     "scenario_fte": 4000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 8000000000,
+     "baseline_fte": 9000.0,
+     "department_id": "dept_sales",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Sales",
+     "scenario_budget_usd": 8000000000,
+     "scenario_fte": 9000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2500000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_marketing",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Marketing",
+     "scenario_budget_usd": 2500000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4500000000,
+     "baseline_fte": 8000.0,
+     "department_id": "dept_customer_success",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Customer Success",
+     "scenario_budget_usd": 4500000000,
+     "scenario_fte": 8000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3400000000,
+     "baseline_fte": 3000.0,
+     "department_id": "dept_finance",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Finance",
+     "scenario_budget_usd": 3400000000,
+     "scenario_fte": 3000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2000000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_compliance",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Compliance",
+     "scenario_budget_usd": 2000000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
+    }
+   ],
    "feasible": true,
    "future": "act_now",
    "goal_met": true,
@@ -6941,7 +7605,8 @@
       "e_account_planning_retention"
      ],
      "evidence_refs": [
-      "ev_vendor_dataset_matrix"
+      "ev_vendor_dataset_matrix",
+      "ev_sales_playbook_context"
      ],
      "first_effect_day": 30,
      "impact_id": "imp_kpi_net_retention_loss",
@@ -7448,6 +8113,116 @@
      "value": 100.0
     }
    ],
+   "department_states": [
+    {
+     "baseline_budget_usd": 9000000000,
+     "baseline_fte": 16300.0,
+     "department_id": "dept_engineering",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Engineering",
+     "scenario_budget_usd": 9000000000,
+     "scenario_fte": 16300.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3100000000,
+     "baseline_fte": 5800.0,
+     "department_id": "dept_operations",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Operations",
+     "scenario_budget_usd": 3100000000,
+     "scenario_fte": 5800.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4000000000,
+     "baseline_fte": 4500.0,
+     "department_id": "dept_ai_data",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "AI and Data",
+     "scenario_budget_usd": 4000000000,
+     "scenario_fte": 4500.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3500000000,
+     "baseline_fte": 4000.0,
+     "department_id": "dept_product",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Product",
+     "scenario_budget_usd": 3500000000,
+     "scenario_fte": 4000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 8000000000,
+     "baseline_fte": 9000.0,
+     "department_id": "dept_sales",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Sales",
+     "scenario_budget_usd": 8000000000,
+     "scenario_fte": 9000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2500000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_marketing",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Marketing",
+     "scenario_budget_usd": 2500000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4500000000,
+     "baseline_fte": 8000.0,
+     "department_id": "dept_customer_success",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Customer Success",
+     "scenario_budget_usd": 4500000000,
+     "scenario_fte": 8000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3400000000,
+     "baseline_fte": 3000.0,
+     "department_id": "dept_finance",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Finance",
+     "scenario_budget_usd": 3400000000,
+     "scenario_fte": 3000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2000000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_compliance",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Compliance",
+     "scenario_budget_usd": 2000000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
+    }
+   ],
    "feasible": true,
    "future": "delay",
    "goal_met": true,
@@ -7679,7 +8454,8 @@
       "e_account_planning_retention"
      ],
      "evidence_refs": [
-      "ev_vendor_dataset_matrix"
+      "ev_vendor_dataset_matrix",
+      "ev_sales_playbook_context"
      ],
      "first_effect_day": 120,
      "impact_id": "imp_kpi_net_retention_loss",
@@ -8179,6 +8955,116 @@
      "passed": true,
      "threshold": 100.0,
      "value": 100.0
+    }
+   ],
+   "department_states": [
+    {
+     "baseline_budget_usd": 9000000000,
+     "baseline_fte": 16300.0,
+     "department_id": "dept_engineering",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Engineering",
+     "scenario_budget_usd": 9000000000,
+     "scenario_fte": 16300.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3100000000,
+     "baseline_fte": 5800.0,
+     "department_id": "dept_operations",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Operations",
+     "scenario_budget_usd": 3100000000,
+     "scenario_fte": 5800.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4000000000,
+     "baseline_fte": 4500.0,
+     "department_id": "dept_ai_data",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "AI and Data",
+     "scenario_budget_usd": 4000000000,
+     "scenario_fte": 4500.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3500000000,
+     "baseline_fte": 4000.0,
+     "department_id": "dept_product",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Product",
+     "scenario_budget_usd": 3500000000,
+     "scenario_fte": 4000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 8000000000,
+     "baseline_fte": 9000.0,
+     "department_id": "dept_sales",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Sales",
+     "scenario_budget_usd": 8000000000,
+     "scenario_fte": 9000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2500000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_marketing",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Marketing",
+     "scenario_budget_usd": 2500000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4500000000,
+     "baseline_fte": 8000.0,
+     "department_id": "dept_customer_success",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Customer Success",
+     "scenario_budget_usd": 4500000000,
+     "scenario_fte": 8000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3400000000,
+     "baseline_fte": 3000.0,
+     "department_id": "dept_finance",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Finance",
+     "scenario_budget_usd": 3400000000,
+     "scenario_fte": 3000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2000000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_compliance",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Compliance",
+     "scenario_budget_usd": 2000000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
     }
    ],
    "feasible": true,

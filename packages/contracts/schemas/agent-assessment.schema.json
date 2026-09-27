@@ -53,6 +53,13 @@
         "confidence": {
           "title": "Confidence",
           "type": "number"
+        },
+        "review_replies": {
+          "items": {
+            "$ref": "#/$defs/ReviewReply"
+          },
+          "title": "Review Replies",
+          "type": "array"
         }
       },
       "required": [
@@ -709,6 +716,111 @@
       "title": "Relation",
       "type": "string"
     },
+    "ReviewIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "issue_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Issue Id",
+          "type": "string"
+        },
+        "source_assessment_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Source Assessment Id",
+          "type": "string"
+        },
+        "source_agent_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Source Agent Id",
+          "type": "string"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "target_assessment_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Target Assessment Id",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "severity": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Severity",
+          "type": "integer"
+        },
+        "entity_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Entity Ids",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "issue_id",
+        "source_assessment_id",
+        "source_agent_id",
+        "source_ref",
+        "target_assessment_id",
+        "text",
+        "severity"
+      ],
+      "title": "ReviewIssue",
+      "type": "object"
+    },
+    "ReviewReply": {
+      "properties": {
+        "issue_id": {
+          "title": "Issue Id",
+          "type": "string"
+        },
+        "position": {
+          "enum": [
+            "revised",
+            "supported",
+            "unresolved"
+          ],
+          "title": "Position",
+          "type": "string"
+        },
+        "explanation": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "issue_id",
+        "position",
+        "explanation"
+      ],
+      "title": "ReviewReply",
+      "type": "object"
+    },
     "ToolCall": {
       "additionalProperties": false,
       "properties": {
@@ -818,10 +930,32 @@
     "pass_type": {
       "enum": [
         "first_pass",
-        "challenge"
+        "challenge",
+        "response"
       ],
       "title": "Pass Type",
       "type": "string"
+    },
+    "responds_to_assessment_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Responds To Assessment Id"
+    },
+    "review_issues": {
+      "items": {
+        "$ref": "#/$defs/ReviewIssue"
+      },
+      "title": "Review Issues",
+      "type": "array"
     },
     "status": {
       "enum": [

@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 import shutil
 
 import pytest
@@ -85,6 +86,40 @@ def knowledge_texts(root, agent_id: str) -> tuple[str, str]:
 FALLBACK_ALLOWED: set[str] = set()
 
 
+def test_skill_files_are_portable_department_guidance() -> None:
+    root = find_repo_root()
+    manifest = load_manifest(root)
+    twin = json.loads((root / "data" / "synthetic_company.json").read_text(encoding="utf-8"))
+    organization_names = {
+        twin["organization"]["legal_name"].casefold(),
+        twin["organization"]["display_name"].casefold(),
+    }
+    vendor_names = {
+        entity["name"].casefold()
+        for entity in twin["entities"]
+        if entity["type"] == "vendor"
+    }
+    company_id = re.compile(r"\b(?:dept|role|sys|wf|kn|kpi|ds|vendor|seg|proj|ctl|ev)_[a-z0-9_]+\b")
+    predetermined_language = {
+        "vendor demo",
+        "workforce proof",
+        "recommended plan",
+        "safe cut",
+        "do not cut",
+    }
+
+    for agent_id, entry in manifest["agents"].items():
+        path = root / entry["skill"]
+        text = path.read_text(encoding="utf-8")
+        lowered = text.casefold()
+        assert "use the organization's current record" in lowered, agent_id
+        assert "## boundaries" in lowered, agent_id
+        assert not company_id.search(text), f"{agent_id} hard-codes a company entity ID"
+        forbidden = organization_names | vendor_names | predetermined_language
+        found = sorted(value for value in forbidden if value in lowered)
+        assert not found, f"{agent_id} hard-codes company/demo conclusions: {found}"
+
+
 @pytest.mark.parametrize("agent_id", sorted(load_manifest()["agents"]))
 def test_every_agent_uses_its_skill_file(agent_id, brief, twin, settings) -> None:
     root = find_repo_root()
@@ -109,3 +144,33 @@ def test_missing_skill_file_falls_back(tmp_path, brief, twin, settings) -> None:
     system = prompt.messages[0]["content"]
     assert prompt.knowledge_source == "fallback"
     assert fallback in system and skill_text not in system
+
+
+def test_compact_edge_table_retains_relationships_and_evidence():
+    from agent_orchestration.prompts import compact_json, slim_context
+    import json
+
+    edges = [
+        {"source": "vendor_a", "target": "dataset_a", "relation": "PROVIDES", "strength": 0,
+         "substitutability": 0.5, "evidence_refs": ["ev_a"]},
+        {"source": "dataset_a", "target": "workflow_a", "relation": "SUPPORTS", "strength": 0.8,
+         "lag_days": 5, "evidence_refs": ["ev_b"]},
+    ]
+    table = json.loads(compact_json(slim_context({"view": {"edges": edges}})))["view"]["edges"]
+    restored = [{key: value for key, value in zip(table["columns"], row) if value is not None}
+                for row in table["rows"]]
+    assert restored == edges
+
+
+def test_compact_effect_table_preserves_values_timing_paths_and_evidence():
+    from agent_orchestration.prompts import compact_json, slim_context
+
+    effects = [{"impact_id": "imp_a", "affected_entity": "wf_a", "magnitude": 0,
+                "first_effect_day": 0, "peak_effect_day": 15, "confidence": 0.6,
+                "dependency_path": ["vendor_a", "wf_a"], "evidence_refs": ["ev_a"]},
+               {"impact_id": "imp_b", "affected_entity": "wf_b", "magnitude": -10,
+                "first_effect_day": 5, "peak_effect_day": 20, "confidence": 0.8}]
+    table = json.loads(compact_json(slim_context({"act_now_effects": effects})))["act_now_effects"]
+    restored = [{key: value for key, value in zip(table["columns"], row) if value is not None}
+                for row in table["rows"]]
+    assert restored == effects

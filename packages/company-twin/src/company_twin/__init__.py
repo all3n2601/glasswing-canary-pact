@@ -73,4 +73,8 @@ __all__ = [
     "TwinValidationError",
     "build_adventureworks_twin",
     "ADVENTUREWORKS_TABLES",
+    "edit_department",
+    "edit_organization",
 ]
+
+from .departments import edit_department, edit_organization

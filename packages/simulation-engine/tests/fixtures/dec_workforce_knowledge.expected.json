@@ -16,13 +16,14 @@
     },
     {
      "department_id": "dept_finance",
-     "headline": "Finance: 8 harmed, 5 improved; most severe: Monthly financial close loses 90% of capacity ($75.41M)",
+     "headline": "Finance: 9 harmed, 5 improved; most severe: Monthly financial close loses 90% of capacity ($75.41M)",
      "impact_ids": [
       "imp_remove_close_accountant_savings",
       "imp_remove_gl_accountant_savings",
       "imp_remove_reporting_analyst_savings",
       "imp_remove_revenue_accountant_savings",
       "imp_remove_ar_specialist_savings",
+      "imp_kpi_close_cycle_days_loss",
       "imp_kpi_gross_margin_loss",
       "imp_role_ar_specialist_loss",
       "imp_role_close_accountant_loss",
@@ -186,6 +187,14 @@
      "critical_constraint": false,
      "label": "Revenue effect",
      "level": "second_order",
+     "source": "wf_financial_close",
+     "target": "kpi_close_cycle_days"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Revenue effect",
+     "level": "second_order",
      "source": "wf_invoicing",
      "target": "kpi_gross_margin"
     },
@@ -212,6 +221,14 @@
      "level": "second_order",
      "source": "wf_billing_recon",
      "target": "wf_invoicing"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Revenue effect",
+     "level": null,
+     "source": "kpi_close_cycle_days",
+     "target": "outcome_company"
     },
     {
      "channel_id": null,
@@ -341,6 +358,23 @@
      "pressure_id": null,
      "severity": 5,
      "value_usd": 43635375
+    },
+    {
+     "category": "business",
+     "department_id": "dept_finance",
+     "entity_id": "kpi_close_cycle_days",
+     "first_effect_day": 30,
+     "headline": "Close cycle days loses 69% of capacity",
+     "impact_ids": [
+      "imp_kpi_close_cycle_days_loss"
+     ],
+     "kind": "entity",
+     "level": "second_order",
+     "node_id": "kpi_close_cycle_days",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 2,
+     "value_usd": null
     },
     {
      "category": "business",
@@ -574,7 +608,7 @@
     }
    ],
    "outcome": {
-    "headline": "Net value -$825.08M, risk high (50.9), infeasible (1 failed checks)",
+    "headline": "Net value -$825.08M, risk high (51.0), infeasible (1 failed checks)",
     "net_value_usd": -825075878,
     "risk_level": "high"
    },
@@ -862,7 +896,7 @@
     "p_better_than_inaction": 0.0,
     "plan_id": "plan_naive",
     "result_id": "res_run_acceptance_act_now_plan_naive",
-    "risk_score": 50.8718
+    "risk_score": 50.9799
    },
    {
     "breakeven_day": null,
@@ -920,7 +954,7 @@
     "p_better_than_inaction": 0.0,
     "plan_id": "plan_naive",
     "result_id": "res_run_acceptance_delay_plan_naive",
-    "risk_score": 50.8718
+    "risk_score": 50.9799
    }
   ],
   "run_id": "run_acceptance"
@@ -1041,6 +1075,127 @@
      "passed": true,
      "threshold": 2.0,
      "value": 0.0
+    }
+   ],
+   "department_states": [
+    {
+     "baseline_budget_usd": 9000000000,
+     "baseline_fte": 16300.0,
+     "department_id": "dept_engineering",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Engineering",
+     "scenario_budget_usd": 9000000000,
+     "scenario_fte": 16300.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3100000000,
+     "baseline_fte": 5800.0,
+     "department_id": "dept_operations",
+     "effective_day": 30,
+     "lifecycle": "active",
+     "modeling_notes": [
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role."
+     ],
+     "name": "Operations",
+     "scenario_budget_usd": 3100000000,
+     "scenario_fte": 5530.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4000000000,
+     "baseline_fte": 4500.0,
+     "department_id": "dept_ai_data",
+     "effective_day": 30,
+     "lifecycle": "active",
+     "modeling_notes": [
+      "Staffing reflects the modeled capacity change of the targeted role."
+     ],
+     "name": "AI and Data",
+     "scenario_budget_usd": 4000000000,
+     "scenario_fte": 4440.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3500000000,
+     "baseline_fte": 4000.0,
+     "department_id": "dept_product",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Product",
+     "scenario_budget_usd": 3500000000,
+     "scenario_fte": 4000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 8000000000,
+     "baseline_fte": 9000.0,
+     "department_id": "dept_sales",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Sales",
+     "scenario_budget_usd": 8000000000,
+     "scenario_fte": 9000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2500000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_marketing",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Marketing",
+     "scenario_budget_usd": 2500000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4500000000,
+     "baseline_fte": 8000.0,
+     "department_id": "dept_customer_success",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Customer Success",
+     "scenario_budget_usd": 4500000000,
+     "scenario_fte": 8000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3400000000,
+     "baseline_fte": 3000.0,
+     "department_id": "dept_finance",
+     "effective_day": 30,
+     "lifecycle": "active",
+     "modeling_notes": [
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role."
+     ],
+     "name": "Finance",
+     "scenario_budget_usd": 3400000000,
+     "scenario_fte": 2280.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2000000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_compliance",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Compliance",
+     "scenario_budget_usd": 2000000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
     }
    ],
    "feasible": true,
@@ -1818,6 +1973,127 @@
      "value": 0.0
     }
    ],
+   "department_states": [
+    {
+     "baseline_budget_usd": 9000000000,
+     "baseline_fte": 16300.0,
+     "department_id": "dept_engineering",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Engineering",
+     "scenario_budget_usd": 9000000000,
+     "scenario_fte": 16300.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3100000000,
+     "baseline_fte": 5800.0,
+     "department_id": "dept_operations",
+     "effective_day": 30,
+     "lifecycle": "active",
+     "modeling_notes": [
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role."
+     ],
+     "name": "Operations",
+     "scenario_budget_usd": 3100000000,
+     "scenario_fte": 5530.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4000000000,
+     "baseline_fte": 4500.0,
+     "department_id": "dept_ai_data",
+     "effective_day": 30,
+     "lifecycle": "active",
+     "modeling_notes": [
+      "Staffing reflects the modeled capacity change of the targeted role."
+     ],
+     "name": "AI and Data",
+     "scenario_budget_usd": 4000000000,
+     "scenario_fte": 4440.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3500000000,
+     "baseline_fte": 4000.0,
+     "department_id": "dept_product",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Product",
+     "scenario_budget_usd": 3500000000,
+     "scenario_fte": 4000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 8000000000,
+     "baseline_fte": 9000.0,
+     "department_id": "dept_sales",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Sales",
+     "scenario_budget_usd": 8000000000,
+     "scenario_fte": 9000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2500000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_marketing",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Marketing",
+     "scenario_budget_usd": 2500000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4500000000,
+     "baseline_fte": 8000.0,
+     "department_id": "dept_customer_success",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Customer Success",
+     "scenario_budget_usd": 4500000000,
+     "scenario_fte": 8000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3400000000,
+     "baseline_fte": 3000.0,
+     "department_id": "dept_finance",
+     "effective_day": 30,
+     "lifecycle": "active",
+     "modeling_notes": [
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role."
+     ],
+     "name": "Finance",
+     "scenario_budget_usd": 3400000000,
+     "scenario_fte": 2280.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2000000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_compliance",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Compliance",
+     "scenario_budget_usd": 2000000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
+    }
+   ],
    "feasible": false,
    "future": "act_now",
    "goal_met": true,
@@ -2135,6 +2411,47 @@
      "polarity": "harm",
      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
      "severity": 5,
+     "source_entity": "role_data_platform_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_data_platform_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "kpi_close_cycle_days",
+     "assumptions": [],
+     "category": "business",
+     "confidence": 0.729,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_data_platform_lead",
+      "kn_warehouse_lineage",
+      "wf_financial_close",
+      "kpi_close_cycle_days"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_data_platform_lead_knows_lineage",
+      "e_lineage_supports_close",
+      "e_close_cycle"
+     ],
+     "evidence_refs": [
+      "ev_knowledge_matrix_3",
+      "ev_sop_financial_close_lineage"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_kpi_close_cycle_days_loss",
+     "level": "second_order",
+     "magnitude": 0.688808,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 2,
      "source_entity": "role_data_platform_lead",
      "source_kind": "intervention",
      "source_ref": "remove_data_platform_lead",
@@ -2826,11 +3143,11 @@
      "capability_workflow": 25.0,
      "compliance_control": 0.0,
      "customer_revenue": 0.0,
-     "execution_uncertainty": 0.8718,
+     "execution_uncertainty": 0.9799,
      "financial": 25.0
     },
     "level": "high",
-    "score": 50.8718,
+    "score": 50.9799,
     "settings_version": 1
    },
    "run_id": "run_acceptance",
@@ -2942,6 +3259,7 @@
   "restored_entity_ids": [
    "kn_billing_exception",
    "kn_warehouse_lineage",
+   "kpi_close_cycle_days",
    "kpi_gross_margin",
    "wf_billing_recon",
    "wf_financial_close",
@@ -3011,6 +3329,127 @@
       "passed": true,
       "threshold": 2.0,
       "value": 0.0
+     }
+    ],
+    "department_states": [
+     {
+      "baseline_budget_usd": 9000000000,
+      "baseline_fte": 16300.0,
+      "department_id": "dept_engineering",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Engineering",
+      "scenario_budget_usd": 9000000000,
+      "scenario_fte": 16300.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 3100000000,
+      "baseline_fte": 5800.0,
+      "department_id": "dept_operations",
+      "effective_day": 30,
+      "lifecycle": "active",
+      "modeling_notes": [
+       "Staffing reflects the modeled capacity change of the targeted role.",
+       "Staffing reflects the modeled capacity change of the targeted role."
+      ],
+      "name": "Operations",
+      "scenario_budget_usd": 3100000000,
+      "scenario_fte": 5530.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 4000000000,
+      "baseline_fte": 4500.0,
+      "department_id": "dept_ai_data",
+      "effective_day": 30,
+      "lifecycle": "active",
+      "modeling_notes": [
+       "Staffing reflects the modeled capacity change of the targeted role."
+      ],
+      "name": "AI and Data",
+      "scenario_budget_usd": 4000000000,
+      "scenario_fte": 4440.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 3500000000,
+      "baseline_fte": 4000.0,
+      "department_id": "dept_product",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Product",
+      "scenario_budget_usd": 3500000000,
+      "scenario_fte": 4000.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 8000000000,
+      "baseline_fte": 9000.0,
+      "department_id": "dept_sales",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Sales",
+      "scenario_budget_usd": 8000000000,
+      "scenario_fte": 9000.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 2500000000,
+      "baseline_fte": 2500.0,
+      "department_id": "dept_marketing",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Marketing",
+      "scenario_budget_usd": 2500000000,
+      "scenario_fte": 2500.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 4500000000,
+      "baseline_fte": 8000.0,
+      "department_id": "dept_customer_success",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Customer Success",
+      "scenario_budget_usd": 4500000000,
+      "scenario_fte": 8000.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 3400000000,
+      "baseline_fte": 3000.0,
+      "department_id": "dept_finance",
+      "effective_day": 30,
+      "lifecycle": "active",
+      "modeling_notes": [
+       "Staffing reflects the modeled capacity change of the targeted role.",
+       "Staffing reflects the modeled capacity change of the targeted role.",
+       "Staffing reflects the modeled capacity change of the targeted role.",
+       "Staffing reflects the modeled capacity change of the targeted role.",
+       "Staffing reflects the modeled capacity change of the targeted role."
+      ],
+      "name": "Finance",
+      "scenario_budget_usd": 3400000000,
+      "scenario_fte": 2280.0,
+      "transferred_workflow_ids": []
+     },
+     {
+      "baseline_budget_usd": 2000000000,
+      "baseline_fte": 2500.0,
+      "department_id": "dept_compliance",
+      "effective_day": 0,
+      "lifecycle": "active",
+      "modeling_notes": [],
+      "name": "Compliance",
+      "scenario_budget_usd": 2000000000,
+      "scenario_fte": 2500.0,
+      "transferred_workflow_ids": []
      }
     ],
     "feasible": false,
@@ -3330,6 +3769,47 @@
       "polarity": "harm",
       "scenario_id": "scn_run_acceptance_act_now_plan_naive",
       "severity": 5,
+      "source_entity": "role_data_platform_lead",
+      "source_kind": "intervention",
+      "source_ref": "remove_data_platform_lead",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": null
+     },
+     {
+      "affected_department": "dept_finance",
+      "affected_entity": "kpi_close_cycle_days",
+      "assumptions": [],
+      "category": "business",
+      "confidence": 0.729,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_data_platform_lead",
+       "kn_warehouse_lineage",
+       "wf_financial_close",
+       "kpi_close_cycle_days"
+      ],
+      "direction": "decrease",
+      "edge_path": [
+       "e_data_platform_lead_knows_lineage",
+       "e_lineage_supports_close",
+       "e_close_cycle"
+      ],
+      "evidence_refs": [
+       "ev_knowledge_matrix_3",
+       "ev_sop_financial_close_lineage"
+      ],
+      "first_effect_day": 30,
+      "impact_id": "imp_kpi_close_cycle_days_loss",
+      "level": "second_order",
+      "magnitude": 0.688808,
+      "metric": "capacity_loss",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 2,
       "source_entity": "role_data_platform_lead",
       "source_kind": "intervention",
       "source_ref": "remove_data_platform_lead",
@@ -3897,11 +4377,11 @@
       "capability_workflow": 25.0,
       "compliance_control": 0.0,
       "customer_revenue": 0.0,
-      "execution_uncertainty": 0.8718,
+      "execution_uncertainty": 0.9799,
       "financial": 25.0
      },
      "level": "high",
-     "score": 50.8718,
+     "score": 50.9799,
      "settings_version": 1
     },
     "run_id": "run_acceptance",
@@ -4047,6 +4527,127 @@
     "passed": true,
     "threshold": 2.0,
     "value": 0.0
+   }
+  ],
+  "department_states": [
+   {
+    "baseline_budget_usd": 9000000000,
+    "baseline_fte": 16300.0,
+    "department_id": "dept_engineering",
+    "effective_day": 0,
+    "lifecycle": "active",
+    "modeling_notes": [],
+    "name": "Engineering",
+    "scenario_budget_usd": 9000000000,
+    "scenario_fte": 16300.0,
+    "transferred_workflow_ids": []
+   },
+   {
+    "baseline_budget_usd": 3100000000,
+    "baseline_fte": 5800.0,
+    "department_id": "dept_operations",
+    "effective_day": 30,
+    "lifecycle": "active",
+    "modeling_notes": [
+     "Staffing reflects the modeled capacity change of the targeted role.",
+     "Staffing reflects the modeled capacity change of the targeted role."
+    ],
+    "name": "Operations",
+    "scenario_budget_usd": 3100000000,
+    "scenario_fte": 5530.0,
+    "transferred_workflow_ids": []
+   },
+   {
+    "baseline_budget_usd": 4000000000,
+    "baseline_fte": 4500.0,
+    "department_id": "dept_ai_data",
+    "effective_day": 30,
+    "lifecycle": "active",
+    "modeling_notes": [
+     "Staffing reflects the modeled capacity change of the targeted role."
+    ],
+    "name": "AI and Data",
+    "scenario_budget_usd": 4000000000,
+    "scenario_fte": 4440.0,
+    "transferred_workflow_ids": []
+   },
+   {
+    "baseline_budget_usd": 3500000000,
+    "baseline_fte": 4000.0,
+    "department_id": "dept_product",
+    "effective_day": 0,
+    "lifecycle": "active",
+    "modeling_notes": [],
+    "name": "Product",
+    "scenario_budget_usd": 3500000000,
+    "scenario_fte": 4000.0,
+    "transferred_workflow_ids": []
+   },
+   {
+    "baseline_budget_usd": 8000000000,
+    "baseline_fte": 9000.0,
+    "department_id": "dept_sales",
+    "effective_day": 0,
+    "lifecycle": "active",
+    "modeling_notes": [],
+    "name": "Sales",
+    "scenario_budget_usd": 8000000000,
+    "scenario_fte": 9000.0,
+    "transferred_workflow_ids": []
+   },
+   {
+    "baseline_budget_usd": 2500000000,
+    "baseline_fte": 2500.0,
+    "department_id": "dept_marketing",
+    "effective_day": 0,
+    "lifecycle": "active",
+    "modeling_notes": [],
+    "name": "Marketing",
+    "scenario_budget_usd": 2500000000,
+    "scenario_fte": 2500.0,
+    "transferred_workflow_ids": []
+   },
+   {
+    "baseline_budget_usd": 4500000000,
+    "baseline_fte": 8000.0,
+    "department_id": "dept_customer_success",
+    "effective_day": 0,
+    "lifecycle": "active",
+    "modeling_notes": [],
+    "name": "Customer Success",
+    "scenario_budget_usd": 4500000000,
+    "scenario_fte": 8000.0,
+    "transferred_workflow_ids": []
+   },
+   {
+    "baseline_budget_usd": 3400000000,
+    "baseline_fte": 3000.0,
+    "department_id": "dept_finance",
+    "effective_day": 30,
+    "lifecycle": "active",
+    "modeling_notes": [
+     "Staffing reflects the modeled capacity change of the targeted role.",
+     "Staffing reflects the modeled capacity change of the targeted role.",
+     "Staffing reflects the modeled capacity change of the targeted role.",
+     "Staffing reflects the modeled capacity change of the targeted role.",
+     "Staffing reflects the modeled capacity change of the targeted role."
+    ],
+    "name": "Finance",
+    "scenario_budget_usd": 3400000000,
+    "scenario_fte": 2280.0,
+    "transferred_workflow_ids": []
+   },
+   {
+    "baseline_budget_usd": 2000000000,
+    "baseline_fte": 2500.0,
+    "department_id": "dept_compliance",
+    "effective_day": 0,
+    "lifecycle": "active",
+    "modeling_notes": [],
+    "name": "Compliance",
+    "scenario_budget_usd": 2000000000,
+    "scenario_fte": 2500.0,
+    "transferred_workflow_ids": []
    }
   ],
   "feasible": false,
@@ -4366,6 +4967,47 @@
     "polarity": "harm",
     "scenario_id": "scn_run_acceptance_act_now_none",
     "severity": 5,
+    "source_entity": "role_data_platform_lead",
+    "source_kind": "intervention",
+    "source_ref": "remove_data_platform_lead",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": null
+   },
+   {
+    "affected_department": "dept_finance",
+    "affected_entity": "kpi_close_cycle_days",
+    "assumptions": [],
+    "category": "business",
+    "confidence": 0.729,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_data_platform_lead",
+     "kn_warehouse_lineage",
+     "wf_financial_close",
+     "kpi_close_cycle_days"
+    ],
+    "direction": "decrease",
+    "edge_path": [
+     "e_data_platform_lead_knows_lineage",
+     "e_lineage_supports_close",
+     "e_close_cycle"
+    ],
+    "evidence_refs": [
+     "ev_knowledge_matrix_3",
+     "ev_sop_financial_close_lineage"
+    ],
+    "first_effect_day": 30,
+    "impact_id": "imp_kpi_close_cycle_days_loss",
+    "level": "second_order",
+    "magnitude": 0.688808,
+    "metric": "capacity_loss",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 2,
     "source_entity": "role_data_platform_lead",
     "source_kind": "intervention",
     "source_ref": "remove_data_platform_lead",
@@ -4933,11 +5575,11 @@
     "capability_workflow": 25.0,
     "compliance_control": 0.0,
     "customer_revenue": 0.0,
-    "execution_uncertainty": 0.8718,
+    "execution_uncertainty": 0.9799,
     "financial": 25.0
    },
    "level": "high",
-   "score": 50.8718,
+   "score": 50.9799,
    "settings_version": 1
   },
   "run_id": "run_acceptance",
@@ -5085,6 +5727,127 @@
      "passed": true,
      "threshold": 2.0,
      "value": 0.0
+    }
+   ],
+   "department_states": [
+    {
+     "baseline_budget_usd": 9000000000,
+     "baseline_fte": 16300.0,
+     "department_id": "dept_engineering",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Engineering",
+     "scenario_budget_usd": 9000000000,
+     "scenario_fte": 16300.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3100000000,
+     "baseline_fte": 5800.0,
+     "department_id": "dept_operations",
+     "effective_day": 30,
+     "lifecycle": "active",
+     "modeling_notes": [
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role."
+     ],
+     "name": "Operations",
+     "scenario_budget_usd": 3100000000,
+     "scenario_fte": 5530.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4000000000,
+     "baseline_fte": 4500.0,
+     "department_id": "dept_ai_data",
+     "effective_day": 30,
+     "lifecycle": "active",
+     "modeling_notes": [
+      "Staffing reflects the modeled capacity change of the targeted role."
+     ],
+     "name": "AI and Data",
+     "scenario_budget_usd": 4000000000,
+     "scenario_fte": 4440.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3500000000,
+     "baseline_fte": 4000.0,
+     "department_id": "dept_product",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Product",
+     "scenario_budget_usd": 3500000000,
+     "scenario_fte": 4000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 8000000000,
+     "baseline_fte": 9000.0,
+     "department_id": "dept_sales",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Sales",
+     "scenario_budget_usd": 8000000000,
+     "scenario_fte": 9000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2500000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_marketing",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Marketing",
+     "scenario_budget_usd": 2500000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4500000000,
+     "baseline_fte": 8000.0,
+     "department_id": "dept_customer_success",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Customer Success",
+     "scenario_budget_usd": 4500000000,
+     "scenario_fte": 8000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3400000000,
+     "baseline_fte": 3000.0,
+     "department_id": "dept_finance",
+     "effective_day": 30,
+     "lifecycle": "active",
+     "modeling_notes": [
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role."
+     ],
+     "name": "Finance",
+     "scenario_budget_usd": 3400000000,
+     "scenario_fte": 2280.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2000000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_compliance",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Compliance",
+     "scenario_budget_usd": 2000000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
     }
    ],
    "feasible": false,
@@ -5404,6 +6167,47 @@
      "polarity": "harm",
      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
      "severity": 5,
+     "source_entity": "role_data_platform_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_data_platform_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "kpi_close_cycle_days",
+     "assumptions": [],
+     "category": "business",
+     "confidence": 0.729,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_data_platform_lead",
+      "kn_warehouse_lineage",
+      "wf_financial_close",
+      "kpi_close_cycle_days"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_data_platform_lead_knows_lineage",
+      "e_lineage_supports_close",
+      "e_close_cycle"
+     ],
+     "evidence_refs": [
+      "ev_knowledge_matrix_3",
+      "ev_sop_financial_close_lineage"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_kpi_close_cycle_days_loss",
+     "level": "second_order",
+     "magnitude": 0.688808,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 2,
      "source_entity": "role_data_platform_lead",
      "source_kind": "intervention",
      "source_ref": "remove_data_platform_lead",
@@ -6095,11 +6899,11 @@
      "capability_workflow": 25.0,
      "compliance_control": 0.0,
      "customer_revenue": 0.0,
-     "execution_uncertainty": 0.8718,
+     "execution_uncertainty": 0.9799,
      "financial": 25.0
     },
     "level": "high",
-    "score": 50.8718,
+    "score": 50.9799,
     "settings_version": 1
    },
    "run_id": "run_acceptance",
@@ -6246,6 +7050,127 @@
      "passed": true,
      "threshold": 2.0,
      "value": 0.0
+    }
+   ],
+   "department_states": [
+    {
+     "baseline_budget_usd": 9000000000,
+     "baseline_fte": 16300.0,
+     "department_id": "dept_engineering",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Engineering",
+     "scenario_budget_usd": 9000000000,
+     "scenario_fte": 16300.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3100000000,
+     "baseline_fte": 5800.0,
+     "department_id": "dept_operations",
+     "effective_day": 120,
+     "lifecycle": "active",
+     "modeling_notes": [
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role."
+     ],
+     "name": "Operations",
+     "scenario_budget_usd": 3100000000,
+     "scenario_fte": 5530.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4000000000,
+     "baseline_fte": 4500.0,
+     "department_id": "dept_ai_data",
+     "effective_day": 120,
+     "lifecycle": "active",
+     "modeling_notes": [
+      "Staffing reflects the modeled capacity change of the targeted role."
+     ],
+     "name": "AI and Data",
+     "scenario_budget_usd": 4000000000,
+     "scenario_fte": 4440.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3500000000,
+     "baseline_fte": 4000.0,
+     "department_id": "dept_product",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Product",
+     "scenario_budget_usd": 3500000000,
+     "scenario_fte": 4000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 8000000000,
+     "baseline_fte": 9000.0,
+     "department_id": "dept_sales",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Sales",
+     "scenario_budget_usd": 8000000000,
+     "scenario_fte": 9000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2500000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_marketing",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Marketing",
+     "scenario_budget_usd": 2500000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4500000000,
+     "baseline_fte": 8000.0,
+     "department_id": "dept_customer_success",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Customer Success",
+     "scenario_budget_usd": 4500000000,
+     "scenario_fte": 8000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3400000000,
+     "baseline_fte": 3000.0,
+     "department_id": "dept_finance",
+     "effective_day": 120,
+     "lifecycle": "active",
+     "modeling_notes": [
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role.",
+      "Staffing reflects the modeled capacity change of the targeted role."
+     ],
+     "name": "Finance",
+     "scenario_budget_usd": 3400000000,
+     "scenario_fte": 2280.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2000000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_compliance",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Compliance",
+     "scenario_budget_usd": 2000000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
     }
    ],
    "feasible": false,
@@ -6565,6 +7490,47 @@
      "polarity": "harm",
      "scenario_id": "scn_run_acceptance_delay_plan_naive",
      "severity": 5,
+     "source_entity": "role_data_platform_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_data_platform_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "kpi_close_cycle_days",
+     "assumptions": [],
+     "category": "business",
+     "confidence": 0.729,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_data_platform_lead",
+      "kn_warehouse_lineage",
+      "wf_financial_close",
+      "kpi_close_cycle_days"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_data_platform_lead_knows_lineage",
+      "e_lineage_supports_close",
+      "e_close_cycle"
+     ],
+     "evidence_refs": [
+      "ev_knowledge_matrix_3",
+      "ev_sop_financial_close_lineage"
+     ],
+     "first_effect_day": 120,
+     "impact_id": "imp_kpi_close_cycle_days_loss",
+     "level": "delayed",
+     "magnitude": 0.688808,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 2,
      "source_entity": "role_data_platform_lead",
      "source_kind": "intervention",
      "source_ref": "remove_data_platform_lead",
@@ -7256,11 +8222,11 @@
      "capability_workflow": 25.0,
      "compliance_control": 0.0,
      "customer_revenue": 0.0,
-     "execution_uncertainty": 0.8718,
+     "execution_uncertainty": 0.9799,
      "financial": 25.0
     },
     "level": "high",
-    "score": 50.8718,
+    "score": 50.9799,
     "settings_version": 1
    },
    "run_id": "run_acceptance",
@@ -7401,6 +8367,116 @@
      "passed": true,
      "threshold": 2.0,
      "value": 0.0
+    }
+   ],
+   "department_states": [
+    {
+     "baseline_budget_usd": 9000000000,
+     "baseline_fte": 16300.0,
+     "department_id": "dept_engineering",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Engineering",
+     "scenario_budget_usd": 9000000000,
+     "scenario_fte": 16300.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3100000000,
+     "baseline_fte": 5800.0,
+     "department_id": "dept_operations",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Operations",
+     "scenario_budget_usd": 3100000000,
+     "scenario_fte": 5800.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4000000000,
+     "baseline_fte": 4500.0,
+     "department_id": "dept_ai_data",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "AI and Data",
+     "scenario_budget_usd": 4000000000,
+     "scenario_fte": 4500.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3500000000,
+     "baseline_fte": 4000.0,
+     "department_id": "dept_product",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Product",
+     "scenario_budget_usd": 3500000000,
+     "scenario_fte": 4000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 8000000000,
+     "baseline_fte": 9000.0,
+     "department_id": "dept_sales",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Sales",
+     "scenario_budget_usd": 8000000000,
+     "scenario_fte": 9000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2500000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_marketing",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Marketing",
+     "scenario_budget_usd": 2500000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 4500000000,
+     "baseline_fte": 8000.0,
+     "department_id": "dept_customer_success",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Customer Success",
+     "scenario_budget_usd": 4500000000,
+     "scenario_fte": 8000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 3400000000,
+     "baseline_fte": 3000.0,
+     "department_id": "dept_finance",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Finance",
+     "scenario_budget_usd": 3400000000,
+     "scenario_fte": 3000.0,
+     "transferred_workflow_ids": []
+    },
+    {
+     "baseline_budget_usd": 2000000000,
+     "baseline_fte": 2500.0,
+     "department_id": "dept_compliance",
+     "effective_day": 0,
+     "lifecycle": "active",
+     "modeling_notes": [],
+     "name": "Compliance",
+     "scenario_budget_usd": 2000000000,
+     "scenario_fte": 2500.0,
+     "transferred_workflow_ids": []
     }
    ],
    "feasible": true,

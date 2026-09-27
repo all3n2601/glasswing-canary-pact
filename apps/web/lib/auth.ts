@@ -2,6 +2,14 @@ import type { LoginRequest, SignupRequest, UserPublic } from "@canary-pact/contr
 
 type AuthResponse = { user: UserPublic; expires_at: string };
 
+export function safeReturnTo(value?: string) {
+  // Backslashes and control characters can normalize into an external URL.
+  if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//") || /[\\\x00-\x20]/.test(value)) return "/simulate";
+  const pathname = new URL(value, "https://canary.invalid").pathname;
+  if (/^\/(login|signup|api)(\/|$)/.test(pathname)) return "/simulate";
+  return value;
+}
+
 async function authError(response: Response, fallback: string): Promise<Error> {
   try {
     const body = (await response.json()) as { detail?: string | Array<{ msg?: string }> };

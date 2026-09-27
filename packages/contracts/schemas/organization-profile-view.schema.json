@@ -284,6 +284,25 @@
         "enabled": {
           "title": "Enabled",
           "type": "boolean"
+        },
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "agent_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
         }
       },
       "required": [
@@ -468,12 +487,8 @@
           "type": "array"
         },
         "llm_mode": {
-          "default": "replay",
-          "enum": [
-            "live",
-            "replay",
-            "mock"
-          ],
+          "const": "live",
+          "default": "live",
           "title": "Llm Mode",
           "type": "string"
         },
@@ -693,6 +708,18 @@
   },
   "additionalProperties": false,
   "properties": {
+    "twin_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Twin Version"
+    },
     "schema_version": {
       "default": "2.1.1",
       "enum": [

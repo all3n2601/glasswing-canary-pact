@@ -1,6 +1,6 @@
 "use client";
 
-import type { BlastEdge, BlastNode, BlastRadius, DecisionPackage, DomainGraph, Edge as DomainEdge, Entity, Impact } from "@canary-pact/contracts/generated";
+import type { BlastEdge, BlastNode, BlastRadius, DecisionPackage, DomainGraph, Edge as DomainEdge, Entity, Impact, SimulationResult } from "@canary-pact/contracts/generated";
 import { Background, Controls, MiniMap, type Edge, type Node, ReactFlow } from "@xyflow/react";
 import { CalendarClock, FileText, Filter, Search, ShieldAlert, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -122,7 +122,7 @@ function blastEdges(edges: BlastEdge[], visibleIds: Set<string>, selected: Selec
   });
 }
 
-function EvidenceInspector({ selected, graph, blast, decisionPackage, onClose }: { selected: SelectedItem; graph: DomainGraph; blast?: BlastRadius | null; decisionPackage?: DecisionPackage | null; onClose: () => void }) {
+function EvidenceInspector({ selected, graph, blast, decisionPackage, selectedResult, onClose }: { selected: SelectedItem; graph: DomainGraph; blast?: BlastRadius | null; decisionPackage?: DecisionPackage | null; selectedResult?: SimulationResult; onClose: () => void }) {
   if (!selected) return null;
   const entities = graph.nodes ?? [];
   const domainEdges = graph.edges ?? [];
@@ -133,7 +133,7 @@ function EvidenceInspector({ selected, graph, blast, decisionPackage, onClose }:
   const domainEdge = selected.kind === "edge" ? domainEdges.find((item) => item.id === selected.id) : undefined;
   const blastSource = blast?.nodes?.find((item) => item.node_id === blastEdge?.source);
   const blastTarget = blast?.nodes?.find((item) => item.node_id === blastEdge?.target);
-  const result = decisionPackage?.portfolios.recommended?.result ?? decisionPackage?.portfolios.naive.result;
+  const result = selectedResult;
   const impact = blastNode?.impact_ids?.map((id) => result?.impacts?.find((item) => item.impact_id === id)).find(Boolean) as Impact | undefined;
   const connected = entity ? domainEdges.filter((edge) => edge.source === entity.id || edge.target === entity.id) : [];
   const evidence = [...new Set([...(entity?.evidence_refs ?? []), ...(impact?.evidence_refs ?? []), ...(domainEdge?.evidence_refs ?? []), ...connected.flatMap((edge) => edge.evidence_refs ?? [])])];
@@ -151,16 +151,14 @@ function EvidenceInspector({ selected, graph, blast, decisionPackage, onClose }:
   </aside>;
 }
 
-export function CompanyGraph({ graph, blastRadius, decisionPackage, day, loading, error }: { graph: DomainGraph | null; blastRadius?: BlastRadius | null; decisionPackage?: DecisionPackage | null; day: number; loading: boolean; error: string | null }) {
+export function CompanyGraph({ graph, blastRadius, decisionPackage, selectedResult, day, loading, error }: { graph: DomainGraph | null; blastRadius?: BlastRadius | null; decisionPackage?: DecisionPackage | null; selectedResult?: SimulationResult; day: number; loading: boolean; error: string | null }) {
   const [mode, setMode] = useState<GraphMode>(blastRadius ? "blast" : "twin");
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [selected, setSelected] = useState<SelectedItem>(null);
   useEffect(() => {
-    if (blastRadius) {
-      setMode("blast");
-      setSelected(null);
-    }
+    setMode(blastRadius ? "blast" : "twin");
+    setSelected(null);
   }, [blastRadius]);
   const baseGraph = graph ?? { nodes: [], edges: [] };
   const entities = baseGraph.nodes ?? [];
@@ -195,6 +193,6 @@ export function CompanyGraph({ graph, blastRadius, decisionPackage, day, loading
       <div className="mt-3 flex items-center justify-between border-t border-zinc-100 pt-2 text-[9px] text-zinc-500"><span>{nodes.length} nodes · {edges.length} dependencies</span>{mode === "blast" ? <span className="flex items-center gap-1"><CalendarClock className="size-3" />Through day {day}</span> : <span>Click a node or edge</span>}</div>
     </div>
 
-    <EvidenceInspector selected={selected} graph={baseGraph} blast={mode === "blast" ? blastRadius : null} decisionPackage={decisionPackage} onClose={() => setSelected(null)} />
+    <EvidenceInspector selected={selected} graph={baseGraph} blast={mode === "blast" ? blastRadius : null} decisionPackage={decisionPackage} selectedResult={selectedResult} onClose={() => setSelected(null)} />
   </div>;
 }

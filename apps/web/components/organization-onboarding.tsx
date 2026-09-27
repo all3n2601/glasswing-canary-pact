@@ -8,6 +8,7 @@ import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { saveOrganizationProfile } from "@/lib/organization-profile";
 import { formatCompactCurrency } from "@/lib/formatters";
 
 const steps = [
@@ -23,6 +24,8 @@ const fieldClass = "h-11 rounded-xl border-zinc-200 bg-white text-sm shadow-none
 export function OrganizationOnboarding({ profile }: { profile: OrganizationProfile }) {
   const router = useRouter();
   const [step, setStep] = useState(0);
+  const [saveError,setSaveError] = useState<string|null>(null);
+  const [saving,setSaving] = useState(false);
   const [organization, setOrganization] = useState(profile.organization);
   const [departments, setDepartments] = useState(profile.departments);
   const [riskAppetite, setRiskAppetite] = useState(profile.settings.risk_appetite);
@@ -33,9 +36,14 @@ export function OrganizationOnboarding({ profile }: { profile: OrganizationProfi
     budget: enabledDepartments.reduce((sum, department) => sum + department.annual_budget_usd, 0),
   }), [enabledDepartments]);
 
-  const next = () => {
-    if (step < steps.length - 1) setStep((current) => current + 1);
-    else router.push("/settings/organization?onboarded=true");
+  const next = async () => {
+    if (step < steps.length - 1) {setStep(current=>current+1);return;}
+    setSaving(true);setSaveError(null);
+    try {
+      await saveOrganizationProfile({...profile,organization,departments,settings:{...profile.settings,risk_appetite:riskAppetite,default_horizon_days:horizon}});
+      router.push("/settings/organization?onboarded=true");router.refresh();
+    } catch(error) {setSaveError(error instanceof Error ? error.message : "Could not save organization");}
+    finally {setSaving(false);}
   };
 
   return (
@@ -57,6 +65,7 @@ export function OrganizationOnboarding({ profile }: { profile: OrganizationProfi
         </aside>
 
         <section className="flex min-h-[720px] flex-col">
+          {saveError ? <p role="alert" className="rounded-xl bg-red-50 p-3 text-xs text-red-700">{saveError}</p> : null}
           <header className="flex h-20 items-center justify-between border-b border-zinc-100 px-6 sm:px-10"><div><span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-zinc-400">Step {step + 1} of {steps.length}</span><p className="mt-0.5 text-sm font-semibold">{steps[step].label}</p></div><Button variant="ghost" className="text-zinc-500" onClick={() => router.push("/")}>Exit setup</Button></header>
 
           <div className="flex-1 px-6 py-10 sm:px-10 lg:px-16 lg:py-14">
@@ -115,7 +124,7 @@ export function OrganizationOnboarding({ profile }: { profile: OrganizationProfi
             </motion.div>
           </div>
 
-          <footer className="flex items-center justify-between border-t border-zinc-100 px-6 py-5 sm:px-10"><Button variant="ghost" onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0}><ArrowLeft />Back</Button><div className="hidden items-center gap-2 text-[10px] text-zinc-400 sm:flex"><CircleDollarSign className="size-3.5" />Money remains stored in USD</div><Button onClick={next} className="bg-zinc-950 text-white hover:bg-zinc-800">{step === steps.length - 1 ? "Finish setup" : "Continue"}<ArrowRight /></Button></footer>
+          <footer className="flex items-center justify-between border-t border-zinc-100 px-6 py-5 sm:px-10"><Button variant="ghost" onClick={() => setStep((current) => Math.max(0, current - 1))} disabled={step === 0}><ArrowLeft />Back</Button><div className="hidden items-center gap-2 text-[10px] text-zinc-400 sm:flex"><CircleDollarSign className="size-3.5" />Money remains stored in USD</div><Button onClick={next} disabled={saving} className="bg-zinc-950 text-white hover:bg-zinc-800">{step === steps.length - 1 ? "Finish setup" : "Continue"}<ArrowRight /></Button></footer>
         </section>
       </div>
     </main>

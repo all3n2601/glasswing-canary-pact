@@ -2,6 +2,77 @@
 
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "Future".
+ */
+export type Future = "act_now" | "inaction" | "delay" | "alternative";
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "ImpactLevel".
+ */
+export type ImpactLevel = "direct" | "dependent" | "second_order" | "delayed" | "feedback";
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "ImpactCategory".
+ */
+export type ImpactCategory = "ownership" | "technical" | "operational" | "business" | "compliance" | "financial";
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "Polarity".
+ */
+export type Polarity = "benefit" | "harm";
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "Direction".
+ */
+export type Direction = "increase" | "decrease" | "no_change";
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "Origin".
+ */
+export type Origin = "engine" | "agent" | "challenger" | "user";
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "ClaimStatus".
+ */
+export type ClaimStatus = "computed" | "validated" | "hypothesis" | "rejected";
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "Criticality".
+ */
+export type Criticality = "low" | "medium" | "high" | "critical";
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "RiskLevel".
+ */
+export type RiskLevel = "low" | "medium" | "high" | "critical";
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "RiskAppetite".
+ */
+export type RiskAppetite = "conservative" | "balanced" | "aggressive";
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "DocumentType".
+ */
+export type DocumentType =
+  | "contract"
+  | "policy"
+  | "runbook"
+  | "sop"
+  | "architecture_note"
+  | "org_chart"
+  | "budget_report"
+  | "financial_forecast"
+  | "kpi_report"
+  | "incident_report"
+  | "audit_report"
+  | "workflow_map"
+  | "knowledge_matrix"
+  | "meeting_minutes"
+  | "strategy_memo"
+  | "other";
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
  * via the `definition` "Sector".
  */
 export type Sector =
@@ -54,11 +125,6 @@ export type EntityType =
   | "kpi"
   | "customer_segment"
   | "dataset";
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "Criticality".
- */
-export type Criticality = "low" | "medium" | "high" | "critical";
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
  * via the `definition` "Sensitivity".
@@ -120,27 +186,6 @@ export type MitigationType =
   | "retain_capacity_temporarily";
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "DocumentType".
- */
-export type DocumentType =
-  | "contract"
-  | "policy"
-  | "runbook"
-  | "sop"
-  | "architecture_note"
-  | "org_chart"
-  | "budget_report"
-  | "financial_forecast"
-  | "kpi_report"
-  | "incident_report"
-  | "audit_report"
-  | "workflow_map"
-  | "knowledge_matrix"
-  | "meeting_minutes"
-  | "strategy_memo"
-  | "other";
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
  * via the `definition` "DocumentStatus".
  */
 export type DocumentStatus = "current" | "outdated" | "draft" | "archived";
@@ -162,16 +207,6 @@ export type EvidenceSource =
   | "finance_forecast";
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "Future".
- */
-export type Future = "act_now" | "inaction" | "delay" | "alternative";
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "RiskAppetite".
- */
-export type RiskAppetite = "conservative" | "balanced" | "aggressive";
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
  * via the `definition` "DecisionType".
  */
 export type DecisionType =
@@ -187,41 +222,6 @@ export type DecisionType =
  * via the `definition` "InterventionKind".
  */
 export type InterventionKind = "action" | "mitigation";
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "ImpactLevel".
- */
-export type ImpactLevel = "direct" | "dependent" | "second_order" | "delayed" | "feedback";
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "ImpactCategory".
- */
-export type ImpactCategory = "ownership" | "technical" | "operational" | "business" | "compliance" | "financial";
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "Polarity".
- */
-export type Polarity = "benefit" | "harm";
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "Direction".
- */
-export type Direction = "increase" | "decrease" | "no_change";
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "Origin".
- */
-export type Origin = "engine" | "agent" | "challenger" | "user";
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "ClaimStatus".
- */
-export type ClaimStatus = "computed" | "validated" | "hypothesis" | "rejected";
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "RiskLevel".
- */
-export type RiskLevel = "low" | "medium" | "high" | "critical";
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
  * via the `definition` "MigrationDifficulty".
@@ -303,6 +303,7 @@ export type OverlapDimension =
   | "substitutability";
 
 export interface CanaryContracts {
+  QuickOfficePreview: QuickOfficePreview;
   Twin: Twin;
   Organization: Organization;
   DepartmentProfile: DepartmentProfile;
@@ -334,6 +335,7 @@ export interface CanaryContracts {
   MissingQuestion: MissingQuestion;
   UserAnswer: UserAnswer;
   AgentSpec: AgentSpec;
+  AgentSkillFile: AgentSkillFile;
   AgentContext: AgentContext;
   AgentOutput: AgentOutput;
   ChallengerOutput: ChallengerOutput;
@@ -354,6 +356,10 @@ export interface CanaryContracts {
   ReplayInfo: ReplayInfo;
   ReplayStarted: ReplayStarted;
   OrganizationProfileView: OrganizationProfileView;
+  DepartmentContextItemCreate: DepartmentContextItemCreate;
+  DepartmentSave: DepartmentSave;
+  OrganizationSave: OrganizationSave;
+  RunEventPage: RunEventPage;
   SignupRequest: SignupRequest;
   LoginRequest: LoginRequest;
   UserPublic: UserPublic;
@@ -361,9 +367,283 @@ export interface CanaryContracts {
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "QuickOfficePreview".
+ */
+export interface QuickOfficePreview {
+  baseline_twin_version: string;
+  result: SimulationResult;
+  blast_radius: BlastRadius;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "SimulationResult".
+ */
+export interface SimulationResult {
+  result_id: string;
+  run_id: string;
+  scenario_id: string;
+  future: Future;
+  plan_id?: string | null;
+  mode: "quick" | "full";
+  seed?: number | null;
+  intervention_ids?: string[];
+  department_states?: DepartmentScenarioState[];
+  value: ValueBreakdown;
+  goal_met: boolean;
+  constraint_results?: ConstraintResult[];
+  impacts?: Impact[];
+  workflow_coverage?: WorkflowCoverage[];
+  knowledge_coverage?: KnowledgeCoverage[];
+  pressures_triggered?: PressureTrigger[];
+  risk: RiskScore;
+  affected_department_ids?: string[];
+  feasible: boolean;
+  rejection_reasons?: string[];
+  assumptions?: string[];
+  computed_at: string;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "DepartmentScenarioState".
+ */
+export interface DepartmentScenarioState {
+  department_id: string;
+  name: string;
+  lifecycle: "active" | "added" | "closed";
+  baseline_fte: number;
+  scenario_fte: number;
+  baseline_budget_usd: number;
+  scenario_budget_usd: number;
+  effective_day: number;
+  transferred_workflow_ids?: string[];
+  modeling_notes?: string[];
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "ValueBreakdown".
+ */
+export interface ValueBreakdown {
+  gross_savings_usd: number;
+  transition_cost_usd: number;
+  added_cost_usd: number;
+  rebound_cost_usd: number;
+  expected_business_loss_usd: number;
+  pressure_cost_usd: number;
+  avoided_failure_cost_usd: number;
+  net_value_usd: number;
+  monthly_net_usd?: number[];
+  p10_net_value_usd?: number | null;
+  p50_net_value_usd?: number | null;
+  p90_net_value_usd?: number | null;
+  /**
+   * Contract termination fees paid to exit vendors or projects.
+   */
+  termination_cost_usd?: number | null;
+  /**
+   * One-time cost of moving work or data onto a replacement.
+   */
+  migration_cost_usd?: number | null;
+  /**
+   * Cost of work pushed onto remaining teams by the change.
+   */
+  displaced_work_cost_usd?: number | null;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "ConstraintResult".
+ */
+export interface ConstraintResult {
+  constraint_id: string;
+  metric:
+    | "annual_savings_usd"
+    | "net_value_usd"
+    | "revenue_impact_pct"
+    | "customer_impact_pct"
+    | "compliance_controls_broken"
+    | "stranded_workflows"
+    | "critical_systems_degraded"
+    | "max_capacity_loss_pct"
+    | "critical_coverage_pct";
+  operator: "<=" | ">=" | "==";
+  threshold: number;
+  value: number;
+  hard: boolean;
+  passed: boolean;
+  explanation: string;
+  impact_ids?: string[];
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "Impact".
+ */
+export interface Impact {
+  impact_id: string;
+  decision_id: string;
+  scenario_id: string;
+  source_entity: string;
+  source_kind: "intervention" | "pressure";
+  source_ref: string;
+  affected_entity: string;
+  affected_department?: string | null;
+  level: ImpactLevel;
+  category: ImpactCategory;
+  polarity: Polarity;
+  direction: Direction;
+  metric: string;
+  magnitude: number;
+  unit: string;
+  value_usd?: number | null;
+  severity: number;
+  first_effect_day: number;
+  peak_effect_day: number;
+  confidence: number;
+  dependency_path?: string[];
+  edge_path?: string[];
+  evidence_refs?: string[];
+  assumptions?: string[];
+  constraint_refs?: string[];
+  origin: Origin;
+  status: ClaimStatus;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "WorkflowCoverage".
+ */
+export interface WorkflowCoverage {
+  workflow_id: string;
+  criticality: Criticality;
+  owners_before?: string[];
+  owners_after?: string[];
+  min_qualified_owners: number;
+  backup_count_after: number;
+  documented_pct: number;
+  stranded: boolean;
+  reasons?: string[];
+  owner_capacity_fte_before?: number | null;
+  owner_capacity_fte_after?: number | null;
+  exception_documented_pct?: number | null;
+  automation_pct?: number | null;
+  training_days_required?: number | null;
+  replacement_cost_usd?: number | null;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "KnowledgeCoverage".
+ */
+export interface KnowledgeCoverage {
+  knowledge_id: string;
+  holders_before?: string[];
+  holders_after?: string[];
+  holder_capacity_fte_before: number;
+  holder_capacity_fte_after: number;
+  documented_pct: number;
+  lost: boolean;
+  dependent_workflow_ids?: string[];
+  reasons?: string[];
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "PressureTrigger".
+ */
+export interface PressureTrigger {
+  pressure_id: string;
+  expected_events: number;
+  expected_cost_usd: number;
+  neutralised: boolean;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "RiskScore".
+ */
+export interface RiskScore {
+  score: number;
+  level: RiskLevel;
+  settings_version: number;
+  components: RiskComponents;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "RiskComponents".
+ */
+export interface RiskComponents {
+  financial: number;
+  capability_workflow: number;
+  customer_revenue: number;
+  compliance_control: number;
+  execution_uncertainty: number;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "BlastRadius".
+ */
+export interface BlastRadius {
+  run_id: string;
+  scenario_id: string;
+  future: Future;
+  plan_id?: string | null;
+  root_node_id: string;
+  nodes?: BlastNode[];
+  edges?: BlastEdge[];
+  departments?: DepartmentImpactSummary[];
+  outcome: CompanyOutcome;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "BlastNode".
+ */
+export interface BlastNode {
+  node_id: string;
+  kind: "decision" | "department" | "entity" | "pressure" | "outcome";
+  department_id?: string | null;
+  entity_id?: string | null;
+  pressure_id?: string | null;
+  headline: string;
+  level?: ImpactLevel | null;
+  category?: ImpactCategory | null;
+  polarity?: Polarity | null;
+  severity?: number | null;
+  value_usd?: number | null;
+  first_effect_day?: number | null;
+  impact_ids?: string[];
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "BlastEdge".
+ */
+export interface BlastEdge {
+  source: string;
+  target: string;
+  label: string;
+  level?: ImpactLevel | null;
+  critical_constraint: boolean;
+  channel_id?: string | null;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "DepartmentImpactSummary".
+ */
+export interface DepartmentImpactSummary {
+  department_id: string;
+  headline: string;
+  polarity: Polarity;
+  severity: number;
+  impact_ids?: string[];
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "CompanyOutcome".
+ */
+export interface CompanyOutcome {
+  net_value_usd: number;
+  risk_level: RiskLevel;
+  headline: string;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
  * via the `definition` "Twin".
  */
 export interface Twin {
+  organization_settings?: OrganizationSettings | null;
   schema_version?: "2.1.0" | "2.1.1";
   version: VersionInfo;
   organization: Organization;
@@ -373,6 +653,89 @@ export interface Twin {
   pressures?: Pressure[];
   documents?: Document[];
   evidence?: Evidence[];
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "OrganizationSettings".
+ */
+export interface OrganizationSettings {
+  settings_id?: string;
+  organization_id?: string | null;
+  settings_version?: number;
+  updated_by?: string;
+  updated_at?: string;
+  display_currency?: string;
+  money_display_scale?: "auto" | "K" | "M" | "B";
+  timezone?: string;
+  locale?: string;
+  default_horizon_days?: number;
+  default_futures?: Future[];
+  default_delay_days?: number;
+  mc_samples?: number;
+  default_seed?: number;
+  propagation_max_hops?: number;
+  min_impact_threshold?: number;
+  risk_appetite?: RiskAppetite;
+  risk_level_thresholds?: RiskLevelThresholds;
+  risk_weights?: RiskWeights;
+  optimizer_objective?: "max_net_value" | "min_risk" | "balanced";
+  default_constraints?: Constraint[];
+  always_protected_entity_ids?: string[];
+  require_human_approval?: true;
+  anonymize_people?: true;
+  enabled_agent_ids?: string[];
+  llm_mode?: "live";
+  model_id_strong?: string | null;
+  model_id_fast?: string | null;
+  max_tool_calls?: number;
+  temperature?: number;
+  agent_timeout_seconds?: number;
+  doc_staleness_days?: number;
+  required_doc_types_per_workflow?: DocumentType[];
+  sector_preset_id?: string | null;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "RiskLevelThresholds".
+ */
+export interface RiskLevelThresholds {
+  medium?: number;
+  high?: number;
+  critical?: number;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "RiskWeights".
+ */
+export interface RiskWeights {
+  financial?: number;
+  capability_workflow?: number;
+  customer_revenue?: number;
+  compliance_control?: number;
+  execution_uncertainty?: number;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "Constraint".
+ */
+export interface Constraint {
+  id: string;
+  metric:
+    | "annual_savings_usd"
+    | "net_value_usd"
+    | "revenue_impact_pct"
+    | "customer_impact_pct"
+    | "compliance_controls_broken"
+    | "stranded_workflows"
+    | "critical_systems_degraded"
+    | "max_capacity_loss_pct"
+    | "critical_coverage_pct";
+  operator: "<=" | ">=" | "==";
+  threshold: number;
+  unit: string;
+  hard: boolean;
+  scope_entity_id?: string | null;
+  description: string;
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
@@ -430,6 +793,7 @@ export interface StrategicPriority {
  * via the `definition` "DepartmentProfile".
  */
 export interface DepartmentProfile {
+  active?: boolean;
   department_id: string;
   mission: string;
   head_role_id?: string | null;
@@ -636,89 +1000,6 @@ export interface Evidence {
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "OrganizationSettings".
- */
-export interface OrganizationSettings {
-  settings_id?: string;
-  organization_id?: string | null;
-  settings_version?: number;
-  updated_by?: string;
-  updated_at?: string;
-  display_currency?: string;
-  money_display_scale?: "auto" | "K" | "M" | "B";
-  timezone?: string;
-  locale?: string;
-  default_horizon_days?: number;
-  default_futures?: Future[];
-  default_delay_days?: number;
-  mc_samples?: number;
-  default_seed?: number;
-  propagation_max_hops?: number;
-  min_impact_threshold?: number;
-  risk_appetite?: RiskAppetite;
-  risk_level_thresholds?: RiskLevelThresholds;
-  risk_weights?: RiskWeights;
-  optimizer_objective?: "max_net_value" | "min_risk" | "balanced";
-  default_constraints?: Constraint[];
-  always_protected_entity_ids?: string[];
-  require_human_approval?: true;
-  anonymize_people?: true;
-  enabled_agent_ids?: string[];
-  llm_mode?: "live" | "replay" | "mock";
-  model_id_strong?: string | null;
-  model_id_fast?: string | null;
-  max_tool_calls?: number;
-  temperature?: number;
-  agent_timeout_seconds?: number;
-  doc_staleness_days?: number;
-  required_doc_types_per_workflow?: DocumentType[];
-  sector_preset_id?: string | null;
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "RiskLevelThresholds".
- */
-export interface RiskLevelThresholds {
-  medium?: number;
-  high?: number;
-  critical?: number;
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "RiskWeights".
- */
-export interface RiskWeights {
-  financial?: number;
-  capability_workflow?: number;
-  customer_revenue?: number;
-  compliance_control?: number;
-  execution_uncertainty?: number;
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "Constraint".
- */
-export interface Constraint {
-  id: string;
-  metric:
-    | "annual_savings_usd"
-    | "net_value_usd"
-    | "revenue_impact_pct"
-    | "customer_impact_pct"
-    | "compliance_controls_broken"
-    | "stranded_workflows"
-    | "critical_systems_degraded"
-    | "max_capacity_loss_pct"
-    | "critical_coverage_pct";
-  operator: "<=" | ">=" | "==";
-  threshold: number;
-  unit: string;
-  hard: boolean;
-  scope_entity_id?: string | null;
-  description: string;
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
  * via the `definition` "SectorPreset".
  */
 export interface SectorPreset {
@@ -800,6 +1081,7 @@ export interface DecisionBrief {
   goal: Goal;
   horizon_days?: number;
   candidate_interventions: Intervention[];
+  organization_changes?: OrganizationChange[];
   protected_entity_ids?: string[];
   constraints?: Constraint[];
   futures?: Future[];
@@ -842,6 +1124,33 @@ export interface Intervention {
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "OrganizationChange".
+ */
+export interface OrganizationChange {
+  intervention_id: string;
+  operation: "create" | "close" | "transfer";
+  department_id: string;
+  new_department?: DepartmentEdit | null;
+  destination_department_id?: string | null;
+  workflow_ids?: string[];
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "DepartmentEdit".
+ */
+export interface DepartmentEdit {
+  department_id: string;
+  name: string;
+  mission: string;
+  actual_fte: number;
+  annual_budget_usd: number;
+  utilisation?: number;
+  active?: boolean;
+  agent_id?: string | null;
+  assumption: string;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
  * via the `definition` "CandidatePlan".
  */
 export interface CandidatePlan {
@@ -863,187 +1172,6 @@ export interface Scenario {
   delay_days: number;
   baseline_twin_version: string;
   created_at: string;
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "Impact".
- */
-export interface Impact {
-  impact_id: string;
-  decision_id: string;
-  scenario_id: string;
-  source_entity: string;
-  source_kind: "intervention" | "pressure";
-  source_ref: string;
-  affected_entity: string;
-  affected_department?: string | null;
-  level: ImpactLevel;
-  category: ImpactCategory;
-  polarity: Polarity;
-  direction: Direction;
-  metric: string;
-  magnitude: number;
-  unit: string;
-  value_usd?: number | null;
-  severity: number;
-  first_effect_day: number;
-  peak_effect_day: number;
-  confidence: number;
-  dependency_path?: string[];
-  edge_path?: string[];
-  evidence_refs?: string[];
-  assumptions?: string[];
-  constraint_refs?: string[];
-  origin: Origin;
-  status: ClaimStatus;
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "SimulationResult".
- */
-export interface SimulationResult {
-  result_id: string;
-  run_id: string;
-  scenario_id: string;
-  future: Future;
-  plan_id?: string | null;
-  mode: "quick" | "full";
-  seed?: number | null;
-  intervention_ids?: string[];
-  value: ValueBreakdown;
-  goal_met: boolean;
-  constraint_results?: ConstraintResult[];
-  impacts?: Impact[];
-  workflow_coverage?: WorkflowCoverage[];
-  knowledge_coverage?: KnowledgeCoverage[];
-  pressures_triggered?: PressureTrigger[];
-  risk: RiskScore;
-  affected_department_ids?: string[];
-  feasible: boolean;
-  rejection_reasons?: string[];
-  assumptions?: string[];
-  computed_at: string;
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "ValueBreakdown".
- */
-export interface ValueBreakdown {
-  gross_savings_usd: number;
-  transition_cost_usd: number;
-  added_cost_usd: number;
-  rebound_cost_usd: number;
-  expected_business_loss_usd: number;
-  pressure_cost_usd: number;
-  avoided_failure_cost_usd: number;
-  net_value_usd: number;
-  monthly_net_usd?: number[];
-  p10_net_value_usd?: number | null;
-  p50_net_value_usd?: number | null;
-  p90_net_value_usd?: number | null;
-  /**
-   * Contract termination fees paid to exit vendors or projects.
-   */
-  termination_cost_usd?: number | null;
-  /**
-   * One-time cost of moving work or data onto a replacement.
-   */
-  migration_cost_usd?: number | null;
-  /**
-   * Cost of work pushed onto remaining teams by the change.
-   */
-  displaced_work_cost_usd?: number | null;
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "ConstraintResult".
- */
-export interface ConstraintResult {
-  constraint_id: string;
-  metric:
-    | "annual_savings_usd"
-    | "net_value_usd"
-    | "revenue_impact_pct"
-    | "customer_impact_pct"
-    | "compliance_controls_broken"
-    | "stranded_workflows"
-    | "critical_systems_degraded"
-    | "max_capacity_loss_pct"
-    | "critical_coverage_pct";
-  operator: "<=" | ">=" | "==";
-  threshold: number;
-  value: number;
-  hard: boolean;
-  passed: boolean;
-  explanation: string;
-  impact_ids?: string[];
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "WorkflowCoverage".
- */
-export interface WorkflowCoverage {
-  workflow_id: string;
-  criticality: Criticality;
-  owners_before?: string[];
-  owners_after?: string[];
-  min_qualified_owners: number;
-  backup_count_after: number;
-  documented_pct: number;
-  stranded: boolean;
-  reasons?: string[];
-  owner_capacity_fte_before?: number | null;
-  owner_capacity_fte_after?: number | null;
-  exception_documented_pct?: number | null;
-  automation_pct?: number | null;
-  training_days_required?: number | null;
-  replacement_cost_usd?: number | null;
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "KnowledgeCoverage".
- */
-export interface KnowledgeCoverage {
-  knowledge_id: string;
-  holders_before?: string[];
-  holders_after?: string[];
-  holder_capacity_fte_before: number;
-  holder_capacity_fte_after: number;
-  documented_pct: number;
-  lost: boolean;
-  dependent_workflow_ids?: string[];
-  reasons?: string[];
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "PressureTrigger".
- */
-export interface PressureTrigger {
-  pressure_id: string;
-  expected_events: number;
-  expected_cost_usd: number;
-  neutralised: boolean;
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "RiskScore".
- */
-export interface RiskScore {
-  score: number;
-  level: RiskLevel;
-  settings_version: number;
-  components: RiskComponents;
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "RiskComponents".
- */
-export interface RiskComponents {
-  financial: number;
-  capability_workflow: number;
-  customer_revenue: number;
-  compliance_control: number;
-  execution_uncertainty: number;
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
@@ -1115,72 +1243,6 @@ export interface MitigationComparison {
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "BlastRadius".
- */
-export interface BlastRadius {
-  run_id: string;
-  scenario_id: string;
-  future: Future;
-  plan_id?: string | null;
-  root_node_id: string;
-  nodes?: BlastNode[];
-  edges?: BlastEdge[];
-  departments?: DepartmentImpactSummary[];
-  outcome: CompanyOutcome;
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "BlastNode".
- */
-export interface BlastNode {
-  node_id: string;
-  kind: "decision" | "department" | "entity" | "pressure" | "outcome";
-  department_id?: string | null;
-  entity_id?: string | null;
-  pressure_id?: string | null;
-  headline: string;
-  level?: ImpactLevel | null;
-  category?: ImpactCategory | null;
-  polarity?: Polarity | null;
-  severity?: number | null;
-  value_usd?: number | null;
-  first_effect_day?: number | null;
-  impact_ids?: string[];
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "BlastEdge".
- */
-export interface BlastEdge {
-  source: string;
-  target: string;
-  label: string;
-  level?: ImpactLevel | null;
-  critical_constraint: boolean;
-  channel_id?: string | null;
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "DepartmentImpactSummary".
- */
-export interface DepartmentImpactSummary {
-  department_id: string;
-  headline: string;
-  polarity: Polarity;
-  severity: number;
-  impact_ids?: string[];
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "CompanyOutcome".
- */
-export interface CompanyOutcome {
-  net_value_usd: number;
-  risk_level: RiskLevel;
-  headline: string;
-}
-/**
- * This interface was referenced by `CanaryContracts`'s JSON-Schema
  * via the `definition` "VendorOverlap".
  */
 export interface VendorOverlap {
@@ -1248,6 +1310,18 @@ export interface AgentSpec {
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "AgentSkillFile".
+ */
+export interface AgentSkillFile {
+  agent_id: string;
+  display_name: string;
+  department_id?: string | null;
+  source: "skill" | "fallback";
+  file_path: string;
+  content: string;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
  * via the `definition` "AgentContext".
  */
 export interface AgentContext {
@@ -1260,18 +1334,26 @@ export interface AgentContext {
   act_now_effects?: Impact[];
   inaction_effects?: Impact[];
   known_impact_summaries?: string[];
+  review_issues?: ReviewIssue[];
+  previous_assessment_id?: string | null;
+  previous_output?: AgentOutput | null;
   settings: AgentSettingsView;
   max_tool_calls?: number;
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
- * via the `definition` "AgentSettingsView".
+ * via the `definition` "ReviewIssue".
  */
-export interface AgentSettingsView {
-  risk_appetite: RiskAppetite;
-  optimizer_objective: "max_net_value" | "min_risk" | "balanced";
-  display_currency: string;
-  money_display_scale: "auto" | "K" | "M" | "B";
+export interface ReviewIssue {
+  issue_id: string;
+  source_assessment_id: string;
+  source_agent_id: string;
+  source_ref: string;
+  target_assessment_id: string;
+  text: string;
+  severity: number;
+  entity_ids?: string[];
+  evidence_refs?: string[];
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
@@ -1287,6 +1369,7 @@ export interface AgentOutput {
   assumptions?: string[];
   evidence_refs?: string[];
   confidence: number;
+  review_replies?: ReviewReply[];
   [k: string]: unknown;
 }
 /**
@@ -1367,6 +1450,27 @@ export interface Objection {
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "ReviewReply".
+ */
+export interface ReviewReply {
+  issue_id: string;
+  position: "revised" | "supported" | "unresolved";
+  explanation: string;
+  evidence_refs?: string[];
+  [k: string]: unknown;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "AgentSettingsView".
+ */
+export interface AgentSettingsView {
+  risk_appetite: RiskAppetite;
+  optimizer_objective: "max_net_value" | "min_risk" | "balanced";
+  display_currency: string;
+  money_display_scale: "auto" | "K" | "M" | "B";
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
  * via the `definition` "ChallengerOutput".
  */
 export interface ChallengerOutput {
@@ -1389,7 +1493,9 @@ export interface AgentAssessment {
   run_id: string;
   plan_id?: string | null;
   agent_id: string;
-  pass_type: "first_pass" | "challenge";
+  pass_type: "first_pass" | "challenge" | "response";
+  responds_to_assessment_id?: string | null;
+  review_issues?: ReviewIssue[];
   status: "ok" | "replayed" | "fallback_cached" | "unavailable" | "invalid";
   output?: AgentOutput | null;
   challenge?: ChallengerOutput | null;
@@ -1593,6 +1699,8 @@ export interface CandidateRejected {
 export interface AgentStarted {
   agent_id: string;
   plan_id?: string | null;
+  pass_type?: "first_pass" | "challenge" | "response";
+  review_issues?: ReviewIssue[];
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
@@ -1602,6 +1710,8 @@ export interface AgentFailed {
   agent_id: string;
   reason: string;
   fallback_used: boolean;
+  plan_id?: string | null;
+  pass_type?: "first_pass" | "challenge" | "response";
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema
@@ -1699,6 +1809,7 @@ export interface HumanDecisionRequest {
  * via the `definition` "QuickSimulateRequest".
  */
 export interface QuickSimulateRequest {
+  expected_twin_version?: string | null;
   brief: DecisionBrief;
   intervention_ids?: string[] | null;
   future?: Future;
@@ -1742,6 +1853,7 @@ export interface ReplayStarted {
  * via the `definition` "OrganizationProfileView".
  */
 export interface OrganizationProfileView {
+  twin_version?: string | null;
   schema_version?: "2.1.0" | "2.1.1";
   organization: Organization;
   departments: OrganizationDepartmentSummary[];
@@ -1760,6 +1872,60 @@ export interface OrganizationDepartmentSummary {
   utilisation: number;
   maturity_level: number;
   enabled: boolean;
+  active?: boolean;
+  agent_id?: string | null;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "DepartmentContextItemCreate".
+ */
+export interface DepartmentContextItemCreate {
+  entity_type: "role" | "knowledge_asset" | "system" | "project" | "workflow" | "kpi";
+  name: string;
+  criticality?: Criticality;
+  evidence_title: string;
+  evidence_source: EvidenceSource;
+  evidence_snippet: string;
+  annual_cost_usd?: number | null;
+  capacity_fte?: number | null;
+  min_qualified_owners?: number | null;
+  documented_pct?: number | null;
+  failure_cost_per_day_usd?: number | null;
+  completion_pct?: number | null;
+  remaining_cost_usd?: number | null;
+  expected_completion_day?: number | null;
+  time_to_train_days?: number | null;
+  kpi_baseline?: number | null;
+  kpi_unit?: string | null;
+  higher_is_better?: boolean | null;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "DepartmentSave".
+ */
+export interface DepartmentSave {
+  expected_twin_version: string;
+  department: DepartmentEdit;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "OrganizationSave".
+ */
+export interface OrganizationSave {
+  expected_twin_version: string;
+  organization: Organization;
+  departments: DepartmentEdit[];
+  settings: OrganizationSettings;
+}
+/**
+ * This interface was referenced by `CanaryContracts`'s JSON-Schema
+ * via the `definition` "RunEventPage".
+ */
+export interface RunEventPage {
+  events: Event[];
+  next_sequence: number;
+  has_more: boolean;
+  terminal: boolean;
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema

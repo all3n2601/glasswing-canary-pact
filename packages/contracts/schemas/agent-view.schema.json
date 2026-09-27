@@ -143,6 +143,11 @@
     "DepartmentProfile": {
       "additionalProperties": false,
       "properties": {
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
         "department_id": {
           "maxLength": 80,
           "pattern": "^[a-z][a-z0-9_]*$",

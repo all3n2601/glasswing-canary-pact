@@ -15,6 +15,101 @@
       "title": "ActionType",
       "type": "string"
     },
+    "AgentOutput": {
+      "properties": {
+        "affected_entities": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Affected Entities",
+          "type": "array"
+        },
+        "act_now_view": {
+          "$ref": "#/$defs/FutureView"
+        },
+        "inaction_view": {
+          "$ref": "#/$defs/FutureView"
+        },
+        "proposed_dependencies": {
+          "items": {
+            "$ref": "#/$defs/ProposedDependency"
+          },
+          "title": "Proposed Dependencies",
+          "type": "array"
+        },
+        "questions": {
+          "items": {
+            "$ref": "#/$defs/AgentQuestion"
+          },
+          "title": "Questions",
+          "type": "array"
+        },
+        "objections": {
+          "items": {
+            "$ref": "#/$defs/Objection"
+          },
+          "title": "Objections",
+          "type": "array"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "confidence": {
+          "title": "Confidence",
+          "type": "number"
+        },
+        "review_replies": {
+          "items": {
+            "$ref": "#/$defs/ReviewReply"
+          },
+          "title": "Review Replies",
+          "type": "array"
+        }
+      },
+      "required": [
+        "act_now_view",
+        "inaction_view",
+        "confidence"
+      ],
+      "title": "AgentOutput",
+      "type": "object"
+    },
+    "AgentQuestion": {
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "why_it_matters": {
+          "title": "Why It Matters",
+          "type": "string"
+        },
+        "entity_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Entity Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "why_it_matters"
+      ],
+      "title": "AgentQuestion",
+      "type": "object"
+    },
     "AgentSettingsView": {
       "additionalProperties": false,
       "properties": {
@@ -443,6 +538,13 @@
           "title": "Candidate Interventions",
           "type": "array"
         },
+        "organization_changes": {
+          "items": {
+            "$ref": "#/$defs/OrganizationChange"
+          },
+          "title": "Organization Changes",
+          "type": "array"
+        },
         "protected_entity_ids": {
           "items": {
             "maxLength": 80,
@@ -572,6 +674,81 @@
       "title": "DepartmentBudget",
       "type": "object"
     },
+    "DepartmentEdit": {
+      "additionalProperties": false,
+      "properties": {
+        "department_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Department Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 80,
+          "minLength": 2,
+          "title": "Name",
+          "type": "string"
+        },
+        "mission": {
+          "maxLength": 500,
+          "minLength": 2,
+          "title": "Mission",
+          "type": "string"
+        },
+        "actual_fte": {
+          "minimum": 0,
+          "title": "Actual Fte",
+          "type": "number"
+        },
+        "annual_budget_usd": {
+          "minimum": 0,
+          "title": "Annual Budget Usd",
+          "type": "integer"
+        },
+        "utilisation": {
+          "default": 0,
+          "maximum": 1.5,
+          "minimum": 0,
+          "title": "Utilisation",
+          "type": "number"
+        },
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "agent_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "assumption": {
+          "maxLength": 300,
+          "minLength": 10,
+          "title": "Assumption",
+          "type": "string"
+        }
+      },
+      "required": [
+        "department_id",
+        "name",
+        "mission",
+        "actual_fte",
+        "annual_budget_usd",
+        "assumption"
+      ],
+      "title": "DepartmentEdit",
+      "type": "object"
+    },
     "DepartmentGap": {
       "additionalProperties": false,
       "properties": {
@@ -625,6 +802,11 @@
     "DepartmentProfile": {
       "additionalProperties": false,
       "properties": {
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
         "department_id": {
           "maxLength": 80,
           "pattern": "^[a-z][a-z0-9_]*$",
@@ -1740,6 +1922,40 @@
       "title": "EvidenceSource",
       "type": "string"
     },
+    "Finding": {
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "entity_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Entity Ids",
+          "type": "array"
+        },
+        "severity": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Severity",
+          "type": "integer"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "severity"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
     "Future": {
       "enum": [
         "act_now",
@@ -1749,6 +1965,40 @@
       ],
       "title": "Future",
       "type": "string"
+    },
+    "FutureView": {
+      "properties": {
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "failure_modes": {
+          "items": {
+            "$ref": "#/$defs/Finding"
+          },
+          "title": "Failure Modes",
+          "type": "array"
+        },
+        "edge_cases": {
+          "items": {
+            "$ref": "#/$defs/Finding"
+          },
+          "title": "Edge Cases",
+          "type": "array"
+        },
+        "proposed_impacts": {
+          "items": {
+            "$ref": "#/$defs/ProposedImpact"
+          },
+          "title": "Proposed Impacts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "summary"
+      ],
+      "title": "FutureView",
+      "type": "object"
     },
     "Goal": {
       "additionalProperties": false,
@@ -2171,6 +2421,31 @@
       "title": "NeutraliserRef",
       "type": "object"
     },
+    "Objection": {
+      "properties": {
+        "target_ref": {
+          "title": "Target Ref",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "severity": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Severity",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "target_ref",
+        "text",
+        "severity"
+      ],
+      "title": "Objection",
+      "type": "object"
+    },
     "Organization": {
       "additionalProperties": false,
       "properties": {
@@ -2291,6 +2566,73 @@
         "description"
       ],
       "title": "Organization",
+      "type": "object"
+    },
+    "OrganizationChange": {
+      "additionalProperties": false,
+      "properties": {
+        "intervention_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Intervention Id",
+          "type": "string"
+        },
+        "operation": {
+          "enum": [
+            "create",
+            "close",
+            "transfer"
+          ],
+          "title": "Operation",
+          "type": "string"
+        },
+        "department_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Department Id",
+          "type": "string"
+        },
+        "new_department": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DepartmentEdit"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "destination_department_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Destination Department Id"
+        },
+        "workflow_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Workflow Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "intervention_id",
+        "operation",
+        "department_id"
+      ],
+      "title": "OrganizationChange",
       "type": "object"
     },
     "Origin": {
@@ -2523,6 +2865,146 @@
       "title": "PressureKind",
       "type": "string"
     },
+    "ProposedDependency": {
+      "properties": {
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        },
+        "relation": {
+          "$ref": "#/$defs/Relation"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "confidence": {
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "source",
+        "target",
+        "relation",
+        "rationale",
+        "confidence"
+      ],
+      "title": "ProposedDependency",
+      "type": "object"
+    },
+    "ProposedImpact": {
+      "properties": {
+        "affected_entity": {
+          "title": "Affected Entity",
+          "type": "string"
+        },
+        "metric": {
+          "title": "Metric",
+          "type": "string"
+        },
+        "direction": {
+          "$ref": "#/$defs/Direction"
+        },
+        "polarity": {
+          "$ref": "#/$defs/Polarity"
+        },
+        "category": {
+          "$ref": "#/$defs/ImpactCategory"
+        },
+        "level": {
+          "$ref": "#/$defs/ImpactLevel"
+        },
+        "estimated_magnitude": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimated Magnitude"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        },
+        "first_effect_day": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "First Effect Day"
+        },
+        "severity": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Severity",
+          "type": "integer"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        },
+        "dependency_path": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Dependency Path",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "confidence": {
+          "title": "Confidence",
+          "type": "number"
+        }
+      },
+      "required": [
+        "affected_entity",
+        "metric",
+        "direction",
+        "polarity",
+        "category",
+        "level",
+        "severity",
+        "rationale",
+        "confidence"
+      ],
+      "title": "ProposedImpact",
+      "type": "object"
+    },
     "Relation": {
       "enum": [
         "OWNS",
@@ -2542,6 +3024,111 @@
       ],
       "title": "Relation",
       "type": "string"
+    },
+    "ReviewIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "issue_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Issue Id",
+          "type": "string"
+        },
+        "source_assessment_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Source Assessment Id",
+          "type": "string"
+        },
+        "source_agent_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Source Agent Id",
+          "type": "string"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "target_assessment_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Target Assessment Id",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "severity": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Severity",
+          "type": "integer"
+        },
+        "entity_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Entity Ids",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "issue_id",
+        "source_assessment_id",
+        "source_agent_id",
+        "source_ref",
+        "target_assessment_id",
+        "text",
+        "severity"
+      ],
+      "title": "ReviewIssue",
+      "type": "object"
+    },
+    "ReviewReply": {
+      "properties": {
+        "issue_id": {
+          "title": "Issue Id",
+          "type": "string"
+        },
+        "position": {
+          "enum": [
+            "revised",
+            "supported",
+            "unresolved"
+          ],
+          "title": "Position",
+          "type": "string"
+        },
+        "explanation": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "issue_id",
+        "position",
+        "explanation"
+      ],
+      "title": "ReviewReply",
+      "type": "object"
     },
     "RiskAppetite": {
       "enum": [
@@ -2748,6 +3335,38 @@
       },
       "title": "Known Impact Summaries",
       "type": "array"
+    },
+    "review_issues": {
+      "items": {
+        "$ref": "#/$defs/ReviewIssue"
+      },
+      "title": "Review Issues",
+      "type": "array"
+    },
+    "previous_assessment_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Previous Assessment Id"
+    },
+    "previous_output": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AgentOutput"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     },
     "settings": {
       "$ref": "#/$defs/AgentSettingsView"

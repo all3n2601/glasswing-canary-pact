@@ -1,4 +1,5 @@
 {
+  "twin_version": null,
   "schema_version": "2.1.1",
   "organization": {
     "id": "org_northstar",
@@ -59,7 +60,9 @@
       "annual_budget_usd": 9000000000,
       "utilisation": 1.05,
       "maturity_level": 3,
-      "enabled": true
+      "enabled": true,
+      "active": true,
+      "agent_id": null
     },
     {
       "department_id": "dept_operations",
@@ -69,7 +72,9 @@
       "annual_budget_usd": 3100000000,
       "utilisation": 1.12,
       "maturity_level": 3,
-      "enabled": true
+      "enabled": true,
+      "active": true,
+      "agent_id": null
     },
     {
       "department_id": "dept_ai_data",
@@ -79,7 +84,9 @@
       "annual_budget_usd": 4000000000,
       "utilisation": 1.0,
       "maturity_level": 3,
-      "enabled": true
+      "enabled": true,
+      "active": true,
+      "agent_id": null
     },
     {
       "department_id": "dept_product",
@@ -89,7 +96,9 @@
       "annual_budget_usd": 3500000000,
       "utilisation": 1.0,
       "maturity_level": 3,
-      "enabled": true
+      "enabled": true,
+      "active": true,
+      "agent_id": null
     },
     {
       "department_id": "dept_sales",
@@ -99,7 +108,9 @@
       "annual_budget_usd": 8000000000,
       "utilisation": 1.05,
       "maturity_level": 3,
-      "enabled": true
+      "enabled": true,
+      "active": true,
+      "agent_id": null
     },
     {
       "department_id": "dept_marketing",
@@ -109,7 +120,9 @@
       "annual_budget_usd": 2500000000,
       "utilisation": 1.0,
       "maturity_level": 3,
-      "enabled": true
+      "enabled": true,
+      "active": true,
+      "agent_id": null
     },
     {
       "department_id": "dept_customer_success",
@@ -119,7 +132,9 @@
       "annual_budget_usd": 4500000000,
       "utilisation": 1.08,
       "maturity_level": 3,
-      "enabled": true
+      "enabled": true,
+      "active": true,
+      "agent_id": null
     },
     {
       "department_id": "dept_finance",
@@ -129,7 +144,9 @@
       "annual_budget_usd": 3400000000,
       "utilisation": 1.0,
       "maturity_level": 3,
-      "enabled": true
+      "enabled": true,
+      "active": true,
+      "agent_id": null
     },
     {
       "department_id": "dept_compliance",
@@ -139,7 +156,9 @@
       "annual_budget_usd": 2000000000,
       "utilisation": 1.05,
       "maturity_level": 3,
-      "enabled": true
+      "enabled": true,
+      "active": true,
+      "agent_id": null
     }
   ],
   "settings": {
@@ -194,7 +213,7 @@
       "challenger",
       "people_knowledge"
     ],
-    "llm_mode": "replay",
+    "llm_mode": "live",
     "model_id_strong": null,
     "model_id_fast": null,
     "max_tool_calls": 3,

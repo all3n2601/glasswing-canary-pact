@@ -54,7 +54,7 @@ from contracts_py.twin import (
     VersionInfo,
 )
 
-from company_twin import TwinValidationError, build_adventureworks_twin, build_twin
+from company_twin import build_adventureworks_twin, build_twin
 from simulation_engine import (
     blast_radius,
     check_result,
@@ -339,9 +339,7 @@ def aw_tables() -> dict[str, list[list[str]]]:
 
 
 def test_the_engine_runs_on_the_adventureworks_twin():
-    twin = build_adventureworks_twin(aw_tables(), created_at=CREATED_AT)
-    with pytest.raises(TwinValidationError):
-        build_twin(twin)
+    twin = build_twin(build_adventureworks_twin(aw_tables(), created_at=CREATED_AT))
     assert twin.pressures == [] and not any(e.type in {EntityType.control, EntityType.dataset} for e in twin.entities)
     removals = [_remove(ActionType.remove_vendor, v) for v in ("vendor_aw_1492", "vendor_aw_1494")]
     brief = DecisionBrief(decision_id="dec_aw_vendors", decision_type=DecisionType.vendor_consolidation,
@@ -363,5 +361,5 @@ def test_the_engine_runs_on_the_adventureworks_twin():
     assert check_result(comparison, twin) == [] and check_result(portfolios, twin) == []
     assert portfolios.evaluated_count == 4
     assert len(vendor_overlap(twin, ["vendor_aw_1492", "vendor_aw_1494"])) == 1
-    again = build_adventureworks_twin(aw_tables(), created_at=CREATED_AT)
+    again = build_twin(build_adventureworks_twin(aw_tables(), created_at=CREATED_AT))
     assert compare_futures(again, brief, plan, run_id="run_aw").model_dump_json() == comparison.model_dump_json()

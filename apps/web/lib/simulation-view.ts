@@ -1,5 +1,6 @@
+import { officePosition } from "./office-layout";
 import type { OrganizationProfile } from "@canary-pact/contracts";
-import type { DecisionPackage, Impact } from "@canary-pact/contracts/generated";
+import type { DecisionPackage, Impact, SimulationResult } from "@canary-pact/contracts/generated";
 
 export type DepartmentImpactTone = "source" | "positive" | "negative" | "neutral";
 
@@ -16,7 +17,8 @@ export interface DepartmentSimulationView {
   label: string;
   strength: number;
   startsAt: number;
-  severity: "Protected" | "Low" | "Medium" | "High";
+  peaksAt?: number;
+  severity: "Not assessed" | "Protected" | "Low" | "Medium" | "High";
   confidence?: number;
   summary: string;
   workflows: string[];
@@ -26,35 +28,10 @@ export interface DepartmentSimulationView {
   mitigation: string;
 }
 
-const fixedPositions: Record<string, [number, number, number]> = {
-  dept_finance: [-7.6, 0.08, -5.65],
-  dept_engineering: [0, 0.08, -5.65],
-  dept_ai_data: [7.6, 0.08, -5.65],
-  dept_marketing: [-8.6, 0.08, 0],
-  dept_operations: [-4.4, 0.08, 5.65],
-  dept_people: [4.4, 0.08, -0.3],
-  dept_compliance: [8.6, 0.08, 0],
-  dept_sales: [0, 0.08, 5.65],
-  dept_customer: [7.6, 0.08, 5.65],
-  dept_customer_success: [7.6, 0.08, 5.65],
-};
-
-function fallbackPosition(index: number): [number, number, number] {
-  const positions: Array<[number, number, number]> = [
-    [-10.4, 0.08, -3.1],
-    [-10.4, 0.08, 3.1],
-    [10.4, 0.08, -3.1],
-    [10.4, 0.08, 3.1],
-    [-4.4, 0.08, -0.3],
-    [4.4, 0.08, 3.25],
-  ];
-  return positions[index % positions.length];
-}
-
 export function buildDepartmentSimulation(profile: OrganizationProfile): DepartmentSimulationView[] {
   let fallbackIndex = 0;
   return profile.departments
-    .filter((department) => department.enabled)
+    .filter((department) => department.active ?? department.enabled)
     .map((department) => ({
       departmentId: department.department_id,
       name: department.name,
@@ -63,14 +40,14 @@ export function buildDepartmentSimulation(profile: OrganizationProfile): Departm
       annualBudgetUsd: department.annual_budget_usd,
       utilisation: department.utilisation,
       maturityLevel: department.maturity_level,
-      position: fixedPositions[department.department_id] ?? fallbackPosition(fallbackIndex++),
+      position: officePosition(fallbackIndex++),
       tone: "neutral",
-      label: "No material impact",
+      label: "Not assessed",
       strength: 0.25,
-      startsAt: 90,
-      severity: "Protected",
+      startsAt: Number.POSITIVE_INFINITY,
+      severity: "Not assessed",
       confidence: undefined,
-      summary: "No material impact has been reported for this department.",
+      summary: "This department has not been assessed in the selected scenario.",
       workflows: [],
       kpis: [],
       dependencyPath: [department.name],
@@ -93,20 +70,21 @@ function formatImpact(impact: Impact) {
   return `${impact.direction === "decrease" ? "−" : "+"}${formatted}`;
 }
 
-export function applyDecisionPackage(baseline: DepartmentSimulationView[], decisionPackage: DecisionPackage): DepartmentSimulationView[] {
-  const result = decisionPackage.portfolios.recommended?.result ?? decisionPackage.portfolios.naive.result;
+export function applyDecisionPackage(baseline: DepartmentSimulationView[], decisionPackage: DecisionPackage | null, selectedResult?: SimulationResult): DepartmentSimulationView[] {
+  const result = selectedResult ?? decisionPackage?.portfolios.recommended?.result ?? decisionPackage?.portfolios.naive.result;
+  if (!result) return baseline;
   const impacts = result.impacts ?? [];
-  const summaries = new Map((decisionPackage.department_impacts ?? []).map((summary) => [summary.department_id, summary]));
+  const summaries = new Map((decisionPackage?.department_impacts ?? []).map((summary) => [summary.department_id, summary]));
   const sourceDepartments = new Set(
-    decisionPackage.brief.candidate_interventions
+    (decisionPackage?.brief.candidate_interventions ?? [])
       .map((intervention) => intervention.target_entity_id)
       .filter((id) => baseline.some((department) => department.departmentId === id)),
   );
-  const implementation = decisionPackage.implementation?.[0]?.action;
+  const implementation = decisionPackage?.implementation?.[0]?.action;
 
   return baseline.map((department) => {
     const departmentImpacts = impacts.filter((impact) => impact.affected_department === department.departmentId);
-    const summary = summaries.get(department.departmentId);
+    const summary = selectedResult ? undefined : summaries.get(department.departmentId);
     if (!summary && departmentImpacts.length === 0) return department;
     const severity = Math.max(summary?.severity ?? 0, ...departmentImpacts.map((impact) => impact.severity));
     const tone: DepartmentImpactTone = sourceDepartments.has(department.departmentId)
@@ -124,15 +102,16 @@ export function applyDecisionPackage(baseline: DepartmentSimulationView[], decis
       tone,
       label: summary?.headline ?? departmentImpacts[0]?.metric.replaceAll("_", " ") ?? "Modeled impact",
       strength: Math.max(0.25, Math.min(1, severity / 5)),
-      startsAt: Math.min(...departmentImpacts.map((impact) => impact.first_effect_day), 90),
+      startsAt: Math.min(...departmentImpacts.map((impact) => impact.first_effect_day)),
+      peaksAt: Math.max(...departmentImpacts.map((impact) => impact.peak_effect_day)),
       severity: severityLabel(severity),
       confidence: confidences.length ? confidences.reduce((sum, value) => sum + value, 0) / confidences.length : undefined,
-      summary: summary?.headline ?? departmentImpacts.map((impact) => impact.metric.replaceAll("_", " ")).join(", "),
-      workflows: [...new Set(departmentImpacts.map((impact) => impact.affected_entity))].slice(0, 4),
+      summary: summary?.headline ?? [...new Set(departmentImpacts.map((impact) => impact.metric.replaceAll("_", " ")))].join(", "),
+      workflows: [...new Set(departmentImpacts.map((impact) => impact.affected_entity).filter(id=>id.startsWith("wf_")))],
       kpis: departmentImpacts.slice(0, 2).map((impact) => ({ label: impact.metric.replaceAll("_", " "), value: formatImpact(impact) })),
       dependencyPath: path.length ? path : [department.name],
       evidence: [...new Set(departmentImpacts.flatMap((impact) => impact.evidence_refs ?? []))],
-      mitigation: implementation ?? "Continue monitoring this department against the decision package.",
+      mitigation: selectedResult ? "Inspect the package for proposed mitigations; only a rerun establishes their effects." : implementation ?? "No specific mitigation was supplied.",
     };
   });
 }

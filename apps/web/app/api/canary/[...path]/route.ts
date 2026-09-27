@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { authToken } from "@/lib/auth-server";
+import { apiUnavailable, authToken, getSession } from "@/lib/auth-server";
 
 const API_URL = process.env.CANARY_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -13,7 +13,12 @@ const ALLOWED_PATHS = [
   /^organization\/settings$/,
   /^organization\/profile$/,
   /^departments$/,
+  /^departments\/save$/,
+  /^runs\/[A-Za-z0-9_-]+\/office-evidence\/[A-Za-z0-9_-]+$/,
+  /^runs\/[A-Za-z0-9_-]+\/office-departments\/[A-Za-z0-9_-]+$/,
+  /^runs\/[A-Za-z0-9_-]+\/(event-log|office-profile|office-graph|perspectives)$/,
   /^departments\/[A-Za-z0-9_-]+$/,
+  /^departments\/[A-Za-z0-9_-]+\/context$/,
   /^documents$/,
   /^documents\/[A-Za-z0-9_-]+$/,
   /^decisions$/,
@@ -21,7 +26,7 @@ const ALLOWED_PATHS = [
   /^runs\/[A-Za-z0-9_-]+$/,
   /^runs\/[A-Za-z0-9_-]+\/package$/,
   /^runs\/[A-Za-z0-9_-]+\/decision$/,
-  /^simulate\/(quick|futures|optimize)$/,
+  /^simulate\/(quick|futures|optimize|office-preview)$/,
 ];
 
 function allowed(path: string) {
@@ -32,6 +37,12 @@ async function proxy(request: Request, context: RouteContext<"/api/canary/[...pa
   const { path: segments } = await context.params;
   const path = segments.join("/");
   if (!allowed(path)) return NextResponse.json({ detail: "API path is not available" }, { status: 404 });
+
+  if (path !== "health") {
+    const session = await getSession();
+    if (session.unavailable) return apiUnavailable();
+    if (!session.user) return NextResponse.json({ detail: "Not authenticated" }, { status: 401 });
+  }
 
   const incomingUrl = new URL(request.url);
   const token = await authToken();

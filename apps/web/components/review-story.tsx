@@ -1,0 +1,107 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import type { DecisionPackage, Event } from "@canary-pact/contracts/generated";
+import { REVIEW_STAGES, reviewSnapshot } from "@/lib/review-story";
+import { formatCompactCurrency } from "@/lib/formatters";
+
+const name = (value: string) => value.replaceAll("_", " ").replace(/\b\w/g, c => c.toUpperCase());
+const descriptions = [
+  "Start with the proposed change, its objective, and the constraints it must respect.",
+  "Departments assess the same proposal independently. These are their initial positions.",
+  "Specific objections test the assumptions behind those positions.",
+  "Affected departments answer linked objections once. A reply records a position, not consensus.",
+  "Validated dependencies feed the engine. These values come from the recorded calculations.",
+  "Review the recommendation alongside the remaining concerns. A human makes the final decision.",
+];
+
+export function ReviewStory({events, complete, decisionPackage, onEvidence}: {
+  events: Event[]; complete: boolean; decisionPackage?: DecisionPackage | null; onEvidence?: (id: string) => void;
+}) {
+  const snapshot = useMemo(() => reviewSnapshot(events, decisionPackage), [events, decisionPackage]);
+  const [selected, setSelected] = useState<number | null>(() => complete ? 0 : null);
+  const [playing, setPlaying] = useState(false);
+  const stage = selected ?? snapshot.stage;
+  useEffect(() => {
+    if (!playing) return;
+    const timer = setInterval(() => setSelected(current => {
+      const next = (current ?? 0) + 1;
+      if (next >= 5) setPlaying(false);
+      return Math.min(next, 5);
+    }), 6000);
+    return () => clearInterval(timer);
+  }, [playing]);
+  const choose = (index: number) => {setPlaying(false); setSelected(index);};
+  const sources = (refs: string[] = []) => refs.length > 0 ? <div className="mt-3 flex flex-wrap gap-2">{refs.map(ref =>
+    onEvidence ? <button key={ref} onClick={() => onEvidence(ref)} className="break-all rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs text-emerald-900">Source · {ref}</button>
+      : <span key={ref} className="break-all text-xs text-zinc-500">Source · {ref}</span>)}</div> : null;
+  const first = snapshot.assessments.filter(a => a.pass_type === "first_pass");
+  const challenges = snapshot.assessments.filter(a => a.pass_type === "challenge" || (a.pass_type === "first_pass" && a.status === "ok" && a.output?.objections?.length));
+  const pkg = snapshot.decisionPackage;
+  const recommendation = pkg?.recommendation;
+  const selectedRow = pkg?.futures.rows.find(row => row.result_id === recommendation?.result_id);
+  const empty = (text: string) => <p role="status" className="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-5 text-sm text-zinc-600">{text}</p>;
+  return <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-zinc-200 bg-white shadow-sm" aria-label="Decision story">
+    <nav className="grid grid-cols-3 gap-1 border-b p-2 lg:grid-cols-6" aria-label="Review stages">
+      {REVIEW_STAGES.map((label, index) => <button key={label} onClick={() => choose(index)} aria-current={stage === index ? "step" : undefined}
+        className={`flex items-center gap-2 rounded-lg px-2 py-3 text-left text-xs font-medium ${stage === index ? "bg-emerald-950 text-white" : "text-zinc-600 hover:bg-zinc-100"}`}>
+        <span className={`grid size-5 shrink-0 place-items-center rounded-full text-[10px] ${stage === index ? "bg-white/20" : "bg-zinc-100"}`}>{index + 1}</span>{label}
+      </button>)}
+    </nav>
+    <div className="min-h-0 flex-1 overflow-y-auto p-5 md:p-6">
+      <div className="mb-5"><p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-700">{complete ? "Recorded review" : "Live review"} · Stage {stage + 1} of 6</p>
+        <h2 className="mt-1 text-2xl font-semibold tracking-tight">{REVIEW_STAGES[stage]}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">{descriptions[stage]}</p></div>
+      {snapshot.failure ? <p role="alert" className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">Run failed: {snapshot.failure}. Received findings remain available.</p> : null}
+      <div className="space-y-4 text-sm leading-6">
+      {stage === 0 && (snapshot.brief ? <>
+        <h3 className="text-xl font-medium">{snapshot.brief.title}</h3><p>{snapshot.brief.statement}</p>
+        <p className="text-zinc-500">{snapshot.brief.horizon_days} days · {snapshot.brief.candidate_interventions.length} proposed interventions · {snapshot.brief.constraints?.length ?? 0} constraints</p>
+        <details><summary className="cursor-pointer font-medium">Proposed interventions and constraints</summary><ul className="mt-3 space-y-2">{snapshot.brief.candidate_interventions.map(i => <li key={i.id}>{name(i.type)} · {name(i.target_entity_id)}{i.rationale ? ` — ${i.rationale}` : ""}</li>)}{snapshot.brief.constraints?.map(c => <li key={c.id}>{c.description}</li>)}</ul></details>
+      </> : empty("Waiting for the decision brief."))}
+      {stage === 1 && (first.length ? first.map(a => <article key={a.assessment_id} className="rounded-xl border p-4">
+        <h3 className="font-semibold">{name(a.agent_id)} <span className="ml-2 text-xs font-normal text-zinc-500">Initial assessment</span></h3>
+        {a.status === "ok" && a.output ? <><p className="mt-2"><strong>Act now: </strong>{a.output.act_now_view.summary}</p><p className="mt-2 text-zinc-600"><strong>Do not act: </strong>{a.output.inaction_view.summary}</p>{sources(a.output.evidence_refs)}<p className="mt-2 text-xs text-zinc-500">Confidence {Math.round(a.output.confidence * 100)}%</p></>
+          : <p className="mt-2 text-amber-800">Assessment unavailable. {a.validation?.errors?.join("; ")}</p>}
+      </article>) : empty(complete ? "No department assessments were recorded." : "Departments are analyzing the proposal. Findings will appear here."))}
+      {stage === 2 && (challenges.length ? challenges.map(a => <details key={a.assessment_id} open={a.pass_type === "challenge"} className="rounded-xl border border-amber-200 bg-amber-50/40 p-4">
+        <summary className="cursor-pointer font-semibold">{name(a.agent_id)} · {a.status === "ok" ? "Review concerns" : "Review unavailable"}</summary>
+        {a.status !== "ok" ? <p className="mt-2 text-amber-800">No valid challenge assessment was received. This perspective remains missing.</p> : null}
+        {(a.challenge?.objections ?? a.output?.objections ?? []).map((o, i) => <div key={i} className="mt-3"><p className="text-xs font-medium text-amber-800">To {name(first.find(f => f.assessment_id === o.target_ref)?.agent_id ?? o.target_ref)} · Severity {o.severity}</p><p>{o.text}</p></div>)}
+        {[...(a.challenge?.unsupported_assumptions ?? []), ...(a.challenge?.circular_logic ?? []), ...(a.challenge?.inaction_underestimated ?? [])].map((f,i) => <div key={i} className="mt-3"><p>{f.text}</p>{sources(f.evidence_refs)}</div>)}
+        {(a.challenge?.missed_dependencies ?? []).map((d,i) => <div key={i} className="mt-3"><p className="font-medium">Missing dependency · {name(d.source)} → {name(d.target)}</p><p>{d.rationale}</p>{sources(d.evidence_refs)}</div>)}
+        {a.challenge && !a.challenge.objections?.length && !a.challenge.unsupported_assumptions?.length && !a.challenge.circular_logic?.length && !a.challenge.inaction_underestimated?.length && !a.challenge.missed_dependencies?.length ? <p className="mt-2 text-zinc-500">No specific objections were supplied.</p> : null}
+      </details>) : empty(complete ? "No objections were recorded. No exchange was invented." : "Waiting for the challenge review."))}
+      {stage === 3 && (snapshot.issues.length ? snapshot.issues.map(issue => {
+        const original = first.find(a => a.assessment_id === issue.target_assessment_id);
+        const response = snapshot.assessments.find(a => a.pass_type === "response" && a.review_issues?.some(i => i.issue_id === issue.issue_id));
+        const reply = response?.status === "ok" ? response.output?.review_replies?.find(r => r.issue_id === issue.issue_id) : undefined;
+        return <article key={issue.issue_id} className="overflow-hidden rounded-xl border">
+          <div className="bg-zinc-50 p-4"><p className="text-xs font-semibold text-zinc-500">{name(original?.agent_id ?? "department")} · Original position</p><p className="mt-1"><strong>Act now: </strong>{original?.output?.act_now_view.summary ?? "Original assessment unavailable."}</p><p className="mt-2 text-zinc-600"><strong>Do not act: </strong>{original?.output?.inaction_view.summary ?? "Original assessment unavailable."}</p></div>
+          <div className="border-t border-amber-100 bg-amber-50/50 p-4"><p className="text-xs font-semibold text-amber-800">{name(issue.source_agent_id)} → {name(original?.agent_id ?? "department")}</p><p className="mt-1">{issue.text}</p>{sources(issue.evidence_refs)}</div>
+          <div className="border-t p-4"><p className="text-xs font-semibold text-emerald-800">{name(original?.agent_id ?? "department")} · {reply ? name(reply.position) : response || complete ? "Unresolved" : "Responding"}</p>
+            <p className="mt-1">{reply?.explanation ?? (response || complete ? "No valid response was received. The objection remains open." : "Waiting for the department’s response.")}</p>{sources(reply?.evidence_refs)}
+            {reply?.position === "revised" && response?.output ? <div className="mt-3 space-y-2 text-zinc-600"><p><strong>Updated act-now view: </strong>{response.output.act_now_view.summary}</p><p><strong>Updated do-not-act view: </strong>{response.output.inaction_view.summary}</p></div> : null}
+          </div></article>;
+      }) : empty(complete ? "No targeted response round was recorded for this run. Any remaining concerns stay open for human review." : "Specific objections will be routed to affected departments. At most three departments respond once."))}
+      {stage === 4 && <>
+        {snapshot.latest ? <><div className="grid gap-3 sm:grid-cols-2">{[{label:"Before department review", result:snapshot.initial}, {label:"Latest engine calculation · Act now", result:snapshot.latest}].map(({label,result}) => <article key={label} className="rounded-xl border p-4"><h3 className="text-xs font-medium text-zinc-500">{label}</h3>{result ? <><p className="mt-2 text-2xl font-semibold">{formatCompactCurrency(result.value.net_value_usd)}</p><p>Net value · {result.feasible ? "Within modeled constraints" : "Not feasible"}</p><p className="mt-1 break-all text-xs text-zinc-500">{result.plan_id}</p></> : <p>Not recorded.</p>}</article>)}</div>
+          <p className="text-xs text-zinc-500">Agent replies do not change calculated values directly. {snapshot.initial ? snapshot.initial.plan_id !== snapshot.latest.plan_id ? "The engine selected a different plan after review." : "Both calculations refer to the same plan." : "The initial calculation is unavailable for comparison."}</p>
+          {snapshot.dependencies.length ? <div><h3 className="font-semibold">Dependencies accepted by validation</h3>{snapshot.dependencies.map((d,i) => <div key={i} className="mt-2 rounded-lg bg-emerald-50 p-3"><p>{name(d.source)} → {name(d.target)}</p>{sources(d.evidence)}</div>)}</div> : <p>No new validated dependencies were recorded. Discussion alone does not establish a change in outcome.</p>}
+          <details><summary className="cursor-pointer font-semibold">When effects appear · {snapshot.latest.impacts?.length ?? 0} modeled impacts</summary><div className="mt-3 space-y-3">{[...(snapshot.latest.impacts ?? [])].sort((a,b) => a.first_effect_day - b.first_effect_day).map(impact => <article key={impact.impact_id} className="rounded-xl border p-4"><p className="text-xs font-semibold text-zinc-500">First effect: day {impact.first_effect_day} · Peak: day {impact.peak_effect_day}</p><h4 className="mt-1 font-medium">{name(impact.metric)} · {name(impact.affected_entity)}</h4><p>{impact.magnitude} {impact.unit} · {impact.direction} · {impact.polarity}</p><p className="mt-1 text-zinc-500">{impact.dependency_path?.length ? impact.dependency_path.map(name).join(" → ") : "No dependency path supplied."}</p><p className="text-xs text-zinc-500">Confidence {Math.round(impact.confidence * 100)}% · Severity {impact.severity}</p>{sources(impact.evidence_refs)}</article>)}</div></details>
+        </> : empty("No act-now calculations are available in the event history.")}
+      </>}
+      {stage === 5 && (pkg ? <>
+        <article className="rounded-xl bg-emerald-950 p-5 text-white"><p className="text-xs font-medium text-emerald-200">Engine recommendation · {recommendation ? name(recommendation.future) : "Unavailable"}</p><h3 className="mt-2 text-xl font-medium">{recommendation?.headline ?? "No recommendation was produced."}</h3>{selectedRow ? <p className="mt-3">{formatCompactCurrency(selectedRow.net_value_p50_usd)} net value · {selectedRow.feasible ? "Within modeled constraints" : "Not feasible"}</p> : null}</article>
+        {pkg.open_questions?.length ? <details open><summary className="cursor-pointer font-semibold">Open concerns · {pkg.open_questions.length}</summary><ul className="mt-3 space-y-2">{pkg.open_questions.map((q,i) => <li key={i} className="rounded-lg bg-amber-50 p-3">{q}</li>)}</ul></details> : <p>No open concerns were supplied in the package. This does not establish certainty.</p>}
+        {pkg.missing_perspectives?.length ? <p className="text-amber-800">Missing perspectives: {pkg.missing_perspectives.map(name).join(", ")}</p> : null}
+        <p className="rounded-xl border p-4 font-medium">{snapshot.humanDecision ? `Human decision recorded: ${name(snapshot.humanDecision.decision)}. ${snapshot.humanDecision.notes || "No organizational changes were executed."}` : "Human approval is required. Review the evidence and remaining uncertainty before approving, rejecting, or requesting another scenario."}</p>
+      </> : empty(complete ? "This run has no final decision package." : "The engine is preparing the decision package."))}
+      </div>
+    </div>
+    <footer className="flex flex-wrap items-center justify-between gap-2 border-t p-3 text-xs">
+      <button className="rounded-lg border px-3 py-2 disabled:opacity-40" disabled={stage === 0} onClick={() => choose(stage - 1)}>← Previous</button>
+      {complete ? <button className="rounded-lg px-3 py-2 text-zinc-600" onClick={() => {if (!playing) setSelected(stage >= 5 ? 0 : stage); setPlaying(!playing);}}>{playing ? "Pause review" : "Play stages"}</button> : <button className="rounded-lg px-3 py-2 text-emerald-700" onClick={() => {setSelected(null); setPlaying(false);}}>Follow live progress</button>}
+      <button className="rounded-lg bg-emerald-950 px-3 py-2 text-white disabled:opacity-40" disabled={stage === 5} onClick={() => choose(stage + 1)}>Next stage →</button>
+    </footer>
+  </section>;
+}

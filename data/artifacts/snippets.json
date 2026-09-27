@@ -29,5 +29,10 @@
   "ev_incident_response_runbook_steps": "The incident response runbook sets out the on-call escalation and recovery steps for the Incident response and on-call workflow.",
   "ev_risk_monitoring_runbook_steps": "The risk monitoring runbook sets out how the Risk monitoring workflow detects and responds to geographic and macroeconomic risk signals.",
   "ev_soc2_evidence_sop_steps": "The SOC 2 evidence collection SOP sets out how the SOC 2 audit-evidence collection workflow collects and files audit evidence.",
-  "ev_vendor_recon_sop_steps": "The vendor reconciliation SOP sets out the steps of the monthly Vendor reconciliation workflow."
+  "ev_vendor_recon_sop_steps": "The vendor reconciliation SOP sets out the steps of the monthly Vendor reconciliation workflow.",
+  "ev_eng_release_context": "Engineering owns the core API release path; the Engineering Manager coordinates releases and rollback readiness.",
+  "ev_product_roadmap_context": "Product analytics informs roadmap sequencing and the Billing Modernization delivery plan.",
+  "ev_marketing_attribution_context": "Campaign targeting uses audience segmentation and is measured through qualified pipeline and acquisition cost.",
+  "ev_sales_playbook_context": "Sales uses lead scoring for qualification and account planning for enterprise expansion and retention.",
+  "ev_customer_success_context": "Customer Success owns onboarding and escalation readiness, with net revenue retention as the outcome measure."
 }

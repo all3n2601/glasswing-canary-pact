@@ -5,7 +5,8 @@ import pytest
 from api_auth_helpers import auth_headers
 from pydantic import TypeAdapter
 
-from contracts_py.api import DecisionCreated, DecisionDraft, HealthResponse, OrganizationProfileView, ReplayInfo, ReplayStarted
+from contracts_py.agents import AgentSkillFile
+from contracts_py.api import DecisionCreated, DecisionDraft, HealthResponse, OrganizationProfileView
 from contracts_py.engine import FutureComparison, PortfolioComparison, SimulationResult
 from contracts_py.enums import RunStatus
 from contracts_py.events import EventType, PhaseChanged, RunState
@@ -22,6 +23,9 @@ from contracts_py.twin import (
 )
 
 from canary_api import runtime
+from agent_orchestration import DecisionIntake
+from agent_orchestration.llm import LiveReply
+from simulation_engine import apply_interventions
 
 
 def validate(model, response):
@@ -50,12 +54,12 @@ def wait_for_status(client, run_id: str, status: RunStatus, timeout: float = 5.0
         ("/organization", Organization),
         ("/organization/settings", OrganizationSettings),
         ("/organization/profile", OrganizationProfileView),
+        ("/organization/agent-skills", list[AgentSkillFile]),
         ("/departments", list[DepartmentProfile]),
         ("/departments/dept_operations", DepartmentDetail),
         ("/documents", list[Document]),
         ("/documents?department_id=dept_operations&doc_type=runbook&status=outdated", list[Document]),
         ("/documents/doc_billing_recon_runbook", Document),
-        ("/replays", list[ReplayInfo]),
     ],
 )
 def test_get_endpoints_match_contracts(client, path, model) -> None:
@@ -91,8 +95,7 @@ def test_missing_ids_are_404(client) -> None:
     assert client.get("/departments/vendor_apex").status_code == 404
     assert client.get("/documents/doc_nope").status_code == 404
     assert client.get("/runs/run_nope").status_code == 404
-    assert client.post("/replays/nope/play").status_code == 404
-    assert client.post("/replays/sample_run/play?speed=3").status_code == 422
+    assert client.get("/replays").status_code == 404
 
 
 def test_simulate_endpoints_match_contracts(client, brief_json) -> None:
@@ -150,6 +153,45 @@ def test_prompt_decision_drafts_and_runs_every_department(client) -> None:
     assert any("unquantified" in assumption.lower() for assumption in package.assumptions)
 
 
+@pytest.mark.parametrize("unit", ["dollars", "fte", "budget"])
+def test_decision_draft_accepts_non_percentage_requests(client, monkeypatch, unit) -> None:
+    twin = runtime.twin()
+    role = next(e for e in twin.entities if e.type.value == "role" and e.capacity_fte and e.annual_cost_usd)
+    requested_cost = round(role.annual_cost_usd / 4)
+    quantities = {
+        "dollars": {"amount_usd": requested_cost, "dollar_basis": "annual_staffing_cost"},
+        "fte": {"amount_fte": role.capacity_fte / 4},
+        "budget": {"amount_usd": requested_cost, "dollar_basis": "budget"},
+    }
+
+    def live_call(*args, **kwargs):
+        return LiveReply({
+            "decision_type": "capacity_change", "title": "Review staffing change",
+            "goal": {"metric": "annual_savings_usd", "target": requested_cost, "unit": "usd",
+                     "basis": "gross", "direction": "at_least"},
+            "candidate_interventions": [{"type": "reduce_capacity", "target_entity_id": role.id,
+                                         "rationale": "Requested change", **quantities[unit]}],
+        })
+
+    monkeypatch.setattr(runtime, "build_intake", lambda settings: DecisionIntake(
+        settings.model_copy(update={"model_id_strong": "test-provider"}), live_call=live_call,
+    ))
+    draft = validate(DecisionDraft, client.post(
+        "/decisions/draft", headers=auth_headers(client),
+        json={"prompt": f"Evaluate a change to {role.name}: {quantities[unit]}"},
+    ))
+    intervention = draft.brief.candidate_interventions[0]
+    applied = apply_interventions(twin, [intervention])
+    assert draft.brief.goal.target == requested_cost
+    if unit == "budget":
+        assert intervention.type.value == "assess_change"
+        assert draft.warnings and applied.gross_savings_usd == 0
+    else:
+        assert intervention.type.value == "reduce_capacity"
+        assert applied.gross_savings_usd == requested_cost
+        assert draft.assumptions and not draft.warnings
+
+
 def test_decision_brief_gets_settings_defaults(client, brief_json) -> None:
     for key in ("horizon_days", "futures", "delay_days", "seed", "mc_samples"):
         brief_json.pop(key)
@@ -176,16 +218,6 @@ def test_package_before_ready_is_409(client) -> None:
                        json={"decision": "approve", "decided_by": "x", "package_hash": "0" * 64}).status_code == 409
 
 
-def test_replay_play_creates_new_run(client) -> None:
-    started = validate(ReplayStarted, client.post("/replays/sample_run/play?speed=4"))
-    assert started.speed == 4
-    state = wait_for_status(client, started.run_id, RunStatus.awaiting_approval)
-    assert state.run_id == started.run_id
-    assert state.scenario_ids
-    package = validate(DecisionPackage, client.get(f"/runs/{started.run_id}/package"))
-    assert package.run_id == started.run_id
-
-
 def test_organization_profile_lists_all_departments(client) -> None:
     profile = validate(OrganizationProfileView, client.get("/organization/profile"))
     twin = validate(Twin, client.get("/company"))
@@ -197,6 +229,65 @@ def test_organization_profile_lists_all_departments(client) -> None:
     )
     assert all(d.enabled for d in profile.departments)
     assert profile.settings.organization_id == twin.organization.id
+
+
+def test_organization_agent_skills_exposes_effective_runtime_knowledge(client) -> None:
+    skills = validate(list[AgentSkillFile], client.get("/organization/agent-skills"))
+    assert [skill.agent_id for skill in skills] == [
+        "finance", "engineering", "ai_data", "operations", "product", "marketing", "sales",
+        "customer_success", "compliance", "people_knowledge", "challenger",
+    ]
+    finance = skills[0]
+    assert finance.department_id == "dept_finance"
+    assert finance.source == "skill"
+    assert finance.file_path == "docs/skillfiles/finance.md"
+    assert "Use the organization's current record" in finance.content
+    assert "BeaconIQ" not in finance.content
+
+
+def test_department_context_item_is_persisted_and_returned(client) -> None:
+    original = runtime.twin().model_copy(deep=True)
+    try:
+        response = client.post(
+            "/departments/dept_operations/context",
+            headers=auth_headers(client),
+            json={
+                "entity_type": "workflow",
+                "name": "Quarterly continuity rehearsal",
+                "criticality": "high",
+                "min_qualified_owners": 2,
+                "documented_pct": 0.8,
+                "failure_cost_per_day_usd": 25000,
+                "evidence_title": "Continuity rehearsal operating note",
+                "evidence_source": "runbook",
+                "evidence_snippet": "Operations owns and runs the quarterly continuity rehearsal for critical services.",
+            },
+        )
+        detail = validate(DepartmentDetail, response)
+        added = next(entity for entity in detail.owned_entities if entity.name == "Quarterly continuity rehearsal")
+        assert added.department_id == "dept_operations"
+        assert added.evidence_refs
+        assert any(document.title == "Continuity rehearsal operating note" for document in detail.documents)
+        persisted = validate(DepartmentDetail, client.get("/departments/dept_operations"))
+        assert any(entity.id == added.id for entity in persisted.owned_entities)
+    finally:
+        runtime.activate_twin(original)
+
+
+def test_department_context_write_requires_approver(client) -> None:
+    response = client.post(
+        "/departments/dept_operations/context",
+        headers=auth_headers(client, role="viewer"),
+        json={
+            "entity_type": "knowledge_asset",
+            "name": "Restricted context",
+            "documented_pct": 0.5,
+            "evidence_title": "Restricted note",
+            "evidence_source": "knowledge_matrix",
+            "evidence_snippet": "This viewer request must not update the active company twin.",
+        },
+    )
+    assert response.status_code == 403
 
 
 def test_profile_marks_departments_without_enabled_agent(client, monkeypatch) -> None:

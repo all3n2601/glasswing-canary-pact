@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 import { BackendUnavailable } from "@/components/backend-unavailable";
 import { OrganizationSettings } from "@/components/organization-settings";
-import { getOrganizationProfile } from "@/lib/canary-api-server";
+import { getAgentSkillFiles, getOrganizationProfile } from "@/lib/canary-api-server";
+import { requireUser } from "@/lib/auth-server";
 
 export const metadata: Metadata = {
   title: "Organization settings · Canary Pact",
@@ -10,8 +11,11 @@ export const metadata: Metadata = {
 };
 
 export default async function OrganizationSettingsPage() {
+  if (!await requireUser("/settings/organization")) return <BackendUnavailable resource="account verification" />;
+
   try {
-    return <OrganizationSettings profile={await getOrganizationProfile()} />;
+    const [profile, agentSkills] = await Promise.all([getOrganizationProfile(), getAgentSkillFiles()]);
+    return <OrganizationSettings profile={profile} agentSkills={agentSkills} />;
   } catch {
     return <BackendUnavailable resource="organization settings" />;
   }

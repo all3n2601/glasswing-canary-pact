@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from enum import StrEnum
 from typing import Annotated, Any, Literal
@@ -64,6 +66,15 @@ class AgentSpec(Strict):
     prompt_version: str
 
 
+class AgentSkillFile(Strict):
+    agent_id: ID
+    display_name: str
+    department_id: ID | None = None
+    source: Literal["skill", "fallback"]
+    file_path: str
+    content: str
+
+
 class AgentSettingsView(Strict):
     risk_appetite: RiskAppetite
     optimizer_objective: Literal["max_net_value", "min_risk", "balanced"]
@@ -81,6 +92,9 @@ class AgentContext(Strict):
     act_now_effects: list[Impact] = Field(default_factory=list)
     inaction_effects: list[Impact] = Field(default_factory=list)
     known_impact_summaries: list[str] = Field(default_factory=list)
+    review_issues: list[ReviewIssue] = Field(default_factory=list)
+    previous_assessment_id: ID | None = None
+    previous_output: AgentOutput | None = None
     settings: AgentSettingsView
     max_tool_calls: int = Field(default=3, ge=0, le=5)
 
@@ -137,6 +151,25 @@ class Objection(Lenient):
     severity: Severity
 
 
+class ReviewIssue(Strict):
+    issue_id: ID
+    source_assessment_id: ID
+    source_agent_id: ID
+    source_ref: str
+    target_assessment_id: ID
+    text: str
+    severity: Severity
+    entity_ids: list[str] = Field(default_factory=list)
+    evidence_refs: list[str] = Field(default_factory=list)
+
+
+class ReviewReply(Lenient):
+    issue_id: str
+    position: Literal["revised", "supported", "unresolved"]
+    explanation: str = Field(min_length=1, max_length=2000)
+    evidence_refs: list[str] = Field(default_factory=list)
+
+
 class AgentOutput(Lenient):
     affected_entities: list[str] = Field(default_factory=list)
     act_now_view: FutureView
@@ -147,6 +180,7 @@ class AgentOutput(Lenient):
     assumptions: list[str] = Field(default_factory=list)
     evidence_refs: list[str] = Field(default_factory=list)
     confidence: RawConfidence
+    review_replies: list[ReviewReply] = Field(default_factory=list)
 
 
 class ChallengerOutput(Lenient):
@@ -190,7 +224,9 @@ class AgentAssessment(Strict):
     run_id: ID
     plan_id: ID | None = None
     agent_id: ID
-    pass_type: Literal["first_pass", "challenge"]
+    pass_type: Literal["first_pass", "challenge", "response"]
+    responds_to_assessment_id: ID | None = None
+    review_issues: list[ReviewIssue] = Field(default_factory=list)
     status: Literal["ok", "replayed", "fallback_cached", "unavailable", "invalid"]
     output: AgentOutput | None = None
     challenge: ChallengerOutput | None = None
@@ -204,3 +240,6 @@ class Claim(Strict):
     text: str
     source: Literal["calculation", "evidence", "assumption", "agent_validated"]
     ref: str
+
+
+AgentContext.model_rebuild()

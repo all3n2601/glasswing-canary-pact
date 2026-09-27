@@ -19,6 +19,7 @@ import { motion, useReducedMotion, useScroll, useTransform } from "motion/react"
 import Link from "next/link";
 import { useRef } from "react";
 
+import { useAuth } from "@/components/auth-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,6 +51,8 @@ const resultCapabilities = [
 const reveal = { hidden: { opacity: 0, y: 22 }, visible: { opacity: 1, y: 0 } };
 
 export function LandingExperience() {
+  const { user, loading, unavailable } = useAuth();
+  const canAccessWorkspace = Boolean(user) && !loading && !unavailable;
   const heroRef = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();
@@ -77,8 +80,8 @@ export function LandingExperience() {
             Simulate a business decision across your organization and understand who benefits, who carries the risk, and what happens next.
           </motion.p>
           <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24, duration: 0.65 }} className="mt-7 flex flex-col gap-2.5 sm:flex-row">
-            <Button asChild size="lg" className="rounded-xl bg-zinc-950 px-5 text-white hover:bg-zinc-800"><Link href="/simulate">Run a simulation <ArrowRight /></Link></Button>
-            <Button asChild size="lg" variant="outline" className="rounded-xl border-zinc-200 bg-white px-5"><Link href="/story"><Play className="size-3.5 fill-current" /> See how it works</Link></Button>
+            <Button asChild size="lg" className="rounded-xl bg-zinc-950 px-5 text-white hover:bg-zinc-800"><Link href={canAccessWorkspace ? "/simulate" : "/signup"}>{canAccessWorkspace ? "Run a simulation" : "Get started"} <ArrowRight /></Link></Button>
+            <Button asChild size="lg" variant="outline" className="rounded-xl border-zinc-200 bg-white px-5"><Link href="#how-it-works"><Play className="size-3.5 fill-current" /> See how it works</Link></Button>
           </motion.div>
         </motion.div>
 
@@ -115,7 +118,7 @@ export function LandingExperience() {
           <motion.div variants={reveal}><Badge variant="outline" className="rounded-full border-zinc-200 bg-white text-zinc-500">The organizational twin</Badge></motion.div>
           <motion.h2 variants={reveal} className="mt-5 max-w-lg text-4xl font-semibold leading-[1.02] tracking-[-0.05em] sm:text-6xl">Your whole company, in one shared picture.</motion.h2>
           <motion.p variants={reveal} className="mt-5 max-w-md text-sm leading-6 text-zinc-500">Canary Pact maps departments, goals, capacity, dependencies, and commitments so every scenario starts with the same truth.</motion.p>
-          <motion.div variants={reveal} className="mt-7"><Button asChild variant="outline" className="rounded-xl"><Link href="/evidence">Explore the evidence <ArrowRight /></Link></Button></motion.div>
+          {canAccessWorkspace ? <motion.div variants={reveal} className="mt-7"><Button asChild variant="outline" className="rounded-xl"><Link href="/evidence">Explore the evidence <ArrowRight /></Link></Button></motion.div> : null}
         </motion.div>
 
         <motion.div className="relative min-h-[500px] rounded-[30px] border border-zinc-200 bg-[radial-gradient(circle_at_50%_45%,#e6f7ff_0%,#f4fbff_27%,#fff_66%)] p-5 sm:p-10" initial={{ opacity: 0, x: 35 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.7 }}>
@@ -172,7 +175,7 @@ export function LandingExperience() {
           <motion.ul variants={reveal} className="mt-7 space-y-3 text-sm text-zinc-700">
             {["Positive and negative effects stay visually distinct", "Every claim links back to its source", "People keep final approval at every stage"].map((item) => <li key={item} className="flex items-center gap-2.5"><span className="grid size-5 place-items-center rounded-full bg-emerald-50 text-emerald-600"><Check className="size-3" /></span>{item}</li>)}
           </motion.ul>
-          <motion.div variants={reveal} className="mt-8"><Button asChild className="rounded-xl bg-zinc-950 text-white hover:bg-zinc-800"><Link href="/story">View the full story <ArrowRight /></Link></Button></motion.div>
+          {canAccessWorkspace ? <motion.div variants={reveal} className="mt-8"><Button asChild className="rounded-xl bg-zinc-950 text-white hover:bg-zinc-800"><Link href="/story">View the full story <ArrowRight /></Link></Button></motion.div> : null}
         </motion.div>
       </section>
 
@@ -181,7 +184,7 @@ export function LandingExperience() {
           <span className="mx-auto grid size-11 place-items-center rounded-2xl bg-white text-zinc-950"><Network className="size-5" /></span>
           <h2 className="mx-auto mt-7 max-w-3xl text-4xl font-semibold leading-[1.02] tracking-[-0.05em] sm:text-6xl">Make the decision after you see the consequence.</h2>
           <p className="mx-auto mt-5 max-w-lg text-sm leading-6 text-zinc-400">Load the company twin and run a backend-supported decision scenario.</p>
-          <Button asChild size="lg" className="mt-8 rounded-xl bg-white px-5 text-zinc-950 hover:bg-zinc-200"><Link href="/simulate">Enter the simulation <ArrowRight /></Link></Button>
+          <Button asChild size="lg" className="mt-8 rounded-xl bg-white px-5 text-zinc-950 hover:bg-zinc-200"><Link href={canAccessWorkspace ? "/simulate" : "/signup"}>{canAccessWorkspace ? "Enter the simulation" : "Create an account"} <ArrowRight /></Link></Button>
         </div>
       </motion.section>
 

@@ -52,3 +52,29 @@ def test_settings_defaults() -> None:
     assert settings.mc_samples == 1000 and settings.propagation_max_hops == 4
     assert settings.risk_weights.financial == 25
     assert {"finance", "compliance", "challenger"} <= set(OrganizationSettings(enabled_agent_ids=["sales"]).enabled_agent_ids)
+
+
+def test_response_assessment_example_matches_exported_schema():
+    import json
+    from pathlib import Path
+    from contracts_py.agents import AgentAssessment
+
+    payload = {
+        "assessment_id": "asm_example_operations_response", "run_id": "run_example",
+        "agent_id": "operations", "plan_id": "plan_example", "pass_type": "response", "status": "ok",
+        "responds_to_assessment_id": "asm_example_operations",
+        "review_issues": [{"issue_id": "issue_example", "source_assessment_id": "asm_example_challenger",
+            "source_agent_id": "challenger", "source_ref": "objections.0",
+            "target_assessment_id": "asm_example_operations", "text": "What supports continuity?", "severity": 4}],
+        "output": {"act_now_view": {"summary": "Continuity remains uncertain."},
+            "inaction_view": {"summary": "The dependency remains."}, "confidence": 0.5,
+            "review_replies": [{"issue_id": "issue_example", "position": "unresolved",
+                "explanation": "The supplied evidence does not establish coverage."}]},
+        "metrics": {"model_id": "test", "prompt_version": "p3", "prompt_hash": "test",
+            "latency_ms": 0, "input_tokens": 0, "output_tokens": 0},
+        "created_at": "2026-09-27T12:00:00Z",
+    }
+    assessment = AgentAssessment.model_validate(payload)
+    schema = Path(__file__).resolve().parents[2] / "contracts/schemas/agent-assessment.schema.json"
+    assert json.loads(schema.read_text()) == AgentAssessment.model_json_schema()
+    assert AgentAssessment.model_validate_json(assessment.model_dump_json()) == assessment

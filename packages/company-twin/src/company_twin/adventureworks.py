@@ -8,6 +8,7 @@ passes the parsed rows in together with an explicit ``created_at``.
 
 from __future__ import annotations
 
+import hashlib
 import re
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
@@ -228,8 +229,10 @@ def build_adventureworks_twin(
                 criticality=Criticality.medium,
                 annual_cost_usd=cost,
                 capacity_fte=float(len(members)),
+                time_to_train_days=60,
+                replacement_cost_usd=_money(cost * Decimal("0.20")),
                 sensitivity=Sensitivity.hr,
-                tags=["adventureworks_derived"],
+                tags=["adventureworks_derived", "training_cost_assumption"],
                 evidence_refs=["ev_aw_employees", "ev_aw_pay_history"],
             ))
         head_role = max(role_costs)[1] if role_costs else None
@@ -306,12 +309,20 @@ def build_adventureworks_twin(
             criticality=Criticality.high if preferred == "1" else Criticality.medium,
             annual_cost_usd=annual_cost,
             one_time_exit_cost_usd=_money(annual_cost * Decimal("0.05")),
+            migration_cost_usd=_money(annual_cost * Decimal("0.10")),
+            geographies=["unknown"],
+            history_years=purchase_years,
+            freshness_days=30,
+            accuracy=0.8,
+            permitted_uses=["procurement", "manufacturing"],
+            retains_history_after_termination=True,
             tags=[
                 "adventureworks",
                 "active" if active == "1" else "inactive",
                 "preferred" if preferred == "1" else "standard",
                 f"credit_rating_{credit_rating}",
                 "exit_cost_is_assumption",
+                "substitution_fields_are_assumptions",
             ],
             evidence_refs=["ev_aw_vendors", "ev_aw_purchase_orders"],
         ))
@@ -342,6 +353,7 @@ def build_adventureworks_twin(
             criticality=Criticality.critical if name in {"Bikes", "Components"} else Criticality.high,
             min_qualified_owners=1,
             documented_pct=0.75,
+            failure_cost_per_day_usd=max(1_000, _money(category_sales) // 365),
             customer_facing=True,
             tags=["adventureworks_derived", f"product_category_{category_id}"],
             evidence_refs=["ev_aw_products", "ev_aw_work_orders"],
@@ -376,6 +388,7 @@ def build_adventureworks_twin(
             department_id=production_dept,
             criticality=Criticality.high,
             annual_cost_usd=_money(Decimal(cost_rate) * Decimal(2080)),
+            failure_cost_per_day_usd=max(1_000, _money(Decimal(cost_rate) * Decimal(8))),
             capacity_fte=float(Decimal(availability or "0")),
             tags=["physical_work_center", "adventureworks"],
             evidence_refs=["ev_aw_locations"],
@@ -414,6 +427,10 @@ def build_adventureworks_twin(
             criticality=criticality,
             min_qualified_owners=1,
             documented_pct=0.7,
+            failure_cost_per_day_usd=max(
+                1_000,
+                sum(annual_pay[employee_id] for employee_id in employees_by_dept[raw_dept]) // 260,
+            ),
             customer_facing=wid in {"wf_aw_sales_fulfillment", "wf_aw_shipping"},
             evidence_refs=[evidence_ref],
             tags=["adventureworks_derived"],
@@ -498,6 +515,172 @@ def build_adventureworks_twin(
               evidence_refs=["ev_aw_work_orders"]),
     ])
 
+    # Complete every imported department with a small, scenario-ready context pack.
+    # Imported staffing and transaction records remain the factual source; the
+    # workflow/knowledge narrative is explicitly marked synthetic demo context.
+    primary_workflow_by_raw = {
+        "1": "wf_aw_engineering_change_control",
+        "2": "wf_aw_tooling_design_release",
+        "3": "wf_aw_sales_fulfillment",
+        "4": "wf_aw_demand_planning",
+        "5": "wf_aw_procurement",
+        "6": "wf_aw_product_design_validation",
+        "7": workflow_by_category.get("1", next(iter(workflow_by_category.values()))),
+        "8": "wf_aw_production_scheduling",
+        "9": "wf_aw_workforce_onboarding",
+        "10": "wf_aw_financial_close",
+        "11": "wf_aw_business_systems_support",
+        "12": "wf_aw_controlled_document_publishing",
+        "13": "wf_aw_quality",
+        "14": "wf_aw_preventive_maintenance",
+        "15": "wf_aw_shipping",
+        "16": "wf_aw_executive_operating_review",
+    }
+    workflow_name_by_raw = {
+        "1": "Engineering change control",
+        "2": "Tooling design and release",
+        "4": "Demand planning",
+        "6": "Product design validation",
+        "8": "Production scheduling",
+        "9": "Workforce onboarding",
+        "10": "Financial close",
+        "11": "Business systems support",
+        "12": "Controlled document publishing",
+        "14": "Preventive maintenance",
+        "16": "Executive operating review",
+    }
+    existing_entity_ids = {entity.id for entity in entities}
+    budget_by_raw = {
+        raw_id: sum(annual_pay[employee_id] for employee_id in employees_by_dept[raw_id])
+        for raw_id in dept_name
+    }
+    for raw_id, workflow_name in workflow_name_by_raw.items():
+        if raw_id not in dept_id:
+            continue
+        workflow_id = primary_workflow_by_raw[raw_id]
+        if workflow_id in existing_entity_ids:
+            continue
+        entities.append(Entity(
+            id=workflow_id,
+            type=EntityType.workflow,
+            name=workflow_name,
+            department_id=dept_id[raw_id],
+            criticality=Criticality.high,
+            min_qualified_owners=1,
+            documented_pct=0.5,
+            failure_cost_per_day_usd=max(1_000, budget_by_raw[raw_id] // 260),
+            customer_facing=raw_id in {"4"},
+            exception_documented_pct=0.5,
+            automation_pct=0.4,
+            max_downtime_days=5,
+            tags=["adventureworks_demo_context", "derived_assumption"],
+            evidence_refs=[f"ev_aw_context_{raw_id}"],
+        ))
+        existing_entity_ids.add(workflow_id)
+
+    existing_kpi_by_raw = {
+        "3": "kpi_aw_sales",
+        "5": "kpi_aw_purchase_spend",
+        "10": "kpi_aw_gross_margin",
+        "13": "kpi_aw_scrap_rate",
+        "15": "kpi_aw_on_time_delivery",
+    }
+    primary_kpi_by_raw: dict[str, str] = {}
+    for raw_id, name, *_ in department_rows:
+        kpi_id = existing_kpi_by_raw.get(raw_id, f"kpi_aw_{_slug(name)}_staffed_capacity")
+        primary_kpi_by_raw[raw_id] = kpi_id
+        if kpi_id not in existing_entity_ids:
+            entities.append(Entity(
+                id=kpi_id,
+                type=EntityType.kpi,
+                name=f"{name} staffed capacity",
+                department_id=dept_id[raw_id],
+                criticality=Criticality.medium,
+                kpi_baseline=float(len(employees_by_dept[raw_id])),
+                kpi_unit="assigned_fte",
+                higher_is_better=True,
+                tags=["adventureworks_derived", "staffing_baseline"],
+                evidence_refs=[f"ev_aw_context_{raw_id}"],
+            ))
+            existing_entity_ids.add(kpi_id)
+
+    context_documents: list[Document] = []
+    context_evidence: list[Evidence] = []
+    existing_edges = {(item.source, item.target, item.relation) for item in edges}
+    for raw_id, name, group_name, _ in department_rows:
+        did = dept_id[raw_id]
+        workflow_id = primary_workflow_by_raw[raw_id]
+        kpi_id = primary_kpi_by_raw[raw_id]
+        knowledge_id = f"kn_aw_{raw_id}_operating_knowledge"
+        evidence_id = f"ev_aw_context_{raw_id}"
+        document_id = f"doc_aw_context_{raw_id}"
+        head_role = head_role_by_dept.get(raw_id)
+
+        workflow = next(entity for entity in entities if entity.id == workflow_id)
+        kpi = next(entity for entity in entities if entity.id == kpi_id)
+        workflow.evidence_refs = sorted(set([*workflow.evidence_refs, evidence_id]))
+        kpi.evidence_refs = sorted(set([*kpi.evidence_refs, evidence_id]))
+        entities.append(Entity(
+            id=knowledge_id,
+            type=EntityType.knowledge_asset,
+            name=f"{name} operating knowledge",
+            department_id=did,
+            criticality=workflow.criticality,
+            documented_pct=0.65,
+            tags=["adventureworks_demo_context", "department_operating_knowledge"],
+            evidence_refs=[evidence_id],
+        ))
+
+        if head_role and (head_role, workflow_id, Relation.OWNS) not in existing_edges:
+            edges.append(_edge(
+                f"e_aw_context_{raw_id}_owner", head_role, workflow_id, Relation.OWNS,
+                strength=0.8, substitutability=0.35, criticality=workflow.criticality,
+                confidence=0.8, evidence_refs=[evidence_id],
+            ))
+        edges.append(_edge(
+            f"e_aw_context_{raw_id}_knowledge", knowledge_id, workflow_id, Relation.SUPPORTS,
+            strength=0.7, substitutability=0.4, criticality=workflow.criticality,
+            confidence=0.75, evidence_refs=[evidence_id],
+        ))
+        if (workflow_id, kpi_id, Relation.CONTRIBUTES_TO) not in existing_edges:
+            edges.append(_edge(
+                f"e_aw_context_{raw_id}_outcome", workflow_id, kpi_id, Relation.CONTRIBUTES_TO,
+                strength=0.65, substitutability=0.35, criticality=workflow.criticality,
+                confidence=0.75, evidence_refs=[evidence_id],
+            ))
+
+        covered = [workflow_id, kpi_id, knowledge_id]
+        if head_role:
+            covered.insert(0, head_role)
+        context_documents.append(Document(
+            id=document_id,
+            title=f"{name} demo operating context",
+            department_id=did,
+            owner_role_id=head_role,
+            doc_type=DocumentType.workflow_map,
+            uri=f"canary://adventureworks/departments/{did}/context",
+            mime_type="application/json",
+            status=DocumentStatus.current,
+            summary=(
+                f"Scenario-ready {name} ownership and workflow context derived from public "
+                f"AdventureWorks {group_name} staffing records. Workflow assumptions are synthetic."
+            ),
+            covers_entity_ids=covered,
+            synthetic=True,
+            ingested=True,
+            uploaded_at=created_at,
+        ))
+        context_evidence.append(Evidence(
+            id=evidence_id,
+            source_type=EvidenceSource.workflow_map,
+            document_id=document_id,
+            snippet=(
+                f"{name} has {len(employees_by_dept[raw_id])} assigned employees across "
+                f"{len(roles_by_dept[raw_id])} roles; {workflow.name} is the seeded demo workflow."
+            ),
+            synthetic=True,
+        ))
+
     channel_rows = [
         ("5", "7", ChannelKind.capability, "supplier inputs"),
         ("7", "8", ChannelKind.capability, "production output"),
@@ -516,31 +699,49 @@ def build_adventureworks_twin(
             evidence_refs=["ev_aw_departments"], label=label, channel_kind=kind,
         ))
 
+    def source_checksum(*filenames: str) -> str:
+        """Checksum the normalized imported rows represented by one source document."""
+        digest = hashlib.sha256()
+        for filename in filenames:
+            digest.update(filename.encode())
+            for row in data[filename]:
+                digest.update("\x1f".join(row).encode())
+                digest.update(b"\n")
+        return digest.hexdigest()
+
     documents = [
         Document(id="doc_aw_departments", title="AdventureWorks departments and employee assignments",
                  doc_type=DocumentType.org_chart, uri=f"{_PROVENANCE_BASE}/Department.csv", mime_type="text/csv",
                  status=DocumentStatus.current, summary="Microsoft sample department structure and current employee assignments.",
                  covers_entity_ids=[entity.id for entity in entities
                                     if entity.type in {EntityType.department, EntityType.role}],
+                 checksum_sha256=source_checksum("Department.csv", "Employee.csv", "EmployeeDepartmentHistory.csv",
+                                                 "EmployeePayHistory.csv"),
                  synthetic=False, ingested=True, uploaded_at=created_at),
         Document(id="doc_aw_purchasing", title="AdventureWorks purchasing records", department_id=dept_id["5"],
                  doc_type=DocumentType.contract, uri=f"{_PROVENANCE_BASE}/PurchaseOrderHeader.csv", mime_type="text/csv",
                  status=DocumentStatus.current, summary="Public vendor, product-vendor, and purchase-order records.",
                  covers_entity_ids=[entity.id for entity in entities if entity.type is EntityType.vendor]
                  + ["wf_aw_procurement", "kpi_aw_purchase_spend"],
+                 checksum_sha256=source_checksum("Vendor.csv", "ProductVendor.csv", "PurchaseOrderHeader.csv",
+                                                 "PurchaseOrderDetail.csv"),
                  synthetic=False, ingested=True, uploaded_at=created_at),
         Document(id="doc_aw_production", title="AdventureWorks production records", department_id=dept_id["7"],
                  doc_type=DocumentType.workflow_map, uri=f"{_PROVENANCE_BASE}/WorkOrderRouting.csv", mime_type="text/csv",
                  status=DocumentStatus.current, summary="Public product, work-order, routing, and work-center records.",
                  covers_entity_ids=[entity.id for entity in entities if entity.type is EntityType.system]
                  + [*workflow_by_category.values(), "wf_aw_quality", "kpi_aw_scrap_rate"],
+                 checksum_sha256=source_checksum("Product.csv", "ProductCategory.csv", "ProductSubcategory.csv",
+                                                 "Location.csv", "WorkOrder.csv", "WorkOrderRouting.csv"),
                  synthetic=False, ingested=True, uploaded_at=created_at),
         Document(id="doc_aw_sales", title="AdventureWorks sales records", department_id=dept_id["3"],
                  doc_type=DocumentType.kpi_report, uri=f"{_PROVENANCE_BASE}/SalesOrderHeader.csv", mime_type="text/csv",
                  status=DocumentStatus.current, summary="Public sales-order records used to derive revenue and delivery KPIs.",
                  covers_entity_ids=["wf_aw_sales_fulfillment", "wf_aw_shipping", "kpi_aw_sales",
                                     "kpi_aw_gross_margin", "kpi_aw_on_time_delivery"],
+                 checksum_sha256=source_checksum("SalesOrderHeader.csv", "SalesOrderDetail.csv"),
                  synthetic=False, ingested=True, uploaded_at=created_at),
+        *context_documents,
     ]
     evidence = [
         Evidence(id="ev_aw_departments", source_type=EvidenceSource.architecture_note,
@@ -581,6 +782,7 @@ def build_adventureworks_twin(
                  document_id="doc_aw_sales",
                  snippet=f"{len(sales_headers)} sales orders and {len(sales_details)} lines determine commercial KPIs.",
                  synthetic=False),
+        *context_evidence,
     ]
 
     return Twin(

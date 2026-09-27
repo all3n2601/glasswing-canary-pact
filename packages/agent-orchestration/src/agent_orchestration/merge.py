@@ -14,6 +14,7 @@ from contracts_py.agents import (
     FutureView,
     ProposedDependency,
     ProposedImpact,
+    ReviewReply,
     ValidationReport,
 )
 from contracts_py.engine import Impact
@@ -182,7 +183,28 @@ class _Merger:
             "proposed_dependencies": self.dependencies(output.proposed_dependencies, "proposed_dependencies"),
             "questions": questions,
             "confidence": self.clamp(output.confidence, "confidence"),
+            "review_replies": self.review_replies(output.review_replies),
         })
+
+    def review_replies(self, replies: list[ReviewReply]) -> list[ReviewReply]:
+        """A reply is an agent position, never proof that a challenge is resolved."""
+        expected = {issue.issue_id: issue for issue in self.context.review_issues}
+        accepted: dict[str, ReviewReply] = {}
+        for reply in replies:
+            if reply.issue_id not in expected or reply.issue_id in accepted:
+                self.report.errors.append(f"review_replies{REJECTED_MARKER}unknown or duplicate issue {reply.issue_id}")
+                continue
+            refs = [ref for ref in reply.evidence_refs if ref in self.known_evidence]
+            position = reply.position
+            if position != "unresolved" and not refs:
+                position = "unresolved"
+                self.report.downgraded_to_hypothesis.append(f"review_replies.{reply.issue_id}")
+            accepted[reply.issue_id] = reply.model_copy(update={"position": position, "evidence_refs": refs})
+        for issue_id in expected:
+            if issue_id not in accepted:
+                accepted[issue_id] = ReviewReply(issue_id=issue_id, position="unresolved",
+                                                explanation="No structured response was supplied for this objection.")
+        return list(accepted.values())
 
     def challenger_output(self, output: ChallengerOutput) -> ChallengerOutput:
         combos = [c for n, c in enumerate(output.overlooked_combinations)
@@ -210,12 +232,16 @@ def redact_tree(value: Any) -> tuple[Any, int]:
     return value, 0
 
 
-def merge(agent_id: str, result: LLMResult, *, context: AgentContext, pass_type: Literal["first_pass", "challenge"],
+def merge(agent_id: str, result: LLMResult, *, context: AgentContext, pass_type: Literal["first_pass", "challenge", "response"],
           scenario_ids: dict[str, str], created_at: datetime) -> MergeOutcome:
     """Applies the section 7 merge rules; scenario_ids maps "act_now" and "inaction" to scenario IDs."""
     assessment_id = f"asm_{context.run_id}_{agent_id}"
+    if pass_type == "response":
+        assessment_id += "_response"
+    if len(assessment_id) > 80:
+        assessment_id = "asm_" + hashlib.sha256(assessment_id.encode()).hexdigest()[:32]
     origin = Origin.challenger if pass_type == "challenge" else Origin.agent
-    merger = _Merger(agent_id, context, assessment_id, scenario_ids, origin, stale=result.status == "fallback_cached")
+    merger = _Merger(agent_id, context, assessment_id, scenario_ids, origin, stale=False)
     merger.report.errors.extend(result.errors)
     output = challenge = None
     if isinstance(result.output, AgentOutput):
@@ -230,6 +256,8 @@ def merge(agent_id: str, result: LLMResult, *, context: AgentContext, pass_type:
         plan_id=context.plan.plan_id,
         agent_id=agent_id,
         pass_type=pass_type,
+        responds_to_assessment_id=context.previous_assessment_id,
+        review_issues=context.review_issues,
         status=result.status,
         output=output,
         challenge=challenge,

@@ -1,9 +1,10 @@
 import logging
 import os
+from threading import RLock
 from functools import cache
 from pathlib import Path
 
-from agent_orchestration import AgentLLM
+from agent_orchestration import AgentLLM, DecisionIntake
 from agent_orchestration.llm import structured_output_mode
 from agent_orchestration.orchestrator import simulation_mode
 from contracts_py.twin import OrganizationSettings, Twin
@@ -22,6 +23,7 @@ structured_output_error: str | None = None
 sim_mode_error: str | None = None
 _twin: Twin | None = None
 _stub_twin: Twin | None = None
+twin_lock = RLock()
 
 
 SNIPPETS_PATH = DATA_DIR / "artifacts" / "snippets.json"
@@ -63,25 +65,32 @@ def twin() -> Twin:
     return _twin
 
 
+def activate_twin(value: Twin) -> None:
+    """Persist and activate a validated company twin for subsequent requests and runs."""
+    global _twin
+    storage.current().save_twin(value, active=True)
+    _twin = value
+
+
 @cache
 def _settings(organization_id: str) -> OrganizationSettings:
     return OrganizationSettings(organization_id=organization_id)
 
 
 def settings() -> OrganizationSettings:
-    return _settings(twin().organization.id)
-
-
-def llm_cache_dir() -> Path:
-    return Path(os.environ.get("CANARY_LLM_CACHE_DIR", DATA_DIR / "artifacts" / "llm_cache"))
-
-
-def cache_is_empty(cache_dir: Path) -> bool:
-    return not cache_dir.is_dir() or next(cache_dir.rglob("*.json"), None) is None
+    return twin().organization_settings or _settings(twin().organization.id)
 
 
 def build_llm(run_settings: OrganizationSettings) -> AgentLLM:
-    return AgentLLM(run_settings, cache_dir=llm_cache_dir())
+    if run_settings.llm_mode != "live":
+        raise ValueError("Decision runs require llm_mode='live'; test doubles must be injected explicitly")
+    return AgentLLM(run_settings)
+
+
+def build_intake(run_settings: OrganizationSettings) -> DecisionIntake:
+    if run_settings.llm_mode != "live":
+        raise ValueError("Decision intake requires llm_mode='live'; test doubles must be injected explicitly")
+    return DecisionIntake(run_settings)
 
 
 def check_structured_output() -> str | None:

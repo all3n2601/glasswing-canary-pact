@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import secrets
+import tempfile
 import uuid
 from datetime import datetime, timedelta, timezone
 from functools import cache
@@ -18,6 +19,7 @@ from pydantic import ValidationError
 from contracts_py.api import AuthToken, LoginRequest, SignupRequest, UserPublic, UserRole
 
 from canary_api import storage
+from canary_api.paths import runs_dir
 from canary_api.storage import DuplicateEmail, FileStorage, Storage
 
 log = logging.getLogger(__name__)
@@ -129,8 +131,25 @@ def _secret() -> bytes:
     configured = os.environ.get("CANARY_AUTH_SECRET")
     if configured:
         return configured.encode()
-    log.warning("CANARY_AUTH_SECRET is not set; using a random secret, so tokens reset on restart")
-    return secrets.token_bytes(32)
+    # Keep the local key across reloads and share it between workers. Publish a
+    # fully written file atomically so concurrent starts never read a partial key.
+    root = runs_dir()
+    root.mkdir(parents=True, exist_ok=True)
+    path = root / ".auth-secret"
+    if not path.exists():
+        with tempfile.NamedTemporaryFile(dir=root) as temporary:
+            temporary.write(secrets.token_bytes(32))
+            temporary.flush()
+            try:
+                os.link(temporary.name, path)
+            except FileExistsError:
+                pass
+    secret = path.read_bytes()
+    if len(secret) != 32:
+        raise RuntimeError("Local auth key is invalid; restore it or configure CANARY_AUTH_SECRET")
+    log.warning("CANARY_AUTH_SECRET is not set; using the persistent local key. "
+                "Configure a shared secret for multi-host deployments.")
+    return secret
 
 
 def store() -> UserStore:

@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 import pytest
 from api_auth_helpers import auth_headers
 
+from agent_orchestration import IntakeInvalid, IntakeUnavailable
 from canary_api import engine_port, eval_cli, paths, runtime, storage
 from canary_api.app import app, lifespan
 from canary_api.stubs import engine as stub_engine
@@ -38,12 +39,42 @@ def test_invalid_structured_output_blocks_live_runs_at_startup(client, brief_jso
     denied = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=brief_json)
     assert denied.status_code == 503
     assert "CANARY_STRUCTURED_OUTPUT must be one of auto, json_schema, function_calling" in denied.json()["detail"]
-    assert client.post("/decisions?llm_mode=mock", headers=auth_headers(client), json=brief_json).status_code == 200
+    assert client.post("/decisions?llm_mode=mock", headers=auth_headers(client), json=brief_json).status_code == 422
 
 
 def test_valid_structured_output_clears_the_startup_error(monkeypatch, restore_structured_output) -> None:
     monkeypatch.setenv("CANARY_STRUCTURED_OUTPUT", "json_schema")
     assert runtime.check_structured_output() is None and runtime.structured_output_error is None
+
+
+def test_free_text_draft_requires_live_agents(client, monkeypatch) -> None:
+    monkeypatch.delenv("CANARY_ALLOW_LIVE", raising=False)
+    response = client.post(
+        "/decisions/draft",
+        headers=auth_headers(client),
+        json={"prompt": "Remove BeaconIQ while preserving critical data coverage."},
+    )
+    assert response.status_code == 503
+    assert "Live agents are disabled" in response.json()["detail"]
+
+
+@pytest.mark.parametrize(
+    ("error", "status"),
+    [(IntakeUnavailable("provider unavailable"), 503), (IntakeInvalid("invalid structured intake"), 422)],
+)
+def test_free_text_draft_never_falls_back_when_live_intake_fails(client, monkeypatch, error, status) -> None:
+    class BrokenIntake:
+        def draft(self, *args, **kwargs):
+            raise error
+
+    monkeypatch.setattr(runtime, "build_intake", lambda settings: BrokenIntake())
+    response = client.post(
+        "/decisions/draft",
+        headers=auth_headers(client),
+        json={"prompt": "Remove BeaconIQ while preserving critical data coverage."},
+    )
+    assert response.status_code == status
+    assert response.json()["detail"] == str(error)
 
 
 def _values(node, key: str) -> set[str]:
@@ -110,24 +141,15 @@ def test_eval_cli_live_needs_opt_in(monkeypatch, tmp_path) -> None:
 
 
 def test_eval_cli_records_twin_impl(tmp_path) -> None:
-    assert eval_cli.main(["--mode", "mock", "--out", str(tmp_path)]) == 0
+    assert eval_cli.main(["--mode", "live", "--out", str(tmp_path)]) == 0
     rows = json.loads((tmp_path / "eval_runs.json").read_text())["rows"]
     assert {row["twin_impl"] for row in rows} == {engine_port.twin_impl()}
 
 
-def test_engine_port_vendor_overlap_uses_the_real_engine_by_default(monkeypatch) -> None:
-    monkeypatch.delenv("ENGINE_IMPL", raising=False)
+def test_engine_port_vendor_overlap_uses_the_real_engine() -> None:
     twin = stub_twin()
-    assert engine_port.engine_impl() == "real"
     assert engine_port.vendor_overlap(twin, ["vendor_apex", "vendor_beacon"]) != []
     assert engine_port.vendor_overlap(twin, ["vendor_apex"]) == []
-
-
-def test_engine_port_vendor_overlap_follows_engine_impl_stub(monkeypatch) -> None:
-    monkeypatch.setenv("ENGINE_IMPL", "stub")
-    twin = stub_twin()
-    assert engine_port.vendor_overlap(twin, ["vendor_apex", "vendor_beacon"]) == stub_engine.vendor_overlap(
-        twin, ["vendor_apex", "vendor_beacon"]) != []
 
 
 def test_invalid_sim_mode_blocks_all_runs_at_startup(client, brief_json, monkeypatch, caplog) -> None:
@@ -143,10 +165,10 @@ def test_invalid_sim_mode_blocks_all_runs_at_startup(client, brief_json, monkeyp
             asyncio.run(start_and_stop())
         assert "decision runs disabled" in caplog.text and "CANARY_SIM_MODE" in caplog.text
         monkeypatch.setenv("CANARY_ALLOW_LIVE", "true")
-        for mode in ("mock", "live"):
-            denied = client.post(f"/decisions?llm_mode={mode}", headers=auth_headers(client), json=brief_json)
-            assert denied.status_code == 503
-            assert "CANARY_SIM_MODE must be one of full, quick" in denied.json()["detail"]
+        denied = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=brief_json)
+        assert denied.status_code == 503
+        assert "CANARY_SIM_MODE must be one of full, quick" in denied.json()["detail"]
+        assert client.post("/decisions?llm_mode=mock", headers=auth_headers(client), json=brief_json).status_code == 422
     finally:
         monkeypatch.delenv("CANARY_SIM_MODE", raising=False)
         runtime.check_sim_mode()

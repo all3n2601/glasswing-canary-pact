@@ -572,6 +572,13 @@
           "title": "Candidate Interventions",
           "type": "array"
         },
+        "organization_changes": {
+          "items": {
+            "$ref": "#/$defs/OrganizationChange"
+          },
+          "title": "Organization Changes",
+          "type": "array"
+        },
         "protected_entity_ids": {
           "items": {
             "maxLength": 80,
@@ -659,6 +666,81 @@
       "title": "DecisionType",
       "type": "string"
     },
+    "DepartmentEdit": {
+      "additionalProperties": false,
+      "properties": {
+        "department_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Department Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 80,
+          "minLength": 2,
+          "title": "Name",
+          "type": "string"
+        },
+        "mission": {
+          "maxLength": 500,
+          "minLength": 2,
+          "title": "Mission",
+          "type": "string"
+        },
+        "actual_fte": {
+          "minimum": 0,
+          "title": "Actual Fte",
+          "type": "number"
+        },
+        "annual_budget_usd": {
+          "minimum": 0,
+          "title": "Annual Budget Usd",
+          "type": "integer"
+        },
+        "utilisation": {
+          "default": 0,
+          "maximum": 1.5,
+          "minimum": 0,
+          "title": "Utilisation",
+          "type": "number"
+        },
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "agent_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "assumption": {
+          "maxLength": 300,
+          "minLength": 10,
+          "title": "Assumption",
+          "type": "string"
+        }
+      },
+      "required": [
+        "department_id",
+        "name",
+        "mission",
+        "actual_fte",
+        "annual_budget_usd",
+        "assumption"
+      ],
+      "title": "DepartmentEdit",
+      "type": "object"
+    },
     "DepartmentImpactSummary": {
       "additionalProperties": false,
       "properties": {
@@ -698,6 +780,83 @@
         "severity"
       ],
       "title": "DepartmentImpactSummary",
+      "type": "object"
+    },
+    "DepartmentScenarioState": {
+      "additionalProperties": false,
+      "properties": {
+        "department_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Department Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "lifecycle": {
+          "enum": [
+            "active",
+            "added",
+            "closed"
+          ],
+          "title": "Lifecycle",
+          "type": "string"
+        },
+        "baseline_fte": {
+          "minimum": 0,
+          "title": "Baseline Fte",
+          "type": "number"
+        },
+        "scenario_fte": {
+          "minimum": 0,
+          "title": "Scenario Fte",
+          "type": "number"
+        },
+        "baseline_budget_usd": {
+          "minimum": 0,
+          "title": "Baseline Budget Usd",
+          "type": "integer"
+        },
+        "scenario_budget_usd": {
+          "minimum": 0,
+          "title": "Scenario Budget Usd",
+          "type": "integer"
+        },
+        "effective_day": {
+          "minimum": 0,
+          "title": "Effective Day",
+          "type": "integer"
+        },
+        "transferred_workflow_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Transferred Workflow Ids",
+          "type": "array"
+        },
+        "modeling_notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Modeling Notes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "department_id",
+        "name",
+        "lifecycle",
+        "baseline_fte",
+        "scenario_fte",
+        "baseline_budget_usd",
+        "scenario_budget_usd",
+        "effective_day"
+      ],
+      "title": "DepartmentScenarioState",
       "type": "object"
     },
     "Direction": {
@@ -1648,6 +1807,73 @@
       "title": "MonitorRule",
       "type": "object"
     },
+    "OrganizationChange": {
+      "additionalProperties": false,
+      "properties": {
+        "intervention_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Intervention Id",
+          "type": "string"
+        },
+        "operation": {
+          "enum": [
+            "create",
+            "close",
+            "transfer"
+          ],
+          "title": "Operation",
+          "type": "string"
+        },
+        "department_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Department Id",
+          "type": "string"
+        },
+        "new_department": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DepartmentEdit"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "destination_department_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Destination Department Id"
+        },
+        "workflow_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Workflow Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "intervention_id",
+        "operation",
+        "department_id"
+      ],
+      "title": "OrganizationChange",
+      "type": "object"
+    },
     "Origin": {
       "enum": [
         "engine",
@@ -1994,6 +2220,13 @@
             "type": "string"
           },
           "title": "Intervention Ids",
+          "type": "array"
+        },
+        "department_states": {
+          "items": {
+            "$ref": "#/$defs/DepartmentScenarioState"
+          },
+          "title": "Department States",
           "type": "array"
         },
         "value": {

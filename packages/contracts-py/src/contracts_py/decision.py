@@ -72,6 +72,37 @@ class Intervention(Strict):
         return self
 
 
+class DepartmentEdit(Strict):
+    department_id: ID
+    name: str = Field(min_length=2, max_length=80)
+    mission: str = Field(min_length=2, max_length=500)
+    actual_fte: float = Field(ge=0)
+    annual_budget_usd: USD = Field(ge=0)
+    utilisation: float = Field(default=0, ge=0, le=1.5)
+    active: bool = True
+    agent_id: ID | None = None
+    assumption: str = Field(min_length=10, max_length=300)
+
+
+class OrganizationChange(Strict):
+    intervention_id: ID
+    operation: Literal["create", "close", "transfer"]
+    department_id: ID
+    new_department: DepartmentEdit | None = None
+    destination_department_id: ID | None = None
+    workflow_ids: list[ID] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_operation(self) -> "OrganizationChange":
+        if self.operation == "create" and (self.new_department is None or self.new_department.department_id != self.department_id):
+            raise ValueError("Creation needs a matching department declaration")
+        if self.operation == "transfer" and (not self.destination_department_id or not self.workflow_ids):
+            raise ValueError("Transfer needs a destination and explicit workflow IDs")
+        if self.destination_department_id == self.department_id:
+            raise ValueError("Transfer destination must differ from the source")
+        return self
+
+
 class DecisionBrief(Strict):
     schema_version: SchemaVersion = SCHEMA_VERSION
     decision_id: prefixed("dec_")
@@ -81,6 +112,7 @@ class DecisionBrief(Strict):
     goal: Goal
     horizon_days: int = Field(default=365, gt=0)
     candidate_interventions: list[Intervention]
+    organization_changes: list[OrganizationChange] = Field(default_factory=list)
     protected_entity_ids: list[ID] = Field(default_factory=list)
     constraints: list[Constraint] = Field(default_factory=list)
     futures: list[Future] = Field(default_factory=lambda: [Future.act_now, Future.inaction, Future.delay])
@@ -93,7 +125,14 @@ class DecisionBrief(Strict):
 
     @model_validator(mode="after")
     def check_rule_5(self) -> "DecisionBrief":
+        intervention_ids = {i.id for i in self.candidate_interventions}
+        if any(c.intervention_id not in intervention_ids for c in self.organization_changes):
+            raise ValueError("Organization changes must reference candidate interventions")
+        if len({c.intervention_id for c in self.organization_changes}) != len(self.organization_changes):
+            raise ValueError("Only one organization change is permitted per intervention")
         protected = set(self.protected_entity_ids)
+        if any(c.department_id in protected or c.destination_department_id in protected or protected.intersection(c.workflow_ids) for c in self.organization_changes):
+            raise ValueError("Organization change targets a protected entity")
         targeted = sorted({i.target_entity_id for i in self.candidate_interventions} & protected)
         if targeted:
             raise ValueError(f"protected entities targeted by interventions: {targeted}")

@@ -9,12 +9,13 @@ import { useAuth } from "@/components/auth-provider";
 import { Button } from "@/components/ui/button";
 
 export function AuthControls({ compact = false }: { compact?: boolean }) {
-  const { user, loading, logout } = useAuth();
+  const { user, loading, unavailable, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const router = useRouter();
 
   if (loading) return <div className="h-9 w-24 animate-pulse rounded-xl bg-zinc-100" aria-label="Loading account" />;
+  if (unavailable) return <Button variant="outline" size="sm" onClick={() => router.refresh()}>Retry account check</Button>;
   if (!user) {
     return <div className="flex items-center gap-1.5">
       {!compact ? <Button asChild variant="ghost" size="sm"><Link href="/login">Log in</Link></Button> : null}
@@ -28,7 +29,7 @@ export function AuthControls({ compact = false }: { compact?: boolean }) {
     try {
       await logout();
       setOpen(false);
-      router.push("/");
+      router.replace("/");
       router.refresh();
     } finally { setSigningOut(false); }
   };

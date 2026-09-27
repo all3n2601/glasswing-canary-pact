@@ -202,6 +202,19 @@ class PressureTrigger(Strict):
     neutralised: bool
 
 
+class DepartmentScenarioState(Strict):
+    department_id: ID
+    name: str
+    lifecycle: Literal["active", "added", "closed"]
+    baseline_fte: float = Field(ge=0)
+    scenario_fte: float = Field(ge=0)
+    baseline_budget_usd: USD = Field(ge=0)
+    scenario_budget_usd: USD = Field(ge=0)
+    effective_day: int = Field(ge=0)
+    transferred_workflow_ids: list[ID] = Field(default_factory=list)
+    modeling_notes: list[str] = Field(default_factory=list)
+
+
 class SimulationResult(Strict):
     result_id: ID
     run_id: ID
@@ -211,6 +224,7 @@ class SimulationResult(Strict):
     mode: Literal["quick", "full"]
     seed: int | None = None
     intervention_ids: list[ID] = Field(default_factory=list)
+    department_states: list[DepartmentScenarioState] = Field(default_factory=list)
     value: ValueBreakdown
     goal_met: bool
     constraint_results: list[ConstraintResult] = Field(default_factory=list)

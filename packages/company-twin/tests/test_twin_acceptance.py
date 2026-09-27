@@ -110,6 +110,25 @@ def test_every_department_has_roles_strengths_knowledge_and_a_document():
         assert docs[de.id] >= 1, f"{de.id} current document"
 
 
+def test_every_department_has_evidence_backed_context_reaching_an_outcome():
+    """Demo scenarios need more than department descriptions: each department
+    must have a sourced operating fact that participates in the dependency graph
+    and can reach a KPI when a role, workflow, system, or knowledge asset changes.
+    """
+    kpi_ids = {e.id for e in TWIN.entities if e.type == EntityType.kpi}
+    for department in [e for e in TWIN.entities if e.type == EntityType.department]:
+        context_ids = [
+            e.id for e in TWIN.entities
+            if e.department_id == department.id and e.evidence_refs and e.type != EntityType.kpi
+        ]
+        assert context_ids, f"{department.id} evidence-backed context"
+        assert any(
+            source in G and kpi_id in G and nx.has_path(G, source, kpi_id)
+            for source in context_ids
+            for kpi_id in kpi_ids
+        ), f"{department.id} has no evidence-backed path to a KPI"
+
+
 # ---- the plan story: vendor consolidation (A-03) + workforce knowledge loss (A-04) ----
 def _reaches(a, b):
     return nx.has_path(G, a, b)

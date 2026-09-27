@@ -96,6 +96,83 @@
       "title": "Criticality",
       "type": "string"
     },
+    "DepartmentScenarioState": {
+      "additionalProperties": false,
+      "properties": {
+        "department_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Department Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "lifecycle": {
+          "enum": [
+            "active",
+            "added",
+            "closed"
+          ],
+          "title": "Lifecycle",
+          "type": "string"
+        },
+        "baseline_fte": {
+          "minimum": 0,
+          "title": "Baseline Fte",
+          "type": "number"
+        },
+        "scenario_fte": {
+          "minimum": 0,
+          "title": "Scenario Fte",
+          "type": "number"
+        },
+        "baseline_budget_usd": {
+          "minimum": 0,
+          "title": "Baseline Budget Usd",
+          "type": "integer"
+        },
+        "scenario_budget_usd": {
+          "minimum": 0,
+          "title": "Scenario Budget Usd",
+          "type": "integer"
+        },
+        "effective_day": {
+          "minimum": 0,
+          "title": "Effective Day",
+          "type": "integer"
+        },
+        "transferred_workflow_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Transferred Workflow Ids",
+          "type": "array"
+        },
+        "modeling_notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Modeling Notes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "department_id",
+        "name",
+        "lifecycle",
+        "baseline_fte",
+        "scenario_fte",
+        "baseline_budget_usd",
+        "scenario_budget_usd",
+        "effective_day"
+      ],
+      "title": "DepartmentScenarioState",
+      "type": "object"
+    },
     "Direction": {
       "enum": [
         "increase",
@@ -642,6 +719,13 @@
             "type": "string"
           },
           "title": "Intervention Ids",
+          "type": "array"
+        },
+        "department_states": {
+          "items": {
+            "$ref": "#/$defs/DepartmentScenarioState"
+          },
+          "title": "Department States",
           "type": "array"
         },
         "value": {

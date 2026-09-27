@@ -8,6 +8,9 @@ members = [
 ]
 
 [tool.pytest.ini_options]
+markers = [
+  "live_agents: calls the configured live model provider and may incur usage costs",
+]
 testpaths = [
   "apps/api/tests",
   "packages/contracts-py/tests",

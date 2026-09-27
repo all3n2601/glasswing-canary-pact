@@ -81,6 +81,11 @@ def build_context(spec: AgentSpec, *, run_id: str, brief: DecisionBrief, plan: C
                   engine: EnginePort, act_now: SimulationResult, inaction: SimulationResult,
                   settings: OrganizationSettings, known_impact_summaries: list[str] | None = None,
                   hops: int | None = None, trim: bool = True) -> AgentContext:
+    mapped = [p for p in twin.department_profiles if p.active and p.agent_id == spec.agent_id]
+    if mapped:
+        own_id = spec.department_id if any(p.department_id == spec.department_id for p in mapped) else mapped[0].department_id
+        spec = spec.model_copy(update={"department_id": own_id, "responsibilities": [*spec.responsibilities,
+            "Assess these explicitly mapped departments: " + ", ".join(p.department_id for p in mapped)]})
     full_view = engine.build_agent_view(
         twin,
         agent_id=spec.agent_id,

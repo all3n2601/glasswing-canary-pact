@@ -7,7 +7,10 @@ from canary_api.paths import DATA_DIR
 from contracts_py.decision import DecisionBrief
 from contracts_py.twin import OrganizationSettings
 
-from agent_orchestration import AgentLLM, evals, run_decision
+from agent_orchestration import evals, run_decision
+from agent_orchestration.llm import LLMResult
+from agent_orchestration.mock import mock_output
+from orchestration_helpers import ScriptedLLM, metrics
 from agent_orchestration import orchestrator as orchestrator_module
 from agent_orchestration.context import build_context, context_hops
 
@@ -39,21 +42,20 @@ def load_brief(name: str) -> DecisionBrief:
     return DecisionBrief.model_validate_json((DATA_DIR / name).read_text())
 
 
-class Capture(AgentLLM):
+class Capture(ScriptedLLM):
     def __init__(self, settings, store):
-        super().__init__(settings, cache_dir=DATA_DIR / "artifacts" / "unused_test_cache")
+        super().__init__(settings, {})
         self.store = store
 
     def call(self, agent_id, messages, output_model, *, prompt_version, context, fast=False):
         self.store[agent_id] = (messages, context)
-        return super().call(agent_id, messages, output_model, prompt_version=prompt_version, context=context,
-                            fast=fast)
+        return LLMResult(mock_output(output_model, context), "ok", metrics(agent_id))
 
 
 @functools.cache
 def captured(name: str) -> dict:
     store: dict = {}
-    settings = OrganizationSettings(llm_mode="mock")
+    settings = OrganizationSettings(llm_mode="live")
     twin = engine_port.load_twin(DATA_DIR / "synthetic_company.json")
     run_decision(load_brief(name), engine=engine_port, settings=settings, llm=Capture(settings, store),
                  emit=lambda *a, **k: None, run_id="run_trim_test", twin=twin)
@@ -92,7 +94,7 @@ def test_every_impact_entity_and_its_evidence_is_kept(name) -> None:
 
 def test_hops_setting_controls_the_neighbourhood(real_twin, monkeypatch) -> None:
     brief = load_brief("vendor_scenario.json")
-    settings = OrganizationSettings(llm_mode="mock")
+    settings = OrganizationSettings(llm_mode="live")
     spec = captured("vendor_scenario.json")["finance"][1].agent
     _, context = captured("vendor_scenario.json")["finance"]
 
@@ -120,14 +122,14 @@ def _result(context, future):
     return SimulationResult.model_construct(impacts=impacts)
 
 
-def test_trimming_keeps_resolving_evidence_in_the_mock_eval(real_twin, monkeypatch, tmp_path) -> None:
+def test_trimming_keeps_resolving_evidence_with_an_explicit_test_provider(real_twin, monkeypatch, tmp_path) -> None:
     brief = load_brief("vendor_scenario.json")
-    settings = OrganizationSettings(llm_mode="mock")
+    settings = OrganizationSettings(llm_mode="live")
 
     def pct() -> float:
-        report = evals.run_eval(engine=engine_port, twin=real_twin, brief=brief, settings=settings, llm_mode="mock",
+        report = evals.run_eval(engine=engine_port, twin=real_twin, brief=brief, settings=settings, llm_mode="live",
                                 configs=["full"], engine_impl="real", twin_impl="real",
-                                cache_dir=tmp_path, planted_path=tmp_path / "absent.json")
+                                llm_factory=lambda settings: Capture(settings, {}), planted_path=tmp_path / "absent.json")
         return report.rows[0]["claims_with_resolving_evidence_pct"]
 
     trimmed = pct()

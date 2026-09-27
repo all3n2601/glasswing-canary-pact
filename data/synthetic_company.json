@@ -771,7 +771,9 @@
       "time_to_train_days": 30,
       "replacement_cost_usd": 40000,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_eng_release_context"
+      ]
     },
     {
       "id": "role_qa_eng",
@@ -813,7 +815,9 @@
       "time_to_train_days": 30,
       "replacement_cost_usd": 40000,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_incident_review_q2"
+      ]
     },
     {
       "id": "role_platform_eng",
@@ -841,7 +845,9 @@
       "time_to_train_days": 30,
       "replacement_cost_usd": 40000,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
+      ]
     },
     {
       "id": "role_ml_eng",
@@ -897,7 +903,9 @@
       "time_to_train_days": 30,
       "replacement_cost_usd": 40000,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_product_roadmap_context"
+      ]
     },
     {
       "id": "role_ux",
@@ -925,7 +933,9 @@
       "time_to_train_days": 30,
       "replacement_cost_usd": 40000,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_sales_playbook_context"
+      ]
     },
     {
       "id": "role_sales_eng",
@@ -967,7 +977,9 @@
       "time_to_train_days": 30,
       "replacement_cost_usd": 40000,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_marketing_attribution_context"
+      ]
     },
     {
       "id": "role_demand_gen",
@@ -1023,7 +1035,9 @@
       "time_to_train_days": 30,
       "replacement_cost_usd": 40000,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
     },
     {
       "id": "role_onboarding",
@@ -1079,7 +1093,9 @@
       "time_to_train_days": 30,
       "replacement_cost_usd": 40000,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_sop_financial_close_lineage"
+      ]
     },
     {
       "id": "role_grc_lead",
@@ -1093,7 +1109,9 @@
       "time_to_train_days": 30,
       "replacement_cost_usd": 40000,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_soc2_register_intro"
+      ]
     },
     {
       "id": "role_privacy_counsel",
@@ -1593,7 +1611,9 @@
       "customer_facing": true,
       "migration_cost_usd": 3200000,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_eng_release_context"
+      ]
     },
     {
       "id": "sys_customer_portal",
@@ -1677,7 +1697,9 @@
       "customer_facing": false,
       "migration_cost_usd": 1800000,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
+      ]
     },
     {
       "id": "sys_ml_scoring",
@@ -2093,7 +2115,9 @@
       "automation_pct": 0.5,
       "max_downtime_days": 7,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_incident_review_q2"
+      ]
     },
     {
       "id": "wf_soc2_evidence",
@@ -2110,7 +2134,9 @@
       "automation_pct": 0.5,
       "max_downtime_days": 7,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_soc2_register_intro"
+      ]
     },
     {
       "id": "wf_customer_onboarding",
@@ -2127,7 +2153,9 @@
       "automation_pct": 0.5,
       "max_downtime_days": 7,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
     },
     {
       "id": "wf_data_refresh",
@@ -2144,7 +2172,9 @@
       "automation_pct": 0.5,
       "max_downtime_days": 7,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
+      ]
     },
     {
       "id": "wf_financial_close",
@@ -2161,7 +2191,9 @@
       "automation_pct": 0.4,
       "max_downtime_days": 3,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_sop_financial_close_lineage"
+      ]
     },
     {
       "id": "wf_lead_scoring",
@@ -2178,7 +2210,9 @@
       "automation_pct": 0.5,
       "max_downtime_days": 7,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_sales_playbook_context"
+      ]
     },
     {
       "id": "wf_campaign_targeting",
@@ -2195,7 +2229,9 @@
       "automation_pct": 0.5,
       "max_downtime_days": 7,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_marketing_attribution_context"
+      ]
     },
     {
       "id": "wf_account_planning",
@@ -2212,7 +2248,9 @@
       "automation_pct": 0.5,
       "max_downtime_days": 7,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_sales_playbook_context"
+      ]
     },
     {
       "id": "wf_kyc_screening",
@@ -2263,7 +2301,9 @@
       "automation_pct": 0.5,
       "max_downtime_days": 7,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_product_roadmap_context"
+      ]
     },
     {
       "id": "wf_risk_monitoring",
@@ -2313,7 +2353,9 @@
       "department_id": "dept_compliance",
       "documented_pct": 0.4,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_soc2_register_intro"
+      ]
     },
     {
       "id": "kn_data_format",
@@ -2324,7 +2366,9 @@
       "department_id": "dept_ai_data",
       "documented_pct": 0.3,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
+      ]
     },
     {
       "id": "kn_oncall",
@@ -2335,7 +2379,9 @@
       "department_id": "dept_operations",
       "documented_pct": 0.7,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_incident_review_q2"
+      ]
     },
     {
       "id": "kn_core_arch",
@@ -2357,7 +2403,9 @@
       "department_id": "dept_engineering",
       "documented_pct": 0.75,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_eng_release_context"
+      ]
     },
     {
       "id": "kn_ml_modeling",
@@ -2379,7 +2427,9 @@
       "department_id": "dept_product",
       "documented_pct": 0.7,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_product_roadmap_context"
+      ]
     },
     {
       "id": "kn_enterprise_deals",
@@ -2390,7 +2440,9 @@
       "department_id": "dept_sales",
       "documented_pct": 0.65,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_sales_playbook_context"
+      ]
     },
     {
       "id": "kn_segmentation",
@@ -2401,7 +2453,9 @@
       "department_id": "dept_marketing",
       "documented_pct": 0.7,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_marketing_attribution_context"
+      ]
     },
     {
       "id": "kn_onboarding_playbook",
@@ -2412,7 +2466,9 @@
       "department_id": "dept_customer_success",
       "documented_pct": 0.75,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
     },
     {
       "id": "kn_cs_escalation",
@@ -2423,7 +2479,9 @@
       "department_id": "dept_customer_success",
       "documented_pct": 0.7,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
     },
     {
       "id": "kn_vendor_contracts",
@@ -2434,7 +2492,9 @@
       "department_id": "dept_finance",
       "documented_pct": 0.6,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_sop_financial_close_lineage"
+      ]
     },
     {
       "id": "kn_privacy_program",
@@ -2557,7 +2617,9 @@
       "remaining_cost_usd": 5600000,
       "expected_completion_day": 240,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_product_roadmap_context"
+      ]
     },
     {
       "id": "proj_soc2_type2",
@@ -2599,7 +2661,9 @@
       "kpi_unit": "percent",
       "higher_is_better": true,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
     },
     {
       "id": "kpi_pipeline",
@@ -2612,7 +2676,9 @@
       "kpi_unit": "usd",
       "higher_is_better": true,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_marketing_attribution_context"
+      ]
     },
     {
       "id": "kpi_uptime_sla",
@@ -2625,7 +2691,9 @@
       "kpi_unit": "percent",
       "higher_is_better": true,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_incident_review_q2"
+      ]
     },
     {
       "id": "kpi_soc2_coverage",
@@ -2638,7 +2706,24 @@
       "kpi_unit": "percent",
       "higher_is_better": true,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_soc2_register_intro"
+      ]
+    },
+    {
+      "id": "kpi_data_refresh_sla",
+      "type": "kpi",
+      "name": "Data refresh SLA",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_ai_data",
+      "kpi_baseline": 99.5,
+      "kpi_unit": "percent",
+      "higher_is_better": true,
+      "tags": [],
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
+      ]
     },
     {
       "id": "kpi_cac",
@@ -2651,7 +2736,9 @@
       "kpi_unit": "usd",
       "higher_is_better": false,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_marketing_attribution_context"
+      ]
     },
     {
       "id": "kpi_close_cycle_days",
@@ -2664,7 +2751,9 @@
       "kpi_unit": "days",
       "higher_is_better": false,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_sop_financial_close_lineage"
+      ]
     },
     {
       "id": "seg_enterprise",
@@ -2675,7 +2764,9 @@
       "department_id": "dept_sales",
       "arr_usd": 80000000000,
       "tags": [],
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_sales_playbook_context"
+      ]
     },
     {
       "id": "seg_midmarket",
@@ -2690,6 +2781,132 @@
     }
   ],
   "edges": [
+    {
+      "id": "e_eng_manager_owns_core_api",
+      "source": "role_eng_manager",
+      "target": "sys_core_api",
+      "relation": "OWNS",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_eng_release_context"
+      ]
+    },
+    {
+      "id": "e_data_lead_owns_refresh",
+      "source": "role_data_lead",
+      "target": "wf_data_refresh",
+      "relation": "OWNS",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.25,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
+      ]
+    },
+    {
+      "id": "e_product_lead_owns_analytics",
+      "source": "role_product_lead",
+      "target": "wf_product_analytics",
+      "relation": "OWNS",
+      "strength": 0.75,
+      "strength_range": [
+        0.525,
+        0.975
+      ],
+      "substitutability": 0.35,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_product_roadmap_context"
+      ]
+    },
+    {
+      "id": "e_ae_owns_account_planning",
+      "source": "role_ae",
+      "target": "wf_account_planning",
+      "relation": "OWNS",
+      "strength": 0.75,
+      "strength_range": [
+        0.525,
+        0.975
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_sales_playbook_context"
+      ]
+    },
+    {
+      "id": "e_pmm_owns_campaign_targeting",
+      "source": "role_pmm",
+      "target": "wf_campaign_targeting",
+      "relation": "OWNS",
+      "strength": 0.75,
+      "strength_range": [
+        0.525,
+        0.975
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_marketing_attribution_context"
+      ]
+    },
+    {
+      "id": "e_support_lead_owns_onboarding",
+      "source": "role_support_lead",
+      "target": "wf_customer_onboarding",
+      "relation": "OWNS",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
+    },
+    {
+      "id": "e_grc_lead_owns_kyc",
+      "source": "role_grc_lead",
+      "target": "wf_kyc_screening",
+      "relation": "OWNS",
+      "strength": 0.85,
+      "strength_range": [
+        0.595,
+        1.0
+      ],
+      "substitutability": 0.2,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_kyc_screening_inputs"
+      ]
+    },
     {
       "id": "e_close_accountant_owns_close",
       "source": "role_close_accountant",
@@ -3118,6 +3335,24 @@
       "confidence": 0.9,
       "evidence_refs": [
         "ev_architecture_core"
+      ]
+    },
+    {
+      "id": "e_data_pipeline_refresh",
+      "source": "sys_data_pipeline",
+      "target": "wf_data_refresh",
+      "relation": "SUPPORTS",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.15,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
       ]
     },
     {
@@ -3803,6 +4038,24 @@
       ]
     },
     {
+      "id": "e_incident_uptime",
+      "source": "wf_incident_mgmt",
+      "target": "kpi_uptime_sla",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.75,
+      "strength_range": [
+        0.525,
+        0.975
+      ],
+      "substitutability": 0.25,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_incident_review_q2"
+      ]
+    },
+    {
       "id": "e_ctl_pci_billing",
       "source": "sys_billing_platform",
       "target": "ctl_pci_carddata",
@@ -3836,6 +4089,24 @@
       "confidence": 0.9,
       "evidence_refs": [
         "ev_soc2_register_intro"
+      ]
+    },
+    {
+      "id": "e_data_refresh_sla",
+      "source": "wf_data_refresh",
+      "target": "kpi_data_refresh_sla",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.15,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
       ]
     },
     {
@@ -3886,7 +4157,9 @@
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_marketing_attribution_context"
+      ]
     },
     {
       "id": "e_account_planning_retention",
@@ -3902,7 +4175,9 @@
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_sales_playbook_context"
+      ]
     },
     {
       "id": "e_product_analytics_retention",
@@ -3918,7 +4193,9 @@
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_product_roadmap_context"
+      ]
     },
     {
       "id": "e_risk_monitoring_margin",
@@ -3986,7 +4263,27 @@
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
+    },
+    {
+      "id": "e_close_cycle",
+      "source": "wf_financial_close",
+      "target": "kpi_close_cycle_days",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.15,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_sop_financial_close_lineage"
+      ]
     },
     {
       "id": "e_enterprise_margin",
@@ -4020,7 +4317,9 @@
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_architecture_core"
+      ]
     },
     {
       "id": "e_kn_release",
@@ -4036,7 +4335,9 @@
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_eng_release_context"
+      ]
     },
     {
       "id": "e_kn_mlmodel",
@@ -4068,7 +4369,9 @@
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_product_roadmap_context"
+      ]
     },
     {
       "id": "e_kn_deals",
@@ -4084,7 +4387,9 @@
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_sales_playbook_context"
+      ]
     },
     {
       "id": "e_kn_segmentation",
@@ -4100,7 +4405,9 @@
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_marketing_attribution_context"
+      ]
     },
     {
       "id": "e_kn_onboarding",
@@ -4116,7 +4423,9 @@
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
     },
     {
       "id": "e_kn_cs_escalation",
@@ -4132,7 +4441,9 @@
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
-      "evidence_refs": []
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
     },
     {
       "id": "e_kn_vendorcontracts",
@@ -5011,7 +5322,8 @@
       "sensitivity": "general",
       "covers_entity_ids": [
         "wf_data_refresh",
-        "sys_data_pipeline"
+        "sys_data_pipeline",
+        "kpi_data_refresh_sla"
       ],
       "framework_refs": [],
       "summary": "Refresh schedule, backfills and failure recovery for the data pipeline.",
@@ -5052,8 +5364,10 @@
       "status": "current",
       "sensitivity": "general",
       "covers_entity_ids": [
+        "role_eng_manager",
         "kn_release_eng",
-        "sys_core_api"
+        "sys_core_api",
+        "kpi_uptime_sla"
       ],
       "framework_refs": [],
       "summary": "Build, test and deploy pipeline for core services.",
@@ -5073,6 +5387,8 @@
       "sensitivity": "general",
       "covers_entity_ids": [
         "proj_billing_modernization",
+        "proj_soc2_type2",
+        "wf_product_analytics",
         "kn_roadmap_context"
       ],
       "framework_refs": [],
@@ -5092,7 +5408,9 @@
       "status": "current",
       "sensitivity": "general",
       "covers_entity_ids": [
+        "wf_campaign_targeting",
         "kpi_pipeline",
+        "kpi_cac",
         "kn_segmentation"
       ],
       "framework_refs": [],
@@ -5112,7 +5430,10 @@
       "status": "current",
       "sensitivity": "general",
       "covers_entity_ids": [
+        "wf_lead_scoring",
+        "wf_account_planning",
         "seg_enterprise",
+        "seg_midmarket",
         "kn_enterprise_deals"
       ],
       "framework_refs": [],
@@ -5133,7 +5454,9 @@
       "sensitivity": "general",
       "covers_entity_ids": [
         "wf_customer_onboarding",
-        "kn_onboarding_playbook"
+        "kn_onboarding_playbook",
+        "kn_cs_escalation",
+        "kpi_net_retention"
       ],
       "framework_refs": [],
       "summary": "Onboarding steps and escalation paths for enterprise accounts.",
@@ -5550,6 +5873,46 @@
       "document_id": "doc_architecture",
       "location": null,
       "snippet": "Invoicing consumes the reconciled ledger from billing-recon; billing runs on billing-platform.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_eng_release_context",
+      "source_type": "runbook",
+      "document_id": "doc_eng_release",
+      "location": null,
+      "snippet": "Engineering owns the core API release path; the Engineering Manager coordinates releases and rollback readiness.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_product_roadmap_context",
+      "source_type": "policy",
+      "document_id": "doc_product_roadmap",
+      "location": null,
+      "snippet": "Product analytics informs roadmap sequencing and the Billing Modernization delivery plan.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_marketing_attribution_context",
+      "source_type": "kpi_definition",
+      "document_id": "doc_mkt_attribution",
+      "location": null,
+      "snippet": "Campaign targeting uses audience segmentation and is measured through qualified pipeline and acquisition cost.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_sales_playbook_context",
+      "source_type": "workflow_map",
+      "document_id": "doc_sales_playbook",
+      "location": null,
+      "snippet": "Sales uses lead scoring for qualification and account planning for enterprise expansion and retention.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_customer_success_context",
+      "source_type": "runbook",
+      "document_id": "doc_cs_runbook",
+      "location": null,
+      "snippet": "Customer Success owns onboarding and escalation readiness, with net revenue retention as the outcome measure.",
       "synthetic": true
     },
     {

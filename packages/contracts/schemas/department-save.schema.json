@@ -1,0 +1,95 @@
+{
+  "$defs": {
+    "DepartmentEdit": {
+      "additionalProperties": false,
+      "properties": {
+        "department_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Department Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 80,
+          "minLength": 2,
+          "title": "Name",
+          "type": "string"
+        },
+        "mission": {
+          "maxLength": 500,
+          "minLength": 2,
+          "title": "Mission",
+          "type": "string"
+        },
+        "actual_fte": {
+          "minimum": 0,
+          "title": "Actual Fte",
+          "type": "number"
+        },
+        "annual_budget_usd": {
+          "minimum": 0,
+          "title": "Annual Budget Usd",
+          "type": "integer"
+        },
+        "utilisation": {
+          "default": 0,
+          "maximum": 1.5,
+          "minimum": 0,
+          "title": "Utilisation",
+          "type": "number"
+        },
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "agent_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "assumption": {
+          "maxLength": 300,
+          "minLength": 10,
+          "title": "Assumption",
+          "type": "string"
+        }
+      },
+      "required": [
+        "department_id",
+        "name",
+        "mission",
+        "actual_fte",
+        "annual_budget_usd",
+        "assumption"
+      ],
+      "title": "DepartmentEdit",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "expected_twin_version": {
+      "title": "Expected Twin Version",
+      "type": "string"
+    },
+    "department": {
+      "$ref": "#/$defs/DepartmentEdit"
+    }
+  },
+  "required": [
+    "expected_twin_version",
+    "department"
+  ],
+  "title": "DepartmentSave",
+  "type": "object"
+}

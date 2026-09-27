@@ -141,15 +141,6 @@ def test_failed_call_keeps_status_and_errors(context) -> None:
     assert outcome.assessment.validation.errors == ["no cached answer"]
 
 
-def test_fallback_cached_claims_are_hypotheses_only(context) -> None:
-    outcome = run_merge(context, output(impact(), dependencies=[dependency()]), status="fallback_cached")
-    assert outcome.validated_edges == []
-    assert [i.status for i in outcome.assessment.accepted_impacts] == [ClaimStatus.hypothesis]
-    assert outcome.assessment.validation.downgraded_to_hypothesis == [
-        "act_now_view.proposed_impacts[0]", "proposed_dependencies[0]"
-    ]
-
-
 def test_person_tokens_rejected_even_when_visible(brief, hr_twin, settings) -> None:
     context = make_context(brief, hr_twin, settings, agent_id="people_knowledge")
     assert "pt_07" in {e.id for e in context.view.entities}

@@ -9,13 +9,9 @@ import { useAuth } from "@/components/auth-provider";
 import { Brand } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { login, signup } from "@/lib/auth";
+import { login, safeReturnTo, signup } from "@/lib/auth";
 
 type AuthFormProps = { mode: "login" | "signup"; returnTo?: string };
-
-function safeReturnTo(value?: string) {
-  return value?.startsWith("/") && !value.startsWith("//") ? value : "/simulate";
-}
 
 export function AuthForm({ mode, returnTo }: AuthFormProps) {
   const isSignup = mode === "signup";
@@ -37,7 +33,7 @@ export function AuthForm({ mode, returnTo }: AuthFormProps) {
         ? await signup({ email, password, display_name: String(form.get("displayName") ?? "").trim() })
         : await login({ email, password });
       setUser(response.user);
-      router.push(safeReturnTo(returnTo));
+      router.replace(safeReturnTo(returnTo));
       router.refresh();
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "Could not authenticate");
@@ -62,7 +58,7 @@ export function AuthForm({ mode, returnTo }: AuthFormProps) {
           {error ? <p role="alert" className="rounded-xl border border-rose-100 bg-rose-50 px-3.5 py-3 text-xs text-rose-700">{error}</p> : null}
           <Button type="submit" disabled={submitting} className="h-12 w-full rounded-xl bg-zinc-950 text-white hover:bg-zinc-800">{submitting ? <LoaderCircle className="animate-spin" /> : null}{submitting ? (isSignup ? "Creating account…" : "Signing in…") : (isSignup ? "Create account" : "Sign in")}{!submitting ? <ArrowRight /> : null}</Button>
         </form>
-        <p className="mt-7 text-center text-xs text-zinc-500">{isSignup ? "Already have an account?" : "New to Canary Pact?"} <Link className="font-semibold text-zinc-950 hover:underline" href={isSignup ? "/login" : "/signup"}>{isSignup ? "Sign in" : "Create an account"}</Link></p>
+        <p className="mt-7 text-center text-xs text-zinc-500">{isSignup ? "Already have an account?" : "New to Canary Pact?"} <Link className="font-semibold text-zinc-950 hover:underline" href={`${isSignup ? "/login" : "/signup"}?next=${encodeURIComponent(safeReturnTo(returnTo))}`}>{isSignup ? "Sign in" : "Create an account"}</Link></p>
       </div>
       <p className="text-[10px] leading-5 text-zinc-400">Human approval remains required for organizational decisions.</p>
     </section>

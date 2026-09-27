@@ -38,6 +38,8 @@ class Storage(Protocol):
 
     def load_active_twin(self) -> Twin | None: ...
 
+    def load_twin_version(self, version: str) -> Twin | None: ...
+
     def append_event(self, event: Event) -> None: ...
 
     def read_events(self, run_id: str) -> list[Event]: ...
@@ -114,6 +116,11 @@ class FileStorage:
             row = db.execute(
                 "SELECT twin_json FROM twins WHERE active = 1 ORDER BY created_at DESC LIMIT 1"
             ).fetchone()
+        return Twin.model_validate_json(row[0]) if row else None
+
+    def load_twin_version(self, version: str) -> Twin | None:
+        with self._users() as db:
+            row = db.execute("SELECT twin_json FROM twins WHERE twin_version = ?", (version,)).fetchone()
         return Twin.model_validate_json(row[0]) if row else None
 
     def append_event(self, event: Event) -> None:
@@ -272,19 +279,25 @@ class PostgresStorage:
     def save_twin(self, twin: Twin, *, active: bool = True) -> None:
         from psycopg.types.json import Jsonb
 
-        if active:
-            self._run("UPDATE canary_twins SET active = false WHERE active = true")
-        self._run(
-            "INSERT INTO canary_twins (twin_version, organization_id, twin, active, created_at) "
-            "VALUES (%s, %s, %s, %s, %s) ON CONFLICT (twin_version) DO UPDATE SET "
-            "organization_id = EXCLUDED.organization_id, twin = EXCLUDED.twin, "
-            "active = EXCLUDED.active, created_at = EXCLUDED.created_at",
-            (twin.version.twin_version, twin.organization.id, Jsonb(twin.model_dump(mode="json")), active,
-             twin.version.created_at),
-        )
+        # Activation and snapshot insertion must succeed or roll back together.
+        with self.pool.connection() as conn, conn.transaction():
+            if active:
+                conn.execute("UPDATE canary_twins SET active = false WHERE active = true")
+            conn.execute(
+                "INSERT INTO canary_twins (twin_version, organization_id, twin, active, created_at) "
+                "VALUES (%s, %s, %s, %s, %s) ON CONFLICT (twin_version) DO UPDATE SET "
+                "organization_id = EXCLUDED.organization_id, twin = EXCLUDED.twin, "
+                "active = EXCLUDED.active, created_at = EXCLUDED.created_at",
+                (twin.version.twin_version, twin.organization.id, Jsonb(twin.model_dump(mode="json")), active,
+                 twin.version.created_at),
+            )
 
     def load_active_twin(self) -> Twin | None:
         rows = self._run("SELECT twin FROM canary_twins WHERE active = true ORDER BY created_at DESC LIMIT 1")
+        return Twin.model_validate(rows[0][0]) if rows else None
+
+    def load_twin_version(self, version: str) -> Twin | None:
+        rows = self._run("SELECT twin FROM canary_twins WHERE twin_version = %s", (version,))
         return Twin.model_validate(rows[0][0]) if rows else None
 
     def append_event(self, event: Event) -> None:

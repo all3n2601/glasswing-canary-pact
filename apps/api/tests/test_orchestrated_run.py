@@ -2,6 +2,7 @@ import asyncio
 import hashlib
 import inspect
 import json
+import os
 import re
 import threading
 import time
@@ -11,6 +12,7 @@ from api_auth_helpers import auth_headers
 from real_data import workforce_brief
 
 from agent_orchestration.ports import EnginePort
+from agent_orchestration.llm import sciforium_call
 from canary_api import engine_port, runs, runtime, storage
 from canary_api.storage import FileStorage
 from contracts_py.enums import RunStatus
@@ -80,14 +82,14 @@ def test_thread_emitter_publishes_on_the_loop_in_order(monkeypatch) -> None:
         assert mine == [f"agent_{n}_{i}" for i in range(25)]
 
 
-def test_live_decision_runs_real_orchestrator_to_approval(client, brief_json) -> None:
-    run_id = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=brief_json).json()["run_id"]
+def test_orchestrated_decision_uses_explicit_test_provider_to_reach_approval(client, brief_json) -> None:
+    run_id = client.post("/decisions", headers=auth_headers(client), json=brief_json).json()["run_id"]
     wait_for(client, run_id, "awaiting_approval")
     events = runtime.bus.runs[run_id].events
     assert events[0].type is EventType.run_created
     assert not [e for e in events if e.type is EventType.settings_updated]
     assessments = [e.payload for e in events if e.type is EventType.agent_completed]
-    assert assessments and all(a.status == "ok" and a.metrics.model_id == "test-live" for a in assessments)
+    assert assessments and all(a.status == "ok" and a.metrics.model_id == "test-provider" for a in assessments)
     EventLog.model_validate([e.model_dump(mode="json") for e in events])
 
     response = client.get(f"/runs/{run_id}/package")
@@ -107,8 +109,105 @@ def test_live_decision_runs_real_orchestrator_to_approval(client, brief_json) ->
     assert client.get(f"/runs/{run_id}").json()["status"] == "completed"
 
 
+@pytest.mark.live_agents
+def test_runtime_builds_only_the_real_provider_client() -> None:
+    llm = runtime.build_llm(OrganizationSettings(llm_mode="live"))
+    assert llm.live_call is sciforium_call
+    intake = runtime.build_intake(OrganizationSettings(llm_mode="live"))
+    assert intake.live_call is sciforium_call
+    with pytest.raises(ValueError, match="require llm_mode='live'"):
+        runtime.build_llm(OrganizationSettings().model_copy(update={"llm_mode": "mock"}))
+    with pytest.raises(ValueError, match="requires llm_mode='live'"):
+        runtime.build_intake(OrganizationSettings().model_copy(update={"llm_mode": "mock"}))
+
+
+LIVE_TEST_ENABLED = os.environ.get("CANARY_RUN_LIVE_TESTS", "").strip().lower() == "true"
+
+
+@pytest.mark.live_agents
+@pytest.mark.skipif(not LIVE_TEST_ENABLED, reason="set CANARY_RUN_LIVE_TESTS=true to make paid provider calls")
+def test_live_provider_decision_reaches_approval_without_agent_substitutes(client, brief_json) -> None:
+    response = client.post("/decisions", headers=auth_headers(client), json=brief_json)
+    assert response.status_code == 200, response.text
+    run_id = response.json()["run_id"]
+    wait_for(client, run_id, "awaiting_approval", timeout=180.0)
+
+    events = runtime.bus.runs[run_id].events
+    assessments = [event.payload for event in events if event.type is EventType.agent_completed]
+    failures = [event.payload for event in events if event.type is EventType.agent_failed]
+    assert assessments
+    assert failures == []
+    assert all(assessment.status == "ok" for assessment in assessments)
+    assert all(assessment.metrics.model_id != "test-provider" for assessment in assessments)
+    assert sum(assessment.metrics.input_tokens for assessment in assessments) > 0
+    assert sum(assessment.metrics.output_tokens for assessment in assessments) > 0
+
+    package_response = client.get(f"/runs/{run_id}/package")
+    package = DecisionPackage.model_validate(package_response.json())
+    assert package.run_id == run_id
+    decision = client.post(f"/runs/{run_id}/decision", headers=auth_headers(client), json={
+        "decision": "approve",
+        "decided_by": "live_test",
+        "package_hash": hashlib.sha256(package_response.content).hexdigest(),
+    })
+    assert decision.status_code == 200, decision.text
+    assert client.get(f"/runs/{run_id}").json()["status"] == "completed"
+
+
+@pytest.mark.live_agents
+@pytest.mark.skipif(not LIVE_TEST_ENABLED, reason="set CANARY_RUN_LIVE_TESTS=true to make paid provider calls")
+def test_live_free_text_is_structured_then_runs_only_live_agents(client) -> None:
+    prompt = (
+        "Remove BeaconIQ and EchoMarket to cut at least $2 billion in annual external-data spend while preserving "
+        "compliance and critical data coverage."
+    )
+    response = client.post("/decisions/draft", headers=auth_headers(client), json={"prompt": prompt})
+    assert response.status_code == 200, response.text
+    draft = response.json()
+    brief = draft["brief"]
+    assert brief["decision_type"] == "vendor_consolidation"
+    assert brief["goal"] == {
+        "metric": "annual_savings_usd",
+        "target": 2_000_000_000,
+        "unit": "usd",
+        "basis": "gross",
+        "direction": "at_least",
+    }
+    assert {(item["type"], item["target_entity_id"]) for item in brief["candidate_interventions"]} == {
+        ("remove_vendor", "vendor_beacon"),
+        ("remove_vendor", "vendor_echo"),
+    }
+    assert {constraint["metric"] for constraint in brief["constraints"]} >= {
+        "compliance_controls_broken",
+        "critical_coverage_pct",
+    }
+
+    created = client.post("/decisions", headers=auth_headers(client), json=brief)
+    assert created.status_code == 200, created.text
+    run_id = created.json()["run_id"]
+    wait_for(client, run_id, "awaiting_approval", timeout=180.0)
+    events = runtime.bus.runs[run_id].events
+    assessments = [event.payload for event in events if event.type is EventType.agent_completed]
+    assert assessments and all(assessment.status == "ok" for assessment in assessments)
+    assert not [event for event in events if event.type is EventType.agent_failed]
+    assert all(assessment.metrics.model_id != "test-provider" for assessment in assessments)
+
+    package_response = client.get(f"/runs/{run_id}/package")
+    assert package_response.status_code == 200, package_response.text
+    package = DecisionPackage.model_validate(package_response.json())
+    assert package.brief.goal.metric == "annual_savings_usd"
+    assert package.brief.goal.target == 2_000_000_000
+    decision = client.post(f"/runs/{run_id}/decision", headers=auth_headers(client), json={
+        "decision": "approve",
+        "decided_by": "live_free_text_test",
+        "package_hash": hashlib.sha256(package_response.content).hexdigest(),
+    })
+    assert decision.status_code == 200, decision.text
+    assert client.get(f"/runs/{run_id}").json()["status"] == "completed"
+
+
 def test_websocket_mid_orchestrated_run_gets_every_sequence_once(client, brief_json) -> None:
-    run_id = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=brief_json).json()["run_id"]
+    run_id = client.post("/decisions", headers=auth_headers(client), json=brief_json).json()["run_id"]
     with client.websocket_connect(f"/runs/{run_id}/events") as ws:
         received: list[Event] = []
         while not received or not (received[-1].type is EventType.phase_changed
@@ -117,45 +216,9 @@ def test_websocket_mid_orchestrated_run_gets_every_sequence_once(client, brief_j
     assert [e.sequence for e in received] == list(range(1, len(received) + 1))
 
 
-def test_mock_decision_runs_real_orchestrator_to_approval(client, brief_json) -> None:
-    run_id = client.post("/decisions?llm_mode=mock", headers=auth_headers(client), json=brief_json).json()["run_id"]
-    wait_for(client, run_id, "awaiting_approval")
-    events = runtime.bus.runs[run_id].events
-    assert runs.MOCK_FALLBACK_ASSUMPTION not in client.get(f"/runs/{run_id}/package").json()["assumptions"]
-    assessments = [e.payload for e in events if e.type is EventType.agent_completed]
-    assert assessments and all(a.status == "ok" and a.metrics.model_id == "mock" for a in assessments)
-    EventLog.model_validate([e.model_dump(mode="json") for e in events])
-
-
-def test_empty_replay_cache_falls_back_to_mock_with_a_package_assumption(client, brief_json, monkeypatch,
-                                                                         tmp_path) -> None:
-    # Live tests write their answers to the shared cache, so this one points at an empty directory.
-    monkeypatch.setenv("CANARY_LLM_CACHE_DIR", str(tmp_path / "empty_cache"))
-    assert runtime.cache_is_empty(runtime.llm_cache_dir())
-    run_id = client.post("/decisions?llm_mode=replay", headers=auth_headers(client), json=brief_json).json()["run_id"]
-    wait_for(client, run_id, "awaiting_approval")
-    events = runtime.bus.runs[run_id].events
-    assert events[0].type is EventType.run_created
-    assert not [e for e in events if e.type is EventType.settings_updated]
-    package = client.get(f"/runs/{run_id}/package").json()
-    assert package["assumptions"].count(runs.MOCK_FALLBACK_ASSUMPTION) == 1
-    assessments = [e.payload for e in events if e.type is EventType.agent_completed]
-    assert assessments and not [a for a in assessments if a.status in ("unavailable", "fallback_cached")]
-
-
-def test_replay_with_cached_answers_stays_in_replay(monkeypatch, tmp_path) -> None:
-    (tmp_path / "finance").mkdir()
-    (tmp_path / "finance" / "abc.json").write_text(json.dumps({"agent_id": "finance", "decision_id": "dec_a"}))
-    monkeypatch.setenv("CANARY_LLM_CACHE_DIR", str(tmp_path))
-    resolved, fell_back = runs.resolve_llm_settings(OrganizationSettings(), "replay", "dec_a")
-    assert (resolved.llm_mode, fell_back) == ("replay", False)
-    assert runtime.build_llm(resolved).cache_dir == tmp_path
-    live, fell_back = runs.resolve_llm_settings(OrganizationSettings(), "live")
-    assert (live.llm_mode, fell_back) == ("live", False)
-
-
 def test_bad_llm_mode_is_rejected(client, brief_json) -> None:
     assert client.post("/decisions?llm_mode=chatty", headers=auth_headers(client), json=brief_json).status_code == 422
+    assert client.post("/decisions?llm_mode=mock", headers=auth_headers(client), json=brief_json).status_code == 422
 
 
 def test_runtime_seeds_then_loads_the_versioned_company_twin_from_storage(monkeypatch, tmp_path) -> None:
@@ -214,7 +277,7 @@ def test_to_role_level_keeps_person_tokens_out_of_events(client, brief_json, mon
         return json.loads(PERSON_TOKEN.sub("role_billing_ops_lead", text))
 
     monkeypatch.setattr(engine_port, "to_role_level", to_role_level)
-    run_id = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=brief_json).json()["run_id"]
+    run_id = client.post("/decisions", headers=auth_headers(client), json=brief_json).json()["run_id"]
     wait_for(client, run_id, "awaiting_approval")
     assert "SimulationResult" in calls
     assert not PERSON_TOKEN.search(all_event_text(run_id))
@@ -222,7 +285,7 @@ def test_to_role_level_keeps_person_tokens_out_of_events(client, brief_json, mon
 
 def test_person_tokens_left_by_the_engine_fail_the_run_without_leaking(client, brief_json, monkeypatch) -> None:
     leak_person_tokens(monkeypatch, "pt_unknown_07")
-    run_id = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=brief_json).json()["run_id"]
+    run_id = client.post("/decisions", headers=auth_headers(client), json=brief_json).json()["run_id"]
     wait_for(client, run_id, "failed")
     events = runtime.bus.runs[run_id].events
     failures = [e.payload.reason for e in events if e.type is EventType.run_failed]
@@ -233,7 +296,7 @@ def test_person_tokens_left_by_the_engine_fail_the_run_without_leaking(client, b
 def test_live_mode_needs_explicit_opt_in(client, brief_json, monkeypatch) -> None:
     monkeypatch.delenv("CANARY_ALLOW_LIVE", raising=False)
     denied = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=brief_json)
-    assert denied.status_code == 403
+    assert denied.status_code == 503
     assert "CANARY_ALLOW_LIVE" in denied.json()["detail"]
     monkeypatch.setenv("CANARY_ALLOW_LIVE", "true")
     assert runs.live_allowed()
@@ -243,7 +306,7 @@ def test_live_mode_needs_explicit_opt_in(client, brief_json, monkeypatch) -> Non
 
 def test_live_workforce_decision_routes_people_knowledge_and_detects_real_concentration(client) -> None:
     body = workforce_brief().model_dump(mode="json")
-    run_id = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=body).json()["run_id"]
+    run_id = client.post("/decisions", headers=auth_headers(client), json=body).json()["run_id"]
     wait_for(client, run_id, "awaiting_approval")
     events = runtime.bus.runs[run_id].events
     assert "people_knowledge" in [e.payload.agent_id for e in events if e.type is EventType.agent_started]

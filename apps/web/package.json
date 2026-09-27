@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "typecheck": "tsc --noEmit",
-    "test": "node -e \"console.log('Web smoke tests will live in tests/e2e')\""
+    "test": "node --test tests/*.test.cjs"
   },
   "dependencies": {
     "@canary-pact/contracts": "workspace:*",
