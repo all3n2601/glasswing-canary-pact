@@ -1,3 +1,4 @@
+import hashlib
 import logging
 import operator
 import os
@@ -69,7 +70,7 @@ SIM_MODES = ("full", "quick")
 
 
 def simulation_mode() -> str:
-    """CANARY_SIM_MODE picks the engine's simulate mode; full is the default until the engine implements it."""
+    """CANARY_SIM_MODE picks the engine's simulate mode; full (expected value until Monte Carlo lands) is the default."""
     mode = os.environ.get("CANARY_SIM_MODE", "full").strip() or "full"
     if mode not in SIM_MODES:
         raise ValueError(f"CANARY_SIM_MODE must be one of {', '.join(SIM_MODES)}, got {mode!r}")
@@ -86,6 +87,18 @@ class RunCancelled(RuntimeError):
 
 def _unique(items: list[str]) -> list[str]:
     return list(dict.fromkeys(items))
+
+
+MAX_ID_LENGTH = 80
+
+
+def bounded_id(prefix: str, body: str) -> str:
+    """``prefix + body``, or ``prefix`` plus a hash of ``body`` when that would pass the 80-character ID limit."""
+    # Same scheme as simulation_engine's bounded_id, so the engine and the orchestrator name a scenario alike.
+    candidate = prefix + body
+    if len(candidate) <= MAX_ID_LENGTH:
+        return candidate
+    return prefix + hashlib.sha256(body.encode()).hexdigest()[:24]
 
 
 class _Run:
@@ -132,7 +145,7 @@ class _Run:
         key = (future, plan_id)
         if key not in self.scenarios:
             scenario = Scenario(
-                scenario_id=f"scn_{self.run_id}_{future.value}_{plan_id or 'none'}",
+                scenario_id=bounded_id("scn_", f"{self.run_id}_{future.value}_{plan_id or 'none'}"),
                 run_id=self.run_id,
                 future=future,
                 plan_id=plan_id,
