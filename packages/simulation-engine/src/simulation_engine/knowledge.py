@@ -4,9 +4,10 @@ A workflow's qualified owners are the roles with an OWNS or BACKS_UP edge into i
 left. It is stranded when fewer than ``min_qualified_owners`` remain (rule 11, as
 ``contracts_py`` enforces). Only workflows whose owners changed are reported.
 
-A stranded workflow in a department whose ``documentation_coverage`` is at least
-``DOCUMENTED_DOWNGRADE_AT`` has its harm severity lowered one level: someone can pick it up from
-the documents (schema 5.11, CORE).
+A stranded workflow that is itself documented (``company_twin.documented_workflow_ids``: a
+current runbook or SOP, with its supporting knowledge written down) in a department whose
+``documentation_coverage`` is at least ``DOCUMENTED_DOWNGRADE_AT`` has its harm severity lowered
+one level: someone can pick it up from the documents (schema 5.11, CORE).
 """
 
 from __future__ import annotations
@@ -14,6 +15,8 @@ from __future__ import annotations
 from contracts_py.engine import Impact, WorkflowCoverage
 from contracts_py.enums import EntityType, Polarity, Relation
 from contracts_py.twin import Twin
+
+from company_twin import documented_workflow_ids
 
 OWNER_RELATIONS = {Relation.OWNS, Relation.BACKS_UP}
 DOCUMENTED_DOWNGRADE_AT = 0.8
@@ -55,10 +58,10 @@ def workflow_coverage(baseline: Twin, scenario: Twin) -> list[WorkflowCoverage]:
 
 
 def downgrade_documented(impacts: list[Impact], coverage: list[WorkflowCoverage], twin: Twin) -> list[Impact]:
-    """Lower by one the severity of harm to stranded workflows in well-documented departments."""
+    """Lower by one the severity of harm to documented stranded workflows in well-documented departments."""
     ents = {e.id: e for e in twin.entities}
     documented = {p.department_id: p.documentation_coverage for p in twin.department_profiles}
-    stranded = {c.workflow_id for c in coverage if c.stranded}
+    stranded = {c.workflow_id for c in coverage if c.stranded} & documented_workflow_ids(twin)
     out = []
     for impact in impacts:
         department = ents[impact.affected_entity].department_id
