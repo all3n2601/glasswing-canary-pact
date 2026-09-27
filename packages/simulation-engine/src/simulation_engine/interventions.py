@@ -94,7 +94,21 @@ def _roles_in_scope(twin: Twin, target: Entity) -> list[Entity]:
 
 
 def _remove_vendor(s: AppliedScenario, i: Intervention, target: Entity) -> None:
+    """Stop the vendor's cost and lose everything it supplies from the start day.
+
+    History retention (``retains_history_after_termination``, plan E-06): a PROVIDES edge's
+    ``substitutability`` is the share of the vendor's coverage another provider can take over. The
+    refresh can be re-sourced, but the history the company holds through the vendor can only move
+    with it; when the vendor keeps no history after termination (``False``), nothing of its
+    coverage can be taken over, so its PROVIDES edges become non-substitutable (0) in the scenario.
+    ``True`` and ``None`` (unknown, the optimistic assumption) leave the edges as they are.
+    """
     _require(target, {EntityType.vendor}, i)
+    if target.retains_history_after_termination is False:
+        s.twin.edges = [e.model_copy(update={"substitutability": 0.0})
+                        if e.source == target.id and e.relation is Relation.PROVIDES else e for e in s.twin.edges]
+        s.assumptions.append(f"{i.id}: {target.id} keeps no history after termination, so none of the coverage it "
+                             "provides is substitutable")
     saved = target.annual_cost_usd or 0
     s.gross_savings_usd += saved
     s.savings_by_intervention[i.id] = saved
