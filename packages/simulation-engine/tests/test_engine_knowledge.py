@@ -46,7 +46,9 @@ def test_w2_removing_the_eight_roles_strands_exactly_the_two_story_workflows():
     for row in result.workflow_coverage:
         if row.workflow_id in STORY_WORKFLOWS:
             assert row.owners_after == [] and set(row.owners_before) <= EIGHT_ROLES
+            assert row.min_qualified_owners == 1 and row.stranded
             assert "lost qualified owners" in row.reasons[0]
+            assert "0 qualified owners left for a minimum of 1" in row.reasons
 
 
 def test_every_reported_critical_workflow_carries_the_plan_11_6_inputs():
@@ -55,7 +57,7 @@ def test_every_reported_critical_workflow_carries_the_plan_11_6_inputs():
         wf = ents[row.workflow_id]
         if row.workflow_id not in STORY_WORKFLOWS:
             continue
-        assert row.criticality is wf.criticality and row.min_qualified_owners == wf.min_qualified_owners == 2
+        assert row.criticality is wf.criticality and row.min_qualified_owners == wf.min_qualified_owners == 1
         assert row.backup_count_after == 0
         assert row.owner_capacity_fte_before > 0 and row.owner_capacity_fte_after == 0
         assert row.documented_pct == wf.documented_pct
@@ -91,25 +93,30 @@ def test_w3_lineage_is_lost_and_the_exception_path_gap_is_reported_separately():
     assert all(i.category is ImpactCategory.ownership and i.value_usd is None for i in added)
 
 
-def test_w4_qualified_backups_outside_the_eight_keep_a_workflow_covered():
-    # Both story workflows need two qualified owners, so one outside backup is not enough, two are.
+def test_w4_one_qualified_backup_outside_the_eight_restores_each_story_workflow():
+    # Both story workflows need one qualified owner, so reassigning a single backup outside the eight roles
+    # keeps each covered (plan 19.3); this is the edge A7's reassign_owner mitigation adds.
+    restored = remove_eight(clone_with_edges(TWIN, [backs_up("role_controller", "wf_financial_close"),
+                                                    backs_up("role_finance_analyst", "wf_billing_recon")]))
+    rows = {c.workflow_id: c for c in restored.workflow_coverage}
+    assert rows["wf_financial_close"].owners_after == ["role_controller"]
+    assert rows["wf_billing_recon"].owners_after == ["role_finance_analyst"]
+    for workflow_id in STORY_WORKFLOWS:
+        row = rows[workflow_id]
+        assert row.min_qualified_owners == 1 and row.backup_count_after == 1 and not row.stranded
+    assert not any(c.stranded for c in restored.workflow_coverage)
+    assert next(c for c in restored.constraint_results if c.constraint_id == "c_stranded").passed
+
+    # One backup restores only its own workflow.
     one = remove_eight(clone_with_edges(TWIN, [backs_up("role_controller", "wf_financial_close")]))
-    close = next(c for c in one.workflow_coverage if c.workflow_id == "wf_financial_close")
-    assert close.owners_after == ["role_controller"] and close.stranded
+    assert {c.workflow_id for c in one.workflow_coverage if c.stranded} == {"wf_billing_recon"}
 
-    two = remove_eight(clone_with_edges(TWIN, [backs_up("role_controller", "wf_financial_close"),
-                                               backs_up("role_finance_analyst", "wf_financial_close")]))
-    stranded = {c.workflow_id for c in two.workflow_coverage if c.stranded}
-    close = next(c for c in two.workflow_coverage if c.workflow_id == "wf_financial_close")
-    assert not close.stranded and close.backup_count_after == 2
-    assert stranded == {"wf_billing_recon"}
-
-    # With a one-owner minimum, a single qualified backup prevents stranding (plan 19.3).
-    relaxed = clone_with_edges(TWIN, [backs_up("role_controller", "wf_financial_close")])
-    for e in relaxed.entities:
+    # Under a two-owner minimum a single backup would not be enough (rule 11).
+    strict = clone_with_edges(TWIN, [backs_up("role_controller", "wf_financial_close")])
+    for e in strict.entities:
         if e.id == "wf_financial_close":
-            e.min_qualified_owners = 1
-    assert not next(c for c in remove_eight(relaxed).workflow_coverage if c.workflow_id == "wf_financial_close").stranded
+            e.min_qualified_owners = 2
+    assert next(c for c in remove_eight(strict).workflow_coverage if c.workflow_id == "wf_financial_close").stranded
 
 
 def test_losing_every_qualified_owner_strands_even_without_a_configured_minimum():

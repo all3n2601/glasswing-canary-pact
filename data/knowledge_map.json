@@ -181,14 +181,14 @@
       "workflow_id": "wf_billing_recon",
       "name": "Billing reconciliation",
       "criticality": "critical",
-      "min_qualified_owners": 2,
+      "min_qualified_owners": 1,
       "owner_roles": [
         "role_billing_ops_lead",
         "role_billing_specialist"
       ],
       "documented_pct": 0.35,
       "ownership_modeled": true,
-      "stranded_if_owners_removed": true
+      "stranded_if_owners_removed": false
     },
     {
       "workflow_id": "wf_invoicing",
@@ -246,14 +246,14 @@
       "workflow_id": "wf_financial_close",
       "name": "Monthly financial close",
       "criticality": "critical",
-      "min_qualified_owners": 2,
+      "min_qualified_owners": 1,
       "owner_roles": [
         "role_close_accountant",
         "role_gl_accountant"
       ],
       "documented_pct": 0.5,
       "ownership_modeled": true,
-      "stranded_if_owners_removed": true
+      "stranded_if_owners_removed": false
     },
     {
       "workflow_id": "wf_lead_scoring",

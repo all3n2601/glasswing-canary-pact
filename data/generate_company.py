@@ -424,13 +424,13 @@ for vid, name, did, cost, exit_c, mig_c, crit in VENDORS:
 # below (loader._derive_documented_pct), except wf_billing_recon (kept at its under-documented
 # story value, R3/W-3: its only covering doc is deliberately outdated).
 WORKFLOWS = [
-    ("wf_billing_recon", "Billing reconciliation", "dept_operations", "critical", 2, 900_000, 0.35, True),
+    ("wf_billing_recon", "Billing reconciliation", "dept_operations", "critical", 1, 900_000, 0.35, True),
     ("wf_invoicing", "Invoice generation and dispatch", "dept_operations", "critical", 2, 1_200_000, 0.5, True),
     ("wf_incident_mgmt", "Incident response and on-call", "dept_operations", "high", 2, 600_000, 0.5, False),
     ("wf_soc2_evidence", "SOC 2 audit-evidence collection", "dept_compliance", "high", 1, 150_000, 0.5, False),
     ("wf_customer_onboarding", "Customer onboarding", "dept_customer_success", "medium", 2, 300_000, 0.5, True),
     ("wf_data_refresh", "Data pipeline refresh", "dept_ai_data", "high", 2, 400_000, 0.5, False),
-    ("wf_financial_close", "Monthly financial close", "dept_finance", "critical", 2, 250_000, 0.5, False),
+    ("wf_financial_close", "Monthly financial close", "dept_finance", "critical", 1, 250_000, 0.5, False),
     ("wf_lead_scoring", "Lead scoring", "dept_sales", "medium", 1, 500_000, 0.7, False),
     ("wf_campaign_targeting", "Campaign targeting", "dept_marketing", "medium", 1, 400_000, 0.65, False),
     ("wf_account_planning", "Account planning", "dept_sales", "medium", 1, 600_000, 0.6, False),
