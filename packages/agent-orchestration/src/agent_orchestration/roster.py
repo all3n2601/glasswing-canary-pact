@@ -4,7 +4,8 @@ from contracts_py.agents import AgentSpec
 from contracts_py.enums import DecisionType, EntityType, Sensitivity
 from contracts_py.twin import ALWAYS_ENABLED_AGENTS, CORE_AGENT_IDS
 
-PROMPT_VERSION = "p1"
+# p2: agent context trimmed to the decision neighbourhood and serialized as compact JSON.
+PROMPT_VERSION = "p2"
 CHALLENGER = "challenger"
 ALWAYS_RUN = ALWAYS_ENABLED_AGENTS
 

@@ -44,6 +44,56 @@ def redact_people(text: str) -> tuple[str, list[str]]:
     return PERSON_TOKEN.sub("[role]", text), found
 
 
+def prune(value: Any) -> Any:
+    """Drops nulls and empty strings, lists and objects so the prompt only carries facts."""
+    if isinstance(value, dict):
+        pruned = {k: prune(v) for k, v in value.items()}
+        return {k: v for k, v in pruned.items() if v not in (None, "", [], {})}
+    if isinstance(value, list):
+        return [prune(v) for v in value]
+    return value
+
+
+# Fields the agent never reasons over: storage metadata, and values the context already implies.
+OMIT_FIELDS = {
+    "entities": {"sensitivity"},
+    "edges": {"strength_range", "confidence", "coefficient_version", "last_validated", "extraction_method"},
+    "documents": {"uri", "mime_type", "uploaded_at", "synthetic", "ingested", "checksum_sha256", "page_count",
+                  "version", "sensitivity", "covers_entity_ids"},
+    "evidence": {"synthetic"},
+    "impacts": {"decision_id", "scenario_id", "origin", "status", "edge_path"},
+}
+
+
+def slim_context(context: dict[str, Any]) -> dict[str, Any]:
+    view = dict(context.get("view", {}))
+    for part in ("entities", "edges", "documents", "evidence"):
+        view[part] = [{k: v for k, v in item.items() if k not in OMIT_FIELDS[part]} for item in view.get(part, [])]
+    # Agents propose dependencies by source, relation and target, so an edge id is only noise.
+    view["edges"] = [{k: v for k, v in e.items() if k != "id" and not (k == "lag_days" and v == 0)}
+                     for e in view["edges"]]
+    slim = {**context, "view": view}
+    for key in ("act_now_effects", "inaction_effects"):
+        slim[key] = [{k: v for k, v in i.items() if k not in OMIT_FIELDS["impacts"]} for i in context.get(key, [])]
+    return slim
+
+
+def strip_schema_titles(schema: Any) -> Any:
+    """Pydantic repeats every field name as a title; property names stay, the titles go."""
+    if isinstance(schema, list):
+        return [strip_schema_titles(item) for item in schema]
+    if not isinstance(schema, dict):
+        return schema
+    out = {k: strip_schema_titles(v) for k, v in schema.items() if k not in ("title", "properties")}
+    if "properties" in schema:
+        out["properties"] = {name: strip_schema_titles(prop) for name, prop in schema["properties"].items()}
+    return out
+
+
+def compact_json(value: Any) -> str:
+    return json.dumps(prune(value), separators=(",", ":"), ensure_ascii=False)
+
+
 def strip_title(markdown: str) -> str:
     lines = markdown.splitlines()
     if lines and lines[0].startswith("# "):
@@ -95,8 +145,9 @@ def assemble(agent_id: str, context: AgentContext, root: Path | None = None) -> 
     sections = {
         "base": base.replace("{display_name}", entry["display_name"]),
         "department_knowledge": knowledge,
-        "agent_context": context.model_dump_json(indent=2),
-        "output_schema": json.dumps(model.model_json_schema(), indent=2, sort_keys=True),
+        "agent_context": compact_json(slim_context(context.model_dump(mode="json", exclude_none=True))),
+        "output_schema": json.dumps(strip_schema_titles(model.model_json_schema()), separators=(",", ":"),
+                                    sort_keys=True),
     }
     rendered = [
         sections[name] if name == "base" else f"{SECTION_TITLES[name]}\n{sections[name]}"
