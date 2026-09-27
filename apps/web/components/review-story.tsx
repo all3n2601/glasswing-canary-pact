@@ -42,7 +42,7 @@ export function ReviewStory({events, complete, decisionPackage, onEvidence}: {
   const selectedRow = pkg?.futures.rows.find(row => row.result_id === recommendation?.result_id);
   const highlights = pkg ? decisionHighlights(snapshot.assessments, pkg) : null;
   const needsReview = Boolean(pkg?.open_questions?.length || pkg?.missing_perspectives?.length || pkg?.missing_information?.length || highlights?.risks.length || pkg?.critical_risks?.length);
-  const recommendationLabel = recommendation?.action === "do_not_proceed" ? "Do not proceed" : recommendation?.action === "delay" ? "Delay" : recommendation?.future === "inaction" ? "Keep the current plan unchanged" : recommendation?.future === "alternative" ? "Consider the alternative plan" : recommendation?.future === "delay" ? "Delay the change" : "Act now";
+  const recommendationLabel = recommendation?.action === "do_not_proceed" ? "Do not proceed" : recommendation?.action === "delay" ? "Delay" : recommendation?.action === "proceed_with_mitigations" ? "Proceed with mitigations" : recommendation?.future === "inaction" ? "Keep the current plan unchanged" : recommendation?.future === "alternative" ? "Consider the alternative plan" : recommendation?.future === "delay" ? "Delay the change" : "Act now";
   const empty = (text: string) => <p role="status" className="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-5 text-sm text-zinc-600">{text}</p>;
   return <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-zinc-200 bg-white shadow-sm" aria-label="Decision story">
     <nav className="grid grid-cols-3 gap-1 border-b p-2 lg:grid-cols-6" aria-label="Review stages">
@@ -115,6 +115,19 @@ export function ReviewStory({events, complete, decisionPackage, onEvidence}: {
           </details>)}</div> : <p className="mt-2 text-sm text-zinc-500">No department risk summaries are available. Missing findings do not establish that there is no risk.</p>}
           {pkg.critical_risks?.length ? <details className="mt-2 rounded-xl border p-3"><summary className="cursor-pointer text-sm font-medium">Engine-reported critical risks · {pkg.critical_risks.length}</summary>{pkg.critical_risks.map(impact => <div key={impact.impact_id} className="mt-3"><p>{name(impact.metric)} · {name(impact.affected_entity)} · First effect day {impact.first_effect_day}</p><p className="text-xs">{impact.magnitude} {impact.unit} · {impact.direction} · {impact.polarity}</p>{sources(impact.evidence_refs)}</div>)}</details> : null}
         </div>
+        {pkg.mitigations?.length ? <div>
+          <h3 className="font-semibold">Mitigations</h3>
+          <p className="text-xs text-zinc-500">Before and after results from engine re-simulation.</p>
+          <div className="mt-2 grid gap-3 sm:grid-cols-2">{pkg.mitigations.map(mitigation => <article key={mitigation.after.result_id} className="rounded-xl border p-4">
+            <h4 className="break-words font-medium">{name(mitigation.plan_id_before)} → {name(mitigation.plan_id_after)}</h4>
+            <dl className="mt-3 grid grid-cols-2 gap-3">
+              <div><dt className="text-xs text-zinc-500">Risk before</dt><dd>{mitigation.before.risk.score} · {name(mitigation.before.risk.level)}</dd></div>
+              <div><dt className="text-xs text-zinc-500">Risk after</dt><dd>{mitigation.after.risk.score} · {name(mitigation.after.risk.level)}</dd></div>
+            </dl>
+            <p className="mt-3 text-xs font-medium text-zinc-500">Restored entities</p>
+            {mitigation.restored_entity_ids?.length ? <ul className="mt-1 space-y-1">{mitigation.restored_entity_ids.map(id => <li key={id} className="break-words">{name(id)}</li>)}</ul> : <p className="mt-1 text-zinc-500">No restored entities reported.</p>}
+          </article>)}</div>
+        </div> : null}
         {highlights?.questions.length ? <div><h3 className="font-semibold">Before you decide</h3><ol className="mt-2 grid items-start gap-2 lg:grid-cols-3">{highlights.questions.map((question, i) => <li key={i} className="rounded-lg bg-zinc-50 p-3"><details className="group"><summary className="cursor-pointer list-none"><span className="text-xs font-medium text-zinc-500">Check {i + 1} · Expand</span><span className="mt-1 line-clamp-3 text-sm leading-5 group-open:hidden">{question}</span></summary><p className="mt-1 text-sm leading-5">{question}</p></details></li>)}</ol></div> : null}
         <details className="rounded-xl border p-3"><summary className="cursor-pointer font-semibold">Full review & calculation · {pkg.open_questions?.length ?? 0} open concerns</summary>
           <p className="mt-3">{recommendation?.headline ?? "No recommendation was produced."}</p>

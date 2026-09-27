@@ -35,7 +35,6 @@ export function SiteHeader() {
           <Link className="hidden text-[11px] font-medium text-zinc-500 transition-colors hover:text-zinc-950 md:block" href="/simulate">Simulation</Link>
           <Link className="hidden text-[11px] font-medium text-zinc-500 transition-colors hover:text-zinc-950 md:block" href="/story">Storyboard</Link>
           <Link className="hidden text-[11px] font-medium text-zinc-500 transition-colors hover:text-zinc-950 md:block" href="/evidence">Evidence</Link>
-          <Link className="hidden text-[11px] font-medium text-zinc-500 transition-colors hover:text-zinc-950 lg:block" href="/settings/organization">Organization</Link>
         </> : null}
         <AuthControls />
       </nav>

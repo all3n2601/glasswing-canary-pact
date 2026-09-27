@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { useAuth } from "@/components/auth-provider";
+import { useSimulationOutcome } from "@/components/simulation-outcome-provider";
 import { DepartmentChange } from "@/components/department-change";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,7 @@ import { saveOrganizationProfile } from "@/lib/organization-profile";
 
 export function OrganizationSettings({ profile, agentSkills }: { profile: OrganizationProfile; agentSkills: AgentSkillFile[] }) {
   const { user } = useAuth();
+  const { outcome: currentOutcome, setOutcome } = useSimulationOutcome();
   const [addingDepartment, setAddingDepartment] = useState(false);
   const [departmentAdded, setDepartmentAdded] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("general");
@@ -50,6 +52,8 @@ export function OrganizationSettings({ profile, agentSkills }: { profile: Organi
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [twinVersion, setTwinVersion] = useState(profile.twin_version);
+  const outcome = currentOutcome?.organizationId === profile.organization.id
+    && (!currentOutcome.preview || currentOutcome.twinVersion === twinVersion) ? currentOutcome : null;
   const riskTotal = useMemo(() => Object.values(settings.risk_weights).reduce((sum, weight) => sum + weight, 0), [settings.risk_weights]);
   const activeLabel = tabs.find((tab) => tab.id === activeTab)?.label;
   const selectedDepartment = departments.find((department) => department.department_id === selectedDepartmentId) ?? departments[0];
@@ -213,7 +217,26 @@ export function OrganizationSettings({ profile, agentSkills }: { profile: Organi
                 </div>
               ) : null}
 
-              {activeTab === "simulation" ? <div className="pt-8"><SettingsSection title="Scenario defaults" description="Pre-filled on every new decision brief and editable per simulation."><div className="grid gap-5 sm:grid-cols-2"><label><span className={labelClass}>Default horizon</span><select className={`${fieldClass} w-full px-3`} value={settings.default_horizon_days} onChange={(event) => setSettings({ ...settings, default_horizon_days: Number(event.target.value) })}><option value={90}>90 days</option><option value={180}>180 days</option><option value={365}>365 days</option></select></label><label><span className={labelClass}>Default delay</span><select className={`${fieldClass} w-full px-3`} value={settings.default_delay_days} onChange={(event) => setSettings({ ...settings, default_delay_days: Number(event.target.value) })}><option value={30}>30 days</option><option value={60}>60 days</option><option value={90}>90 days</option></select></label><label><span className={labelClass}>Propagation depth</span><Input className={fieldClass} type="number" min={1} max={6} value={settings.propagation_max_hops} onChange={(event) => setSettings({ ...settings, propagation_max_hops: Number(event.target.value) })} /></label><label><span className={labelClass}>Minimum impact threshold</span><Input className={fieldClass} type="number" min={0} max={1} step={0.01} value={settings.min_impact_threshold} onChange={(event) => setSettings({ ...settings, min_impact_threshold: Number(event.target.value) })} /></label></div></SettingsSection><SettingsSection title="Department analysis" description="Suggestions always come from the currently configured live agent models."><div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4"><strong className="text-sm text-emerald-950">Live agents</strong><p className="mt-1 text-[10px] leading-4 text-emerald-800">Recorded and offline agent responses are disabled. Failed calls are surfaced as unavailable perspectives.</p></div></SettingsSection></div> : null}
+              {activeTab === "simulation" ? <div className="pt-8">
+                <SettingsSection title="Show outcome" description="Choose which outcome appears in the simulator’s map and totals. This changes your view only; no organization save is needed.">
+                  {outcome ? <div className="max-w-xl">
+                    <p className="mb-4 text-xs font-medium text-zinc-700">{outcome.title}</p>
+                    <label htmlFor="outcome-selector" className={labelClass}>Outcome to display</label>
+                    <select id="outcome-selector" aria-describedby="outcome-description" className={`${fieldClass} w-full border px-3`} value={outcome.resultId} onChange={event => {
+                      const resultId = event.target.value;
+                      setOutcome(current => current ? { ...current, resultId } : null);
+                    }}>
+                      {outcome.options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+                    </select>
+                    <p id="outcome-description" className="mt-3 text-xs leading-5 text-zinc-500">{outcome.options.find(option => option.value === outcome.resultId)?.description}</p>
+                    <Button asChild variant="outline" className="mt-4"><Link href="/simulate">View in simulator <ChevronRight /></Link></Button>
+                  </div> : <div className="rounded-2xl border border-dashed border-zinc-200 p-5">
+                    <p className="text-sm font-medium">No simulation loaded</p>
+                    <p className="mt-2 text-xs leading-5 text-zinc-500">Open the simulator to load your latest run or preview a decision, then return here to choose its outcome.</p>
+                    <Button asChild variant="outline" className="mt-4"><Link href="/simulate">Open simulator <ChevronRight /></Link></Button>
+                  </div>}
+                </SettingsSection>
+                <SettingsSection title="Scenario defaults" description="Pre-filled on every new decision brief and editable per simulation."><div className="grid gap-5 sm:grid-cols-2"><label><span className={labelClass}>Default horizon</span><select className={`${fieldClass} w-full px-3`} value={settings.default_horizon_days} onChange={(event) => setSettings({ ...settings, default_horizon_days: Number(event.target.value) })}><option value={90}>90 days</option><option value={180}>180 days</option><option value={365}>365 days</option></select></label><label><span className={labelClass}>Default delay</span><select className={`${fieldClass} w-full px-3`} value={settings.default_delay_days} onChange={(event) => setSettings({ ...settings, default_delay_days: Number(event.target.value) })}><option value={30}>30 days</option><option value={60}>60 days</option><option value={90}>90 days</option></select></label><label><span className={labelClass}>Propagation depth</span><Input className={fieldClass} type="number" min={1} max={6} value={settings.propagation_max_hops} onChange={(event) => setSettings({ ...settings, propagation_max_hops: Number(event.target.value) })} /></label><label><span className={labelClass}>Minimum impact threshold</span><Input className={fieldClass} type="number" min={0} max={1} step={0.01} value={settings.min_impact_threshold} onChange={(event) => setSettings({ ...settings, min_impact_threshold: Number(event.target.value) })} /></label></div></SettingsSection><SettingsSection title="Department analysis" description="Suggestions always come from the currently configured live agent models."><div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4"><strong className="text-sm text-emerald-950">Live agents</strong><p className="mt-1 text-[10px] leading-4 text-emerald-800">Recorded and offline agent responses are disabled. Failed calls are surfaced as unavailable perspectives.</p></div></SettingsSection></div> : null}
 
               {activeTab === "risk" ? <div className="pt-8"><SettingsSection title="Risk appetite" description="Adjusts thresholds and tie-breaking; it never bypasses hard constraints."><div className="grid gap-3 sm:grid-cols-3">{(["conservative", "balanced", "aggressive"] as const).map((appetite) => <button key={appetite} type="button" onClick={() => setSettings({ ...settings, risk_appetite: appetite })} className={`rounded-2xl border p-4 text-left transition-all ${settings.risk_appetite === appetite ? "border-zinc-950 bg-zinc-950 text-white" : "border-zinc-200"}`}><strong className="text-sm capitalize">{appetite}</strong><p className={`mt-1 text-[10px] ${settings.risk_appetite === appetite ? "text-zinc-400" : "text-zinc-500"}`}>{appetite === "conservative" ? "Flag exposure earlier" : appetite === "balanced" ? "Balance value and risk" : "Favor upside potential"}</p></button>)}</div></SettingsSection><SettingsSection title="Risk weights" description="Weights must total 100%. Deterministic scoring uses these values."><div className="space-y-4">{Object.entries(settings.risk_weights).map(([key, value]) => <label key={key} className="grid grid-cols-[1fr_70px] items-center gap-4"><span className="text-xs capitalize text-zinc-600">{key.replaceAll("_", " ")}</span><Input className="h-9 border-zinc-200 text-right" type="number" min={0} max={100} value={value} onChange={(event) => setSettings({ ...settings, risk_weights: { ...settings.risk_weights, [key]: Number(event.target.value) } })} /></label>)}<div className={`flex items-center justify-between rounded-xl p-3 text-xs font-semibold ${riskTotal === 100 ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}><span>Total</span><span>{riskTotal}%</span></div></div></SettingsSection><SettingsSection title="Protected controls" description="These safeguards are locked in the current environment."><div className="space-y-3"><LockedControl icon={ShieldCheck} title="Human approval required" detail="Every real organizational decision ends at a human approval gate." /><LockedControl icon={Users} title="People remain anonymized" detail="The twin uses role and person tokens, never employee rankings." /><LockedControl icon={FileText} title="Evidence remains traceable" detail="Reported impacts retain evidence, confidence, and dependency paths." /></div></SettingsSection></div> : null}
             </div>

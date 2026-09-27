@@ -3,12 +3,13 @@
 import type { OrganizationProfile } from "@canary-pact/contracts";
 import type { BlastRadius, DecisionBrief, DecisionPackage, DepartmentDetail, DomainGraph, RunState, SimulationResult } from "@canary-pact/contracts/generated";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowRight, Building2, Check, FileText, Gauge, LayoutGrid, LoaderCircle, Map as MapIcon, Pause, Play, Settings2, Share2, Sparkles, Users, WalletCards, X } from "lucide-react";
+import { ArrowRight, Building2, Check, FileText, Gauge, LayoutGrid, LoaderCircle, Map as MapIcon, Pause, Play, Share2, Sparkles, Users, WalletCards, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState, useRef } from "react";
 
 import { AuthControls } from "@/components/auth-controls";
 import { useAuth } from "@/components/auth-provider";
+import { useSimulationOutcome } from "@/components/simulation-outcome-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -59,6 +60,9 @@ function money(value: number) {
 }
 
 export function DecisionDashboard({ profile: initialProfile }: { profile: OrganizationProfile }) {
+  const { outcome, setOutcome } = useSimulationOutcome();
+  const restoredView = useRef(outcome?.organizationId === initialProfile.organization.id
+    && (!outcome.preview || outcome.twinVersion === initialProfile.twin_version) ? outcome : null);
   const [currentProfile, setCurrentProfile] = useState(initialProfile);
   const [snapshotProfile, setSnapshotProfile] = useState<OrganizationProfile | null>(null);
   const [runId, setRunId] = useState<string | null>(null);
@@ -67,8 +71,8 @@ export function DecisionDashboard({ profile: initialProfile }: { profile: Organi
   const [changeOpen, setChangeOpen] = useState(false);
   const [officePage, setOfficePage] = useState(0);
   const [resetCamera, setResetCamera] = useState(0);
-  const [resultId, setResultId] = useState("baseline");
-  const [preview, setPreview] = useState<{brief: DecisionBrief; result: SimulationResult; blast: BlastRadius} | null>(null);
+  const [resultId, setResultId] = useState(restoredView.current?.resultId ?? "baseline");
+  const [preview, setPreview] = useState<{brief: DecisionBrief; result: SimulationResult; blast: BlastRadius} | null>(restoredView.current?.preview ?? null);
   const runRequest = useRef<AbortController | null>(null);
   useEffect(() => () => runRequest.current?.abort(), []);
   const slots = useRef<Record<string, number>>({});
@@ -90,9 +94,9 @@ export function DecisionDashboard({ profile: initialProfile }: { profile: Organi
   const { user } = useAuth();
   const [composerOpen, setComposerOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"office" | "graph" | "board">("office");
-  const [day, setDay] = useState(0);
+  const [day, setDay] = useState(restoredView.current?.day ?? 0);
   const [running, setRunning] = useState(false);
-  const [hasStarted, setHasStarted] = useState(false);
+  const [hasStarted, setHasStarted] = useState(Boolean(restoredView.current?.preview));
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<string | null>(null);
   const [decisionPackage, setDecisionPackage] = useState<DecisionPackage | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -117,6 +121,31 @@ export function DecisionDashboard({ profile: initialProfile }: { profile: Organi
     return [...found.values()];
   }, [live.events, decisionPackage, preview]);
   const selectedResult = results.find(result => result.result_id === resultId);
+  const delayDays = preview?.brief.delay_days ?? decisionPackage?.brief.delay_days;
+  const outcomeOptions = useMemo(() => {
+    const planIds = [...new Set(results.flatMap(result => result.plan_id ? [result.plan_id] : []))];
+    return [{ value: "baseline", label: "Before the decision", description: "Original company structure and budget, before any simulated changes." }, ...results.map(result => {
+      if (result.future === "inaction") return { value: result.result_id, label: "Make no changes", description: "Forecast if you keep things as they are, including existing pressures over time." };
+      const mitigation = decisionPackage?.mitigations?.find(item => item.after.result_id === result.result_id);
+      const planLabel = result.result_id === preview?.result.result_id ? "Draft proposal"
+        : mitigation ? "With safeguards"
+        : result.plan_id === decisionPackage?.portfolios.naive.plan_id || result.plan_id === "plan_naive" ? "Your proposal"
+        : result.plan_id && result.plan_id === decisionPackage?.portfolios.recommended?.plan_id ? "Recommended alternative"
+        : `Option ${Math.max(1, planIds.indexOf(result.plan_id ?? "") + 1)}`;
+      const timing = result.future === "delay"
+        ? delayDays != null ? `Wait ${delayDays} days, then act` : "Wait, then act"
+        : result.future === "alternative" ? "Alternative approach" : "Act now";
+      const description = result.future === "delay" ? "Forecast if you postpone the proposal, then carry it out."
+        : result.future === "alternative" ? "Forecast for a different way to pursue the same goal."
+        : "Forecast if you proceed with the proposal now.";
+      return { value: result.result_id, label: `${timing} · ${planLabel}`, description };
+    })];
+  }, [results, decisionPackage, preview, delayDays]);
+  useEffect(() => {
+    if (!hasStarted || !results.length || (runId && !snapshotProfile)) return;
+    setOutcome({ organizationId: profile.organization.id, twinVersion: profile.twin_version, runId, resultId, day,
+      title: preview?.brief.title ?? decisionPackage?.brief.title ?? "Current simulation", options: outcomeOptions, preview });
+  }, [hasStarted, results.length, runId, snapshotProfile, profile.organization.id, profile.twin_version, resultId, day, preview, decisionPackage, outcomeOptions, setOutcome]);
   const horizon = preview?.brief.horizon_days ?? decisionPackage?.brief.horizon_days ?? 365;
   useEffect(() => {
     setDepartmentDetails({});setCompanyGraph(null);setGraphLoading(false);setSnapshotProfile(null);
@@ -219,6 +248,7 @@ export function DecisionDashboard({ profile: initialProfile }: { profile: Organi
     setRunning(true);
   };
   useEffect(() => {
+    if (restoredView.current?.preview) return;
     const runId = window.localStorage.getItem("canary:last-run-id");
     if (!runId) return;
     let active = true;
@@ -235,9 +265,9 @@ export function DecisionDashboard({ profile: initialProfile }: { profile: Organi
           : await waitForPackage(runId, 300_000, (next) => { if (active && !controller.signal.aborted) setRunState(next); }, controller.signal);
         if (!active || controller.signal.aborted) return;
         setDecisionPackage(restored);
-        setResultId(restored.recommendation?.result_id ?? (restored.portfolios.recommended?.result ?? restored.portfolios.naive.result).result_id);
+        setResultId(restoredView.current?.runId === runId ? restoredView.current.resultId : restored.recommendation?.result_id ?? (restored.portfolios.recommended?.result ?? restored.portfolios.naive.result).result_id);
         setHasStarted(true);
-        setDay(0);
+        setDay(restoredView.current?.runId === runId ? restoredView.current.day : 0);
       })
       .catch(() => {
         // A missing or inaccessible prior run should not block starting a new one.
@@ -245,6 +275,7 @@ export function DecisionDashboard({ profile: initialProfile }: { profile: Organi
     return () => { active = false; controller.abort(); };
   }, []);
   const simulate = async (brief: DecisionBrief, departmentIds: string[]) => {
+    setOutcome(null);
     runRequest.current?.abort();
     const controller = new AbortController();
     runRequest.current = controller;
@@ -273,6 +304,7 @@ export function DecisionDashboard({ profile: initialProfile }: { profile: Organi
     }
   };
   const closeSimulation = () => {
+    setOutcome(null);
     runRequest.current?.abort();setSubmitting(false);setOfficePage(0);
     setRunId(null);setSnapshotProfile(null);setPreview(null);setResultId("baseline");
     window.localStorage.removeItem("canary:last-run-id");
@@ -331,7 +363,6 @@ export function DecisionDashboard({ profile: initialProfile }: { profile: Organi
           <nav className="hidden items-center gap-1 md:flex" aria-label="Simulation navigation">
             <Button asChild variant="ghost" size="sm" className="text-zinc-950"><Link href="/simulate"><Play />Simulation</Link></Button>
             <Button asChild variant="ghost" size="sm" className="text-zinc-500"><Link href="/story"><FileText />Storyboard</Link></Button>
-            <Button asChild variant="ghost" size="sm" className="text-zinc-500"><Link href="/settings/organization"><Settings2 />Settings</Link></Button>
           </nav>
           <span className="hidden h-6 w-px bg-zinc-200 sm:block" />
           <div className="hidden items-center gap-2 px-2 text-[10px] font-medium text-zinc-500 lg:flex"><span className="size-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgb(16_185_129/.11)]" />Twin synchronized</div>
@@ -345,12 +376,10 @@ export function DecisionDashboard({ profile: initialProfile }: { profile: Organi
         <div aria-label="Simulation metrics" className="pointer-events-auto grid w-full max-w-[570px] shrink-0 grid-cols-3 gap-2 self-end">
           {metrics.map((metric) => { const Icon = metric.icon; return <motion.div key={metric.label} layout className="flex min-w-0 items-center gap-2 rounded-2xl border border-white/95 bg-white/88 p-2 shadow-[0_10px_35px_rgb(40_55_50/.09)] backdrop-blur-xl sm:gap-3 sm:p-2.5"><span className={`grid size-9 shrink-0 place-items-center rounded-xl sm:size-10 ${metric.tone}`}><Icon className="size-4" /></span><div className="min-w-0"><strong className="block truncate text-xs sm:text-sm">{metric.value}</strong><span className="block truncate text-[8px] text-zinc-500 sm:text-[9px]">{metric.label}</span></div></motion.div>; })}
         </div>
-        <div role="group" aria-label="Department and scenario controls" className="pointer-events-auto flex shrink-0 flex-wrap gap-2 self-start">
-          <select aria-label="Select department" className="max-w-48 rounded-xl border bg-white/95 px-3 py-2 text-xs" value={selectedDepartmentId ?? ""} onChange={e=>{setSelectedDepartmentId(e.target.value || null);if(e.target.value)setOfficePage(Math.floor(slots.current[e.target.value]/24));}}><option value="">Explore {departments.length} departments</option>{departments.map(d=><option key={d.departmentId} value={d.departmentId}>{d.name}</option>)}</select>
+        <div role="group" aria-label="View controls" className="pointer-events-auto flex max-w-full shrink-0 flex-wrap items-start gap-2 self-start">
           {selectedDepartmentId && !runId ? <button className="rounded-xl border bg-white/95 px-3 py-2 text-xs" onClick={()=>setChangeOpen(true)}>Change department</button>:null}
           <button className="rounded-xl border bg-white/95 px-3 py-2 text-xs" onClick={()=>{setSelectedDepartmentId(null);setResetCamera(k=>k+1);}}>Reset camera</button>
           {officePages>1 ? <select aria-label="Office page" className="rounded-xl border bg-white p-2 text-xs" value={officePage} onChange={e=>setOfficePage(Number(e.target.value))}>{Array.from({length:officePages},(_,i)=><option key={i} value={i}>Office {i+1} of {officePages}</option>)}</select>:null}
-          {results.length ? <select aria-label="Compare scenario" className="max-w-60 rounded-xl border bg-white/95 p-2 text-xs" value={resultId} onChange={e=>{setResultId(e.target.value);setRunning(false);}}><option value="baseline">Baseline company</option>{results.map(r=><option key={r.result_id} value={r.result_id}>{r.future.replaceAll("_", " ")} · {r.plan_id ?? (r.future === "inaction" ? "no action" : "preview")}</option>)}</select>:null}
           {preview ? <span className="rounded-xl bg-amber-50 p-2 text-xs text-amber-900">Deterministic preview · agent review not run</span>:null}
         </div>
         {simulationError && !composerOpen ? <p role="alert" className="pointer-events-auto shrink-0 max-w-sm rounded-xl bg-red-50 p-3 text-xs text-red-700">{simulationError}</p> : null}
@@ -384,10 +413,10 @@ export function DecisionDashboard({ profile: initialProfile }: { profile: Organi
       {viewMode === "office" && !selectedDepartment ? <p className="absolute bottom-5 right-5 z-10 hidden text-[9px] text-zinc-400 md:block">Drag to rotate · scroll to zoom</p> : null}
 
       <AnimatePresence>
-        {selectedDepartment && viewMode !== "board" ? <DepartmentMetricsSidebar scenarioOnly={scenarioOnlyDepartment} departments={departments} department={selectedDepartment} detail={selectedDepartmentDetail} detailLoading={!scenarioOnlyDepartment && departmentDetailLoadingId === selectedDepartment.departmentId} detailError={!scenarioOnlyDepartment && departmentDetailError?.departmentId === selectedDepartment.departmentId ? departmentDetailError.message : undefined} strategicPriorities={selectedStrategicPriorities} scenarioStarted={hasStarted && Boolean(selectedResult)} onSelect={setSelectedDepartmentId} onClose={() => setSelectedDepartmentId(null)} /> : null}
+        {selectedDepartment && viewMode !== "board" ? <DepartmentMetricsSidebar scenarioOnly={scenarioOnlyDepartment} departments={departments} department={selectedDepartment} detail={selectedDepartmentDetail} detailLoading={!scenarioOnlyDepartment && departmentDetailLoadingId === selectedDepartment.departmentId} detailError={!scenarioOnlyDepartment && departmentDetailError?.departmentId === selectedDepartment.departmentId ? departmentDetailError.message : undefined} strategicPriorities={selectedStrategicPriorities} scenarioStarted={hasStarted && Boolean(selectedResult)} onSelect={id=>{setSelectedDepartmentId(id);setOfficePage(Math.floor(slots.current[id]/24));}} onClose={() => setSelectedDepartmentId(null)} /> : null}
       </AnimatePresence>
 
-      {changeOpen ? <DepartmentChange profile={currentProfile} selectedId={selectedDepartmentId} user={user} onClose={()=>setChangeOpen(false)} onSaved={value=>{setCurrentProfile(value);setDepartmentDetails({});setCompanyGraph(null);setPreview(null);setResultId("baseline");setHasStarted(false);setRunning(false);setDay(0);}} onPreview={(brief,result,blast)=>{setPreview({brief,result,blast});setResultId(result.result_id);setHasStarted(true);setDay(brief.candidate_interventions[0]?.start_day ?? 0);setViewMode("office");}} onRun={simulate}/> : null}
+      {changeOpen ? <DepartmentChange profile={currentProfile} selectedId={selectedDepartmentId} user={user} onClose={()=>setChangeOpen(false)} onSaved={value=>{setOutcome(null);setCurrentProfile(value);setDepartmentDetails({});setCompanyGraph(null);setPreview(null);setResultId("baseline");setHasStarted(false);setRunning(false);setDay(0);}} onPreview={(brief,result,blast)=>{setPreview({brief,result,blast});setResultId(result.result_id);setHasStarted(true);setDay(brief.candidate_interventions[0]?.start_day ?? 0);setViewMode("office");}} onRun={simulate}/> : null}
       <AnimatePresence>
         {composerOpen ? <DecisionComposer user={user} submitting={submitting} error={simulationError} onClose={() => setComposerOpen(false)} onSubmit={simulate} /> : null}
       </AnimatePresence>

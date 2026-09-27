@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { AuthProvider } from "@/components/auth-provider";
+import { SimulationOutcomeProvider } from "@/components/simulation-outcome-provider";
 import { getSession } from "@/lib/auth-server";
 
 import "./globals.css";
@@ -15,7 +16,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const session = await getSession();
   return (
     <html lang="en">
-      <body><AuthProvider initialUser={session.user} unavailable={session.unavailable}>{children}</AuthProvider></body>
+      <body><AuthProvider initialUser={session.user} unavailable={session.unavailable}><SimulationOutcomeProvider>{children}</SimulationOutcomeProvider></AuthProvider></body>
     </html>
   );
 }
