@@ -19,6 +19,7 @@ from simulation_engine import (
     blast_radius,
     check_result,
     compare_futures,
+    mitigate,
     optimize,
     quick_impact,
     simulate,
@@ -51,6 +52,7 @@ PORT_SIGNATURES = {
     simulate: ["twin", "brief", "scenario", "plan", "mode", "*settings"],
     optimize: ["twin", "brief", "*settings", "*run_id"],
     compare_futures: ["twin", "brief", "plan", "*alternatives", "*settings", "*run_id"],
+    mitigate: ["twin", "brief", "plan", "actions", "*settings", "*run_id"],
     blast_radius: ["result", "twin"],
     quick_impact: ["twin", "interventions", "*brief", "*settings", "*run_id"],
 }

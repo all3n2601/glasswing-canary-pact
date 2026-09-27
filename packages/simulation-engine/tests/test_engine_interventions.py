@@ -123,5 +123,23 @@ def test_invalid_interventions_are_rejected():
         apply_interventions(TWIN, [action(ActionType.remove_vendor, "role_sre")])
     mitigation = Intervention(id="mit_feed", kind=InterventionKind.mitigation, type=MitigationType.add_replacement_feed,
                               target_entity_id="ds_account_intel", one_time_cost_usd=0, rationale="test")
-    with pytest.raises(ValueError, match="mitigate"):
+    with pytest.raises(ValueError, match="replacement_vendor_id"):
         apply_interventions(TWIN, [mitigation])
+
+
+def test_mitigations_apply_after_every_action_and_cost_transition():
+    # Listed first, the replacement feed still sees vendor_echo's removal, so it refuses vendor_echo itself.
+    feed = Intervention(id="mit_feed", kind=InterventionKind.mitigation, type=MitigationType.add_replacement_feed,
+                        target_entity_id="ds_account_intel", one_time_cost_usd=25_000,
+                        params={"replacement_vendor_id": "vendor_apex"}, rationale="test")
+    remove_echo = action(ActionType.remove_vendor, "vendor_echo")
+    applied = apply_interventions(TWIN, [feed, remove_echo])
+    echo = entity_map(TWIN)["vendor_echo"]
+    assert applied.transition_cost_usd == echo.one_time_exit_cost_usd + echo.migration_cost_usd + 25_000
+    assert applied.migration_cost_usd == echo.migration_cost_usd + 25_000
+    added = [e for e in applied.twin.edges if e.id == "e_mit_feed_1"]
+    assert [(e.source, e.target, e.relation) for e in added] == [("vendor_apex", "ds_account_intel", Relation.PROVIDES)]
+    assert added[0].extraction_method is None
+    with pytest.raises(ValueError, match="itself removed"):
+        apply_interventions(TWIN, [feed.model_copy(update={"params": {"replacement_vendor_id": "vendor_echo"}}),
+                                   remove_echo])
