@@ -1,13 +1,15 @@
 """Derived exports for the company twin (Person 1 required outputs).
 
-All three are computed deterministically from the single source of truth
+All four are computed deterministically from the single source of truth
 (data/synthetic_company.json); none is hand-maintained.
 
-    python -m company_twin.export        # writes the three json files into data/
+    python -m company_twin.export        # writes the four json files into data/
 
 * knowledge_map.json  : knowledge -> holder roles -> workflow, with bus factor / stranded risk
 * graph_snapshot.json : nodes + edges for the frontend graph view (person tokens mapped to roles)
 * vendor_report.json  : per-vendor cost, consumers, substitutability, coverage, replacement
+* organization_profile.json : the OrganizationProfileView of the fixture under default settings, so
+  the company's size, budget and departments cannot drift from the twin
 
 Person tokens (pt_) never appear in these outputs; holders are reported as roles so the
 frontend and any downstream prompt only ever show role-level information.
@@ -19,9 +21,12 @@ risk thresholds (those live in the engine / settings); the twin data stays judge
 from __future__ import annotations
 
 import json
+from datetime import datetime, time, timezone
 from pathlib import Path
 
 import networkx as nx
+from contracts_py.api import OrganizationDepartmentSummary, OrganizationProfileView
+from contracts_py.twin import OrganizationSettings
 
 from .graph import affected_departments, build_graph
 from .loader import default_fixture_path, load_company_twin
@@ -151,6 +156,30 @@ def vendor_report(twin: Twin) -> dict:
     return {"vendors": rows}
 
 
+def organization_profile(twin: Twin, settings: OrganizationSettings | None = None) -> dict:
+    """The organization profile view: the twin's organization and a summary row per department profile.
+
+    Default settings are stamped from the twin's as-of date so the export is byte-identical on every run.
+    """
+    settings = settings or OrganizationSettings(
+        updated_at=datetime.combine(twin.version.as_of_date, time(), tzinfo=timezone.utc))
+    names = {e.id: e.name for e in twin.entities if e.type == EntityType.department}
+    view = OrganizationProfileView(
+        organization=twin.organization,
+        departments=[
+            OrganizationDepartmentSummary(
+                department_id=p.department_id, name=names[p.department_id], mission=p.mission,
+                actual_fte=p.staffing.actual_fte, annual_budget_usd=p.budget.annual_budget_usd,
+                utilisation=p.staffing.utilisation, maturity_level=p.maturity_level,
+                enabled=p.agent_id is None or p.agent_id in settings.enabled_agent_ids,
+            )
+            for p in twin.department_profiles
+        ],
+        settings=settings,
+    )
+    return view.model_dump(mode="json")
+
+
 def main() -> int:
     twin = load_company_twin()
     out_dir = default_fixture_path().parent
@@ -158,6 +187,7 @@ def main() -> int:
         "knowledge_map.json": knowledge_map(twin),
         "graph_snapshot.json": graph_snapshot(twin),
         "vendor_report.json": vendor_report(twin),
+        "organization_profile.json": organization_profile(twin),
     }
     for name, data in artifacts.items():
         (out_dir / name).write_text(json.dumps(data, indent=2) + "\n")

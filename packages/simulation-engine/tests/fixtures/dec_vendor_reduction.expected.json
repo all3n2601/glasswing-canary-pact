@@ -818,6 +818,7 @@
   "blast_radius.act_now": [],
   "blast_radius.inaction": [],
   "compare_futures": [],
+  "mitigate": [],
   "optimize": [],
   "quick_impact": [],
   "simulate.act_now": [],
@@ -932,6 +933,1651 @@
   "run_id": "run_acceptance"
  },
  "decision_id": "dec_vendor_reduction",
+ "missing_questions": [
+  {
+   "answer_type": "boolean",
+   "changes_recommendation_if": "false: the winner becomes Alternative: Alternative plan (remove_beacon, remove_flux) (point estimate)",
+   "current_assumption": "Unknown (null); the engine assumes EchoMarket retains history after termination (True), the optimistic case",
+   "options": [
+    "true",
+    "false"
+   ],
+   "question_id": "q_vendor_echo_retains_history_after_termination",
+   "text": "Does EchoMarket keep our historical records after the contract is terminated?",
+   "uncertain_input": "vendor_echo.retains_history_after_termination",
+   "value_gap_usd": 953809577
+  },
+  {
+   "answer_type": "number",
+   "changes_recommendation_if": "0.49: the winner becomes Alternative: Alternative plan (remove_beacon, remove_cinder) (point estimate)",
+   "current_assumption": "Midpoint strength 0.7 within the range 0.49 to 0.91",
+   "options": [
+    "0.49",
+    "0.91"
+   ],
+   "question_id": "q_e_contactdata_consumed_leadscoring_strength",
+   "text": "How strongly does Lead scoring depend on Contact data (CONSUMES edge e_contactdata_consumed_leadscoring)? The allowed range is 0.49 to 0.91.",
+   "uncertain_input": "e_contactdata_consumed_leadscoring.strength",
+   "value_gap_usd": 293954687
+  },
+  {
+   "answer_type": "number",
+   "changes_recommendation_if": "no answer in range changes the winner",
+   "current_assumption": "Midpoint strength 0.8 within the range 0.56 to 1",
+   "options": [
+    "0.56",
+    "1"
+   ],
+   "question_id": "q_e_account_intel_consumed_account_planning_strength",
+   "text": "How strongly does Account planning depend on Account intelligence (CONSUMES edge e_account_intel_consumed_account_planning)? The allowed range is 0.56 to 1.",
+   "uncertain_input": "e_account_intel_consumed_account_planning.strength",
+   "value_gap_usd": 987131525
+  },
+  {
+   "answer_type": "number",
+   "changes_recommendation_if": "no answer in range changes the winner",
+   "current_assumption": "Midpoint strength 0.6 within the range 0.42 to 0.78",
+   "options": [
+    "0.42",
+    "0.78"
+   ],
+   "question_id": "q_e_account_planning_retention_strength",
+   "text": "How strongly does Net revenue retention depend on Account planning (CONTRIBUTES_TO edge e_account_planning_retention)? The allowed range is 0.42 to 0.78.",
+   "uncertain_input": "e_account_planning_retention.strength",
+   "value_gap_usd": 987131525
+  },
+  {
+   "answer_type": "number",
+   "changes_recommendation_if": "no answer in range changes the winner",
+   "current_assumption": "Midpoint strength 0.7 within the range 0.49 to 0.91",
+   "options": [
+    "0.49",
+    "0.91"
+   ],
+   "question_id": "q_e_beacon_provides_contact_data_strength",
+   "text": "How strongly does Contact data depend on BeaconIQ (PROVIDES edge e_beacon_provides_contact_data)? The allowed range is 0.49 to 0.91.",
+   "uncertain_input": "e_beacon_provides_contact_data.strength",
+   "value_gap_usd": 987131525
+  },
+  {
+   "answer_type": "number",
+   "changes_recommendation_if": "no answer in range changes the winner",
+   "current_assumption": "Midpoint strength 0.9 within the range 0.63 to 1",
+   "options": [
+    "0.63",
+    "1"
+   ],
+   "question_id": "q_e_echo_provides_account_intel_strength",
+   "text": "How strongly does Account intelligence depend on EchoMarket (PROVIDES edge e_echo_provides_account_intel)? The allowed range is 0.63 to 1.",
+   "uncertain_input": "e_echo_provides_account_intel.strength",
+   "value_gap_usd": 987131525
+  },
+  {
+   "answer_type": "number",
+   "changes_recommendation_if": "no answer in range changes the winner",
+   "current_assumption": "Midpoint strength 0.4 within the range 0.28 to 0.52",
+   "options": [
+    "0.28",
+    "0.52"
+   ],
+   "question_id": "q_e_echo_provides_intent_strength",
+   "text": "How strongly does Intent signals depend on EchoMarket (PROVIDES edge e_echo_provides_intent)? The allowed range is 0.28 to 0.52.",
+   "uncertain_input": "e_echo_provides_intent.strength",
+   "value_gap_usd": 987131525
+  },
+  {
+   "answer_type": "number",
+   "changes_recommendation_if": "no answer in range changes the winner",
+   "current_assumption": "Midpoint strength 0.7 within the range 0.49 to 0.91",
+   "options": [
+    "0.49",
+    "0.91"
+   ],
+   "question_id": "q_e_echo_provides_market_intel_strength",
+   "text": "How strongly does Market intelligence depend on EchoMarket (PROVIDES edge e_echo_provides_market_intel)? The allowed range is 0.49 to 0.91.",
+   "uncertain_input": "e_echo_provides_market_intel.strength",
+   "value_gap_usd": 987131525
+  },
+  {
+   "answer_type": "number",
+   "changes_recommendation_if": "no answer in range changes the winner",
+   "current_assumption": "Midpoint strength 0.7 within the range 0.49 to 0.91",
+   "options": [
+    "0.49",
+    "0.91"
+   ],
+   "question_id": "q_e_leadscoring_pipeline_strength",
+   "text": "How strongly does Qualified pipeline depend on Lead scoring (CONTRIBUTES_TO edge e_leadscoring_pipeline)? The allowed range is 0.49 to 0.91.",
+   "uncertain_input": "e_leadscoring_pipeline.strength",
+   "value_gap_usd": 987131525
+  },
+  {
+   "answer_type": "number",
+   "changes_recommendation_if": "no answer in range changes the winner",
+   "current_assumption": "Midpoint strength 0.5 within the range 0.35 to 0.65",
+   "options": [
+    "0.35",
+    "0.65"
+   ],
+   "question_id": "q_e_market_intel_consumed_campaign_strength",
+   "text": "How strongly does Campaign targeting depend on Market intelligence (CONSUMES edge e_market_intel_consumed_campaign)? The allowed range is 0.35 to 0.65.",
+   "uncertain_input": "e_market_intel_consumed_campaign.strength",
+   "value_gap_usd": 987131525
+  }
+ ],
+ "mitigate": {
+  "actions": [
+   {
+    "amount_pct": null,
+    "amount_usd": null,
+    "duration_days": 60,
+    "id": "mit_replacement_feed_account_intel",
+    "kind": "mitigation",
+    "new_owner_id": null,
+    "one_time_cost_usd": 30000000,
+    "params": {
+     "replacement_vendor_id": "vendor_cinder"
+    },
+    "rationale": "Migrate EchoMarket's unique account-intelligence attributes to a CinderSignals feed before Echo is terminated, so account planning and vendor reconciliation keep their source.",
+    "start_day": 0,
+    "target_entity_id": "ds_account_intel",
+    "type": "add_replacement_feed"
+   }
+  ],
+  "after": {
+   "affected_department_ids": [
+    "dept_customer_success",
+    "dept_marketing",
+    "dept_sales"
+   ],
+   "assumptions": [
+    "Midpoint edge strengths; every value is a point estimate; baseline pressures are priced in expected-value form (hazards as probability x cost per event x months, ranges at their point values)",
+    "mit_replacement_feed_account_intel: add_replacement_feed has vendor_cinder provide ds_account_intel at strength 0.9 with vendor_echo's substitutability 0.15; the $30,000,000 one-time cost is the migration; the planned feed has no evidence yet and, as an engine-made edge, no extraction_method",
+    "transition_cost_usd includes $90,000,000 termination and $160,000,000 migration",
+    "added_cost_usd includes $18,332,971 displaced work: harmed workflows and systems priced at loss x failure_cost_per_day_usd until the horizon",
+    "pr_echo_renewal is neutralised from day 60 by the plan",
+    "Full mode falls back to expected value until uncertainty sampling exists (plan E-03); the seed is recorded so the run can be reproduced",
+    "Every value is a point estimate, not a simulated range: p10 = p50 = p90 = net_value_usd in this mode",
+    "p_better_than_inaction is a yes/no comparison of point estimates in this mode (1.0 or 0.0), not a probability",
+    "Readiness gate: the plan's actions remove_beacon, remove_echo move to day 60, when the mitigations are complete (plan 4.2)",
+    "Mitigations take 60 days (day 0 to day 60) and cost $30,000,000 one-time"
+   ],
+   "computed_at": "2026-09-26T00:00:00Z",
+   "constraint_results": [
+    {
+     "constraint_id": "c_compliance",
+     "explanation": "compliance_controls_broken is 0; it must be == 0, so the hard constraint passes",
+     "hard": true,
+     "impact_ids": [],
+     "metric": "compliance_controls_broken",
+     "operator": "==",
+     "passed": true,
+     "threshold": 0.0,
+     "value": 0.0
+    },
+    {
+     "constraint_id": "c_sales",
+     "explanation": "revenue_impact_pct on kpi_pipeline is 2.22% (kpi_pipeline); it must be <= 3.00%, so the hard constraint passes",
+     "hard": true,
+     "impact_ids": [
+      "imp_kpi_pipeline_loss"
+     ],
+     "metric": "revenue_impact_pct",
+     "operator": "<=",
+     "passed": true,
+     "threshold": 3.0,
+     "value": 2.2151
+    },
+    {
+     "constraint_id": "c_customer",
+     "explanation": "customer_impact_pct is 0.00%; it must be <= 2.00%, so the hard constraint passes",
+     "hard": true,
+     "impact_ids": [],
+     "metric": "customer_impact_pct",
+     "operator": "<=",
+     "passed": true,
+     "threshold": 2.0,
+     "value": 0.0
+    },
+    {
+     "constraint_id": "c_stranded",
+     "explanation": "stranded_workflows is 0; it must be == 0, so the soft constraint passes",
+     "hard": false,
+     "impact_ids": [],
+     "metric": "stranded_workflows",
+     "operator": "==",
+     "passed": true,
+     "threshold": 0.0,
+     "value": 0.0
+    },
+    {
+     "constraint_id": "c_coverage",
+     "explanation": "critical_coverage_pct is 100.00%; it must be >= 100.00%, so the hard constraint passes",
+     "hard": true,
+     "impact_ids": [],
+     "metric": "critical_coverage_pct",
+     "operator": ">=",
+     "passed": true,
+     "threshold": 100.0,
+     "value": 100.0
+    }
+   ],
+   "feasible": true,
+   "future": "act_now",
+   "goal_met": true,
+   "impacts": [
+    {
+     "affected_department": "dept_sales",
+     "affected_entity": "vendor_beacon",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_beacon"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 60,
+     "impact_id": "imp_remove_beacon_savings",
+     "level": "direct",
+     "magnitude": 1200000000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 60,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+     "severity": 1,
+     "source_entity": "vendor_beacon",
+     "source_kind": "intervention",
+     "source_ref": "remove_beacon",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 1200000000
+    },
+    {
+     "affected_department": "dept_marketing",
+     "affected_entity": "vendor_echo",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_echo"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 60,
+     "impact_id": "imp_remove_echo_savings",
+     "level": "direct",
+     "magnitude": 1100000000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 60,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+     "severity": 1,
+     "source_entity": "vendor_echo",
+     "source_kind": "intervention",
+     "source_ref": "remove_echo",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 1100000000
+    },
+    {
+     "affected_department": "dept_sales",
+     "affected_entity": "ds_account_intel",
+     "assumptions": [],
+     "category": "technical",
+     "confidence": 0.9,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_echo",
+      "ds_account_intel"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_echo_provides_account_intel"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 60,
+     "impact_id": "imp_ds_account_intel_loss",
+     "level": "dependent",
+     "magnitude": 0.077273,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 60,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+     "severity": 1,
+     "source_entity": "vendor_echo",
+     "source_kind": "intervention",
+     "source_ref": "remove_echo",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_sales",
+     "affected_entity": "ds_contact_data",
+     "assumptions": [],
+     "category": "technical",
+     "confidence": 0.9,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_beacon",
+      "ds_contact_data"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_beacon_provides_contact_data"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 60,
+     "impact_id": "imp_ds_contact_data_loss",
+     "level": "dependent",
+     "magnitude": 0.065969,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 60,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+     "severity": 1,
+     "source_entity": "vendor_beacon",
+     "source_kind": "intervention",
+     "source_ref": "remove_beacon",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_marketing",
+     "affected_entity": "ds_intent_signals",
+     "assumptions": [],
+     "category": "technical",
+     "confidence": 0.9,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_echo",
+      "ds_intent_signals"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_echo_provides_intent"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 60,
+     "impact_id": "imp_ds_intent_signals_loss",
+     "level": "dependent",
+     "magnitude": 0.036364,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 60,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+     "severity": 1,
+     "source_entity": "vendor_echo",
+     "source_kind": "intervention",
+     "source_ref": "remove_echo",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_marketing",
+     "affected_entity": "ds_market_intel",
+     "assumptions": [],
+     "category": "technical",
+     "confidence": 0.9,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_echo",
+      "ds_market_intel"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_echo_provides_market_intel"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 60,
+     "impact_id": "imp_ds_market_intel_loss",
+     "level": "dependent",
+     "magnitude": 0.038849,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 60,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+     "severity": 1,
+     "source_entity": "vendor_echo",
+     "source_kind": "intervention",
+     "source_ref": "remove_echo",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_customer_success",
+     "affected_entity": "kpi_net_retention",
+     "assumptions": [],
+     "category": "business",
+     "confidence": 0.729,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_echo",
+      "ds_account_intel",
+      "wf_account_planning",
+      "kpi_net_retention"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_echo_provides_account_intel",
+      "e_account_intel_consumed_account_planning",
+      "e_account_planning_retention"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 60,
+     "impact_id": "imp_kpi_net_retention_loss",
+     "level": "second_order",
+     "magnitude": 0.021792,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 60,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+     "severity": 1,
+     "source_entity": "vendor_echo",
+     "source_kind": "intervention",
+     "source_ref": "remove_echo",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_marketing",
+     "affected_entity": "kpi_pipeline",
+     "assumptions": [],
+     "category": "business",
+     "confidence": 0.729,
+     "constraint_refs": [
+      "c_sales"
+     ],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_beacon",
+      "ds_contact_data",
+      "wf_lead_scoring",
+      "kpi_pipeline"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_beacon_provides_contact_data",
+      "e_contactdata_consumed_leadscoring",
+      "e_leadscoring_pipeline"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 60,
+     "impact_id": "imp_kpi_pipeline_loss",
+     "level": "second_order",
+     "magnitude": 0.022151,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 60,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+     "severity": 1,
+     "source_entity": "vendor_beacon",
+     "source_kind": "intervention",
+     "source_ref": "remove_beacon",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_sales",
+     "affected_entity": "vendor_beacon",
+     "assumptions": [],
+     "category": "technical",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_beacon"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 60,
+     "impact_id": "imp_vendor_beacon_loss",
+     "level": "direct",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 60,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+     "severity": 3,
+     "source_entity": "vendor_beacon",
+     "source_kind": "intervention",
+     "source_ref": "remove_beacon",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_marketing",
+     "affected_entity": "vendor_echo",
+     "assumptions": [],
+     "category": "technical",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_echo"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 60,
+     "impact_id": "imp_vendor_echo_loss",
+     "level": "direct",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 60,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+     "severity": 3,
+     "source_entity": "vendor_echo",
+     "source_kind": "intervention",
+     "source_ref": "remove_echo",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_sales",
+     "affected_entity": "wf_account_planning",
+     "assumptions": [],
+     "category": "operational",
+     "confidence": 0.81,
+     "constraint_refs": [
+      "c_stranded"
+     ],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_echo",
+      "ds_account_intel",
+      "wf_account_planning"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_echo_provides_account_intel",
+      "e_account_intel_consumed_account_planning"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 60,
+     "impact_id": "imp_wf_account_planning_loss",
+     "level": "second_order",
+     "magnitude": 0.060533,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 60,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+     "severity": 1,
+     "source_entity": "vendor_echo",
+     "source_kind": "intervention",
+     "source_ref": "remove_echo",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": 11077539
+    },
+    {
+     "affected_department": "dept_marketing",
+     "affected_entity": "wf_campaign_targeting",
+     "assumptions": [],
+     "category": "operational",
+     "confidence": 0.81,
+     "constraint_refs": [
+      "c_stranded"
+     ],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_echo",
+      "ds_market_intel",
+      "wf_campaign_targeting"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_echo_provides_market_intel",
+      "e_market_intel_consumed_campaign"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 60,
+     "impact_id": "imp_wf_campaign_targeting_loss",
+     "level": "second_order",
+     "magnitude": 0.024837,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 60,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+     "severity": 1,
+     "source_entity": "vendor_echo",
+     "source_kind": "intervention",
+     "source_ref": "remove_echo",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": 3030114
+    },
+    {
+     "affected_department": "dept_sales",
+     "affected_entity": "wf_lead_scoring",
+     "assumptions": [],
+     "category": "operational",
+     "confidence": 0.81,
+     "constraint_refs": [
+      "c_stranded"
+     ],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_beacon",
+      "ds_contact_data",
+      "wf_lead_scoring"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_beacon_provides_contact_data",
+      "e_contactdata_consumed_leadscoring"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 60,
+     "impact_id": "imp_wf_lead_scoring_loss",
+     "level": "second_order",
+     "magnitude": 0.027707,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 60,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+     "severity": 1,
+     "source_entity": "vendor_beacon",
+     "source_kind": "intervention",
+     "source_ref": "remove_beacon",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": 4225318
+    },
+    {
+     "affected_department": "dept_sales",
+     "affected_entity": "vendor_apex",
+     "assumptions": [
+      "Apex auto-renewal uplift: expected value over days 60-365"
+     ],
+     "category": "financial",
+     "confidence": 0.9,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_apex"
+     ],
+     "direction": "increase",
+     "edge_path": [],
+     "evidence_refs": [
+      "ev_apex_msa_renewal"
+     ],
+     "first_effect_day": 60,
+     "impact_id": "imp_pr_apex_renewal_pressure",
+     "level": "direct",
+     "magnitude": 106958904.0,
+     "metric": "expected_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 365,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+     "severity": 1,
+     "source_entity": "vendor_apex",
+     "source_kind": "pressure",
+     "source_ref": "pr_apex_renewal",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 106958904
+    },
+    {
+     "affected_department": "dept_product",
+     "affected_entity": "vendor_flux",
+     "assumptions": [
+      "Flux usage-based growth: expected value over days 0-365"
+     ],
+     "category": "financial",
+     "confidence": 0.8,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_flux"
+     ],
+     "direction": "increase",
+     "edge_path": [],
+     "evidence_refs": [
+      "ev_finance_forecast_q3"
+     ],
+     "first_effect_day": 0,
+     "impact_id": "imp_pr_flux_usage_growth_pressure",
+     "level": "direct",
+     "magnitude": 83469543.0,
+     "metric": "expected_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 365,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+     "severity": 1,
+     "source_entity": "vendor_flux",
+     "source_kind": "pressure",
+     "source_ref": "pr_flux_usage_growth",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 83469543
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "wf_vendor_reconciliation",
+     "assumptions": [
+      "Vendor reconciliation failure: expected value over days 0-365"
+     ],
+     "category": "financial",
+     "confidence": 0.6,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "wf_vendor_reconciliation"
+     ],
+     "direction": "increase",
+     "edge_path": [],
+     "evidence_refs": [
+      "ev_incident_22"
+     ],
+     "first_effect_day": 0,
+     "impact_id": "imp_pr_vendor_recon_hazard_pressure",
+     "level": "direct",
+     "magnitude": 14600000.0,
+     "metric": "expected_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 365,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+     "severity": 1,
+     "source_entity": "wf_vendor_reconciliation",
+     "source_kind": "pressure",
+     "source_ref": "pr_vendor_recon_hazard",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 14600000
+    }
+   ],
+   "intervention_ids": [
+    "remove_beacon",
+    "remove_echo",
+    "mit_replacement_feed_account_intel"
+   ],
+   "knowledge_coverage": [],
+   "mode": "full",
+   "plan_id": "plan_beacon_echo_mitigated",
+   "pressures_triggered": [
+    {
+     "expected_cost_usd": 106958904,
+     "expected_events": 1.0,
+     "neutralised": false,
+     "pressure_id": "pr_apex_renewal"
+    },
+    {
+     "expected_cost_usd": 0,
+     "expected_events": 0.0,
+     "neutralised": true,
+     "pressure_id": "pr_echo_renewal"
+    },
+    {
+     "expected_cost_usd": 83469543,
+     "expected_events": 0.0,
+     "neutralised": false,
+     "pressure_id": "pr_flux_usage_growth"
+    },
+    {
+     "expected_cost_usd": 14600000,
+     "expected_events": 0.365,
+     "neutralised": false,
+     "pressure_id": "pr_vendor_recon_hazard"
+    }
+   ],
+   "rejection_reasons": [],
+   "result_id": "res_run_acceptance_act_now_plan_beacon_echo_mitigated",
+   "risk": {
+    "components": {
+     "capability_workflow": 1.5133,
+     "compliance_control": 0.0,
+     "customer_revenue": 14.7673,
+     "execution_uncertainty": 1.3745,
+     "financial": 2.9167
+    },
+    "level": "low",
+    "score": 20.5718,
+    "settings_version": 1
+   },
+   "run_id": "run_acceptance",
+   "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo_mitigated",
+   "seed": 42,
+   "value": {
+    "added_cost_usd": 18332971,
+    "avoided_failure_cost_usd": 0,
+    "displaced_work_cost_usd": 18332971,
+    "expected_business_loss_usd": 0,
+    "gross_savings_usd": 2300000000,
+    "migration_cost_usd": 160000000,
+    "monthly_net_usd": [
+     -62047382,
+     124904139,
+     300319001,
+     474702508,
+     648039191,
+     820313348,
+     991509041,
+     1161610091,
+     1330600080,
+     1498462342,
+     1665179961,
+     1826638582
+    ],
+    "net_value_usd": 1826638582,
+    "p10_net_value_usd": 1826638582,
+    "p50_net_value_usd": 1826638582,
+    "p90_net_value_usd": 1826638582,
+    "pressure_cost_usd": 205028447,
+    "rebound_cost_usd": 0,
+    "termination_cost_usd": 90000000,
+    "transition_cost_usd": 250000000
+   },
+   "workflow_coverage": []
+  },
+  "before": {
+   "affected_department_ids": [
+    "dept_customer_success",
+    "dept_marketing",
+    "dept_sales"
+   ],
+   "assumptions": [
+    "Midpoint edge strengths; every value is a point estimate; baseline pressures are priced in expected-value form (hazards as probability x cost per event x months, ranges at their point values)",
+    "transition_cost_usd includes $90,000,000 termination and $130,000,000 migration",
+    "added_cost_usd includes $118,381,395 displaced work: harmed workflows and systems priced at loss x failure_cost_per_day_usd until the horizon",
+    "pr_echo_renewal is neutralised from day 30 by the plan",
+    "Full mode falls back to expected value until uncertainty sampling exists (plan E-03); the seed is recorded so the run can be reproduced",
+    "Every value is a point estimate, not a simulated range: p10 = p50 = p90 = net_value_usd in this mode",
+    "p_better_than_inaction is a yes/no comparison of point estimates in this mode (1.0 or 0.0), not a probability"
+   ],
+   "computed_at": "2026-09-26T00:00:00Z",
+   "constraint_results": [
+    {
+     "constraint_id": "c_compliance",
+     "explanation": "compliance_controls_broken is 0; it must be == 0, so the hard constraint passes",
+     "hard": true,
+     "impact_ids": [],
+     "metric": "compliance_controls_broken",
+     "operator": "==",
+     "passed": true,
+     "threshold": 0.0,
+     "value": 0.0
+    },
+    {
+     "constraint_id": "c_sales",
+     "explanation": "revenue_impact_pct on kpi_pipeline is 2.22% (kpi_pipeline); it must be <= 3.00%, so the hard constraint passes",
+     "hard": true,
+     "impact_ids": [
+      "imp_kpi_pipeline_loss"
+     ],
+     "metric": "revenue_impact_pct",
+     "operator": "<=",
+     "passed": true,
+     "threshold": 3.0,
+     "value": 2.2151
+    },
+    {
+     "constraint_id": "c_customer",
+     "explanation": "customer_impact_pct is 0.00%; it must be <= 2.00%, so the hard constraint passes",
+     "hard": true,
+     "impact_ids": [],
+     "metric": "customer_impact_pct",
+     "operator": "<=",
+     "passed": true,
+     "threshold": 2.0,
+     "value": 0.0
+    },
+    {
+     "constraint_id": "c_stranded",
+     "explanation": "stranded_workflows is 0; it must be == 0, so the soft constraint passes",
+     "hard": false,
+     "impact_ids": [],
+     "metric": "stranded_workflows",
+     "operator": "==",
+     "passed": true,
+     "threshold": 0.0,
+     "value": 0.0
+    },
+    {
+     "constraint_id": "c_coverage",
+     "explanation": "critical_coverage_pct is 100.00%; it must be >= 100.00%, so the hard constraint passes",
+     "hard": true,
+     "impact_ids": [],
+     "metric": "critical_coverage_pct",
+     "operator": ">=",
+     "passed": true,
+     "threshold": 100.0,
+     "value": 100.0
+    }
+   ],
+   "feasible": true,
+   "future": "act_now",
+   "goal_met": true,
+   "impacts": [
+    {
+     "affected_department": "dept_sales",
+     "affected_entity": "vendor_beacon",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_beacon"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_remove_beacon_savings",
+     "level": "direct",
+     "magnitude": 1200000000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+     "severity": 1,
+     "source_entity": "vendor_beacon",
+     "source_kind": "intervention",
+     "source_ref": "remove_beacon",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 1200000000
+    },
+    {
+     "affected_department": "dept_marketing",
+     "affected_entity": "vendor_echo",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_echo"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_remove_echo_savings",
+     "level": "direct",
+     "magnitude": 1100000000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+     "severity": 1,
+     "source_entity": "vendor_echo",
+     "source_kind": "intervention",
+     "source_ref": "remove_echo",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 1100000000
+    },
+    {
+     "affected_department": "dept_sales",
+     "affected_entity": "ds_account_intel",
+     "assumptions": [],
+     "category": "technical",
+     "confidence": 0.9,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_echo",
+      "ds_account_intel"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_echo_provides_account_intel"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_ds_account_intel_loss",
+     "level": "dependent",
+     "magnitude": 0.85,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+     "severity": 3,
+     "source_entity": "vendor_echo",
+     "source_kind": "intervention",
+     "source_ref": "remove_echo",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_sales",
+     "affected_entity": "ds_contact_data",
+     "assumptions": [],
+     "category": "technical",
+     "confidence": 0.9,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_beacon",
+      "ds_contact_data"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_beacon_provides_contact_data"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_ds_contact_data_loss",
+     "level": "dependent",
+     "magnitude": 0.065969,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+     "severity": 1,
+     "source_entity": "vendor_beacon",
+     "source_kind": "intervention",
+     "source_ref": "remove_beacon",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_marketing",
+     "affected_entity": "ds_intent_signals",
+     "assumptions": [],
+     "category": "technical",
+     "confidence": 0.9,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_echo",
+      "ds_intent_signals"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_echo_provides_intent"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_ds_intent_signals_loss",
+     "level": "dependent",
+     "magnitude": 0.036364,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+     "severity": 1,
+     "source_entity": "vendor_echo",
+     "source_kind": "intervention",
+     "source_ref": "remove_echo",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_marketing",
+     "affected_entity": "ds_market_intel",
+     "assumptions": [],
+     "category": "technical",
+     "confidence": 0.9,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_echo",
+      "ds_market_intel"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_echo_provides_market_intel"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_ds_market_intel_loss",
+     "level": "dependent",
+     "magnitude": 0.038849,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+     "severity": 1,
+     "source_entity": "vendor_echo",
+     "source_kind": "intervention",
+     "source_ref": "remove_echo",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_customer_success",
+     "affected_entity": "kpi_net_retention",
+     "assumptions": [],
+     "category": "business",
+     "confidence": 0.729,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_echo",
+      "ds_account_intel",
+      "wf_account_planning",
+      "kpi_net_retention"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_echo_provides_account_intel",
+      "e_account_intel_consumed_account_planning",
+      "e_account_planning_retention"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_kpi_net_retention_loss",
+     "level": "second_order",
+     "magnitude": 0.197753,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+     "severity": 1,
+     "source_entity": "vendor_echo",
+     "source_kind": "intervention",
+     "source_ref": "remove_echo",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_marketing",
+     "affected_entity": "kpi_pipeline",
+     "assumptions": [],
+     "category": "business",
+     "confidence": 0.729,
+     "constraint_refs": [
+      "c_sales"
+     ],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_beacon",
+      "ds_contact_data",
+      "wf_lead_scoring",
+      "kpi_pipeline"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_beacon_provides_contact_data",
+      "e_contactdata_consumed_leadscoring",
+      "e_leadscoring_pipeline"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_kpi_pipeline_loss",
+     "level": "second_order",
+     "magnitude": 0.022151,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+     "severity": 1,
+     "source_entity": "vendor_beacon",
+     "source_kind": "intervention",
+     "source_ref": "remove_beacon",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_sales",
+     "affected_entity": "vendor_beacon",
+     "assumptions": [],
+     "category": "technical",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_beacon"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_vendor_beacon_loss",
+     "level": "direct",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+     "severity": 3,
+     "source_entity": "vendor_beacon",
+     "source_kind": "intervention",
+     "source_ref": "remove_beacon",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_marketing",
+     "affected_entity": "vendor_echo",
+     "assumptions": [],
+     "category": "technical",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_echo"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_vendor_echo_loss",
+     "level": "direct",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+     "severity": 3,
+     "source_entity": "vendor_echo",
+     "source_kind": "intervention",
+     "source_ref": "remove_echo",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_sales",
+     "affected_entity": "wf_account_planning",
+     "assumptions": [],
+     "category": "operational",
+     "confidence": 0.81,
+     "constraint_refs": [
+      "c_stranded"
+     ],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_echo",
+      "ds_account_intel",
+      "wf_account_planning"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_echo_provides_account_intel",
+      "e_account_intel_consumed_account_planning"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_wf_account_planning_loss",
+     "level": "second_order",
+     "magnitude": 0.549315,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+     "severity": 2,
+     "source_entity": "vendor_echo",
+     "source_kind": "intervention",
+     "source_ref": "remove_echo",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": 110412315
+    },
+    {
+     "affected_department": "dept_marketing",
+     "affected_entity": "wf_campaign_targeting",
+     "assumptions": [],
+     "category": "operational",
+     "confidence": 0.81,
+     "constraint_refs": [
+      "c_stranded"
+     ],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_echo",
+      "ds_market_intel",
+      "wf_campaign_targeting"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_echo_provides_market_intel",
+      "e_market_intel_consumed_campaign"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_wf_campaign_targeting_loss",
+     "level": "second_order",
+     "magnitude": 0.024837,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+     "severity": 1,
+     "source_entity": "vendor_echo",
+     "source_kind": "intervention",
+     "source_ref": "remove_echo",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": 3328158
+    },
+    {
+     "affected_department": "dept_sales",
+     "affected_entity": "wf_lead_scoring",
+     "assumptions": [],
+     "category": "operational",
+     "confidence": 0.81,
+     "constraint_refs": [
+      "c_stranded"
+     ],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_beacon",
+      "ds_contact_data",
+      "wf_lead_scoring"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_beacon_provides_contact_data",
+      "e_contactdata_consumed_leadscoring"
+     ],
+     "evidence_refs": [
+      "ev_vendor_dataset_matrix"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_wf_lead_scoring_loss",
+     "level": "second_order",
+     "magnitude": 0.027707,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+     "severity": 1,
+     "source_entity": "vendor_beacon",
+     "source_kind": "intervention",
+     "source_ref": "remove_beacon",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": 4640922
+    },
+    {
+     "affected_department": "dept_sales",
+     "affected_entity": "vendor_apex",
+     "assumptions": [
+      "Apex auto-renewal uplift: expected value over days 60-365"
+     ],
+     "category": "financial",
+     "confidence": 0.9,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_apex"
+     ],
+     "direction": "increase",
+     "edge_path": [],
+     "evidence_refs": [
+      "ev_apex_msa_renewal"
+     ],
+     "first_effect_day": 60,
+     "impact_id": "imp_pr_apex_renewal_pressure",
+     "level": "direct",
+     "magnitude": 106958904.0,
+     "metric": "expected_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 365,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+     "severity": 1,
+     "source_entity": "vendor_apex",
+     "source_kind": "pressure",
+     "source_ref": "pr_apex_renewal",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 106958904
+    },
+    {
+     "affected_department": "dept_product",
+     "affected_entity": "vendor_flux",
+     "assumptions": [
+      "Flux usage-based growth: expected value over days 0-365"
+     ],
+     "category": "financial",
+     "confidence": 0.8,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "vendor_flux"
+     ],
+     "direction": "increase",
+     "edge_path": [],
+     "evidence_refs": [
+      "ev_finance_forecast_q3"
+     ],
+     "first_effect_day": 0,
+     "impact_id": "imp_pr_flux_usage_growth_pressure",
+     "level": "direct",
+     "magnitude": 83469543.0,
+     "metric": "expected_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 365,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+     "severity": 1,
+     "source_entity": "vendor_flux",
+     "source_kind": "pressure",
+     "source_ref": "pr_flux_usage_growth",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 83469543
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "wf_vendor_reconciliation",
+     "assumptions": [
+      "Vendor reconciliation failure: expected value over days 0-365"
+     ],
+     "category": "financial",
+     "confidence": 0.6,
+     "constraint_refs": [],
+     "decision_id": "dec_vendor_reduction",
+     "dependency_path": [
+      "wf_vendor_reconciliation"
+     ],
+     "direction": "increase",
+     "edge_path": [],
+     "evidence_refs": [
+      "ev_incident_22"
+     ],
+     "first_effect_day": 0,
+     "impact_id": "imp_pr_vendor_recon_hazard_pressure",
+     "level": "direct",
+     "magnitude": 14600000.0,
+     "metric": "expected_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 365,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+     "severity": 1,
+     "source_entity": "wf_vendor_reconciliation",
+     "source_kind": "pressure",
+     "source_ref": "pr_vendor_recon_hazard",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 14600000
+    }
+   ],
+   "intervention_ids": [
+    "remove_beacon",
+    "remove_echo"
+   ],
+   "knowledge_coverage": [],
+   "mode": "full",
+   "plan_id": "plan_beacon_echo",
+   "pressures_triggered": [
+    {
+     "expected_cost_usd": 106958904,
+     "expected_events": 1.0,
+     "neutralised": false,
+     "pressure_id": "pr_apex_renewal"
+    },
+    {
+     "expected_cost_usd": 0,
+     "expected_events": 0.0,
+     "neutralised": true,
+     "pressure_id": "pr_echo_renewal"
+    },
+    {
+     "expected_cost_usd": 83469543,
+     "expected_events": 0.0,
+     "neutralised": false,
+     "pressure_id": "pr_flux_usage_growth"
+    },
+    {
+     "expected_cost_usd": 14600000,
+     "expected_events": 0.365,
+     "neutralised": false,
+     "pressure_id": "pr_vendor_recon_hazard"
+    }
+   ],
+   "rejection_reasons": [],
+   "result_id": "res_run_acceptance_act_now_plan_beacon_echo",
+   "risk": {
+    "components": {
+     "capability_workflow": 13.7329,
+     "compliance_control": 0.0,
+     "customer_revenue": 14.7673,
+     "execution_uncertainty": 1.3745,
+     "financial": 3.6781
+    },
+    "level": "medium",
+    "score": 33.5528,
+    "settings_version": 1
+   },
+   "run_id": "run_acceptance",
+   "scenario_id": "scn_run_acceptance_act_now_plan_beacon_echo",
+   "seed": 42,
+   "value": {
+    "added_cost_usd": 118381395,
+    "avoided_failure_cost_usd": 0,
+    "displaced_work_cost_usd": 118381395,
+    "expected_business_loss_usd": 0,
+    "gross_savings_usd": 2300000000,
+    "migration_cost_usd": 130000000,
+    "monthly_net_usd": [
+     -2186301,
+     -27044735,
+     156560172,
+     339133724,
+     520660452,
+     701124654,
+     880510392,
+     1058801487,
+     1235981521,
+     1412033828,
+     1586941492,
+     1756590158
+    ],
+    "net_value_usd": 1756590158,
+    "p10_net_value_usd": 1756590158,
+    "p50_net_value_usd": 1756590158,
+    "p90_net_value_usd": 1756590158,
+    "pressure_cost_usd": 205028447,
+    "rebound_cost_usd": 0,
+    "termination_cost_usd": 90000000,
+    "transition_cost_usd": 220000000
+   },
+   "workflow_coverage": []
+  },
+  "changed_metrics": [
+   "added_cost_usd",
+   "net_value_usd",
+   "risk_score",
+   "transition_cost_usd"
+  ],
+  "feasible_after": true,
+  "feasible_before": true,
+  "plan_id_after": "plan_beacon_echo_mitigated",
+  "plan_id_before": "plan_beacon_echo",
+  "restored_entity_ids": [
+   "ds_account_intel",
+   "kpi_net_retention",
+   "wf_account_planning"
+  ]
+ },
  "optimize": {
   "alternatives": [
    {

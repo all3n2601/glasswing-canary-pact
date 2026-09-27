@@ -247,7 +247,7 @@ ROLES = [
     ("role_eng_manager", "Engineering Manager", "dept_engineering", 210_000, 6),
     ("role_qa_eng", "QA Engineer", "dept_engineering", 150_000, 8),
     # Operations
-    ("role_billing_ops_lead", "Billing Operations Lead", "dept_operations", 190_000, 3),
+    ("role_billing_ops_lead", "Billing Operations Lead", "dept_operations", 190_000, 90),
     ("role_sre", "Site Reliability Engineer", "dept_operations", 175_000, 12),
     ("role_platform_eng", "Platform Engineer", "dept_operations", 165_000, 8),
     # AI and Data
@@ -277,14 +277,14 @@ ROLES = [
     # Compliance
     ("role_grc_lead", "GRC Lead", "dept_compliance", 170_000, 3),
     ("role_privacy_counsel", "Privacy Counsel", "dept_compliance", 175_000, 3),
-    # --- workforce knowledge-loss scenario: the 8 roles (ADHI_BRIEF 4.4) ---
-    ("role_close_accountant", "Close Accountant", "dept_finance", 145_000, 4),
-    ("role_gl_accountant", "General Ledger Accountant", "dept_finance", 120_000, 5),
-    ("role_reporting_analyst", "Financial Reporting Analyst", "dept_finance", 110_000, 3),
-    ("role_data_platform_lead", "Data Platform Lead", "dept_ai_data", 195_000, 2),
-    ("role_billing_specialist", "Billing Specialist", "dept_operations", 95_000, 6),
-    ("role_revenue_accountant", "Revenue Accountant", "dept_finance", 130_000, 4),
-    ("role_ar_specialist", "Accounts Receivable Specialist", "dept_finance", 85_000, 8),
+    # --- workforce knowledge-loss scenario: the 8 roles (ADHI_BRIEF 4.4); salary per FTE, headcount ---
+    ("role_close_accountant", "Close Accountant", "dept_finance", 145_000, 120),
+    ("role_gl_accountant", "General Ledger Accountant", "dept_finance", 120_000, 150),
+    ("role_reporting_analyst", "Financial Reporting Analyst", "dept_finance", 110_000, 90),
+    ("role_data_platform_lead", "Data Platform Lead", "dept_ai_data", 195_000, 60),
+    ("role_billing_specialist", "Billing Specialist", "dept_operations", 95_000, 180),
+    ("role_revenue_accountant", "Revenue Accountant", "dept_finance", 130_000, 120),
+    ("role_ar_specialist", "Accounts Receivable Specialist", "dept_finance", 85_000, 240),
 ]
 # Role training/replacement inputs (2.1.1 CR4). The 8 workforce roles are low-replaceability
 # (long to train, costly to backfill), which is what makes their removal strand the two workflows.
@@ -299,9 +299,19 @@ ROLE_TRAINING = {
     "role_ar_specialist": dict(time_to_train_days=60, replacement_cost_usd=55_000),
 }
 _ROLE_TRAIN_DEFAULT = dict(time_to_train_days=30, replacement_cost_usd=40_000)
+# Each of the 8 workforce roles is a staff group at the company's scale (plan 4.2 "eight staff roles"):
+# capacity_fte is its headcount, annual_cost_usd its loaded annual cost (headcount x salary x
+# LOADED_COST_FACTOR for benefits and overhead) and replacement_cost_usd the per-person backfill cost
+# times the headcount, so eliminating one role saves tens of millions a year. Every other role keeps
+# one salary as its annual_cost_usd.
+LOADED_COST_FACTOR = 1.3
 for rid, name, did, salary, fte in ROLES:
-    ent(rid, "role", name, department_id=did, annual_cost_usd=salary, capacity_fte=float(fte),
-        **ROLE_TRAINING.get(rid, _ROLE_TRAIN_DEFAULT))
+    training = dict(ROLE_TRAINING.get(rid, _ROLE_TRAIN_DEFAULT))
+    cost = salary
+    if rid in ROLE_TRAINING:
+        cost = round(salary * fte * LOADED_COST_FACTOR)
+        training["replacement_cost_usd"] *= fte
+    ent(rid, "role", name, department_id=did, annual_cost_usd=cost, capacity_fte=float(fte), **training)
 
 # Every workforce role that eliminating strands a workflow (goal target = exact sum, ADHI_BRIEF 13.1).
 WORKFORCE_ROLE_IDS = [
@@ -1133,7 +1143,8 @@ PLANTED_ITEMS = {
         "description": ("Account intelligence (vendor_echo's unique dataset) also feeds Vendor "
                          "reconciliation, which supports the SOX reconciliation control. Left out of "
                          "edges[] so the Challenger must find it; once validated, removing Beacon + Echo "
-                         "breaks ctl_sox_reconciliation until add_replacement_feed is applied."),
+                         "puts the mandatory ctl_sox_reconciliation at risk (Beacon + Echo stays feasible and "
+                         "recommended) until add_replacement_feed moves ds_account_intel to vendor_cinder."),
         "challenger_should_flag": True,
     },
     "planted_unknown": {

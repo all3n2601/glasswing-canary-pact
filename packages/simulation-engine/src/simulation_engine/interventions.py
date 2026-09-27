@@ -9,6 +9,32 @@ Department profiles shape capacity cuts (schema v2.2.0 section 5.11, CORE):
 - a department-level ``reduce_capacity`` saves at most ``budget * (1 - fixed_cost_pct)``;
 - the capacity a cut removes is ``cut_pct * max(1, utilisation)`` of the cut department (or the
   cut role's department), so cutting an overstretched team hurts more than proportionally.
+
+Mitigations (``kind == mitigation``, plan E-07, sections 4.2, 11.8) are graph edits too. Every action
+is applied first, then every mitigation in order, so a mitigation edits the post-action graph; each
+one's ``one_time_cost_usd`` is transition cost like an action's. A role "has no capacity left" when
+its ``capacity_fte`` is 0 (``remove_roles`` or a full cut); a person token counts for its role (A5).
+
+- ``reassign_owner`` (workflow target, ``new_owner_id`` a role with capacity): train a backup owner.
+  Every OWNS or BACKS_UP edge into the workflow from a role with no capacity left, and every KNOWS
+  edge from such a role into a knowledge asset that SUPPORTS the workflow, is handed to the new
+  owner. The propagation graph holds one edge per entity pair, so the handed-over edges (and any
+  the new owner already had into the same entity) merge into one new-owner edge that keeps the
+  strongest one's strength, substitutability, lag, criticality and confidence and the union of their
+  evidence: OWNS into the workflow, KNOWS into each knowledge asset. The removed roles' loss stops
+  flowing through the handed-over edges. With no ownership edge to hand over, the new owner gets an
+  OWNS edge of ``params["strength"]`` (default 0.5), substitutability 0.2 and confidence 0.7.
+- ``document_runbook`` (workflow or knowledge asset target): raises ``documented_pct`` (and a
+  workflow's ``exception_documented_pct``) to at least ``params["documented_pct"]`` (default 0.8);
+  a workflow's supporting knowledge-asset edges get at least that substitutability, since
+  documented knowledge can be picked up by others.
+- ``add_replacement_feed`` (dataset target, ``params["replacement_vendor_id"]`` a vendor the plan
+  does not remove): a PROVIDES edge from the replacement vendor with ``params["strength"]`` or the
+  strongest current provider's strength, and that provider's substitutability, lag, criticality
+  and confidence. ``one_time_cost_usd`` is the migration.
+
+Engine-made edges carry no ``extraction_method`` (the contract's methods describe evidence
+extraction) and IDs ``e_{intervention_id}_{n}``.
 """
 
 from __future__ import annotations
@@ -16,13 +42,19 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from contracts_py.decision import Intervention
-from contracts_py.enums import ActionType, EntityType, InterventionKind, Relation
-from contracts_py.twin import Entity, Twin
+from contracts_py.enums import ActionType, EntityType, InterventionKind, MitigationType, Relation
+from contracts_py.twin import Edge, Entity, Twin
 
 from company_twin import entity_map
 
 DAYS_PER_YEAR = 365
 PERSON_TOKEN_RELATIONS = {Relation.OWNS, Relation.KNOWS, Relation.BACKS_UP}
+OWNER_RELATIONS = {Relation.OWNS, Relation.BACKS_UP}
+DEFAULT_DOCUMENTED_PCT = 0.8
+DEFAULT_NEW_OWNER_STRENGTH = 0.5
+NEW_OWNER_SUBSTITUTABILITY = 0.2
+# A trained backup owner is planned, not observed, so its new edge is held with moderate confidence.
+NEW_OWNER_CONFIDENCE = 0.7
 
 
 @dataclass(frozen=True)
@@ -94,7 +126,21 @@ def _roles_in_scope(twin: Twin, target: Entity) -> list[Entity]:
 
 
 def _remove_vendor(s: AppliedScenario, i: Intervention, target: Entity) -> None:
+    """Stop the vendor's cost and lose everything it supplies from the start day.
+
+    History retention (``retains_history_after_termination``, plan E-06): a PROVIDES edge's
+    ``substitutability`` is the share of the vendor's coverage another provider can take over. The
+    refresh can be re-sourced, but the history the company holds through the vendor can only move
+    with it; when the vendor keeps no history after termination (``False``), nothing of its
+    coverage can be taken over, so its PROVIDES edges become non-substitutable (0) in the scenario.
+    ``True`` and ``None`` (unknown, the optimistic assumption) leave the edges as they are.
+    """
     _require(target, {EntityType.vendor}, i)
+    if target.retains_history_after_termination is False:
+        s.twin.edges = [e.model_copy(update={"substitutability": 0.0})
+                        if e.source == target.id and e.relation is Relation.PROVIDES else e for e in s.twin.edges]
+        s.assumptions.append(f"{i.id}: {target.id} keeps no history after termination, so none of the coverage it "
+                             "provides is substitutable")
     saved = target.annual_cost_usd or 0
     s.gross_savings_usd += saved
     s.savings_by_intervention[i.id] = saved
@@ -196,17 +242,148 @@ def _delay_project(s: AppliedScenario, i: Intervention, target: Entity) -> None:
         target.expected_completion_day += days
 
 
+def role_of(entity: Entity | None) -> str | None:
+    """The role an OWNS, KNOWS or BACKS_UP edge counts for: a role itself, or a person token's role (A5)."""
+    if entity is None:
+        return None
+    if entity.type is EntityType.role:
+        return entity.id
+    if entity.type is EntityType.person_token:
+        return entity.role_id
+    return None
+
+
+def _no_capacity(ents: dict[str, Entity], source_id: str) -> bool:
+    role = ents.get(role_of(ents.get(source_id)) or "")
+    return role is not None and role.capacity_fte is not None and role.capacity_fte <= 0
+
+
+def _edge_id(i: Intervention, n: int) -> str:
+    from .simulate import bounded_id  # simulate imports this module (through quick), so import on use
+
+    return bounded_id("e_", f"{i.id}_{n}")
+
+
+def _hand_over(s: AppliedScenario, i: Intervention, edges: list[Edge], new_owner: str, target: str,
+               relation: Relation, n: int) -> None:
+    """Merge ``edges`` and the new owner's own edges into ``target`` into one ``relation`` edge from the new owner."""
+    own = [e for e in s.twin.edges
+           if e.source == new_owner and e.target == target and e.relation in PERSON_TOKEN_RELATIONS]
+    merged = [*edges, *own]
+    gone = {e.id for e in merged}
+    strongest = max(merged, key=lambda e: (e.strength, e.id))
+    s.twin.edges = [e for e in s.twin.edges if e.id not in gone]
+    s.twin.edges.append(strongest.model_copy(update={
+        "id": _edge_id(i, n), "source": new_owner, "relation": relation, "extraction_method": None,
+        "evidence_refs": list(dict.fromkeys(ref for e in merged for ref in e.evidence_refs)),
+    }))
+
+
+def _reassign_owner(s: AppliedScenario, i: Intervention, target: Entity) -> None:
+    _require(target, {EntityType.workflow}, i)
+    ents = entity_map(s.twin)
+    owner = ents.get(i.new_owner_id or "")
+    if owner is None or owner.type is not EntityType.role:
+        raise ValueError(f"{i.id}: reassign_owner needs new_owner_id to be a role in the twin, got {i.new_owner_id}")
+    if owner.capacity_fte is not None and owner.capacity_fte <= 0:
+        raise ValueError(f"{i.id}: new owner {owner.id} has no capacity left in this scenario")
+    handed = [e for e in s.twin.edges
+              if e.target == target.id and e.relation in OWNER_RELATIONS and _no_capacity(ents, e.source)]
+    n = 1
+    if handed:
+        _hand_over(s, i, handed, owner.id, target.id, Relation.OWNS, n)
+        n += 1
+    supporting = sorted(e.source for e in s.twin.edges if e.target == target.id and e.relation is Relation.SUPPORTS
+                        and ents[e.source].type is EntityType.knowledge_asset)
+    transferred = []
+    for knowledge_id in supporting:
+        knows = [e for e in s.twin.edges
+                 if e.target == knowledge_id and e.relation is Relation.KNOWS and _no_capacity(ents, e.source)]
+        if knows:
+            _hand_over(s, i, knows, owner.id, knowledge_id, Relation.KNOWS, n)
+            n += 1
+            transferred.append(knowledge_id)
+    owns_already = any(e.source == owner.id and e.target == target.id and e.relation in OWNER_RELATIONS
+                       for e in s.twin.edges)
+    strength = float(i.params.get("strength", DEFAULT_NEW_OWNER_STRENGTH))
+    if not handed and not owns_already:
+        s.twin.edges.append(Edge(
+            id=_edge_id(i, n), source=owner.id, target=target.id, relation=Relation.OWNS, strength=strength,
+            substitutability=NEW_OWNER_SUBSTITUTABILITY, lag_days=0, criticality=target.criticality,
+            confidence=NEW_OWNER_CONFIDENCE,
+        ))
+    sources = sorted({role_of(ents.get(e.source)) or e.source for e in handed})
+    if handed:
+        what = f"takes over {target.id} from {', '.join(sources)}"
+    elif owns_already:
+        what = f"already owns {target.id}, so no ownership edge is added"
+    else:
+        what = (f"gets an OWNS edge into {target.id} of strength {strength:g}, substitutability "
+                f"{NEW_OWNER_SUBSTITUTABILITY:g} and confidence {NEW_OWNER_CONFIDENCE:g}")
+    s.assumptions.append(f"{i.id}: reassign_owner trains {owner.id} as a backup owner, who {what}"
+                         + (f"; knowledge transferred: {', '.join(transferred)}" if transferred else "")
+                         + "; engine-made edges carry no extraction_method")
+
+
+def _document_runbook(s: AppliedScenario, i: Intervention, target: Entity) -> None:
+    _require(target, {EntityType.workflow, EntityType.knowledge_asset}, i)
+    level = float(i.params.get("documented_pct", DEFAULT_DOCUMENTED_PCT))
+    target.documented_pct = max(target.documented_pct or 0.0, level)
+    detail = ""
+    if target.type is EntityType.workflow:
+        target.exception_documented_pct = max(target.exception_documented_pct or 0.0, level)
+        ents = entity_map(s.twin)
+        s.twin.edges = [
+            e.model_copy(update={"substitutability": max(e.substitutability, level)})
+            if (e.target == target.id and e.relation is Relation.SUPPORTS
+                and ents[e.source].type is EntityType.knowledge_asset) else e
+            for e in s.twin.edges
+        ]
+        detail = ", exception path included, and its supporting knowledge edges are at least that substitutable"
+    s.assumptions.append(f"{i.id}: document_runbook documents {target.id} to at least {level:.0%}{detail}"
+                         + ("" if "documented_pct" in i.params else " (the default level)"))
+
+
+def _add_replacement_feed(s: AppliedScenario, i: Intervention, target: Entity) -> None:
+    _require(target, {EntityType.dataset}, i)
+    ents = entity_map(s.twin)
+    vendor_id = i.params.get("replacement_vendor_id")
+    vendor = ents.get(vendor_id) if isinstance(vendor_id, str) else None
+    if vendor is None or vendor.type is not EntityType.vendor:
+        raise ValueError(f"{i.id}: add_replacement_feed needs params.replacement_vendor_id to be a vendor in the "
+                         f"twin, got {vendor_id}")
+    if vendor.id in s.losses:
+        raise ValueError(f"{i.id}: replacement vendor {vendor.id} is itself removed or cut by the plan")
+    providers = [e for e in s.twin.edges if e.target == target.id and e.relation is Relation.PROVIDES]
+    if any(e.source == vendor.id for e in providers):
+        raise ValueError(f"{i.id}: {vendor.id} already provides {target.id}")
+    if not providers:
+        raise ValueError(f"{i.id}: {target.id} has no provider to replace")
+    template = max(providers, key=lambda e: (e.strength, e.id))
+    strength = float(i.params.get("strength") or template.strength)
+    s.twin.edges.append(Edge(
+        id=_edge_id(i, 1), source=vendor.id, target=target.id, relation=Relation.PROVIDES, strength=strength,
+        substitutability=template.substitutability, lag_days=template.lag_days, criticality=template.criticality,
+        confidence=template.confidence,
+    ))
+    s.migration_cost_usd += i.one_time_cost_usd
+    s.assumptions.append(f"{i.id}: add_replacement_feed has {vendor.id} provide {target.id} at strength {strength:g} "
+                         f"with {template.source}'s substitutability {template.substitutability:g}; the "
+                         f"${i.one_time_cost_usd:,} one-time cost is the migration; the planned feed has no evidence "
+                         "yet and, as an engine-made edge, no extraction_method")
+
+
 def apply_interventions(twin: Twin, interventions: list[Intervention], *, horizon_days: int = DAYS_PER_YEAR,
                         ) -> AppliedScenario:
     """Apply ``interventions`` to a fresh clone of ``twin`` and return the clone with its direct effects.
 
-    Mitigations (``kind == mitigation``) are re-simulated by ``mitigate`` (plan E-07) and are rejected here.
+    Every action is applied first, in order, then every mitigation, in order, on the post-action graph.
     """
     scenario = AppliedScenario(twin=scenario_copy(twin))
     ents = entity_map(scenario.twin)
-    for i in interventions:
-        if i.kind is InterventionKind.mitigation:
-            raise ValueError(f"{i.id}: mitigation {i.type} is applied by mitigate (plan E-07), not as an action")
+    ordered = ([i for i in interventions if i.kind is InterventionKind.action]
+               + [i for i in interventions if i.kind is InterventionKind.mitigation])
+    for i in ordered:
         target = ents.get(i.target_entity_id)
         if target is None:
             raise ValueError(f"{i.id}: unknown target entity {i.target_entity_id}")
@@ -228,4 +405,12 @@ def apply_interventions(twin: Twin, interventions: list[Intervention], *, horizo
                 _start_or_invest(scenario, i, target)
             case ActionType.delay_project:
                 _delay_project(scenario, i, target)
+            case MitigationType.reassign_owner:
+                _reassign_owner(scenario, i, target)
+            case MitigationType.document_runbook:
+                _document_runbook(scenario, i, target)
+            case MitigationType.add_replacement_feed:
+                _add_replacement_feed(scenario, i, target)
+            case _:
+                raise ValueError(f"{i.id}: {i.type} is not modelled yet")
     return scenario

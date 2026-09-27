@@ -13,7 +13,7 @@ import re
 
 import networkx as nx
 
-from company_twin.export import graph_snapshot, knowledge_map, vendor_report
+from company_twin.export import graph_snapshot, knowledge_map, organization_profile, vendor_report
 from company_twin.graph import affected_departments, build_graph
 from company_twin.loader import default_fixture_path, load_company_twin
 from company_twin.models import EntityType, Relation, entity_map
@@ -196,6 +196,15 @@ def test_exports_are_wellformed():
     vr = vendor_report(TWIN)
     delta = next(v for v in vr["vendors"] if v["vendor_id"] == "vendor_delta")
     assert delta["irreplaceable_flag"] is True
+
+
+def test_organization_profile_file_is_derived_from_the_fixture():
+    profile = json.loads((DATA_DIR / "organization_profile.json").read_text(encoding="utf-8"))
+    assert profile == organization_profile(TWIN), "regenerate with: uv run python -m company_twin.export"
+    org = profile["organization"]
+    assert org["total_headcount_fte"] == sum(d["actual_fte"] for d in profile["departments"]) + sum(
+        p.staffing.contractors_fte for p in TWIN.department_profiles)
+    assert org["total_annual_budget_usd"] == sum(d["annual_budget_usd"] for d in profile["departments"])
 
 
 # ---- derived DepartmentProfile fields (computed in the loader) --------------

@@ -9,7 +9,7 @@ from .graph import (
     reachable_departments,
     upstream_paths,
 )
-from .loader import TwinValidationError, build_twin, load_company_twin, load_twin
+from .loader import TwinValidationError, build_twin, load_company_twin, load_mitigation_catalog, load_twin
 from .models import (
     AgentView,
     CompanyTwin,
@@ -56,6 +56,7 @@ __all__ = [
     "reachable_departments",
     "load_company_twin",
     "load_twin",
+    "load_mitigation_catalog",
     "validate_twin",
     "clone",
     "clone_with_edges",

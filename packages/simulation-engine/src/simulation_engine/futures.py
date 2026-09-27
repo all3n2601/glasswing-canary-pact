@@ -89,6 +89,14 @@ def _headline(act_now: SimulationResult, inaction: SimulationResult, delay: Simu
     return text + HEADLINE_NOTE
 
 
+def ranked_rows(rows: list[FutureRow]) -> list[int]:
+    """Indices of the feasible rows, best first; ``best_row_index`` is the first."""
+    # Acting must beat doing nothing: on an equal delta inaction wins, then lower risk, then row order.
+    return sorted((n for n, row in enumerate(rows) if row.feasible),
+                  key=lambda n: (-rows[n].delta_vs_inaction_p50_usd, rows[n].future is not Future.inaction,
+                                 rows[n].risk_score, n))
+
+
 def compare_futures(twin: Twin, brief: DecisionBrief, plan: CandidatePlan, *,
                     alternatives: list[CandidatePlan] | None = None, settings: OrganizationSettings | None = None,
                     run_id: str = "run_adhoc") -> FutureComparison:
@@ -122,10 +130,8 @@ def compare_futures(twin: Twin, brief: DecisionBrief, plan: CandidatePlan, *,
         seen.add(alternative.plan_id)
         rows.append(_row(run(Future.alternative, alternative), inaction, f"Alternative: {alternative.label}", horizon))
 
-    feasible = [n for n, row in enumerate(rows) if row.feasible]
-    # Acting must beat doing nothing: on an equal delta inaction wins, then lower risk, then row order.
-    best = min(feasible, key=lambda n: (-rows[n].delta_vs_inaction_p50_usd, rows[n].future is not Future.inaction,
-                                        rows[n].risk_score, n), default=None)
+    ranked = ranked_rows(rows)
+    best = ranked[0] if ranked else None
     return FutureComparison(
         comparison_id=bounded_id("cmp_", f"{run_id}_{plan.plan_id}"), decision_id=brief.decision_id, run_id=run_id,
         reference_result_id=inaction.result_id, rows=rows, best_row_index=best,
