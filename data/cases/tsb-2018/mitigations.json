@@ -1,0 +1,38 @@
+[
+ {
+  "id": "mit_assured_rollback_path",
+  "kind": "mitigation",
+  "type": "add_replacement_feed",
+  "target_entity_id": "ds_fallback_service",
+  "duration_days": 120,
+  "one_time_cost_usd": 53452000,
+  "params": {
+   "replacement_vendor_id": "vendor_sabis"
+  },
+  "rationale": "Before ending the old host's services, have the new provider stand up a tested fallback: assess all 85 of its sub-suppliers and rehearse a reverse migration, so customer service can be restored if cutover fails."
+ },
+ {
+  "id": "mit_recovery_runbook",
+  "kind": "mitigation",
+  "type": "document_runbook",
+  "target_entity_id": "wf_service_recovery",
+  "duration_days": 45,
+  "one_time_cost_usd": 4008900,
+  "params": {
+   "documented_pct": 0.9
+  },
+  "rationale": "Write and rehearse the cutover and recovery runbook with go or no-go and rollback criteria per channel."
+ },
+ {
+  "id": "mit_complaints_surge_playbook",
+  "kind": "mitigation",
+  "type": "document_runbook",
+  "target_entity_id": "wf_complaints_handling",
+  "duration_days": 30,
+  "one_time_cost_usd": 2672600,
+  "params": {
+   "documented_pct": 0.8
+  },
+  "rationale": "Prepare a complaints and redress surge playbook and trained backup staff before cutover."
+ }
+]

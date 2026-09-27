@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from collections import Counter
 from collections.abc import Mapping
 from pathlib import Path
@@ -35,7 +36,9 @@ def default_fixture_path() -> Path:
 
 
 def default_mitigation_catalog_path() -> Path:
-    return default_fixture_path().parent / "mitigations.json"
+    """``CANARY_MITIGATION_CATALOG_PATH`` when set (a case twin's own catalog), else ``data/mitigations.json``."""
+    override = os.environ.get("CANARY_MITIGATION_CATALOG_PATH")
+    return Path(override) if override else default_fixture_path().parent / "mitigations.json"
 
 
 class TwinValidationError(ValueError):

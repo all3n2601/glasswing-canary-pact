@@ -1,0 +1,25 @@
+{
+ "note": "TSB 2018 case. The planted edge is left out of edges[] so the Challenger must find it from the regulator-summary evidence.",
+ "planted_edge": {
+  "id": "e_fallback_consumed_by_service_recovery",
+  "source": "ds_fallback_service",
+  "relation": "CONSUMES",
+  "target": "wf_service_recovery",
+  "evidence_refs": [
+   "ev_tsb_no_rollback",
+   "ev_tsb_fourth_parties"
+  ],
+  "document_id": "doc_fca_final_notice",
+  "description": "Customer service recovery depends on the old platform's working copy: the new provider's own resilience rested on 85 sub-suppliers the bank had not assessed, and after migration there was no rollback. Once validated, exiting the old host breaks the mandatory operational resilience control until a tested fallback exists.",
+  "challenger_should_flag": true
+ },
+ "planted_unknown": {
+  "entity_id": "vendor_lbg",
+  "field": "retains_history_after_termination",
+  "intended_value": false,
+  "description": "Unknown at decision time whether the old host keeps a usable copy after exit (a rollback). The public record says it did not.",
+  "evidence_refs": [
+   "ev_tsb_lbg_exit_terms"
+  ]
+ }
+}

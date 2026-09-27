@@ -1,0 +1,2598 @@
+{
+ "schema_version": "2.1.1",
+ "version": {
+  "twin_version": "twin_tsb_2018_v1",
+  "settings_version": 1,
+  "prompt_version": "p1",
+  "model_id": "configurable",
+  "engine_version": "e1",
+  "created_at": "2026-09-27T12:00:00Z",
+  "as_of_date": "2018-03-31",
+  "data_snapshot_id": "public_record_tsb_2018"
+ },
+ "organization": {
+  "id": "org_tsb",
+  "legal_name": "TSB Bank plc",
+  "display_name": "TSB Bank (public 2018 case, modeled twin)",
+  "sector": "banking",
+  "sub_sector": "UK retail and business banking",
+  "secondary_sectors": [
+   "financial_services"
+  ],
+  "business_model": "b2c",
+  "size_band": "large_enterprise",
+  "headquarters_country": "GB",
+  "operating_regions": [
+   "UK"
+  ],
+  "annual_revenue_usd": 1469662740,
+  "total_annual_budget_usd": 1148282590,
+  "total_headcount_fte": 8583.0,
+  "fiscal_year_start_month": 1,
+  "regulatory_frameworks": [
+   "PRA_Rulebook",
+   "FCA_SYSC"
+  ],
+  "strategic_priorities": [
+   {
+    "id": "sp_platform_savings",
+    "text": "Move off the transitional platform to save about GBP 160M a year",
+    "rank": 1,
+    "kpi_ids": []
+   },
+   {
+    "id": "sp_customer_service",
+    "text": "Keep customer service and complaints stable",
+    "rank": 2,
+    "kpi_ids": [
+     "kpi_complaints",
+     "kpi_channel_availability"
+    ]
+   }
+  ],
+  "description": "Modeled twin of a UK retail bank at the time of its April 2018 platform migration, built only from public regulator and press figures. Money in USD at the 2018 Federal Reserve average rate. Internal dependencies are modeled.",
+  "evidence_refs": [
+   "ev_tsb_customers",
+   "ev_tsb_saving_target"
+  ]
+ },
+ "department_profiles": [
+  {
+   "department_id": "dept_engineering",
+   "mission": "Run the banking platform, the migration and the technology suppliers.",
+   "head_role_id": "role_head_it",
+   "agent_id": "engineering",
+   "staffing": {
+    "sanctioned_fte": 884.0,
+    "actual_fte": 815.0,
+    "contractors_fte": 43.0,
+    "open_positions": 26,
+    "attrition_rate_annual": 0.12,
+    "avg_time_to_hire_days": 60,
+    "utilisation": 1.1
+   },
+   "budget": {
+    "annual_budget_usd": 275587820,
+    "spent_ytd_usd": 68896955,
+    "fixed_cost_pct": 0.4,
+    "budget_owner_role_id": "role_head_it"
+   },
+   "strengths": [
+    {
+     "id": "str_engineering_core",
+     "name": "Core platform delivery",
+     "category": "capability",
+     "level": 3,
+     "supports_entity_ids": [
+      "sys_proteo4uk"
+     ],
+     "key_role_ids": [
+      "role_head_it"
+     ],
+     "concentration": 0.4,
+     "evidence_refs": [
+      "ev_tsb_provider_experience"
+     ]
+    }
+   ],
+   "gaps": [
+    {
+     "id": "gap_rollback",
+     "name": "No tested rollback once customers move",
+     "category": "process",
+     "severity": 5,
+     "affected_entity_ids": [
+      "kn_cutover_plan"
+     ],
+     "evidence_refs": [
+      "ev_tsb_recovery_runbook"
+     ]
+    }
+   ],
+   "maturity_level": 3
+  },
+  {
+   "department_id": "dept_operations",
+   "mission": "Process payments, run fraud monitoring and recover customer service.",
+   "head_role_id": "role_head_ops",
+   "agent_id": "operations",
+   "staffing": {
+    "sanctioned_fte": 1061.0,
+    "actual_fte": 978.0,
+    "contractors_fte": 52.0,
+    "open_positions": 31,
+    "attrition_rate_annual": 0.12,
+    "avg_time_to_hire_days": 60,
+    "utilisation": 1.0
+   },
+   "budget": {
+    "annual_budget_usd": 160759563,
+    "spent_ytd_usd": 40189891,
+    "fixed_cost_pct": 0.4,
+    "budget_owner_role_id": "role_head_ops"
+   },
+   "strengths": [
+    {
+     "id": "str_operations_core",
+     "name": "Payments and fraud operations",
+     "category": "process",
+     "level": 3,
+     "supports_entity_ids": [
+      "wf_payments_processing"
+     ],
+     "key_role_ids": [
+      "role_head_ops"
+     ],
+     "concentration": 0.4,
+     "evidence_refs": [
+      "ev_tsb_platform_map"
+     ]
+    }
+   ],
+   "gaps": [],
+   "maturity_level": 3
+  },
+  {
+   "department_id": "dept_product",
+   "mission": "Run internet and mobile banking for customers.",
+   "head_role_id": "role_head_digital",
+   "agent_id": "product",
+   "staffing": {
+    "sanctioned_fte": 265.0,
+    "actual_fte": 244.0,
+    "contractors_fte": 13.0,
+    "open_positions": 8,
+    "attrition_rate_annual": 0.12,
+    "avg_time_to_hire_days": 60,
+    "utilisation": 1.0
+   },
+   "budget": {
+    "annual_budget_usd": 68896955,
+    "spent_ytd_usd": 17224239,
+    "fixed_cost_pct": 0.4,
+    "budget_owner_role_id": "role_head_digital"
+   },
+   "strengths": [
+    {
+     "id": "str_product_core",
+     "name": "Digital channel design",
+     "category": "capability",
+     "level": 3,
+     "supports_entity_ids": [
+      "wf_digital_banking"
+     ],
+     "key_role_ids": [
+      "role_head_digital"
+     ],
+     "concentration": 0.4,
+     "evidence_refs": [
+      "ev_tsb_platform_map"
+     ]
+    }
+   ],
+   "gaps": [],
+   "maturity_level": 3
+  },
+  {
+   "department_id": "dept_sales",
+   "mission": "Serve customers in about 551 branches and grow lending.",
+   "head_role_id": "role_branch_manager",
+   "agent_id": "sales",
+   "staffing": {
+    "sanctioned_fte": 3980.0,
+    "actual_fte": 3671.0,
+    "contractors_fte": 193.0,
+    "open_positions": 116,
+    "attrition_rate_annual": 0.12,
+    "avg_time_to_hire_days": 60,
+    "utilisation": 1.0
+   },
+   "budget": {
+    "annual_budget_usd": 298553473,
+    "spent_ytd_usd": 74638368,
+    "fixed_cost_pct": 0.4,
+    "budget_owner_role_id": "role_branch_manager"
+   },
+   "strengths": [
+    {
+     "id": "str_sales_core",
+     "name": "Branch coverage (about 551 branches)",
+     "category": "asset",
+     "level": 3,
+     "supports_entity_ids": [
+      "wf_branch_servicing"
+     ],
+     "key_role_ids": [
+      "role_branch_manager"
+     ],
+     "concentration": 0.4,
+     "evidence_refs": [
+      "ev_tsb_customers"
+     ]
+    }
+   ],
+   "gaps": [],
+   "maturity_level": 3
+  },
+  {
+   "department_id": "dept_customer_success",
+   "mission": "Run telephone banking and handle complaints and redress.",
+   "head_role_id": "role_contact_centre_lead",
+   "agent_id": "customer_success",
+   "staffing": {
+    "sanctioned_fte": 1591.0,
+    "actual_fte": 1468.0,
+    "contractors_fte": 77.0,
+    "open_positions": 46,
+    "attrition_rate_annual": 0.12,
+    "avg_time_to_hire_days": 60,
+    "utilisation": 1.1
+   },
+   "budget": {
+    "annual_budget_usd": 137793911,
+    "spent_ytd_usd": 34448478,
+    "fixed_cost_pct": 0.4,
+    "budget_owner_role_id": "role_contact_centre_lead"
+   },
+   "strengths": [
+    {
+     "id": "str_customer_success_core",
+     "name": "Contact centre scale",
+     "category": "capability",
+     "level": 3,
+     "supports_entity_ids": [
+      "wf_telephone_banking"
+     ],
+     "key_role_ids": [
+      "role_contact_centre_lead"
+     ],
+     "concentration": 0.4,
+     "evidence_refs": [
+      "ev_tsb_complaints"
+     ]
+    }
+   ],
+   "gaps": [],
+   "maturity_level": 3
+  },
+  {
+   "department_id": "dept_marketing",
+   "mission": "Customer communications and brand.",
+   "head_role_id": "role_head_marketing",
+   "agent_id": "marketing",
+   "staffing": {
+    "sanctioned_fte": 177.0,
+    "actual_fte": 163.0,
+    "contractors_fte": 9.0,
+    "open_positions": 5,
+    "attrition_rate_annual": 0.12,
+    "avg_time_to_hire_days": 60,
+    "utilisation": 1.0
+   },
+   "budget": {
+    "annual_budget_usd": 45931304,
+    "spent_ytd_usd": 11482826,
+    "fixed_cost_pct": 0.4,
+    "budget_owner_role_id": "role_head_marketing"
+   },
+   "strengths": [
+    {
+     "id": "str_marketing_core",
+     "name": "Customer communications",
+     "category": "relationship",
+     "level": 3,
+     "supports_entity_ids": [],
+     "key_role_ids": [
+      "role_head_marketing"
+     ],
+     "concentration": 0.4,
+     "evidence_refs": [
+      "ev_tsb_customers"
+     ]
+    }
+   ],
+   "gaps": [],
+   "maturity_level": 3
+  },
+  {
+   "department_id": "dept_ai_data",
+   "mission": "Customer data, reporting and data migration assurance.",
+   "head_role_id": "role_head_data",
+   "agent_id": "ai_data",
+   "staffing": {
+    "sanctioned_fte": 265.0,
+    "actual_fte": 244.0,
+    "contractors_fte": 13.0,
+    "open_positions": 8,
+    "attrition_rate_annual": 0.12,
+    "avg_time_to_hire_days": 60,
+    "utilisation": 1.0
+   },
+   "budget": {
+    "annual_budget_usd": 45931304,
+    "spent_ytd_usd": 11482826,
+    "fixed_cost_pct": 0.4,
+    "budget_owner_role_id": "role_head_data"
+   },
+   "strengths": [
+    {
+     "id": "str_ai_data_core",
+     "name": "Customer ledger stewardship",
+     "category": "data",
+     "level": 3,
+     "supports_entity_ids": [
+      "ds_customer_ledger"
+     ],
+     "key_role_ids": [
+      "role_head_data"
+     ],
+     "concentration": 0.4,
+     "evidence_refs": [
+      "ev_tsb_customers"
+     ]
+    }
+   ],
+   "gaps": [],
+   "maturity_level": 3
+  },
+  {
+   "department_id": "dept_finance",
+   "mission": "Budget, savings case and supplier contracts.",
+   "head_role_id": "role_head_finance",
+   "agent_id": "finance",
+   "staffing": {
+    "sanctioned_fte": 265.0,
+    "actual_fte": 244.0,
+    "contractors_fte": 13.0,
+    "open_positions": 8,
+    "attrition_rate_annual": 0.12,
+    "avg_time_to_hire_days": 60,
+    "utilisation": 1.0
+   },
+   "budget": {
+    "annual_budget_usd": 57414130,
+    "spent_ytd_usd": 14353532,
+    "fixed_cost_pct": 0.4,
+    "budget_owner_role_id": "role_head_finance"
+   },
+   "strengths": [
+    {
+     "id": "str_finance_core",
+     "name": "Savings case and supplier contracts",
+     "category": "process",
+     "level": 3,
+     "supports_entity_ids": [
+      "vendor_lbg"
+     ],
+     "key_role_ids": [
+      "role_head_finance"
+     ],
+     "concentration": 0.4,
+     "evidence_refs": [
+      "ev_tsb_saving_target"
+     ]
+    }
+   ],
+   "gaps": [],
+   "maturity_level": 3
+  },
+  {
+   "department_id": "dept_compliance",
+   "mission": "Operational resilience, outsourcing oversight and regulatory reporting.",
+   "head_role_id": "role_head_risk",
+   "agent_id": "compliance",
+   "staffing": {
+    "sanctioned_fte": 353.0,
+    "actual_fte": 326.0,
+    "contractors_fte": 17.0,
+    "open_positions": 10,
+    "attrition_rate_annual": 0.12,
+    "avg_time_to_hire_days": 60,
+    "utilisation": 1.0
+   },
+   "budget": {
+    "annual_budget_usd": 57414130,
+    "spent_ytd_usd": 14353532,
+    "fixed_cost_pct": 0.4,
+    "budget_owner_role_id": "role_head_risk"
+   },
+   "strengths": [
+    {
+     "id": "str_compliance_core",
+     "name": "Regulatory relationships",
+     "category": "relationship",
+     "level": 3,
+     "supports_entity_ids": [
+      "ctl_operational_resilience"
+     ],
+     "key_role_ids": [
+      "role_head_risk"
+     ],
+     "concentration": 0.4,
+     "evidence_refs": [
+      "ev_tsb_fines"
+     ]
+    }
+   ],
+   "gaps": [
+    {
+     "id": "gap_fourth_party_oversight",
+     "name": "Sub-suppliers of the platform provider not assessed",
+     "category": "process",
+     "severity": 5,
+     "affected_entity_ids": [
+      "vendor_sabis_subsuppliers",
+      "ctl_outsourcing_oversight"
+     ],
+     "evidence_refs": [
+      "ev_tsb_fourth_parties"
+     ]
+    }
+   ],
+   "maturity_level": 3
+  }
+ ],
+ "entities": [
+  {
+   "id": "dept_engineering",
+   "type": "department",
+   "name": "IT and Platform",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "annual_cost_usd": 275587820,
+   "capacity_fte": 858.0
+  },
+  {
+   "id": "dept_operations",
+   "type": "department",
+   "name": "Operations and Payments",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "annual_cost_usd": 160759563,
+   "capacity_fte": 1030.0
+  },
+  {
+   "id": "dept_product",
+   "type": "department",
+   "name": "Digital Banking",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "annual_cost_usd": 68896955,
+   "capacity_fte": 257.0
+  },
+  {
+   "id": "dept_sales",
+   "type": "department",
+   "name": "Branch Network and Lending",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "annual_cost_usd": 298553473,
+   "capacity_fte": 3864.0
+  },
+  {
+   "id": "dept_customer_success",
+   "type": "department",
+   "name": "Customer Service and Complaints",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "annual_cost_usd": 137793911,
+   "capacity_fte": 1545.0
+  },
+  {
+   "id": "dept_marketing",
+   "type": "department",
+   "name": "Marketing and Communications",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "annual_cost_usd": 45931304,
+   "capacity_fte": 172.0
+  },
+  {
+   "id": "dept_ai_data",
+   "type": "department",
+   "name": "Data and Analytics",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "annual_cost_usd": 45931304,
+   "capacity_fte": 257.0
+  },
+  {
+   "id": "dept_finance",
+   "type": "department",
+   "name": "Finance",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "annual_cost_usd": 57414130,
+   "capacity_fte": 257.0
+  },
+  {
+   "id": "dept_compliance",
+   "type": "department",
+   "name": "Risk and Compliance",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "annual_cost_usd": 57414130,
+   "capacity_fte": 343.0
+  },
+  {
+   "id": "role_head_it",
+   "type": "role",
+   "name": "Head of IT",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_engineering",
+   "annual_cost_usd": 334075,
+   "capacity_fte": 1.0,
+   "time_to_train_days": 180
+  },
+  {
+   "id": "role_platform_lead",
+   "type": "role",
+   "name": "Platform Engineering Lead",
+   "criticality": "medium",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_engineering",
+   "annual_cost_usd": 8552320,
+   "capacity_fte": 40.0,
+   "time_to_train_days": 120
+  },
+  {
+   "id": "role_migration_lead",
+   "type": "role",
+   "name": "Migration Programme Lead",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_engineering",
+   "annual_cost_usd": 1443204,
+   "capacity_fte": 6.0,
+   "time_to_train_days": 150
+  },
+  {
+   "id": "role_head_ops",
+   "type": "role",
+   "name": "Head of Operations",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_operations",
+   "annual_cost_usd": 267260,
+   "capacity_fte": 1.0,
+   "time_to_train_days": 150
+  },
+  {
+   "id": "role_payments_lead",
+   "type": "role",
+   "name": "Payments Operations Lead",
+   "criticality": "medium",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_operations",
+   "annual_cost_usd": 7216020,
+   "capacity_fte": 60.0,
+   "time_to_train_days": 90
+  },
+  {
+   "id": "role_fraud_lead",
+   "type": "role",
+   "name": "Fraud Operations Lead",
+   "criticality": "medium",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_operations",
+   "annual_cost_usd": 9086840,
+   "capacity_fte": 80.0,
+   "time_to_train_days": 90
+  },
+  {
+   "id": "role_head_digital",
+   "type": "role",
+   "name": "Head of Digital",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_product",
+   "annual_cost_usd": 253897,
+   "capacity_fte": 1.0,
+   "time_to_train_days": 150
+  },
+  {
+   "id": "role_branch_manager",
+   "type": "role",
+   "name": "Branch Manager",
+   "criticality": "medium",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_sales",
+   "annual_cost_usd": 40423075,
+   "capacity_fte": 550.0,
+   "time_to_train_days": 60
+  },
+  {
+   "id": "role_contact_centre_lead",
+   "type": "role",
+   "name": "Contact Centre Lead",
+   "criticality": "medium",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_customer_success",
+   "annual_cost_usd": 9621360,
+   "capacity_fte": 120.0,
+   "time_to_train_days": 60
+  },
+  {
+   "id": "role_complaints_lead",
+   "type": "role",
+   "name": "Complaints Handling Lead",
+   "criticality": "medium",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_customer_success",
+   "annual_cost_usd": 11024475,
+   "capacity_fte": 150.0,
+   "time_to_train_days": 45
+  },
+  {
+   "id": "role_head_data",
+   "type": "role",
+   "name": "Head of Data",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_ai_data",
+   "annual_cost_usd": 227171,
+   "capacity_fte": 1.0,
+   "time_to_train_days": 150
+  },
+  {
+   "id": "role_head_finance",
+   "type": "role",
+   "name": "Finance Director",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_finance",
+   "annual_cost_usd": 347438,
+   "capacity_fte": 1.0,
+   "time_to_train_days": 180
+  },
+  {
+   "id": "role_head_risk",
+   "type": "role",
+   "name": "Chief Risk Officer",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_compliance",
+   "annual_cost_usd": 347438,
+   "capacity_fte": 1.0,
+   "time_to_train_days": 180
+  },
+  {
+   "id": "role_supplier_risk_lead",
+   "type": "role",
+   "name": "Supplier and Outsourcing Risk Lead",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_compliance",
+   "annual_cost_usd": 1175944,
+   "capacity_fte": 8.0,
+   "time_to_train_days": 120
+  },
+  {
+   "id": "role_head_marketing",
+   "type": "role",
+   "name": "Head of Marketing",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_marketing",
+   "annual_cost_usd": 227171,
+   "capacity_fte": 1.0,
+   "time_to_train_days": 120
+  },
+  {
+   "id": "vendor_lbg",
+   "type": "vendor",
+   "name": "Lloyds Banking Group hosted platform (transitional services)",
+   "criticality": "critical",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_saving_target",
+    "ev_tsb_lbg_exit_terms"
+   ],
+   "department_id": "dept_engineering",
+   "annual_cost_usd": 213808000,
+   "one_time_exit_cost_usd": 0,
+   "migration_cost_usd": 0,
+   "geographies": [
+    "UK"
+   ],
+   "history_years": 20,
+   "freshness_days": 1,
+   "accuracy": 0.99,
+   "permitted_uses": [
+    "core_banking",
+    "channels",
+    "payments"
+   ],
+   "retains_history_after_termination": null
+  },
+  {
+   "id": "vendor_sabis",
+   "type": "vendor",
+   "name": "SABIS (owner's IT subsidiary, Proteo4UK platform)",
+   "criticality": "critical",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_provider_experience"
+   ],
+   "department_id": "dept_engineering",
+   "annual_cost_usd": 80178000,
+   "one_time_exit_cost_usd": 66815000,
+   "migration_cost_usd": 200445000,
+   "geographies": [
+    "UK",
+    "ES"
+   ],
+   "history_years": 0,
+   "freshness_days": 1,
+   "accuracy": 0.95,
+   "permitted_uses": [
+    "core_banking",
+    "channels",
+    "payments"
+   ],
+   "retains_history_after_termination": true
+  },
+  {
+   "id": "vendor_sabis_subsuppliers",
+   "type": "vendor",
+   "name": "SABIS sub-suppliers (85 third parties, unassessed)",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_fourth_parties"
+   ],
+   "department_id": "dept_engineering",
+   "annual_cost_usd": 0,
+   "one_time_exit_cost_usd": 0,
+   "migration_cost_usd": 0,
+   "geographies": [
+    "UK",
+    "ES",
+    "other"
+   ],
+   "history_years": 0,
+   "freshness_days": 1,
+   "accuracy": 0.8,
+   "permitted_uses": [
+    "platform_components"
+   ]
+  },
+  {
+   "id": "sys_lbg_platform",
+   "type": "system",
+   "name": "Legacy hosted core banking platform",
+   "criticality": "critical",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "department_id": "dept_engineering",
+   "annual_cost_usd": 0,
+   "failure_cost_per_day_usd": 0,
+   "customer_facing": false
+  },
+  {
+   "id": "sys_proteo4uk",
+   "type": "system",
+   "name": "Proteo4UK core banking platform",
+   "criticality": "critical",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "department_id": "dept_engineering",
+   "annual_cost_usd": 53452000,
+   "failure_cost_per_day_usd": 334350,
+   "customer_facing": true
+  },
+  {
+   "id": "sys_digital_channels",
+   "type": "system",
+   "name": "Internet and mobile banking",
+   "criticality": "critical",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "department_id": "dept_product",
+   "annual_cost_usd": 20044500,
+   "failure_cost_per_day_usd": 222900,
+   "customer_facing": true
+  },
+  {
+   "id": "sys_telephony",
+   "type": "system",
+   "name": "Telephone banking platform",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "department_id": "dept_customer_success",
+   "annual_cost_usd": 8017800,
+   "failure_cost_per_day_usd": 92875,
+   "customer_facing": true
+  },
+  {
+   "id": "sys_branch_platform",
+   "type": "system",
+   "name": "Branch teller and servicing system",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "department_id": "dept_sales",
+   "annual_cost_usd": 10690400,
+   "failure_cost_per_day_usd": 111450,
+   "customer_facing": true
+  },
+  {
+   "id": "sys_payments_gateway",
+   "type": "system",
+   "name": "Payments gateway",
+   "criticality": "critical",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "department_id": "dept_operations",
+   "annual_cost_usd": 13363000,
+   "failure_cost_per_day_usd": 185750,
+   "customer_facing": true
+  },
+  {
+   "id": "ds_customer_ledger",
+   "type": "dataset",
+   "name": "Customer accounts and transaction ledger (5.2M customers)",
+   "criticality": "critical",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_customers"
+   ],
+   "department_id": "dept_ai_data",
+   "attribute_group": "core_ledger"
+  },
+  {
+   "id": "ds_fallback_service",
+   "type": "dataset",
+   "name": "Working copy of customer services on the old platform (the rollback path)",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_lbg_exit_terms"
+   ],
+   "department_id": "dept_engineering",
+   "attribute_group": "fallback"
+  },
+  {
+   "id": "ds_payment_messages",
+   "type": "dataset",
+   "name": "Payment messages and standing orders",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "department_id": "dept_operations",
+   "attribute_group": "payments"
+  },
+  {
+   "id": "wf_service_recovery",
+   "type": "workflow",
+   "name": "Customer service recovery and rollback",
+   "criticality": "critical",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_recovery_runbook"
+   ],
+   "department_id": "dept_operations",
+   "min_qualified_owners": 2,
+   "failure_cost_per_day_usd": 594400,
+   "customer_facing": false,
+   "max_downtime_days": 1
+  },
+  {
+   "id": "wf_digital_banking",
+   "type": "workflow",
+   "name": "Internet and mobile banking service",
+   "criticality": "critical",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "department_id": "dept_product",
+   "min_qualified_owners": 2,
+   "failure_cost_per_day_usd": 260050,
+   "customer_facing": true,
+   "max_downtime_days": 1
+  },
+  {
+   "id": "wf_telephone_banking",
+   "type": "workflow",
+   "name": "Telephone banking service",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "department_id": "dept_customer_success",
+   "min_qualified_owners": 2,
+   "failure_cost_per_day_usd": 92875,
+   "customer_facing": true,
+   "max_downtime_days": 3
+  },
+  {
+   "id": "wf_branch_servicing",
+   "type": "workflow",
+   "name": "Branch customer servicing",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "department_id": "dept_sales",
+   "min_qualified_owners": 2,
+   "failure_cost_per_day_usd": 111450,
+   "customer_facing": true,
+   "max_downtime_days": 3
+  },
+  {
+   "id": "wf_payments_processing",
+   "type": "workflow",
+   "name": "Payments processing",
+   "criticality": "critical",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "department_id": "dept_operations",
+   "min_qualified_owners": 2,
+   "failure_cost_per_day_usd": 148600,
+   "customer_facing": true,
+   "max_downtime_days": 1
+  },
+  {
+   "id": "wf_fraud_detection",
+   "type": "workflow",
+   "name": "Fraud detection and prevention",
+   "criticality": "critical",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "department_id": "dept_operations",
+   "min_qualified_owners": 2,
+   "failure_cost_per_day_usd": 92875,
+   "customer_facing": false,
+   "max_downtime_days": 1
+  },
+  {
+   "id": "wf_complaints_handling",
+   "type": "workflow",
+   "name": "Complaints handling and redress",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "department_id": "dept_customer_success",
+   "min_qualified_owners": 2,
+   "failure_cost_per_day_usd": 130025,
+   "customer_facing": true,
+   "max_downtime_days": 3
+  },
+  {
+   "id": "wf_supplier_oversight",
+   "type": "workflow",
+   "name": "Outsourcing and sub-supplier oversight",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "department_id": "dept_compliance",
+   "min_qualified_owners": 2,
+   "failure_cost_per_day_usd": 22290,
+   "customer_facing": false,
+   "max_downtime_days": 3
+  },
+  {
+   "id": "ctl_operational_resilience",
+   "type": "control",
+   "name": "Operational resilience: restore important business services",
+   "criticality": "critical",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_fines"
+   ],
+   "department_id": "dept_compliance",
+   "mandatory": true,
+   "framework": "PRA_Rulebook"
+  },
+  {
+   "id": "ctl_outsourcing_oversight",
+   "type": "control",
+   "name": "Outsourcing oversight of material suppliers and their sub-suppliers",
+   "criticality": "critical",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_fourth_parties"
+   ],
+   "department_id": "dept_compliance",
+   "mandatory": true,
+   "framework": "FCA_SYSC"
+  },
+  {
+   "id": "ctl_fraud_controls",
+   "type": "control",
+   "name": "Fraud prevention controls",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "department_id": "dept_operations",
+   "mandatory": true,
+   "framework": "FCA_SYSC"
+  },
+  {
+   "id": "kpi_complaints",
+   "type": "kpi",
+   "name": "Customer complaints per year",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_complaints"
+   ],
+   "department_id": "dept_customer_success",
+   "kpi_baseline": 30000.0,
+   "kpi_unit": "count",
+   "higher_is_better": false
+  },
+  {
+   "id": "kpi_channel_availability",
+   "type": "kpi",
+   "name": "Customer channel availability",
+   "criticality": "critical",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "department_id": "dept_product",
+   "kpi_baseline": 99.5,
+   "kpi_unit": "percent",
+   "higher_is_better": true
+  },
+  {
+   "id": "kpi_customer_retention",
+   "type": "kpi",
+   "name": "Customer retention",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_sales",
+   "kpi_baseline": 95.0,
+   "kpi_unit": "percent",
+   "higher_is_better": true
+  },
+  {
+   "id": "seg_personal",
+   "type": "customer_segment",
+   "name": "Personal banking customers",
+   "criticality": "critical",
+   "sensitivity": "customer",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_customers"
+   ],
+   "department_id": "dept_sales",
+   "arr_usd": 556193864
+  },
+  {
+   "id": "seg_business",
+   "type": "customer_segment",
+   "name": "Business banking customers",
+   "criticality": "high",
+   "sensitivity": "customer",
+   "tags": [],
+   "evidence_refs": [
+    "ev_tsb_customers"
+   ],
+   "department_id": "dept_sales",
+   "arr_usd": 61799318
+  },
+  {
+   "id": "kn_platform_architecture",
+   "type": "knowledge_asset",
+   "name": "New platform architecture and component map",
+   "criticality": "high",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_engineering",
+   "documented_pct": 0.4
+  },
+  {
+   "id": "kn_cutover_plan",
+   "type": "knowledge_asset",
+   "name": "Cutover and rollback criteria",
+   "criticality": "critical",
+   "sensitivity": "general",
+   "tags": [],
+   "evidence_refs": [],
+   "department_id": "dept_engineering",
+   "documented_pct": 0.3
+  }
+ ],
+ "edges": [
+  {
+   "id": "e_lbg_provides_ledger",
+   "source": "vendor_lbg",
+   "target": "ds_customer_ledger",
+   "relation": "PROVIDES",
+   "strength": 0.9,
+   "substitutability": 0.85,
+   "lag_days": 0,
+   "criticality": "critical",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_saving_target"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_lbg_provides_fallback",
+   "source": "vendor_lbg",
+   "target": "ds_fallback_service",
+   "relation": "PROVIDES",
+   "strength": 0.95,
+   "substitutability": 0.05,
+   "lag_days": 0,
+   "criticality": "critical",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_lbg_exit_terms"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_lbg_provides_legacy_platform",
+   "source": "vendor_lbg",
+   "target": "sys_lbg_platform",
+   "relation": "PROVIDES",
+   "strength": 0.9,
+   "substitutability": 0.1,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.9,
+   "evidence_refs": [
+    "ev_tsb_saving_target"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_sabis_provides_ledger",
+   "source": "vendor_sabis",
+   "target": "ds_customer_ledger",
+   "relation": "PROVIDES",
+   "strength": 0.95,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "critical",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_provider_experience"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_sabis_provides_proteo",
+   "source": "vendor_sabis",
+   "target": "sys_proteo4uk",
+   "relation": "PROVIDES",
+   "strength": 0.9,
+   "substitutability": 0.1,
+   "lag_days": 0,
+   "criticality": "critical",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_provider_experience"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_subsuppliers_provide_proteo",
+   "source": "vendor_sabis_subsuppliers",
+   "target": "sys_proteo4uk",
+   "relation": "PROVIDES",
+   "strength": 0.5,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.4,
+   "evidence_refs": [
+    "ev_tsb_fourth_parties"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_proteo_runs_digital",
+   "source": "sys_proteo4uk",
+   "target": "sys_digital_channels",
+   "relation": "DEPENDS_ON",
+   "strength": 0.8,
+   "substitutability": 0.1,
+   "lag_days": 0,
+   "criticality": "critical",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_proteo_runs_telephony",
+   "source": "sys_proteo4uk",
+   "target": "sys_telephony",
+   "relation": "DEPENDS_ON",
+   "strength": 0.6,
+   "substitutability": 0.2,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_proteo_runs_branch",
+   "source": "sys_proteo4uk",
+   "target": "sys_branch_platform",
+   "relation": "DEPENDS_ON",
+   "strength": 0.7,
+   "substitutability": 0.2,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_proteo_runs_payments",
+   "source": "sys_proteo4uk",
+   "target": "sys_payments_gateway",
+   "relation": "DEPENDS_ON",
+   "strength": 0.7,
+   "substitutability": 0.2,
+   "lag_days": 0,
+   "criticality": "critical",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_ledger_consumed_digital",
+   "source": "ds_customer_ledger",
+   "target": "wf_digital_banking",
+   "relation": "CONSUMES",
+   "strength": 0.8,
+   "substitutability": 0.1,
+   "lag_days": 0,
+   "criticality": "critical",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_ledger_consumed_payments",
+   "source": "ds_customer_ledger",
+   "target": "wf_payments_processing",
+   "relation": "CONSUMES",
+   "strength": 0.8,
+   "substitutability": 0.1,
+   "lag_days": 0,
+   "criticality": "critical",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_ledger_consumed_fraud",
+   "source": "ds_customer_ledger",
+   "target": "wf_fraud_detection",
+   "relation": "CONSUMES",
+   "strength": 0.6,
+   "substitutability": 0.2,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_payment_msgs_consumed_payments",
+   "source": "ds_payment_messages",
+   "target": "wf_payments_processing",
+   "relation": "CONSUMES",
+   "strength": 0.7,
+   "substitutability": 0.2,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_sys_digital_runs_wf",
+   "source": "sys_digital_channels",
+   "target": "wf_digital_banking",
+   "relation": "RUNS",
+   "strength": 0.9,
+   "substitutability": 0.1,
+   "lag_days": 0,
+   "criticality": "critical",
+   "confidence": 0.9,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_sys_tel_runs_wf",
+   "source": "sys_telephony",
+   "target": "wf_telephone_banking",
+   "relation": "RUNS",
+   "strength": 0.9,
+   "substitutability": 0.1,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.9,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_sys_branch_runs_wf",
+   "source": "sys_branch_platform",
+   "target": "wf_branch_servicing",
+   "relation": "RUNS",
+   "strength": 0.9,
+   "substitutability": 0.1,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.9,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_sys_pay_runs_wf",
+   "source": "sys_payments_gateway",
+   "target": "wf_payments_processing",
+   "relation": "RUNS",
+   "strength": 0.9,
+   "substitutability": 0.1,
+   "lag_days": 0,
+   "criticality": "critical",
+   "confidence": 0.9,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_recovery_supports_digital",
+   "source": "wf_service_recovery",
+   "target": "wf_digital_banking",
+   "relation": "SUPPORTS",
+   "strength": 0.7,
+   "substitutability": 0.1,
+   "lag_days": 0,
+   "criticality": "critical",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_recovery_runbook"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_recovery_supports_telephone",
+   "source": "wf_service_recovery",
+   "target": "wf_telephone_banking",
+   "relation": "SUPPORTS",
+   "strength": 0.6,
+   "substitutability": 0.2,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_recovery_runbook"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_recovery_supports_branch",
+   "source": "wf_service_recovery",
+   "target": "wf_branch_servicing",
+   "relation": "SUPPORTS",
+   "strength": 0.6,
+   "substitutability": 0.2,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_recovery_runbook"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_recovery_supports_payments",
+   "source": "wf_service_recovery",
+   "target": "wf_payments_processing",
+   "relation": "SUPPORTS",
+   "strength": 0.6,
+   "substitutability": 0.2,
+   "lag_days": 0,
+   "criticality": "critical",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_recovery_runbook"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_recovery_supports_resilience",
+   "source": "wf_service_recovery",
+   "target": "ctl_operational_resilience",
+   "relation": "SUPPORTS",
+   "strength": 0.85,
+   "substitutability": 0.1,
+   "lag_days": 0,
+   "criticality": "critical",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_fines"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_oversight_supports_outsourcing_ctl",
+   "source": "wf_supplier_oversight",
+   "target": "ctl_outsourcing_oversight",
+   "relation": "SUPPORTS",
+   "strength": 0.85,
+   "substitutability": 0.1,
+   "lag_days": 0,
+   "criticality": "critical",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_fourth_parties"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_fraud_supports_ctl",
+   "source": "wf_fraud_detection",
+   "target": "ctl_fraud_controls",
+   "relation": "SUPPORTS",
+   "strength": 0.85,
+   "substitutability": 0.1,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_cutover_supports_recovery",
+   "source": "kn_cutover_plan",
+   "target": "wf_service_recovery",
+   "relation": "SUPPORTS",
+   "strength": 0.5,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.6,
+   "evidence_refs": [
+    "ev_tsb_recovery_runbook"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_arch_supports_recovery",
+   "source": "kn_platform_architecture",
+   "target": "wf_service_recovery",
+   "relation": "SUPPORTS",
+   "strength": 0.4,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "medium",
+   "confidence": 0.6,
+   "evidence_refs": [],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_digital_serves_personal",
+   "source": "wf_digital_banking",
+   "target": "seg_personal",
+   "relation": "CONTRIBUTES_TO",
+   "strength": 0.6,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "critical",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_customers"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_digital_serves_business",
+   "source": "wf_digital_banking",
+   "target": "seg_business",
+   "relation": "CONTRIBUTES_TO",
+   "strength": 0.6,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_customers"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_payments_serves_business",
+   "source": "wf_payments_processing",
+   "target": "seg_business",
+   "relation": "CONTRIBUTES_TO",
+   "strength": 0.6,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_customers"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_branch_serves_personal",
+   "source": "wf_branch_servicing",
+   "target": "seg_personal",
+   "relation": "CONTRIBUTES_TO",
+   "strength": 0.4,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_customers"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_tel_serves_personal",
+   "source": "wf_telephone_banking",
+   "target": "seg_personal",
+   "relation": "CONTRIBUTES_TO",
+   "strength": 0.3,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "medium",
+   "confidence": 0.7,
+   "evidence_refs": [],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_digital_drives_availability",
+   "source": "wf_digital_banking",
+   "target": "kpi_channel_availability",
+   "relation": "CONTRIBUTES_TO",
+   "strength": 0.9,
+   "substitutability": 0.1,
+   "lag_days": 0,
+   "criticality": "critical",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_digital_drives_complaints",
+   "source": "wf_digital_banking",
+   "target": "kpi_complaints",
+   "relation": "CONTRIBUTES_TO",
+   "strength": 0.7,
+   "substitutability": 0.2,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_complaints"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_complaints_load",
+   "source": "wf_digital_banking",
+   "target": "wf_complaints_handling",
+   "relation": "DEPENDS_ON",
+   "strength": 0.5,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_complaints"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_personal_retention",
+   "source": "seg_personal",
+   "target": "kpi_customer_retention",
+   "relation": "CONTRIBUTES_TO",
+   "strength": 0.6,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_customers"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_head_it_owns_proteo",
+   "source": "role_head_it",
+   "target": "sys_proteo4uk",
+   "relation": "OWNS",
+   "strength": 0.8,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.9,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_migration_lead_knows_cutover",
+   "source": "role_migration_lead",
+   "target": "kn_cutover_plan",
+   "relation": "KNOWS",
+   "strength": 0.8,
+   "substitutability": 0.2,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_recovery_runbook"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_platform_lead_knows_arch",
+   "source": "role_platform_lead",
+   "target": "kn_platform_architecture",
+   "relation": "KNOWS",
+   "strength": 0.7,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "medium",
+   "confidence": 0.8,
+   "evidence_refs": [],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_head_ops_owns_recovery",
+   "source": "role_head_ops",
+   "target": "wf_service_recovery",
+   "relation": "OWNS",
+   "strength": 0.8,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_recovery_runbook"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_payments_lead_owns_payments",
+   "source": "role_payments_lead",
+   "target": "wf_payments_processing",
+   "relation": "OWNS",
+   "strength": 0.8,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_fraud_lead_owns_fraud",
+   "source": "role_fraud_lead",
+   "target": "wf_fraud_detection",
+   "relation": "OWNS",
+   "strength": 0.8,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_head_digital_owns_digital",
+   "source": "role_head_digital",
+   "target": "wf_digital_banking",
+   "relation": "OWNS",
+   "strength": 0.8,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_branch_mgr_owns_branch",
+   "source": "role_branch_manager",
+   "target": "wf_branch_servicing",
+   "relation": "OWNS",
+   "strength": 0.8,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_cc_lead_owns_tel",
+   "source": "role_contact_centre_lead",
+   "target": "wf_telephone_banking",
+   "relation": "OWNS",
+   "strength": 0.8,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_complaints_lead_owns",
+   "source": "role_complaints_lead",
+   "target": "wf_complaints_handling",
+   "relation": "OWNS",
+   "strength": 0.8,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_complaints"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_supplier_lead_owns_oversight",
+   "source": "role_supplier_risk_lead",
+   "target": "wf_supplier_oversight",
+   "relation": "OWNS",
+   "strength": 0.8,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_fourth_parties"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_head_risk_backs_oversight",
+   "source": "role_head_risk",
+   "target": "wf_supplier_oversight",
+   "relation": "BACKS_UP",
+   "strength": 0.5,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_fourth_parties"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_platform_lead_backs_recovery",
+   "source": "role_platform_lead",
+   "target": "wf_service_recovery",
+   "relation": "BACKS_UP",
+   "strength": 0.5,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_recovery_runbook"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_head_digital_backs_digital",
+   "source": "role_contact_centre_lead",
+   "target": "wf_complaints_handling",
+   "relation": "BACKS_UP",
+   "strength": 0.4,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "medium",
+   "confidence": 0.7,
+   "evidence_refs": [],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_head_ops_backs_payments",
+   "source": "role_head_ops",
+   "target": "wf_payments_processing",
+   "relation": "BACKS_UP",
+   "strength": 0.5,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_head_ops_backs_fraud",
+   "source": "role_head_ops",
+   "target": "wf_fraud_detection",
+   "relation": "BACKS_UP",
+   "strength": 0.5,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_head_digital_backs_dig",
+   "source": "role_head_it",
+   "target": "wf_digital_banking",
+   "relation": "BACKS_UP",
+   "strength": 0.4,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_branch_backs_tel",
+   "source": "role_branch_manager",
+   "target": "wf_telephone_banking",
+   "relation": "BACKS_UP",
+   "strength": 0.3,
+   "substitutability": 0.5,
+   "lag_days": 0,
+   "criticality": "medium",
+   "confidence": 0.6,
+   "evidence_refs": [],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_cc_backs_branch",
+   "source": "role_contact_centre_lead",
+   "target": "wf_branch_servicing",
+   "relation": "BACKS_UP",
+   "strength": 0.3,
+   "substitutability": 0.5,
+   "lag_days": 0,
+   "criticality": "medium",
+   "confidence": 0.6,
+   "evidence_refs": [],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_complaints_backs_cc",
+   "source": "role_head_marketing",
+   "target": "wf_complaints_handling",
+   "relation": "BACKS_UP",
+   "strength": 0.2,
+   "substitutability": 0.5,
+   "lag_days": 0,
+   "criticality": "medium",
+   "confidence": 0.5,
+   "evidence_refs": [],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "e_platform_backs_recovery2",
+   "source": "role_migration_lead",
+   "target": "wf_service_recovery",
+   "relation": "BACKS_UP",
+   "strength": 0.4,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.6,
+   "evidence_refs": [
+    "ev_tsb_recovery_runbook"
+   ],
+   "extraction_method": "seeded"
+  },
+  {
+   "id": "ch_finance_engineering_budget",
+   "source": "dept_finance",
+   "target": "dept_engineering",
+   "relation": "FLOWS_TO",
+   "strength": 0.5,
+   "substitutability": 0.3,
+   "lag_days": 30,
+   "criticality": "medium",
+   "confidence": 0.9,
+   "evidence_refs": [
+    "ev_tsb_saving_target"
+   ],
+   "extraction_method": "seeded",
+   "label": "budget and savings target",
+   "channel_kind": "budget"
+  },
+  {
+   "id": "ch_engineering_operations_capability",
+   "source": "dept_engineering",
+   "target": "dept_operations",
+   "relation": "FLOWS_TO",
+   "strength": 0.6,
+   "substitutability": 0.2,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded",
+   "label": "platform and recovery",
+   "channel_kind": "capability"
+  },
+  {
+   "id": "ch_engineering_product_capability",
+   "source": "dept_engineering",
+   "target": "dept_product",
+   "relation": "FLOWS_TO",
+   "strength": 0.6,
+   "substitutability": 0.2,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded",
+   "label": "platform for digital channels",
+   "channel_kind": "capability"
+  },
+  {
+   "id": "ch_engineering_sales_capability",
+   "source": "dept_engineering",
+   "target": "dept_sales",
+   "relation": "FLOWS_TO",
+   "strength": 0.5,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded",
+   "label": "branch systems",
+   "channel_kind": "capability"
+  },
+  {
+   "id": "ch_engineering_cs_capability",
+   "source": "dept_engineering",
+   "target": "dept_customer_success",
+   "relation": "FLOWS_TO",
+   "strength": 0.5,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded",
+   "label": "telephony",
+   "channel_kind": "capability"
+  },
+  {
+   "id": "ch_product_sales_value",
+   "source": "dept_product",
+   "target": "dept_sales",
+   "relation": "FLOWS_TO",
+   "strength": 0.4,
+   "substitutability": 0.4,
+   "lag_days": 30,
+   "criticality": "medium",
+   "confidence": 0.7,
+   "evidence_refs": [],
+   "extraction_method": "seeded",
+   "label": "customer value",
+   "channel_kind": "value"
+  },
+  {
+   "id": "ch_product_cs_signal",
+   "source": "dept_product",
+   "target": "dept_customer_success",
+   "relation": "FLOWS_TO",
+   "strength": 0.4,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "medium",
+   "confidence": 0.7,
+   "evidence_refs": [],
+   "extraction_method": "seeded",
+   "label": "complaint volume",
+   "channel_kind": "signal"
+  },
+  {
+   "id": "ch_operations_product_capability",
+   "source": "dept_operations",
+   "target": "dept_product",
+   "relation": "FLOWS_TO",
+   "strength": 0.4,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded",
+   "label": "recovery",
+   "channel_kind": "capability"
+  },
+  {
+   "id": "ch_operations_sales_capability",
+   "source": "dept_operations",
+   "target": "dept_sales",
+   "relation": "FLOWS_TO",
+   "strength": 0.4,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded",
+   "label": "recovery and payments",
+   "channel_kind": "capability"
+  },
+  {
+   "id": "ch_operations_cs_capability",
+   "source": "dept_operations",
+   "target": "dept_customer_success",
+   "relation": "FLOWS_TO",
+   "strength": 0.4,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded",
+   "label": "recovery",
+   "channel_kind": "capability"
+  },
+  {
+   "id": "ch_operations_compliance_signal",
+   "source": "dept_operations",
+   "target": "dept_compliance",
+   "relation": "FLOWS_TO",
+   "strength": 0.4,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded",
+   "label": "resilience evidence",
+   "channel_kind": "signal"
+  },
+  {
+   "id": "ch_compliance_engineering_constraint",
+   "source": "dept_compliance",
+   "target": "dept_engineering",
+   "relation": "FLOWS_TO",
+   "strength": 0.5,
+   "substitutability": 0.3,
+   "lag_days": 30,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_fourth_parties"
+   ],
+   "extraction_method": "seeded",
+   "label": "outsourcing rules",
+   "channel_kind": "constraint"
+  },
+  {
+   "id": "ch_engineering_ai_data_capability",
+   "source": "dept_engineering",
+   "target": "dept_ai_data",
+   "relation": "FLOWS_TO",
+   "strength": 0.5,
+   "substitutability": 0.3,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.8,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded",
+   "label": "ledger",
+   "channel_kind": "capability"
+  },
+  {
+   "id": "ch_ai_data_product_capability",
+   "source": "dept_ai_data",
+   "target": "dept_product",
+   "relation": "FLOWS_TO",
+   "strength": 0.4,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded",
+   "label": "ledger",
+   "channel_kind": "capability"
+  },
+  {
+   "id": "ch_ai_data_operations_capability",
+   "source": "dept_ai_data",
+   "target": "dept_operations",
+   "relation": "FLOWS_TO",
+   "strength": 0.4,
+   "substitutability": 0.4,
+   "lag_days": 0,
+   "criticality": "high",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_platform_map"
+   ],
+   "extraction_method": "seeded",
+   "label": "ledger",
+   "channel_kind": "capability"
+  },
+  {
+   "id": "ch_sales_marketing_signal",
+   "source": "dept_sales",
+   "target": "dept_marketing",
+   "relation": "FLOWS_TO",
+   "strength": 0.3,
+   "substitutability": 0.5,
+   "lag_days": 0,
+   "criticality": "medium",
+   "confidence": 0.6,
+   "evidence_refs": [],
+   "extraction_method": "seeded",
+   "label": "customer communications",
+   "channel_kind": "signal"
+  },
+  {
+   "id": "ch_customer_success_marketing_signal",
+   "source": "dept_customer_success",
+   "target": "dept_marketing",
+   "relation": "FLOWS_TO",
+   "strength": 0.3,
+   "substitutability": 0.5,
+   "lag_days": 0,
+   "criticality": "medium",
+   "confidence": 0.6,
+   "evidence_refs": [],
+   "extraction_method": "seeded",
+   "label": "complaint communications",
+   "channel_kind": "signal"
+  },
+  {
+   "id": "ch_finance_compliance_budget",
+   "source": "dept_finance",
+   "target": "dept_compliance",
+   "relation": "FLOWS_TO",
+   "strength": 0.3,
+   "substitutability": 0.5,
+   "lag_days": 30,
+   "criticality": "medium",
+   "confidence": 0.7,
+   "evidence_refs": [
+    "ev_tsb_saving_target"
+   ],
+   "extraction_method": "seeded",
+   "label": "budget",
+   "channel_kind": "budget"
+  }
+ ],
+ "pressures": [
+  {
+   "id": "pr_tsa_fee_growth",
+   "kind": "renewal_step",
+   "name": "Transitional platform fee step-up",
+   "target_entity_id": "vendor_lbg",
+   "start_day": 180,
+   "step_pct": 5.0,
+   "capacity_sensitivity": 0.0,
+   "neutralised_by": [
+    {
+     "intervention_type": "remove_vendor",
+     "target_entity_id": "vendor_lbg"
+    }
+   ],
+   "evidence_refs": [
+    "ev_tsb_saving_target"
+   ],
+   "description": "Modeled: staying on the old host keeps its fees, with an assumed 5% step-up."
+  }
+ ],
+ "documents": [
+  {
+   "id": "doc_fca_final_notice",
+   "title": "FCA Final Notice to TSB Bank plc (Dec 2022)",
+   "doc_type": "audit_report",
+   "department_id": "dept_compliance",
+   "owner_role_id": null,
+   "uri": "https://www.fca.org.uk/publication/final-notices/tsb-bank-plc-2022.pdf",
+   "mime_type": "application/pdf",
+   "status": "current",
+   "sensitivity": "general",
+   "covers_entity_ids": [],
+   "framework_refs": [],
+   "summary": "Regulator's findings on the 2018 migration: outsourcing oversight, the new provider's sub-suppliers, rollback, complaints and redress. Linked, not copied.",
+   "synthetic": true,
+   "ingested": true,
+   "uploaded_at": "2026-09-27T12:00:00Z"
+  },
+  {
+   "id": "doc_pra_notice",
+   "title": "PRA press release on TSB fine (Dec 2022)",
+   "doc_type": "audit_report",
+   "department_id": "dept_compliance",
+   "owner_role_id": null,
+   "uri": "https://www.bankofengland.co.uk/news/2022/december/tsb-fined-for-operational-resilience-failings",
+   "mime_type": "text/html",
+   "status": "current",
+   "sensitivity": "general",
+   "covers_entity_ids": [],
+   "framework_refs": [],
+   "summary": "Prudential regulator's summary of operational resilience and outsourcing failings and its fine. Linked, not copied.",
+   "synthetic": true,
+   "ingested": true,
+   "uploaded_at": "2026-09-27T12:00:00Z"
+  },
+  {
+   "id": "doc_savings_plan",
+   "title": "Press report on the migration plan and savings (2015)",
+   "doc_type": "strategy_memo",
+   "department_id": "dept_finance",
+   "owner_role_id": null,
+   "uri": "https://www.computerweekly.com/news/2240242809/Sabadell-to-migrate-TSB-IT-to-proprietary-banking-platform-with-450m-sweetener",
+   "mime_type": "text/html",
+   "status": "current",
+   "sensitivity": "general",
+   "covers_entity_ids": [],
+   "framework_refs": [],
+   "summary": "Press report of the owner's plan to move the bank onto its own platform, the expected annual savings and the previous owner's contribution.",
+   "synthetic": true,
+   "ingested": true,
+   "uploaded_at": "2026-09-27T12:00:00Z"
+  },
+  {
+   "id": "doc_charges_2018",
+   "title": "TSB Banking Group Annual Report and Accounts 2018",
+   "doc_type": "financial_forecast",
+   "department_id": "dept_finance",
+   "owner_role_id": null,
+   "uri": "https://www.tsb.co.uk/content/dam/tsb-public/documents/investors/financial-results-and-reports/2018/tsb-banking-group-ara-2018.pdf",
+   "mime_type": "application/pdf",
+   "status": "current",
+   "sensitivity": "general",
+   "covers_entity_ids": [],
+   "framework_refs": [],
+   "summary": "Annual report: 2018 post-migration charges and their breakdown, the provider recovery estimate, 2017 comparatives for income, costs and headcount. Linked, not copied.",
+   "synthetic": true,
+   "ingested": true,
+   "uploaded_at": "2026-09-27T12:00:00Z"
+  },
+  {
+   "id": "doc_platform_map_modeled",
+   "title": "Modeled platform and service dependency map",
+   "doc_type": "architecture_note",
+   "department_id": "dept_engineering",
+   "owner_role_id": null,
+   "uri": "artifacts/tsb_platform_map_modeled.md",
+   "mime_type": "text/markdown",
+   "status": "current",
+   "sensitivity": "general",
+   "covers_entity_ids": [],
+   "framework_refs": [],
+   "summary": "MODELED from public reporting: which channels, datasets and recovery paths depend on the old and new platforms. Not an internal document.",
+   "synthetic": true,
+   "ingested": true,
+   "uploaded_at": "2026-09-27T12:00:00Z"
+  },
+  {
+   "id": "doc_supplier_register_modeled",
+   "title": "Modeled supplier and sub-supplier register",
+   "doc_type": "contract",
+   "department_id": "dept_compliance",
+   "owner_role_id": null,
+   "uri": "artifacts/tsb_supplier_register_modeled.md",
+   "mime_type": "text/markdown",
+   "status": "current",
+   "sensitivity": "general",
+   "covers_entity_ids": [],
+   "framework_refs": [],
+   "summary": "MODELED from public reporting: the platform provider, its sub-suppliers and the old host's exit terms. Not an internal document.",
+   "synthetic": true,
+   "ingested": true,
+   "uploaded_at": "2026-09-27T12:00:00Z"
+  },
+  {
+   "id": "doc_recovery_runbook_modeled",
+   "title": "Modeled service recovery runbook",
+   "doc_type": "runbook",
+   "department_id": "dept_operations",
+   "owner_role_id": null,
+   "uri": "artifacts/tsb_recovery_runbook_modeled.md",
+   "mime_type": "text/markdown",
+   "status": "current",
+   "sensitivity": "general",
+   "covers_entity_ids": [
+    "wf_service_recovery"
+   ],
+   "framework_refs": [],
+   "summary": "MODELED: recovery steps for customer channels after cutover. Public reporting says no tested rollback existed.",
+   "synthetic": true,
+   "ingested": true,
+   "uploaded_at": "2026-09-27T12:00:00Z"
+  }
+ ],
+ "evidence": [
+  {
+   "id": "ev_tsb_customers",
+   "source_type": "policy",
+   "document_id": "doc_fca_final_notice",
+   "location": null,
+   "snippet": "Regulator summary: about 5.2 million customers were moved to the new platform in April 2018.",
+   "synthetic": false
+  },
+  {
+   "id": "ev_tsb_fourth_parties",
+   "source_type": "workflow_map",
+   "document_id": "doc_fca_final_notice",
+   "location": null,
+   "snippet": "Regulator summary: the new platform provider relied on 85 third parties of its own, which the bank had not assessed before migration.",
+   "synthetic": false
+  },
+  {
+   "id": "ev_tsb_no_rollback",
+   "source_type": "workflow_map",
+   "document_id": "doc_fca_final_notice",
+   "location": null,
+   "snippet": "Regulator summary: once customer data moved there was no way back to the old platform, so customer service recovery depended on a fallback that would no longer exist.",
+   "synthetic": false
+  },
+  {
+   "id": "ev_tsb_provider_experience",
+   "source_type": "architecture_note",
+   "document_id": "doc_fca_final_notice",
+   "location": null,
+   "snippet": "Regulator summary: the provider had not run a UK bank platform of this kind before.",
+   "synthetic": false
+  },
+  {
+   "id": "ev_tsb_complaints",
+   "source_type": "incident",
+   "document_id": "doc_fca_final_notice",
+   "location": null,
+   "snippet": "Regulator summary: 225,492 complaints and about GBP 32.7M redress to customers.",
+   "synthetic": false
+  },
+  {
+   "id": "ev_tsb_fines",
+   "source_type": "policy",
+   "document_id": "doc_pra_notice",
+   "location": null,
+   "snippet": "Regulator summary: fines of GBP 29.75M (FCA) and GBP 18.9M (PRA) in December 2022 for operational resilience failings.",
+   "synthetic": false
+  },
+  {
+   "id": "ev_tsb_saving_target",
+   "source_type": "finance_forecast",
+   "document_id": "doc_savings_plan",
+   "location": null,
+   "snippet": "Press summary: the owner expected about GBP 160M a year of pre-tax savings by the third full year; the previous owner contributed GBP 450M.",
+   "synthetic": false
+  },
+  {
+   "id": "ev_tsb_charges",
+   "source_type": "finance_forecast",
+   "document_id": "doc_charges_2018",
+   "location": null,
+   "snippet": "Annual report summary: GBP 330.2M of post-migration charges in 2018; about GBP 153M estimated recovery from the provider was accrued, not yet paid.",
+   "synthetic": false
+  },
+  {
+   "id": "ev_tsb_platform_map",
+   "source_type": "architecture_note",
+   "document_id": "doc_platform_map_modeled",
+   "location": null,
+   "snippet": "Modeled: digital, telephone and branch channels run on the new platform; payments and fraud monitoring depend on the customer ledger.",
+   "synthetic": true
+  },
+  {
+   "id": "ev_tsb_lbg_exit_terms",
+   "source_type": "contract",
+   "document_id": "doc_supplier_register_modeled",
+   "location": null,
+   "snippet": "Modeled: the exit terms with the old host do not say whether a usable copy of the service is kept after exit.",
+   "synthetic": true
+  },
+  {
+   "id": "ev_tsb_recovery_runbook",
+   "source_type": "runbook",
+   "document_id": "doc_recovery_runbook_modeled",
+   "location": null,
+   "snippet": "Modeled: channel recovery steps assume a restore point; no rollback rehearsal is recorded.",
+   "synthetic": true
+  }
+ ]
+}

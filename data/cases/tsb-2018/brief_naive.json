@@ -1,0 +1,69 @@
+{
+ "schema_version": "2.1.1",
+ "decision_id": "dec_tsb_platform_exit",
+ "decision_type": "vendor_consolidation",
+ "title": "Exit the transitional platform and move all customers to the new platform",
+ "statement": "Move all 5.2 million customers off the Lloyds hosted platform onto Proteo4UK in one weekend and end the transitional services, to save about GBP 160M (about $214M) a year, without breaking a mandatory control or hurting customers by more than 2%.",
+ "goal": {
+  "metric": "annual_savings_usd",
+  "target": 213808000,
+  "unit": "usd",
+  "basis": "gross",
+  "direction": "at_least"
+ },
+ "horizon_days": 365,
+ "candidate_interventions": [
+  {
+   "id": "exit_lbg_platform",
+   "kind": "action",
+   "type": "remove_vendor",
+   "target_entity_id": "vendor_lbg",
+   "start_day": 20,
+   "one_time_cost_usd": 0,
+   "params": {},
+   "rationale": "Single-weekend cutover, then end the transitional services"
+  }
+ ],
+ "protected_entity_ids": [],
+ "constraints": [
+  {
+   "id": "c_compliance",
+   "metric": "compliance_controls_broken",
+   "operator": "==",
+   "threshold": 0,
+   "unit": "count",
+   "hard": true,
+   "description": "No mandatory control may break"
+  },
+  {
+   "id": "c_customer",
+   "metric": "customer_impact_pct",
+   "operator": "<=",
+   "threshold": 2,
+   "unit": "percent",
+   "hard": true,
+   "description": "Customer impact within 2%"
+  },
+  {
+   "id": "c_coverage",
+   "metric": "critical_coverage_pct",
+   "operator": ">=",
+   "threshold": 100,
+   "unit": "percent",
+   "hard": true,
+   "description": "Every critical dataset keeps a provider"
+  }
+ ],
+ "futures": [
+  "act_now",
+  "inaction",
+  "delay"
+ ],
+ "delay_days": 90,
+ "active_pressure_ids": [
+  "pr_tsa_fee_growth"
+ ],
+ "seed": 42,
+ "mc_samples": 1000,
+ "created_by": "demo_user"
+}
