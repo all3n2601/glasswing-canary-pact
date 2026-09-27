@@ -154,6 +154,8 @@ def default_cache_dir() -> Path:
 
 
 DEFAULT_AGENT_DEADLINE_SECONDS = 120.0
+# Marks an agent answer that replay could not find and replaced with the mock answer for that agent.
+MOCK_FALLBACK_NOTE = "mock fallback"
 
 
 class DeadlineExceeded(TimeoutError):
@@ -266,7 +268,7 @@ class AgentLLM:
             return LLMResult(mock_output(output_model, context), "ok", metrics)
         decision_id = context.brief.decision_id
         if self.mode == "replay":
-            result = self._from_cache(agent_id, decision_id, digest, output_model, metrics, [])
+            result = self._from_cache(agent_id, decision_id, digest, output_model, metrics, [], mock_context=context)
         else:
             result = self._live(agent_id, decision_id, model_id, digest, messages, output_model, metrics,
                                 person_roles(context))
@@ -330,12 +332,18 @@ class AgentLLM:
         return max(candidates, key=lambda p: p.stat().st_mtime, default=None)
 
     def _from_cache(self, agent_id: str, decision_id: str, digest: str, output_model: type[BaseModel],
-                    metrics: CallMetrics, errors: list[str], retries: int = 0) -> LLMResult:
+                    metrics: CallMetrics, errors: list[str], retries: int = 0,
+                    mock_context: AgentContext | None = None) -> LLMResult:
         exact = self._agent_dir(agent_id) / f"{digest}.json"
         if exact.is_file():
             path, status = exact, "replayed"
         else:
             fallback = self._fallback(agent_id, decision_id)
+            if fallback is None and mock_context is not None:
+                # Replay only: one uncached agent gets its mock answer instead of leaving the run a perspective short.
+                metrics.model_id = "mock"
+                return LLMResult(mock_output(output_model, mock_context), "ok", metrics, retries,
+                                 [*errors, f"{MOCK_FALLBACK_NOTE}: no cached answer for {agent_id} on {decision_id}"])
             if fallback is None:
                 return LLMResult(None, "unavailable", metrics, retries,
                                  [*errors, f"no cached answer for {agent_id} on {decision_id}"])

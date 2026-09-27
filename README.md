@@ -146,6 +146,7 @@ Important environment variables (see `.env.example`; names only here):
   the stub keeps offline tests and the eval harness running without the real packages.
 - `SCIFORIUM_API_KEY`, `SCIFORIUM_BASE_URL`, `MODEL_STRONG`, `MODEL_FAST`: live model access.
 - `CANARY_ALLOW_LIVE`: must be `true` before a run may use `llm_mode=live`.
+- `CANARY_LLM_MODE`: default agent mode (`mock`, `replay` or `live`) for runs that do not pass one.
 - `CANARY_STRUCTURED_OUTPUT`: `auto` (default), `json_schema` or `function_calling`.
 - `CANARY_SIM_MODE`: `full` (default; expected value with p10 = p50 = p90 until Monte Carlo lands)
   or `quick` (point values, no percentiles).
@@ -153,11 +154,15 @@ Important environment variables (see `.env.example`; names only here):
 - `CANARY_DEMO_APPROVER_EMAIL`, `CANARY_DEMO_APPROVER_PASSWORD`: create the demo approver.
 - `DATABASE_URL`, `CANARY_DB_SCHEMA`: optional Postgres (tables live in a private `canary` schema).
 
-LLM modes are chosen per run with `POST /decisions?llm_mode=mock|replay|live`. The default is
-`live` when `CANARY_ALLOW_LIVE` is `true` and `replay` otherwise. Replay answers from the recorded
-cache; when the cache holds nothing for that decision the run uses mock answers and says so in the
-package's assumptions. Every successful live answer is written to the
-cache (`data/artifacts/llm_cache`, or `CANARY_LLM_CACHE_DIR`).
+LLM modes are chosen per run with `POST /decisions?llm_mode=mock|replay|live`. Without one, the
+default is `CANARY_LLM_MODE` if set, else `live` when `CANARY_ALLOW_LIVE` is `true`, else `replay`.
+Replay answers from the recorded cache. When the cache holds nothing for that decision the whole run
+uses mock answers; when only some agents are missing, just those agents get their mock answer.
+Either way the package's assumptions say so. Every successful live answer is written to the cache
+(`data/artifacts/llm_cache`, or `CANARY_LLM_CACHE_DIR`).
+
+After the Sciforium keys are deleted, set `CANARY_ALLOW_LIVE=false` (or `CANARY_LLM_MODE=replay`) so
+runs use the saved answers instead of trying live calls.
 
 Offline demo with no model or database: start the API and replay the recorded run.
 

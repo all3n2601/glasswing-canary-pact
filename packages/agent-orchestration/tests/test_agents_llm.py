@@ -54,7 +54,10 @@ def test_replay_round_trip(tmp_path, brief, twin, settings, live_settings) -> No
 
     miss = call(replay, context, messages=[{"role": "user", "content": "different"}])
     assert miss.status == "fallback_cached" and miss.output == live.output
-    assert call(replay, context, agent_id="finance").status == "unavailable"
+    # Replay gives an agent with no cached answer its mock answer, marked as a mock fallback.
+    uncached = call(replay, context, agent_id="finance")
+    assert (uncached.status, uncached.metrics.model_id) == ("ok", "mock")
+    assert any(e.startswith("mock fallback") for e in uncached.errors)
 
 
 def test_validation_failure_retries_once_with_error(tmp_path, brief, twin, settings, live_settings) -> None:
@@ -112,7 +115,8 @@ def test_fallback_uses_same_decision_and_newest_mtime(tmp_path, brief, twin, set
     result = call(replay, make_context(brief, twin, settings))
     assert result.status == "fallback_cached" and result.output.act_now_view.summary == "new answer"
     other = brief.model_copy(update={"decision_id": "dec_unseen"})
-    assert call(replay, make_context(other, twin, settings)).status == "unavailable"
+    unseen = call(replay, make_context(other, twin, settings))
+    assert (unseen.status, unseen.metrics.model_id) == ("ok", "mock")
 
 
 LLM_ENV = ["SCIFORIUM_API_URL", "SCIFORIUM_BASE_URL", "SCIFORIUM_MODEL", "SCIFORIUM_TEMPERATURE",
@@ -345,3 +349,10 @@ def test_auto_retries_400s_that_name_the_response_format(fake_chat, error) -> No
     fake_chat.script = [error, reply(parsed_output())]
     assert live("auto").output == parsed_output()
     assert [m for m, _ in fake_chat.methods] == ["json_schema", "function_calling"]
+
+
+def test_live_cache_miss_is_still_unavailable(tmp_path, brief, twin, settings, live_settings) -> None:
+    # Only replay substitutes mock answers; a failed live call with nothing cached stays unavailable.
+    failing = AgentLLM(live_settings, cache_dir=tmp_path, live_call=FakeLive(RuntimeError("down")))
+    result = call(failing, make_context(brief, twin, settings))
+    assert result.status == "unavailable" and not any(e.startswith("mock fallback") for e in result.errors)

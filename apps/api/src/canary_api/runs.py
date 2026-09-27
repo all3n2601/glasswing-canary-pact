@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Callable, Coroutine, Literal
 
 from agent_orchestration import run_decision
-from agent_orchestration.llm import cache_has_decision
+from agent_orchestration.llm import MOCK_FALLBACK_NOTE, cache_has_decision
 from pydantic import BaseModel
 
 from contracts_py.api import ReplayInfo
@@ -84,8 +84,17 @@ def live_allowed() -> bool:
     return os.environ.get("CANARY_ALLOW_LIVE", "").strip().lower() == "true"
 
 
+LLM_MODES: tuple[LlmMode, ...] = ("mock", "replay", "live")
+
+
 def default_llm_mode() -> LlmMode:
-    # Live is the default only where live calls are allowed; each live agent still falls back to the cache.
+    # CANARY_LLM_MODE wins; otherwise live only where live calls are allowed (each live agent still falls back
+    # to the cache), else replay.
+    configured = os.environ.get("CANARY_LLM_MODE", "").strip().lower()
+    if configured in LLM_MODES:
+        return configured  # type: ignore[return-value]
+    if configured:
+        log.warning("CANARY_LLM_MODE must be mock, replay or live; ignoring %r", configured)
     return "live" if live_allowed() else "replay"
 
 
@@ -143,6 +152,22 @@ def prepare_payload(kind: EventType, payload: BaseModel, twin: Twin, extra_assum
     return data
 
 
+def mock_fallback_agents(run: Any) -> list[str]:
+    """Agents whose replayed answer was missing and replaced by their mock answer, in the order they finished."""
+    agents: list[str] = []
+    for event in run.events:
+        if event.type in (EventType.agent_completed, EventType.challenge_raised):
+            assessment = event.payload
+            if any(e.startswith(MOCK_FALLBACK_NOTE) for e in assessment.validation.errors) \
+                    and assessment.agent_id not in agents:
+                agents.append(assessment.agent_id)
+    return agents
+
+
+def mock_fallback_assumption(agents: list[str]) -> str:
+    return f"Agents with no recorded answer ran on mock answers: {', '.join(agents)}"
+
+
 def _publish(run_id: str, kind: EventType, payload: BaseModel, actor: str, scenario_id: str | None,
              future: Future | None, twin: Twin, extra_assumptions: list[str]) -> None:
     run = runtime.bus.runs[run_id]
@@ -154,7 +179,12 @@ def _publish(run_id: str, kind: EventType, payload: BaseModel, actor: str, scena
     try:
         if kind is EventType.run_failed and isinstance(payload, RunFailed):
             payload = RunFailed(reason=_redact(payload.reason))
-        data = prepare_payload(kind, payload, twin, extra_assumptions)
+        assumptions = extra_assumptions
+        if kind is EventType.package_ready:
+            mocked = mock_fallback_agents(run)
+            if mocked:
+                assumptions = [*extra_assumptions, mock_fallback_assumption(mocked)]
+        data = prepare_payload(kind, payload, twin, assumptions)
         runtime.bus.publish(run_id, kind, data, actor=actor, scenario_id=scenario_id, future=future)
     except Exception as exc:
         log.exception("could not publish %s for %s", kind, run_id)
