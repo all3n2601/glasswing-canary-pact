@@ -10,7 +10,15 @@ from pathlib import Path
 from typing import Any, Callable, Literal
 
 from contracts_py.decision import CandidatePlan, DecisionBrief, Intervention, Scenario
-from contracts_py.engine import BlastRadius, FutureComparison, PortfolioComparison, SimulationResult, VendorOverlap
+from contracts_py.engine import (
+    BlastRadius,
+    FutureComparison,
+    MissingQuestion,
+    MitigationComparison,
+    PortfolioComparison,
+    SimulationResult,
+    VendorOverlap,
+)
 from contracts_py.enums import EntityType, Sensitivity
 from contracts_py.twin import (
     AgentView,
@@ -93,6 +101,16 @@ def vendor_overlap(twin: Twin, vendor_ids: list[str]) -> list[VendorOverlap]:
     return _resolve(ENGINE_MODULE, "vendor_overlap")(twin, vendor_ids)
 
 
+def mitigate(twin: Twin, brief: DecisionBrief, plan: CandidatePlan, actions: list[Intervention], *,
+             settings: OrganizationSettings | None = None, run_id: str = "run_adhoc") -> MitigationComparison:
+    return _resolve(ENGINE_MODULE, "mitigate")(twin, brief, plan, actions, settings=settings, run_id=run_id)
+
+
+def missing_questions(twin: Twin, brief: DecisionBrief, plan: CandidatePlan, *,
+                      settings: OrganizationSettings | None = None, run_id: str = "run_adhoc") -> list[MissingQuestion]:
+    return _resolve(ENGINE_MODULE, "missing_questions")(twin, brief, plan, settings=settings, run_id=run_id)
+
+
 def check_result(obj: Any, twin: Twin) -> list[ValidationIssue]:
     return _resolve(ENGINE_MODULE, "check_result")(obj, twin)
 
@@ -103,6 +121,10 @@ def load_twin(twin_path: Path, snippets_path: Path | None = None) -> Twin:
 
 def build_twin(data: Twin | dict[str, Any], snippets: dict[str, str] | None = None) -> Twin:
     return _resolve(TWIN_MODULE, "build_twin")(data, snippets)
+
+
+def load_mitigation_catalog(path: Path | None = None, twin: Twin | None = None) -> list[Intervention]:
+    return _resolve(TWIN_MODULE, "load_mitigation_catalog")(path, twin)
 
 
 def validate_twin(twin: Twin) -> list[ValidationIssue]:

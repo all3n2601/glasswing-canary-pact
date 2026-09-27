@@ -279,3 +279,13 @@ def test_recommendation_action_and_optional_plan() -> None:
         Recommendation.model_validate(base | {"plan_id": "plan_a", "action": "do_not_proceed"})
     with pytest.raises(ValidationError, match="no plan"):
         Recommendation.model_validate(base)
+
+
+def test_proceed_with_mitigations_only_when_acting() -> None:
+    from contracts_py.package import Recommendation
+
+    base = {"plan_id": "plan_a_mitigated", "result_id": "res_a", "headline": "h", "action": "proceed_with_mitigations"}
+    assert Recommendation.model_validate(base | {"future": "act_now"}).action == "proceed_with_mitigations"
+    for future in ("inaction", "delay"):
+        with pytest.raises(ValidationError, match="does not match future"):
+            Recommendation.model_validate(base | {"future": future})

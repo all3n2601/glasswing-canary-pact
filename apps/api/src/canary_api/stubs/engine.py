@@ -2,7 +2,15 @@ from datetime import date
 from typing import Any
 
 from contracts_py.decision import CandidatePlan, DecisionBrief, Intervention, Scenario
-from contracts_py.engine import BlastRadius, FutureComparison, PortfolioComparison, SimulationResult, VendorOverlap
+from contracts_py.engine import (
+    BlastRadius,
+    FutureComparison,
+    MissingQuestion,
+    MitigationComparison,
+    PortfolioComparison,
+    SimulationResult,
+    VendorOverlap,
+)
 from contracts_py.enums import DocumentStatus, EntityType, Future
 from contracts_py.twin import (
     AgentView,
@@ -69,6 +77,18 @@ def blast_radius(result: SimulationResult, twin: Twin) -> BlastRadius:
     return results.act_now_blast_radius(result.run_id, decision_id)
 
 
+def mitigate(twin: Twin, brief: DecisionBrief, plan: CandidatePlan, actions: list[Intervention], *,
+             settings: OrganizationSettings | None = None, run_id: str = "run_adhoc") -> MitigationComparison:
+    from canary_api.engine_port import EngineNotReady
+
+    raise EngineNotReady("the stub engine has no mitigation model; set ENGINE_IMPL=real to evaluate mitigations")
+
+
+def missing_questions(twin: Twin, brief: DecisionBrief, plan: CandidatePlan, *,
+                      settings: OrganizationSettings | None = None, run_id: str = "run_adhoc") -> list[MissingQuestion]:
+    return []
+
+
 def check_result(obj: Any, twin: Twin) -> list[ValidationIssue]:
     return []
 
@@ -84,6 +104,10 @@ def build_twin(data: Twin | dict[str, Any], snippets: dict[str, str] | None = No
         if snippets and evidence.id in snippets:
             evidence.snippet = snippets[evidence.id]
     return twin
+
+
+def load_mitigation_catalog(path: Any = None, twin: Twin | None = None) -> list[Intervention]:
+    return []
 
 
 def validate_twin(twin: Twin) -> list[ValidationIssue]:

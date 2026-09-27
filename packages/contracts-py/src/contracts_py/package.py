@@ -39,12 +39,19 @@ def find_person_tokens(value: Any) -> list[str]:
     return found
 
 
-RecommendationAction = Literal["proceed", "do_not_proceed", "delay"]
+RecommendationAction = Literal["proceed", "proceed_with_mitigations", "do_not_proceed", "delay"]
 ACTION_FOR_FUTURE: dict[Future, RecommendationAction] = {
     Future.act_now: "proceed",
     Future.inaction: "do_not_proceed",
     Future.delay: "delay",
     Future.alternative: "proceed",
+}
+# Acting now can also mean acting with the engine's mitigations applied first.
+ALLOWED_ACTIONS: dict[Future, set[str]] = {
+    Future.act_now: {"proceed", "proceed_with_mitigations"},
+    Future.inaction: {"do_not_proceed"},
+    Future.delay: {"delay"},
+    Future.alternative: {"proceed", "proceed_with_mitigations"},
 }
 
 
@@ -62,7 +69,7 @@ class Recommendation(Strict):
         expected = ACTION_FOR_FUTURE[self.future]
         if "action" not in self.model_fields_set:
             self.action = expected
-        elif self.action != expected:
+        elif self.action not in ALLOWED_ACTIONS[self.future]:
             raise ValueError(f"action {self.action} does not match future {self.future}")
         if self.plan_id is None and self.future is not Future.inaction:
             raise ValueError("only a do-nothing recommendation may have no plan")

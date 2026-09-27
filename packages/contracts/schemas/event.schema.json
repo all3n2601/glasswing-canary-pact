@@ -3482,6 +3482,7 @@
           "default": "proceed",
           "enum": [
             "proceed",
+            "proceed_with_mitigations",
             "do_not_proceed",
             "delay"
           ],

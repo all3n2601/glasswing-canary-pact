@@ -16,7 +16,7 @@ from orchestration_helpers import NOW, Recorder, ScriptedLLM, SpyEngine, metrics
 
 BASE_PHASES = ["validating", "building_futures", "optimizing", "running_agents", "propagating", "challenging",
                "propagating"]
-TAIL_PHASES = ["comparing_futures", "generating_package", "awaiting_approval"]
+TAIL_PHASES = ["comparing_futures", "mitigating", "generating_package", "awaiting_approval"]
 
 
 def run(brief, twin, settings, llm, engine=None):
