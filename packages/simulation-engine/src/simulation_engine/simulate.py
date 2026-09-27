@@ -22,8 +22,6 @@ with ``p10 = p50 = p90 = net_value_usd``, the brief's seed, and assumptions sayi
 
 from __future__ import annotations
 
-import hashlib
-
 from contracts_py.decision import CandidatePlan, DecisionBrief, Intervention, Scenario
 from contracts_py.engine import SimulationResult, ValueBreakdown
 from contracts_py.enums import ActionType, Future, Polarity
@@ -31,10 +29,10 @@ from contracts_py.twin import OrganizationSettings, Twin
 
 from .constraints import rejection_reasons
 from .pressures import Harm, active_pressures, price_pressures
+from .propagation import MAX_ID_LENGTH, bounded_id  # re-exported: futures, optimizer and the orchestrator's pin
 from .quick import QUICK_ASSUMPTION, evaluate
 from .value import accrual_days, monthly_net
 
-MAX_ID_LENGTH = 80
 MODES = ("quick", "full")
 FUTURES_ASSUMPTION = ("Midpoint edge strengths; every value is a point estimate; baseline pressures are priced in "
                       "expected-value form (hazards as probability x cost per event x months, ranges at their point "
@@ -49,14 +47,6 @@ EXPECTED_VALUE_ASSUMPTIONS = [
 ]
 UNQUANTIFIED_ASSUMPTION = ("The proposed change is unquantified; the engine reports graph scope without inventing "
                            "value effects.")
-
-
-def bounded_id(prefix: str, body: str) -> str:
-    """``prefix + body``, hashed down when it would exceed the contract's 80-character ID limit."""
-    candidate = prefix + body
-    if len(candidate) <= MAX_ID_LENGTH:
-        return candidate
-    return prefix + hashlib.sha256(body.encode()).hexdigest()[:24]
 
 
 def plan_interventions(brief: DecisionBrief, plan: CandidatePlan) -> list[Intervention]:

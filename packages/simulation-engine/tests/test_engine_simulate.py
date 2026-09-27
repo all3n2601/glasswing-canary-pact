@@ -23,6 +23,8 @@ from simulation_engine import (
     simulate,
 )
 from simulation_engine.knowledge import downgrade_documented
+from simulation_engine.propagation import impact_id
+from simulation_engine.simulate import MAX_ID_LENGTH, bounded_id
 
 TWIN = load_twin(default_fixture_path())
 DATA = default_fixture_path().parent
@@ -265,3 +267,25 @@ def test_workflow_coverage_follows_rule_11():
     assert vendor.workflow_coverage == []
     assert all(e.type is not EntityType.person_token for e in TWIN.entities if e.id in
                {o for c in result.workflow_coverage for o in c.owners_before})
+
+
+# Literal outputs, hashes being sha256(body).hexdigest()[:24], so agent_orchestration's copy can pin the same strings.
+BOUNDED_IDS = [
+    ("scn_", "run_abc_act_now_plan_beacon_echo", "scn_run_abc_act_now_plan_beacon_echo"),
+    ("scn_", "run_" + "a" * 72, "scn_run_" + "a" * 72),  # exactly 80 characters: unchanged
+    ("scn_", "run_" + "a" * 73, "scn_085742e40233b4a45238971b"),  # 81 characters: hashed
+    ("scn_", "run_" + "x" * 66 + "_act_now_none", "scn_33b70b53c15c4e4786d42754"),
+    ("res_", "run_" + "x" * 66 + "_quick_0123456789ab", "res_41c29152b46d17e5e009a677"),
+    ("imp_", "vendor_" + "y" * 80 + "_loss", "imp_b39328cf944ff6874dcfb2b1"),
+]
+
+
+@pytest.mark.parametrize(("prefix", "body", "expected"), BOUNDED_IDS)
+def test_bounded_id_keeps_short_ids_and_hashes_the_body_of_long_ones(prefix, body, expected):
+    assert bounded_id(prefix, body) == expected
+    assert len(expected) <= MAX_ID_LENGTH == 80
+
+
+def test_impact_ids_are_bounded_by_the_same_rule():
+    assert impact_id("sys_warehouse", "loss") == "imp_sys_warehouse_loss"
+    assert impact_id("vendor_" + "y" * 80, "loss") == "imp_b39328cf944ff6874dcfb2b1"

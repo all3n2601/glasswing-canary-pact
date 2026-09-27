@@ -21,7 +21,7 @@ from contracts_py.twin import OrganizationSettings, Twin
 from .constraints import ScenarioMetrics, evaluate_constraints, goal_met, rejection_reasons
 from .interventions import AppliedScenario, apply_interventions
 from .knowledge import downgrade_documented, knowledge_coverage, knowledge_impacts, workflow_coverage
-from .propagation import DELAYED_AFTER_DAYS, Propagation, impact_id, impact_ledger, propagate
+from .propagation import DELAYED_AFTER_DAYS, Propagation, bounded_id, impact_id, impact_ledger, propagate
 from .risk import risk_score
 from .value import price_harms, value_breakdown
 
@@ -134,4 +134,5 @@ def quick_impact(twin: Twin, interventions: list[Intervention], *, brief: Decisi
     """
     digest = hashlib.sha256(json.dumps(sorted(i.id for i in interventions)).encode()).hexdigest()[:12]
     return evaluate(twin, interventions, brief=brief, settings=settings or OrganizationSettings(), run_id=run_id,
-                    scenario_id=f"scn_{run_id}_{Future.act_now.value}_none", result_id=f"res_{run_id}_quick_{digest}")
+                    scenario_id=bounded_id("scn_", f"{run_id}_{Future.act_now.value}_none"),
+                    result_id=bounded_id("res_", f"{run_id}_quick_{digest}"))
