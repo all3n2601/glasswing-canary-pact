@@ -8,6 +8,7 @@ from .optimizer import optimize
 from .overlap import OVERLAP_WEIGHTS, unique_contribution, vendor_overlap
 from .pressures import PricedPressures, active_pressures, price_pressures
 from .propagation import Effect, Propagation, impact_ledger, propagate
+from .questions import missing_questions
 from .quick import quick_impact
 from .simulate import simulate
 
@@ -15,6 +16,7 @@ __all__ = [
     "check_result",
     "quick_impact",
     "simulate",
+    "missing_questions",
     "compare_futures",
     "optimize",
     "blast_radius",
