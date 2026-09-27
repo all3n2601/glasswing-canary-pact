@@ -1,0 +1,5593 @@
+{
+ "as_of_date": "2026-09-26",
+ "blast_radius": {
+  "act_now": {
+   "departments": [
+    {
+     "department_id": "dept_ai_data",
+     "headline": "AI and Data: 2 harmed, 1 improved; most severe: Warehouse lineage knowledge loses 90% of capacity",
+     "impact_ids": [
+      "imp_remove_data_platform_lead_savings",
+      "imp_kn_warehouse_lineage_loss",
+      "imp_role_data_platform_lead_loss"
+     ],
+     "polarity": "harm",
+     "severity": 5
+    },
+    {
+     "department_id": "dept_finance",
+     "headline": "Finance: 8 harmed, 5 improved; most severe: Monthly financial close loses 90% of capacity ($75.41M)",
+     "impact_ids": [
+      "imp_remove_close_accountant_savings",
+      "imp_remove_gl_accountant_savings",
+      "imp_remove_reporting_analyst_savings",
+      "imp_remove_revenue_accountant_savings",
+      "imp_remove_ar_specialist_savings",
+      "imp_kpi_gross_margin_loss",
+      "imp_role_ar_specialist_loss",
+      "imp_role_close_accountant_loss",
+      "imp_role_gl_accountant_loss",
+      "imp_role_reporting_analyst_loss",
+      "imp_role_revenue_accountant_loss",
+      "imp_wf_financial_close_loss",
+      "imp_wf_financial_close_knowledge_kn_warehouse_lineage"
+     ],
+     "polarity": "harm",
+     "severity": 5
+    },
+    {
+     "department_id": "dept_operations",
+     "headline": "Operations: 6 harmed, 2 improved; most severe: Billing-recon exception handling loses 96% of capacity",
+     "impact_ids": [
+      "imp_remove_billing_ops_lead_savings",
+      "imp_remove_billing_specialist_savings",
+      "imp_kn_billing_exception_loss",
+      "imp_role_billing_ops_lead_loss",
+      "imp_role_billing_specialist_loss",
+      "imp_wf_billing_recon_loss",
+      "imp_wf_invoicing_loss",
+      "imp_wf_billing_recon_knowledge_kn_billing_exception"
+     ],
+     "polarity": "harm",
+     "severity": 5
+    }
+   ],
+   "edges": [
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Pressure",
+     "level": "direct",
+     "source": "plan_naive",
+     "target": "pr_billing_recon_hazard"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Pressure",
+     "level": "direct",
+     "source": "pr_billing_recon_hazard",
+     "target": "wf_billing_recon"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Pressure",
+     "level": "direct",
+     "source": "plan_naive",
+     "target": "pr_contractor_cost_growth"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Pressure",
+     "level": "direct",
+     "source": "pr_contractor_cost_growth",
+     "target": "dept_operations"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Pressure",
+     "level": "direct",
+     "source": "plan_naive",
+     "target": "pr_lineage_holder_attrition"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Pressure",
+     "level": "direct",
+     "source": "pr_lineage_holder_attrition",
+     "target": "kn_warehouse_lineage"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Direct impact",
+     "level": "direct",
+     "source": "plan_naive",
+     "target": "role_close_accountant"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Direct impact",
+     "level": "direct",
+     "source": "plan_naive",
+     "target": "role_gl_accountant"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Direct impact",
+     "level": "direct",
+     "source": "plan_naive",
+     "target": "role_reporting_analyst"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Direct impact",
+     "level": "direct",
+     "source": "plan_naive",
+     "target": "role_data_platform_lead"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Direct impact",
+     "level": "direct",
+     "source": "plan_naive",
+     "target": "role_billing_ops_lead"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Direct impact",
+     "level": "direct",
+     "source": "plan_naive",
+     "target": "role_billing_specialist"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Direct impact",
+     "level": "direct",
+     "source": "plan_naive",
+     "target": "role_revenue_accountant"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Direct impact",
+     "level": "direct",
+     "source": "plan_naive",
+     "target": "role_ar_specialist"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Indirect impact",
+     "level": "dependent",
+     "source": "role_billing_ops_lead",
+     "target": "kn_billing_exception"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Indirect impact",
+     "level": "dependent",
+     "source": "role_data_platform_lead",
+     "target": "kn_warehouse_lineage"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Revenue effect",
+     "level": "second_order",
+     "source": "wf_invoicing",
+     "target": "kpi_gross_margin"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": true,
+     "label": "Critical constraint",
+     "level": "dependent",
+     "source": "kn_billing_exception",
+     "target": "wf_billing_recon"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": true,
+     "label": "Critical constraint",
+     "level": "dependent",
+     "source": "kn_warehouse_lineage",
+     "target": "wf_financial_close"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": true,
+     "label": "Critical constraint",
+     "level": "second_order",
+     "source": "wf_billing_recon",
+     "target": "wf_invoicing"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Revenue effect",
+     "level": null,
+     "source": "kpi_gross_margin",
+     "target": "outcome_company"
+    }
+   ],
+   "future": "act_now",
+   "nodes": [
+    {
+     "category": null,
+     "department_id": null,
+     "entity_id": null,
+     "first_effect_day": null,
+     "headline": "8 interventions: remove_close_accountant, remove_gl_accountant, remove_reporting_analyst, remove_data_platform_lead, remove_billing_ops_lead, remove_billing_specialist, remove_revenue_accountant, remove_ar_specialist",
+     "impact_ids": [],
+     "kind": "decision",
+     "level": null,
+     "node_id": "plan_naive",
+     "polarity": null,
+     "pressure_id": null,
+     "severity": null,
+     "value_usd": null
+    },
+    {
+     "category": "financial",
+     "department_id": null,
+     "entity_id": null,
+     "first_effect_day": 0,
+     "headline": "Pressure on Billing reconciliation: $106.17M expected cost",
+     "impact_ids": [
+      "imp_pr_billing_recon_hazard_pressure"
+     ],
+     "kind": "pressure",
+     "level": "direct",
+     "node_id": "pr_billing_recon_hazard",
+     "polarity": "harm",
+     "pressure_id": "pr_billing_recon_hazard",
+     "severity": 5,
+     "value_usd": 106167724
+    },
+    {
+     "category": "financial",
+     "department_id": null,
+     "entity_id": null,
+     "first_effect_day": 0,
+     "headline": "Pressure on Operations: $211.6M expected cost",
+     "impact_ids": [
+      "imp_pr_contractor_cost_growth_pressure"
+     ],
+     "kind": "pressure",
+     "level": "direct",
+     "node_id": "pr_contractor_cost_growth",
+     "polarity": "harm",
+     "pressure_id": "pr_contractor_cost_growth",
+     "severity": 5,
+     "value_usd": 211598071
+    },
+    {
+     "category": "financial",
+     "department_id": null,
+     "entity_id": null,
+     "first_effect_day": 0,
+     "headline": "Pressure on Warehouse lineage knowledge: $43.64M expected cost",
+     "impact_ids": [
+      "imp_pr_lineage_holder_attrition_pressure"
+     ],
+     "kind": "pressure",
+     "level": "direct",
+     "node_id": "pr_lineage_holder_attrition",
+     "polarity": "harm",
+     "pressure_id": "pr_lineage_holder_attrition",
+     "severity": 5,
+     "value_usd": 43635375
+    },
+    {
+     "category": "financial",
+     "department_id": "dept_operations",
+     "entity_id": "dept_operations",
+     "first_effect_day": 0,
+     "headline": "Operations: $211.6M expected pressure cost",
+     "impact_ids": [
+      "imp_pr_contractor_cost_growth_pressure"
+     ],
+     "kind": "department",
+     "level": "direct",
+     "node_id": "dept_operations",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 5,
+     "value_usd": 211598071
+    },
+    {
+     "category": "ownership",
+     "department_id": "dept_operations",
+     "entity_id": "kn_billing_exception",
+     "first_effect_day": 30,
+     "headline": "Billing-recon exception handling loses 96% of capacity",
+     "impact_ids": [
+      "imp_kn_billing_exception_loss"
+     ],
+     "kind": "entity",
+     "level": "dependent",
+     "node_id": "kn_billing_exception",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 5,
+     "value_usd": null
+    },
+    {
+     "category": "ownership",
+     "department_id": "dept_ai_data",
+     "entity_id": "kn_warehouse_lineage",
+     "first_effect_day": 0,
+     "headline": "Warehouse lineage knowledge loses 90% of capacity; Warehouse lineage knowledge: $43.64M expected pressure cost",
+     "impact_ids": [
+      "imp_kn_warehouse_lineage_loss",
+      "imp_pr_lineage_holder_attrition_pressure"
+     ],
+     "kind": "entity",
+     "level": "dependent",
+     "node_id": "kn_warehouse_lineage",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 5,
+     "value_usd": 43635375
+    },
+    {
+     "category": "business",
+     "department_id": "dept_finance",
+     "entity_id": "kpi_gross_margin",
+     "first_effect_day": 45,
+     "headline": "Gross margin % loses 44% of capacity",
+     "impact_ids": [
+      "imp_kpi_gross_margin_loss"
+     ],
+     "kind": "entity",
+     "level": "second_order",
+     "node_id": "kpi_gross_margin",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 2,
+     "value_usd": null
+    },
+    {
+     "category": "ownership",
+     "department_id": "dept_finance",
+     "entity_id": "role_ar_specialist",
+     "first_effect_day": 30,
+     "headline": "Accounts Receivable Specialist loses 100% of capacity; Accounts Receivable Specialist: $85K a year saved",
+     "impact_ids": [
+      "imp_role_ar_specialist_loss",
+      "imp_remove_ar_specialist_savings"
+     ],
+     "kind": "entity",
+     "level": "direct",
+     "node_id": "role_ar_specialist",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 3,
+     "value_usd": 85000
+    },
+    {
+     "category": "ownership",
+     "department_id": "dept_operations",
+     "entity_id": "role_billing_ops_lead",
+     "first_effect_day": 30,
+     "headline": "Billing Operations Lead loses 100% of capacity; Billing Operations Lead: $190K a year saved",
+     "impact_ids": [
+      "imp_role_billing_ops_lead_loss",
+      "imp_remove_billing_ops_lead_savings"
+     ],
+     "kind": "entity",
+     "level": "direct",
+     "node_id": "role_billing_ops_lead",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 3,
+     "value_usd": 190000
+    },
+    {
+     "category": "ownership",
+     "department_id": "dept_operations",
+     "entity_id": "role_billing_specialist",
+     "first_effect_day": 30,
+     "headline": "Billing Specialist loses 100% of capacity; Billing Specialist: $95K a year saved",
+     "impact_ids": [
+      "imp_role_billing_specialist_loss",
+      "imp_remove_billing_specialist_savings"
+     ],
+     "kind": "entity",
+     "level": "direct",
+     "node_id": "role_billing_specialist",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 3,
+     "value_usd": 95000
+    },
+    {
+     "category": "ownership",
+     "department_id": "dept_finance",
+     "entity_id": "role_close_accountant",
+     "first_effect_day": 30,
+     "headline": "Close Accountant loses 100% of capacity; Close Accountant: $145K a year saved",
+     "impact_ids": [
+      "imp_role_close_accountant_loss",
+      "imp_remove_close_accountant_savings"
+     ],
+     "kind": "entity",
+     "level": "direct",
+     "node_id": "role_close_accountant",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 3,
+     "value_usd": 145000
+    },
+    {
+     "category": "ownership",
+     "department_id": "dept_ai_data",
+     "entity_id": "role_data_platform_lead",
+     "first_effect_day": 30,
+     "headline": "Data Platform Lead loses 100% of capacity; Data Platform Lead: $195K a year saved",
+     "impact_ids": [
+      "imp_role_data_platform_lead_loss",
+      "imp_remove_data_platform_lead_savings"
+     ],
+     "kind": "entity",
+     "level": "direct",
+     "node_id": "role_data_platform_lead",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 3,
+     "value_usd": 195000
+    },
+    {
+     "category": "ownership",
+     "department_id": "dept_finance",
+     "entity_id": "role_gl_accountant",
+     "first_effect_day": 30,
+     "headline": "General Ledger Accountant loses 100% of capacity; General Ledger Accountant: $120K a year saved",
+     "impact_ids": [
+      "imp_role_gl_accountant_loss",
+      "imp_remove_gl_accountant_savings"
+     ],
+     "kind": "entity",
+     "level": "direct",
+     "node_id": "role_gl_accountant",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 3,
+     "value_usd": 120000
+    },
+    {
+     "category": "ownership",
+     "department_id": "dept_finance",
+     "entity_id": "role_reporting_analyst",
+     "first_effect_day": 30,
+     "headline": "Financial Reporting Analyst loses 100% of capacity; Financial Reporting Analyst: $110K a year saved",
+     "impact_ids": [
+      "imp_role_reporting_analyst_loss",
+      "imp_remove_reporting_analyst_savings"
+     ],
+     "kind": "entity",
+     "level": "direct",
+     "node_id": "role_reporting_analyst",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 3,
+     "value_usd": 110000
+    },
+    {
+     "category": "ownership",
+     "department_id": "dept_finance",
+     "entity_id": "role_revenue_accountant",
+     "first_effect_day": 30,
+     "headline": "Revenue Accountant loses 100% of capacity; Revenue Accountant: $130K a year saved",
+     "impact_ids": [
+      "imp_role_revenue_accountant_loss",
+      "imp_remove_revenue_accountant_savings"
+     ],
+     "kind": "entity",
+     "level": "direct",
+     "node_id": "role_revenue_accountant",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 3,
+     "value_usd": 130000
+    },
+    {
+     "category": "operational",
+     "department_id": "dept_operations",
+     "entity_id": "wf_billing_recon",
+     "first_effect_day": 0,
+     "headline": "Billing reconciliation loses 96% of capacity ($288.63M); Billing reconciliation: $106.17M expected pressure cost; Billing reconciliation loses kn_billing_exception (65% of it undocumented)",
+     "impact_ids": [
+      "imp_wf_billing_recon_loss",
+      "imp_pr_billing_recon_hazard_pressure",
+      "imp_wf_billing_recon_knowledge_kn_billing_exception"
+     ],
+     "kind": "entity",
+     "level": "second_order",
+     "node_id": "wf_billing_recon",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 5,
+     "value_usd": 394796689
+    },
+    {
+     "category": "operational",
+     "department_id": "dept_finance",
+     "entity_id": "wf_financial_close",
+     "first_effect_day": 30,
+     "headline": "Monthly financial close loses 90% of capacity ($75.41M); Monthly financial close loses kn_warehouse_lineage (80% of it undocumented)",
+     "impact_ids": [
+      "imp_wf_financial_close_loss",
+      "imp_wf_financial_close_knowledge_kn_warehouse_lineage"
+     ],
+     "kind": "entity",
+     "level": "second_order",
+     "node_id": "wf_financial_close",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 5,
+     "value_usd": 75408751
+    },
+    {
+     "category": "operational",
+     "department_id": "dept_operations",
+     "entity_id": "wf_invoicing",
+     "first_effect_day": 45,
+     "headline": "Invoice generation and dispatch loses 69% of capacity ($264.68M)",
+     "impact_ids": [
+      "imp_wf_invoicing_loss"
+     ],
+     "kind": "entity",
+     "level": "second_order",
+     "node_id": "wf_invoicing",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 4,
+     "value_usd": 264676992
+    },
+    {
+     "category": null,
+     "department_id": null,
+     "entity_id": null,
+     "first_effect_day": null,
+     "headline": "Net value -$989.37M",
+     "impact_ids": [],
+     "kind": "outcome",
+     "level": null,
+     "node_id": "outcome_company",
+     "polarity": null,
+     "pressure_id": null,
+     "severity": null,
+     "value_usd": -989365878
+    }
+   ],
+   "outcome": {
+    "headline": "Net value -$989.37M, risk high (70.9), infeasible (2 failed checks)",
+    "net_value_usd": -989365878,
+    "risk_level": "high"
+   },
+   "plan_id": "plan_naive",
+   "root_node_id": "plan_naive",
+   "run_id": "run_acceptance",
+   "scenario_id": "scn_run_acceptance_act_now_plan_naive"
+  },
+  "inaction": {
+   "departments": [
+    {
+     "department_id": "dept_ai_data",
+     "headline": "AI and Data: 1 harmed, 0 improved; most severe: Warehouse lineage knowledge: $16.43M expected pressure cost",
+     "impact_ids": [
+      "imp_pr_lineage_holder_attrition_pressure"
+     ],
+     "polarity": "harm",
+     "severity": 5
+    },
+    {
+     "department_id": "dept_operations",
+     "headline": "Operations: 2 harmed, 0 improved; most severe: Operations: $211.6M expected pressure cost",
+     "impact_ids": [
+      "imp_pr_billing_recon_hazard_pressure",
+      "imp_pr_contractor_cost_growth_pressure"
+     ],
+     "polarity": "harm",
+     "severity": 5
+    }
+   ],
+   "edges": [
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Pressure",
+     "level": "direct",
+     "source": "scn_run_acceptance_inaction_none",
+     "target": "pr_billing_recon_hazard"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Pressure",
+     "level": "direct",
+     "source": "pr_billing_recon_hazard",
+     "target": "wf_billing_recon"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Pressure",
+     "level": "direct",
+     "source": "scn_run_acceptance_inaction_none",
+     "target": "pr_contractor_cost_growth"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Pressure",
+     "level": "direct",
+     "source": "pr_contractor_cost_growth",
+     "target": "dept_operations"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Pressure",
+     "level": "direct",
+     "source": "scn_run_acceptance_inaction_none",
+     "target": "pr_lineage_holder_attrition"
+    },
+    {
+     "channel_id": null,
+     "critical_constraint": false,
+     "label": "Pressure",
+     "level": "direct",
+     "source": "pr_lineage_holder_attrition",
+     "target": "kn_warehouse_lineage"
+    }
+   ],
+   "future": "inaction",
+   "nodes": [
+    {
+     "category": null,
+     "department_id": null,
+     "entity_id": null,
+     "first_effect_day": null,
+     "headline": "Do nothing",
+     "impact_ids": [],
+     "kind": "decision",
+     "level": null,
+     "node_id": "scn_run_acceptance_inaction_none",
+     "polarity": null,
+     "pressure_id": null,
+     "severity": null,
+     "value_usd": null
+    },
+    {
+     "category": "financial",
+     "department_id": null,
+     "entity_id": null,
+     "first_effect_day": 0,
+     "headline": "Pressure on Billing reconciliation: $29.2M expected cost",
+     "impact_ids": [
+      "imp_pr_billing_recon_hazard_pressure"
+     ],
+     "kind": "pressure",
+     "level": "direct",
+     "node_id": "pr_billing_recon_hazard",
+     "polarity": "harm",
+     "pressure_id": "pr_billing_recon_hazard",
+     "severity": 5,
+     "value_usd": 29200000
+    },
+    {
+     "category": "financial",
+     "department_id": null,
+     "entity_id": null,
+     "first_effect_day": 0,
+     "headline": "Pressure on Operations: $211.6M expected cost",
+     "impact_ids": [
+      "imp_pr_contractor_cost_growth_pressure"
+     ],
+     "kind": "pressure",
+     "level": "direct",
+     "node_id": "pr_contractor_cost_growth",
+     "polarity": "harm",
+     "pressure_id": "pr_contractor_cost_growth",
+     "severity": 5,
+     "value_usd": 211598071
+    },
+    {
+     "category": "financial",
+     "department_id": null,
+     "entity_id": null,
+     "first_effect_day": 0,
+     "headline": "Pressure on Warehouse lineage knowledge: $16.43M expected cost",
+     "impact_ids": [
+      "imp_pr_lineage_holder_attrition_pressure"
+     ],
+     "kind": "pressure",
+     "level": "direct",
+     "node_id": "pr_lineage_holder_attrition",
+     "polarity": "harm",
+     "pressure_id": "pr_lineage_holder_attrition",
+     "severity": 5,
+     "value_usd": 16425000
+    },
+    {
+     "category": "financial",
+     "department_id": "dept_operations",
+     "entity_id": "dept_operations",
+     "first_effect_day": 0,
+     "headline": "Operations: $211.6M expected pressure cost",
+     "impact_ids": [
+      "imp_pr_contractor_cost_growth_pressure"
+     ],
+     "kind": "department",
+     "level": "direct",
+     "node_id": "dept_operations",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 5,
+     "value_usd": 211598071
+    },
+    {
+     "category": "financial",
+     "department_id": "dept_ai_data",
+     "entity_id": "kn_warehouse_lineage",
+     "first_effect_day": 0,
+     "headline": "Warehouse lineage knowledge: $16.43M expected pressure cost",
+     "impact_ids": [
+      "imp_pr_lineage_holder_attrition_pressure"
+     ],
+     "kind": "entity",
+     "level": "direct",
+     "node_id": "kn_warehouse_lineage",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 5,
+     "value_usd": 16425000
+    },
+    {
+     "category": "financial",
+     "department_id": "dept_operations",
+     "entity_id": "wf_billing_recon",
+     "first_effect_day": 0,
+     "headline": "Billing reconciliation: $29.2M expected pressure cost",
+     "impact_ids": [
+      "imp_pr_billing_recon_hazard_pressure"
+     ],
+     "kind": "entity",
+     "level": "direct",
+     "node_id": "wf_billing_recon",
+     "polarity": "harm",
+     "pressure_id": null,
+     "severity": 5,
+     "value_usd": 29200000
+    },
+    {
+     "category": null,
+     "department_id": null,
+     "entity_id": null,
+     "first_effect_day": null,
+     "headline": "Net value -$257.22M",
+     "impact_ids": [],
+     "kind": "outcome",
+     "level": null,
+     "node_id": "outcome_company",
+     "polarity": null,
+     "pressure_id": null,
+     "severity": null,
+     "value_usd": -257223071
+    }
+   ],
+   "outcome": {
+    "headline": "Net value -$257.22M, risk medium (25.0), feasible",
+    "net_value_usd": -257223071,
+    "risk_level": "medium"
+   },
+   "plan_id": null,
+   "root_node_id": "scn_run_acceptance_inaction_none",
+   "run_id": "run_acceptance",
+   "scenario_id": "scn_run_acceptance_inaction_none"
+  }
+ },
+ "check_result": {
+  "blast_radius.act_now": [],
+  "blast_radius.inaction": [],
+  "compare_futures": [],
+  "optimize": [],
+  "quick_impact": [],
+  "simulate.act_now": [],
+  "simulate.delay": [],
+  "simulate.inaction": []
+ },
+ "chosen_plan": {
+  "intervention_ids": [
+   "remove_close_accountant",
+   "remove_gl_accountant",
+   "remove_reporting_analyst",
+   "remove_data_platform_lead",
+   "remove_billing_ops_lead",
+   "remove_billing_specialist",
+   "remove_revenue_accountant",
+   "remove_ar_specialist"
+  ],
+  "label": "Naive plan",
+  "parent_plan_id": null,
+  "plan_id": "plan_naive",
+  "source": "optimizer"
+ },
+ "compare_futures": {
+  "best_row_index": 1,
+  "comparison_id": "cmp_run_acceptance_plan_naive",
+  "decision_id": "dec_workforce_knowledge",
+  "headline": "Acting now is worth $732.14M less than doing nothing; waiting 90 days saves $199.94M. As planned it is infeasible (2 failed checks). Values are point estimates, not simulated ranges; p_better_than_inaction is a yes/no comparison, not a probability.",
+  "reference_result_id": "res_run_acceptance_inaction_none",
+  "rows": [
+   {
+    "breakeven_day": null,
+    "cost_of_delay_usd": null,
+    "delta_vs_inaction_p10_usd": -732142807,
+    "delta_vs_inaction_p50_usd": -732142807,
+    "delta_vs_inaction_p90_usd": -732142807,
+    "feasible": false,
+    "future": "act_now",
+    "label": "Naive plan, now (point estimate)",
+    "monthly_delta_usd": [
+     0,
+     -66707992,
+     -133095984,
+     -199483975,
+     -265871967,
+     -332259959,
+     -398647951,
+     -465035943,
+     -531423935,
+     -597811926,
+     -664199918,
+     -732142807
+    ],
+    "net_value_p50_usd": -989365878,
+    "p_better_than_inaction": 0.0,
+    "plan_id": "plan_naive",
+    "result_id": "res_run_acceptance_act_now_plan_naive",
+    "risk_score": 70.8718
+   },
+   {
+    "breakeven_day": null,
+    "cost_of_delay_usd": null,
+    "delta_vs_inaction_p10_usd": 0,
+    "delta_vs_inaction_p50_usd": 0,
+    "delta_vs_inaction_p90_usd": 0,
+    "feasible": true,
+    "future": "inaction",
+    "label": "Do nothing (point estimate)",
+    "monthly_delta_usd": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "net_value_p50_usd": -257223071,
+    "p_better_than_inaction": 0.0,
+    "plan_id": null,
+    "result_id": "res_run_acceptance_inaction_none",
+    "risk_score": 25.0
+   },
+   {
+    "breakeven_day": null,
+    "cost_of_delay_usd": -199937909,
+    "delta_vs_inaction_p10_usd": -532204898,
+    "delta_vs_inaction_p50_usd": -532204898,
+    "delta_vs_inaction_p90_usd": -532204898,
+    "feasible": false,
+    "future": "delay",
+    "label": "Naive plan, in 90 days (point estimate)",
+    "monthly_delta_usd": [
+     0,
+     0,
+     0,
+     0,
+     -66611250,
+     -132902500,
+     -199193750,
+     -265485000,
+     -331776251,
+     -398067501,
+     -464358751,
+     -532204898
+    ],
+    "net_value_p50_usd": -789427969,
+    "p_better_than_inaction": 0.0,
+    "plan_id": "plan_naive",
+    "result_id": "res_run_acceptance_delay_plan_naive",
+    "risk_score": 70.8718
+   }
+  ],
+  "run_id": "run_acceptance"
+ },
+ "decision_id": "dec_workforce_knowledge",
+ "optimize": {
+  "alternatives": [],
+  "evaluated_count": 1,
+  "naive": {
+   "intervention_ids": [
+    "remove_close_accountant",
+    "remove_gl_accountant",
+    "remove_reporting_analyst",
+    "remove_data_platform_lead",
+    "remove_billing_ops_lead",
+    "remove_billing_specialist",
+    "remove_revenue_accountant",
+    "remove_ar_specialist"
+   ],
+   "plan_id": "plan_naive",
+   "rank": null,
+   "result": {
+    "affected_department_ids": [
+     "dept_ai_data",
+     "dept_finance",
+     "dept_operations"
+    ],
+    "assumptions": [
+     "Quick mode: midpoint edge strengths; every value is a point estimate; baseline pressures are priced by simulate",
+     "added_cost_usd includes $628,714,708 displaced work: harmed workflows and systems priced at loss x failure_cost_per_day_usd until the horizon"
+    ],
+    "computed_at": "2026-09-26T00:00:00Z",
+    "constraint_results": [
+     {
+      "constraint_id": "c_compliance",
+      "explanation": "compliance_controls_broken is 0; it must be == 0, so the hard constraint passes",
+      "hard": true,
+      "impact_ids": [],
+      "metric": "compliance_controls_broken",
+      "operator": "==",
+      "passed": true,
+      "threshold": 0.0,
+      "value": 0.0
+     },
+     {
+      "constraint_id": "c_stranded",
+      "explanation": "stranded_workflows is 2 (wf_billing_recon, wf_financial_close); it must be == 0, so the hard constraint fails",
+      "hard": true,
+      "impact_ids": [
+       "imp_wf_billing_recon_loss",
+       "imp_wf_financial_close_loss"
+      ],
+      "metric": "stranded_workflows",
+      "operator": "==",
+      "passed": false,
+      "threshold": 0.0,
+      "value": 2.0
+     },
+     {
+      "constraint_id": "c_customer",
+      "explanation": "customer_impact_pct is 95.73% (wf_billing_recon); it must be <= 2.00%, so the hard constraint fails",
+      "hard": true,
+      "impact_ids": [
+       "imp_wf_billing_recon_loss"
+      ],
+      "metric": "customer_impact_pct",
+      "operator": "<=",
+      "passed": false,
+      "threshold": 2.0,
+      "value": 95.731
+     }
+    ],
+    "feasible": false,
+    "future": "act_now",
+    "goal_met": true,
+    "impacts": [
+     {
+      "affected_department": "dept_finance",
+      "affected_entity": "role_close_accountant",
+      "assumptions": [],
+      "category": "financial",
+      "confidence": 1.0,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_close_accountant"
+      ],
+      "direction": "decrease",
+      "edge_path": [],
+      "evidence_refs": [],
+      "first_effect_day": 30,
+      "impact_id": "imp_remove_close_accountant_savings",
+      "level": "direct",
+      "magnitude": 145000.0,
+      "metric": "annual_cost_usd",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "benefit",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 1,
+      "source_entity": "role_close_accountant",
+      "source_kind": "intervention",
+      "source_ref": "remove_close_accountant",
+      "status": "computed",
+      "unit": "usd",
+      "value_usd": 145000
+     },
+     {
+      "affected_department": "dept_finance",
+      "affected_entity": "role_gl_accountant",
+      "assumptions": [],
+      "category": "financial",
+      "confidence": 1.0,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_gl_accountant"
+      ],
+      "direction": "decrease",
+      "edge_path": [],
+      "evidence_refs": [],
+      "first_effect_day": 30,
+      "impact_id": "imp_remove_gl_accountant_savings",
+      "level": "direct",
+      "magnitude": 120000.0,
+      "metric": "annual_cost_usd",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "benefit",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 1,
+      "source_entity": "role_gl_accountant",
+      "source_kind": "intervention",
+      "source_ref": "remove_gl_accountant",
+      "status": "computed",
+      "unit": "usd",
+      "value_usd": 120000
+     },
+     {
+      "affected_department": "dept_finance",
+      "affected_entity": "role_reporting_analyst",
+      "assumptions": [],
+      "category": "financial",
+      "confidence": 1.0,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_reporting_analyst"
+      ],
+      "direction": "decrease",
+      "edge_path": [],
+      "evidence_refs": [],
+      "first_effect_day": 30,
+      "impact_id": "imp_remove_reporting_analyst_savings",
+      "level": "direct",
+      "magnitude": 110000.0,
+      "metric": "annual_cost_usd",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "benefit",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 1,
+      "source_entity": "role_reporting_analyst",
+      "source_kind": "intervention",
+      "source_ref": "remove_reporting_analyst",
+      "status": "computed",
+      "unit": "usd",
+      "value_usd": 110000
+     },
+     {
+      "affected_department": "dept_ai_data",
+      "affected_entity": "role_data_platform_lead",
+      "assumptions": [],
+      "category": "financial",
+      "confidence": 1.0,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_data_platform_lead"
+      ],
+      "direction": "decrease",
+      "edge_path": [],
+      "evidence_refs": [],
+      "first_effect_day": 30,
+      "impact_id": "imp_remove_data_platform_lead_savings",
+      "level": "direct",
+      "magnitude": 195000.0,
+      "metric": "annual_cost_usd",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "benefit",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 1,
+      "source_entity": "role_data_platform_lead",
+      "source_kind": "intervention",
+      "source_ref": "remove_data_platform_lead",
+      "status": "computed",
+      "unit": "usd",
+      "value_usd": 195000
+     },
+     {
+      "affected_department": "dept_operations",
+      "affected_entity": "role_billing_ops_lead",
+      "assumptions": [],
+      "category": "financial",
+      "confidence": 1.0,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_billing_ops_lead"
+      ],
+      "direction": "decrease",
+      "edge_path": [],
+      "evidence_refs": [],
+      "first_effect_day": 30,
+      "impact_id": "imp_remove_billing_ops_lead_savings",
+      "level": "direct",
+      "magnitude": 190000.0,
+      "metric": "annual_cost_usd",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "benefit",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 1,
+      "source_entity": "role_billing_ops_lead",
+      "source_kind": "intervention",
+      "source_ref": "remove_billing_ops_lead",
+      "status": "computed",
+      "unit": "usd",
+      "value_usd": 190000
+     },
+     {
+      "affected_department": "dept_operations",
+      "affected_entity": "role_billing_specialist",
+      "assumptions": [],
+      "category": "financial",
+      "confidence": 1.0,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_billing_specialist"
+      ],
+      "direction": "decrease",
+      "edge_path": [],
+      "evidence_refs": [],
+      "first_effect_day": 30,
+      "impact_id": "imp_remove_billing_specialist_savings",
+      "level": "direct",
+      "magnitude": 95000.0,
+      "metric": "annual_cost_usd",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "benefit",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 1,
+      "source_entity": "role_billing_specialist",
+      "source_kind": "intervention",
+      "source_ref": "remove_billing_specialist",
+      "status": "computed",
+      "unit": "usd",
+      "value_usd": 95000
+     },
+     {
+      "affected_department": "dept_finance",
+      "affected_entity": "role_revenue_accountant",
+      "assumptions": [],
+      "category": "financial",
+      "confidence": 1.0,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_revenue_accountant"
+      ],
+      "direction": "decrease",
+      "edge_path": [],
+      "evidence_refs": [],
+      "first_effect_day": 30,
+      "impact_id": "imp_remove_revenue_accountant_savings",
+      "level": "direct",
+      "magnitude": 130000.0,
+      "metric": "annual_cost_usd",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "benefit",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 1,
+      "source_entity": "role_revenue_accountant",
+      "source_kind": "intervention",
+      "source_ref": "remove_revenue_accountant",
+      "status": "computed",
+      "unit": "usd",
+      "value_usd": 130000
+     },
+     {
+      "affected_department": "dept_finance",
+      "affected_entity": "role_ar_specialist",
+      "assumptions": [],
+      "category": "financial",
+      "confidence": 1.0,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_ar_specialist"
+      ],
+      "direction": "decrease",
+      "edge_path": [],
+      "evidence_refs": [],
+      "first_effect_day": 30,
+      "impact_id": "imp_remove_ar_specialist_savings",
+      "level": "direct",
+      "magnitude": 85000.0,
+      "metric": "annual_cost_usd",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "benefit",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 1,
+      "source_entity": "role_ar_specialist",
+      "source_kind": "intervention",
+      "source_ref": "remove_ar_specialist",
+      "status": "computed",
+      "unit": "usd",
+      "value_usd": 85000
+     },
+     {
+      "affected_department": "dept_operations",
+      "affected_entity": "kn_billing_exception",
+      "assumptions": [],
+      "category": "ownership",
+      "confidence": 0.9,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_billing_ops_lead",
+       "kn_billing_exception"
+      ],
+      "direction": "decrease",
+      "edge_path": [
+       "e_billing_ops_lead_knows_exception"
+      ],
+      "evidence_refs": [
+       "ev_billing_runbook_gap"
+      ],
+      "first_effect_day": 30,
+      "impact_id": "imp_kn_billing_exception_loss",
+      "level": "dependent",
+      "magnitude": 0.9639,
+      "metric": "capacity_loss",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 5,
+      "source_entity": "role_billing_ops_lead",
+      "source_kind": "intervention",
+      "source_ref": "remove_billing_ops_lead",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": null
+     },
+     {
+      "affected_department": "dept_ai_data",
+      "affected_entity": "kn_warehouse_lineage",
+      "assumptions": [],
+      "category": "ownership",
+      "confidence": 0.9,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_data_platform_lead",
+       "kn_warehouse_lineage"
+      ],
+      "direction": "decrease",
+      "edge_path": [
+       "e_data_platform_lead_knows_lineage"
+      ],
+      "evidence_refs": [
+       "ev_knowledge_matrix_3"
+      ],
+      "first_effect_day": 30,
+      "impact_id": "imp_kn_warehouse_lineage_loss",
+      "level": "dependent",
+      "magnitude": 0.9025,
+      "metric": "capacity_loss",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 5,
+      "source_entity": "role_data_platform_lead",
+      "source_kind": "intervention",
+      "source_ref": "remove_data_platform_lead",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": null
+     },
+     {
+      "affected_department": "dept_finance",
+      "affected_entity": "kpi_gross_margin",
+      "assumptions": [],
+      "category": "business",
+      "confidence": 0.6561,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_billing_ops_lead",
+       "kn_billing_exception",
+       "wf_billing_recon",
+       "wf_invoicing",
+       "kpi_gross_margin"
+      ],
+      "direction": "decrease",
+      "edge_path": [
+       "e_billing_ops_lead_knows_exception",
+       "e_kn_billing_supports_recon",
+       "e_recon_invoicing",
+       "e_invoicing_margin"
+      ],
+      "evidence_refs": [
+       "ev_billing_runbook_gap",
+       "ev_architecture_core",
+       "ev_finance_forecast_q3"
+      ],
+      "first_effect_day": 45,
+      "impact_id": "imp_kpi_gross_margin_loss",
+      "level": "second_order",
+      "magnitude": 0.441128,
+      "metric": "capacity_loss",
+      "origin": "engine",
+      "peak_effect_day": 45,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 2,
+      "source_entity": "role_billing_ops_lead",
+      "source_kind": "intervention",
+      "source_ref": "remove_billing_ops_lead",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": null
+     },
+     {
+      "affected_department": "dept_finance",
+      "affected_entity": "role_ar_specialist",
+      "assumptions": [],
+      "category": "ownership",
+      "confidence": 1.0,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_ar_specialist"
+      ],
+      "direction": "decrease",
+      "edge_path": [],
+      "evidence_refs": [],
+      "first_effect_day": 30,
+      "impact_id": "imp_role_ar_specialist_loss",
+      "level": "direct",
+      "magnitude": 1.0,
+      "metric": "capacity_loss",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 3,
+      "source_entity": "role_ar_specialist",
+      "source_kind": "intervention",
+      "source_ref": "remove_ar_specialist",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": null
+     },
+     {
+      "affected_department": "dept_operations",
+      "affected_entity": "role_billing_ops_lead",
+      "assumptions": [],
+      "category": "ownership",
+      "confidence": 1.0,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_billing_ops_lead"
+      ],
+      "direction": "decrease",
+      "edge_path": [],
+      "evidence_refs": [],
+      "first_effect_day": 30,
+      "impact_id": "imp_role_billing_ops_lead_loss",
+      "level": "direct",
+      "magnitude": 1.0,
+      "metric": "capacity_loss",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 3,
+      "source_entity": "role_billing_ops_lead",
+      "source_kind": "intervention",
+      "source_ref": "remove_billing_ops_lead",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": null
+     },
+     {
+      "affected_department": "dept_operations",
+      "affected_entity": "role_billing_specialist",
+      "assumptions": [],
+      "category": "ownership",
+      "confidence": 1.0,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_billing_specialist"
+      ],
+      "direction": "decrease",
+      "edge_path": [],
+      "evidence_refs": [],
+      "first_effect_day": 30,
+      "impact_id": "imp_role_billing_specialist_loss",
+      "level": "direct",
+      "magnitude": 1.0,
+      "metric": "capacity_loss",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 3,
+      "source_entity": "role_billing_specialist",
+      "source_kind": "intervention",
+      "source_ref": "remove_billing_specialist",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": null
+     },
+     {
+      "affected_department": "dept_finance",
+      "affected_entity": "role_close_accountant",
+      "assumptions": [],
+      "category": "ownership",
+      "confidence": 1.0,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_close_accountant"
+      ],
+      "direction": "decrease",
+      "edge_path": [],
+      "evidence_refs": [],
+      "first_effect_day": 30,
+      "impact_id": "imp_role_close_accountant_loss",
+      "level": "direct",
+      "magnitude": 1.0,
+      "metric": "capacity_loss",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 3,
+      "source_entity": "role_close_accountant",
+      "source_kind": "intervention",
+      "source_ref": "remove_close_accountant",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": null
+     },
+     {
+      "affected_department": "dept_ai_data",
+      "affected_entity": "role_data_platform_lead",
+      "assumptions": [],
+      "category": "ownership",
+      "confidence": 1.0,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_data_platform_lead"
+      ],
+      "direction": "decrease",
+      "edge_path": [],
+      "evidence_refs": [],
+      "first_effect_day": 30,
+      "impact_id": "imp_role_data_platform_lead_loss",
+      "level": "direct",
+      "magnitude": 1.0,
+      "metric": "capacity_loss",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 3,
+      "source_entity": "role_data_platform_lead",
+      "source_kind": "intervention",
+      "source_ref": "remove_data_platform_lead",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": null
+     },
+     {
+      "affected_department": "dept_finance",
+      "affected_entity": "role_gl_accountant",
+      "assumptions": [],
+      "category": "ownership",
+      "confidence": 1.0,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_gl_accountant"
+      ],
+      "direction": "decrease",
+      "edge_path": [],
+      "evidence_refs": [],
+      "first_effect_day": 30,
+      "impact_id": "imp_role_gl_accountant_loss",
+      "level": "direct",
+      "magnitude": 1.0,
+      "metric": "capacity_loss",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 3,
+      "source_entity": "role_gl_accountant",
+      "source_kind": "intervention",
+      "source_ref": "remove_gl_accountant",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": null
+     },
+     {
+      "affected_department": "dept_finance",
+      "affected_entity": "role_reporting_analyst",
+      "assumptions": [],
+      "category": "ownership",
+      "confidence": 1.0,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_reporting_analyst"
+      ],
+      "direction": "decrease",
+      "edge_path": [],
+      "evidence_refs": [],
+      "first_effect_day": 30,
+      "impact_id": "imp_role_reporting_analyst_loss",
+      "level": "direct",
+      "magnitude": 1.0,
+      "metric": "capacity_loss",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 3,
+      "source_entity": "role_reporting_analyst",
+      "source_kind": "intervention",
+      "source_ref": "remove_reporting_analyst",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": null
+     },
+     {
+      "affected_department": "dept_finance",
+      "affected_entity": "role_revenue_accountant",
+      "assumptions": [],
+      "category": "ownership",
+      "confidence": 1.0,
+      "constraint_refs": [],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_revenue_accountant"
+      ],
+      "direction": "decrease",
+      "edge_path": [],
+      "evidence_refs": [],
+      "first_effect_day": 30,
+      "impact_id": "imp_role_revenue_accountant_loss",
+      "level": "direct",
+      "magnitude": 1.0,
+      "metric": "capacity_loss",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 3,
+      "source_entity": "role_revenue_accountant",
+      "source_kind": "intervention",
+      "source_ref": "remove_revenue_accountant",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": null
+     },
+     {
+      "affected_department": "dept_operations",
+      "affected_entity": "wf_billing_recon",
+      "assumptions": [],
+      "category": "operational",
+      "confidence": 0.81,
+      "constraint_refs": [
+       "c_stranded",
+       "c_customer"
+      ],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_billing_ops_lead",
+       "kn_billing_exception",
+       "wf_billing_recon"
+      ],
+      "direction": "decrease",
+      "edge_path": [
+       "e_billing_ops_lead_knows_exception",
+       "e_kn_billing_supports_recon"
+      ],
+      "evidence_refs": [
+       "ev_billing_runbook_gap"
+      ],
+      "first_effect_day": 30,
+      "impact_id": "imp_wf_billing_recon_loss",
+      "level": "second_order",
+      "magnitude": 0.95731,
+      "metric": "capacity_loss",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 5,
+      "source_entity": "role_billing_ops_lead",
+      "source_kind": "intervention",
+      "source_ref": "remove_billing_ops_lead",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": 288628965
+     },
+     {
+      "affected_department": "dept_finance",
+      "affected_entity": "wf_financial_close",
+      "assumptions": [],
+      "category": "operational",
+      "confidence": 0.81,
+      "constraint_refs": [
+       "c_stranded"
+      ],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_data_platform_lead",
+       "kn_warehouse_lineage",
+       "wf_financial_close"
+      ],
+      "direction": "decrease",
+      "edge_path": [
+       "e_data_platform_lead_knows_lineage",
+       "e_lineage_supports_close"
+      ],
+      "evidence_refs": [
+       "ev_knowledge_matrix_3"
+      ],
+      "first_effect_day": 30,
+      "impact_id": "imp_wf_financial_close_loss",
+      "level": "second_order",
+      "magnitude": 0.900403,
+      "metric": "capacity_loss",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 5,
+      "source_entity": "role_data_platform_lead",
+      "source_kind": "intervention",
+      "source_ref": "remove_data_platform_lead",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": 75408751
+     },
+     {
+      "affected_department": "dept_operations",
+      "affected_entity": "wf_invoicing",
+      "assumptions": [],
+      "category": "operational",
+      "confidence": 0.729,
+      "constraint_refs": [
+       "c_stranded",
+       "c_customer"
+      ],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "role_billing_ops_lead",
+       "kn_billing_exception",
+       "wf_billing_recon",
+       "wf_invoicing"
+      ],
+      "direction": "decrease",
+      "edge_path": [
+       "e_billing_ops_lead_knows_exception",
+       "e_kn_billing_supports_recon",
+       "e_recon_invoicing"
+      ],
+      "evidence_refs": [
+       "ev_billing_runbook_gap",
+       "ev_architecture_core"
+      ],
+      "first_effect_day": 45,
+      "impact_id": "imp_wf_invoicing_loss",
+      "level": "second_order",
+      "magnitude": 0.689263,
+      "metric": "capacity_loss",
+      "origin": "engine",
+      "peak_effect_day": 45,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 4,
+      "source_entity": "role_billing_ops_lead",
+      "source_kind": "intervention",
+      "source_ref": "remove_billing_ops_lead",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": 264676992
+     },
+     {
+      "affected_department": "dept_operations",
+      "affected_entity": "wf_billing_recon",
+      "assumptions": [
+       "kn_billing_exception is lost: no holder capacity left and 35% documented"
+      ],
+      "category": "ownership",
+      "confidence": 0.9,
+      "constraint_refs": [
+       "c_stranded",
+       "c_customer"
+      ],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "kn_billing_exception",
+       "wf_billing_recon"
+      ],
+      "direction": "decrease",
+      "edge_path": [
+       "e_kn_billing_supports_recon"
+      ],
+      "evidence_refs": [
+       "ev_billing_runbook_gap"
+      ],
+      "first_effect_day": 30,
+      "impact_id": "imp_wf_billing_recon_knowledge_kn_billing_exception",
+      "level": "dependent",
+      "magnitude": 0.65,
+      "metric": "knowledge_lost",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 4,
+      "source_entity": "kn_billing_exception",
+      "source_kind": "intervention",
+      "source_ref": "remove_billing_specialist",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": null
+     },
+     {
+      "affected_department": "dept_finance",
+      "affected_entity": "wf_financial_close",
+      "assumptions": [
+       "kn_warehouse_lineage is lost: no holder capacity left and 20% documented"
+      ],
+      "category": "ownership",
+      "confidence": 0.9,
+      "constraint_refs": [
+       "c_stranded"
+      ],
+      "decision_id": "dec_workforce_knowledge",
+      "dependency_path": [
+       "kn_warehouse_lineage",
+       "wf_financial_close"
+      ],
+      "direction": "decrease",
+      "edge_path": [
+       "e_lineage_supports_close"
+      ],
+      "evidence_refs": [
+       "ev_knowledge_matrix_3"
+      ],
+      "first_effect_day": 30,
+      "impact_id": "imp_wf_financial_close_knowledge_kn_warehouse_lineage",
+      "level": "dependent",
+      "magnitude": 0.8,
+      "metric": "knowledge_lost",
+      "origin": "engine",
+      "peak_effect_day": 30,
+      "polarity": "harm",
+      "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+      "severity": 4,
+      "source_entity": "kn_warehouse_lineage",
+      "source_kind": "intervention",
+      "source_ref": "remove_data_platform_lead",
+      "status": "computed",
+      "unit": "ratio",
+      "value_usd": null
+     }
+    ],
+    "intervention_ids": [
+     "remove_close_accountant",
+     "remove_gl_accountant",
+     "remove_reporting_analyst",
+     "remove_data_platform_lead",
+     "remove_billing_ops_lead",
+     "remove_billing_specialist",
+     "remove_revenue_accountant",
+     "remove_ar_specialist"
+    ],
+    "knowledge_coverage": [
+     {
+      "dependent_workflow_ids": [
+       "wf_billing_recon"
+      ],
+      "documented_pct": 0.35,
+      "holder_capacity_fte_after": 0.0,
+      "holder_capacity_fte_before": 9.0,
+      "holders_after": [],
+      "holders_before": [
+       "role_billing_ops_lead",
+       "role_billing_specialist"
+      ],
+      "knowledge_id": "kn_billing_exception",
+      "lost": true,
+      "reasons": [
+       "lost holders role_billing_ops_lead, role_billing_specialist",
+       "0 holders left with 0 FTE; 35% documented",
+       "lost: no holder capacity left and less than 50% documented",
+       "wf_billing_recon: its exception path is only 20% documented, below the 35% ordinary documentation"
+      ]
+     },
+     {
+      "dependent_workflow_ids": [
+       "wf_financial_close"
+      ],
+      "documented_pct": 0.2,
+      "holder_capacity_fte_after": 0.0,
+      "holder_capacity_fte_before": 2.0,
+      "holders_after": [],
+      "holders_before": [
+       "role_data_platform_lead"
+      ],
+      "knowledge_id": "kn_warehouse_lineage",
+      "lost": true,
+      "reasons": [
+       "lost holders role_data_platform_lead",
+       "0 holders left with 0 FTE; 20% documented",
+       "lost: no holder capacity left and less than 50% documented"
+      ]
+     }
+    ],
+    "mode": "quick",
+    "plan_id": "plan_naive",
+    "pressures_triggered": [],
+    "rejection_reasons": [
+     "c_stranded: stranded_workflows is 2 (wf_billing_recon, wf_financial_close); it must be == 0, so the hard constraint fails",
+     "c_customer: customer_impact_pct is 95.73% (wf_billing_recon); it must be <= 2.00%, so the hard constraint fails"
+    ],
+    "result_id": "res_run_acceptance_act_now_plan_naive",
+    "risk": {
+     "components": {
+      "capability_workflow": 25.0,
+      "compliance_control": 0.0,
+      "customer_revenue": 20.0,
+      "execution_uncertainty": 0.8718,
+      "financial": 25.0
+     },
+     "level": "high",
+     "score": 70.8718,
+     "settings_version": 1
+    },
+    "run_id": "run_acceptance",
+    "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+    "seed": null,
+    "value": {
+     "added_cost_usd": 628714708,
+     "avoided_failure_cost_usd": 0,
+     "displaced_work_cost_usd": 628714708,
+     "expected_business_loss_usd": 0,
+     "gross_savings_usd": 1070000,
+     "migration_cost_usd": 0,
+     "monthly_net_usd": [
+      0,
+      -57378610,
+      -114437220,
+      -171495829,
+      -228554439,
+      -285613049,
+      -342671659,
+      -399730269,
+      -456788879,
+      -513847488,
+      -570906098,
+      -627964708
+     ],
+     "net_value_usd": -627964708,
+     "p10_net_value_usd": null,
+     "p50_net_value_usd": null,
+     "p90_net_value_usd": null,
+     "pressure_cost_usd": 0,
+     "rebound_cost_usd": 0,
+     "termination_cost_usd": 0,
+     "transition_cost_usd": 320000
+    },
+    "workflow_coverage": [
+     {
+      "automation_pct": 0.3,
+      "backup_count_after": 0,
+      "criticality": "critical",
+      "documented_pct": 0.35,
+      "exception_documented_pct": 0.2,
+      "min_qualified_owners": 1,
+      "owner_capacity_fte_after": 0.0,
+      "owner_capacity_fte_before": 8.4,
+      "owners_after": [],
+      "owners_before": [
+       "role_ar_specialist",
+       "role_billing_ops_lead",
+       "role_billing_specialist",
+       "role_revenue_accountant"
+      ],
+      "reasons": [
+       "lost qualified owners role_ar_specialist, role_billing_ops_lead, role_billing_specialist, role_revenue_accountant",
+       "0 qualified owners left for a minimum of 1",
+       "0 independent backups left; recent execution coverage 100% -> 0%",
+       "35% documented; exception path 20% documented; 30% automated",
+       "recovery knowledge lost: kn_billing_exception",
+       "critical workflow: a replacement owner takes 120 days to train against a maximum downtime of 2 days"
+      ],
+      "replacement_cost_usd": 300000,
+      "stranded": true,
+      "training_days_required": 120,
+      "workflow_id": "wf_billing_recon"
+     },
+     {
+      "automation_pct": 0.4,
+      "backup_count_after": 0,
+      "criticality": "critical",
+      "documented_pct": 0.5,
+      "exception_documented_pct": 0.25,
+      "min_qualified_owners": 1,
+      "owner_capacity_fte_after": 0.0,
+      "owner_capacity_fte_before": 5.4,
+      "owners_after": [],
+      "owners_before": [
+       "role_close_accountant",
+       "role_gl_accountant",
+       "role_reporting_analyst"
+      ],
+      "reasons": [
+       "lost qualified owners role_close_accountant, role_gl_accountant, role_reporting_analyst",
+       "0 qualified owners left for a minimum of 1",
+       "0 independent backups left; recent execution coverage 100% -> 0%",
+       "50% documented; exception path 25% documented; 40% automated",
+       "recovery knowledge lost: kn_warehouse_lineage",
+       "critical workflow: a replacement owner takes 120 days to train against a maximum downtime of 3 days"
+      ],
+      "replacement_cost_usd": 220000,
+      "stranded": true,
+      "training_days_required": 120,
+      "workflow_id": "wf_financial_close"
+     }
+    ]
+   }
+  },
+  "recommended": null
+ },
+ "quick_impact": {
+  "affected_department_ids": [
+   "dept_ai_data",
+   "dept_finance",
+   "dept_operations"
+  ],
+  "assumptions": [
+   "Quick mode: midpoint edge strengths; every value is a point estimate; baseline pressures are priced by simulate",
+   "added_cost_usd includes $628,714,708 displaced work: harmed workflows and systems priced at loss x failure_cost_per_day_usd until the horizon"
+  ],
+  "computed_at": "2026-09-26T00:00:00Z",
+  "constraint_results": [
+   {
+    "constraint_id": "c_compliance",
+    "explanation": "compliance_controls_broken is 0; it must be == 0, so the hard constraint passes",
+    "hard": true,
+    "impact_ids": [],
+    "metric": "compliance_controls_broken",
+    "operator": "==",
+    "passed": true,
+    "threshold": 0.0,
+    "value": 0.0
+   },
+   {
+    "constraint_id": "c_stranded",
+    "explanation": "stranded_workflows is 2 (wf_billing_recon, wf_financial_close); it must be == 0, so the hard constraint fails",
+    "hard": true,
+    "impact_ids": [
+     "imp_wf_billing_recon_loss",
+     "imp_wf_financial_close_loss"
+    ],
+    "metric": "stranded_workflows",
+    "operator": "==",
+    "passed": false,
+    "threshold": 0.0,
+    "value": 2.0
+   },
+   {
+    "constraint_id": "c_customer",
+    "explanation": "customer_impact_pct is 95.73% (wf_billing_recon); it must be <= 2.00%, so the hard constraint fails",
+    "hard": true,
+    "impact_ids": [
+     "imp_wf_billing_recon_loss"
+    ],
+    "metric": "customer_impact_pct",
+    "operator": "<=",
+    "passed": false,
+    "threshold": 2.0,
+    "value": 95.731
+   }
+  ],
+  "feasible": false,
+  "future": "act_now",
+  "goal_met": true,
+  "impacts": [
+   {
+    "affected_department": "dept_finance",
+    "affected_entity": "role_close_accountant",
+    "assumptions": [],
+    "category": "financial",
+    "confidence": 1.0,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_close_accountant"
+    ],
+    "direction": "decrease",
+    "edge_path": [],
+    "evidence_refs": [],
+    "first_effect_day": 30,
+    "impact_id": "imp_remove_close_accountant_savings",
+    "level": "direct",
+    "magnitude": 145000.0,
+    "metric": "annual_cost_usd",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "benefit",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 1,
+    "source_entity": "role_close_accountant",
+    "source_kind": "intervention",
+    "source_ref": "remove_close_accountant",
+    "status": "computed",
+    "unit": "usd",
+    "value_usd": 145000
+   },
+   {
+    "affected_department": "dept_finance",
+    "affected_entity": "role_gl_accountant",
+    "assumptions": [],
+    "category": "financial",
+    "confidence": 1.0,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_gl_accountant"
+    ],
+    "direction": "decrease",
+    "edge_path": [],
+    "evidence_refs": [],
+    "first_effect_day": 30,
+    "impact_id": "imp_remove_gl_accountant_savings",
+    "level": "direct",
+    "magnitude": 120000.0,
+    "metric": "annual_cost_usd",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "benefit",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 1,
+    "source_entity": "role_gl_accountant",
+    "source_kind": "intervention",
+    "source_ref": "remove_gl_accountant",
+    "status": "computed",
+    "unit": "usd",
+    "value_usd": 120000
+   },
+   {
+    "affected_department": "dept_finance",
+    "affected_entity": "role_reporting_analyst",
+    "assumptions": [],
+    "category": "financial",
+    "confidence": 1.0,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_reporting_analyst"
+    ],
+    "direction": "decrease",
+    "edge_path": [],
+    "evidence_refs": [],
+    "first_effect_day": 30,
+    "impact_id": "imp_remove_reporting_analyst_savings",
+    "level": "direct",
+    "magnitude": 110000.0,
+    "metric": "annual_cost_usd",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "benefit",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 1,
+    "source_entity": "role_reporting_analyst",
+    "source_kind": "intervention",
+    "source_ref": "remove_reporting_analyst",
+    "status": "computed",
+    "unit": "usd",
+    "value_usd": 110000
+   },
+   {
+    "affected_department": "dept_ai_data",
+    "affected_entity": "role_data_platform_lead",
+    "assumptions": [],
+    "category": "financial",
+    "confidence": 1.0,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_data_platform_lead"
+    ],
+    "direction": "decrease",
+    "edge_path": [],
+    "evidence_refs": [],
+    "first_effect_day": 30,
+    "impact_id": "imp_remove_data_platform_lead_savings",
+    "level": "direct",
+    "magnitude": 195000.0,
+    "metric": "annual_cost_usd",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "benefit",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 1,
+    "source_entity": "role_data_platform_lead",
+    "source_kind": "intervention",
+    "source_ref": "remove_data_platform_lead",
+    "status": "computed",
+    "unit": "usd",
+    "value_usd": 195000
+   },
+   {
+    "affected_department": "dept_operations",
+    "affected_entity": "role_billing_ops_lead",
+    "assumptions": [],
+    "category": "financial",
+    "confidence": 1.0,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_billing_ops_lead"
+    ],
+    "direction": "decrease",
+    "edge_path": [],
+    "evidence_refs": [],
+    "first_effect_day": 30,
+    "impact_id": "imp_remove_billing_ops_lead_savings",
+    "level": "direct",
+    "magnitude": 190000.0,
+    "metric": "annual_cost_usd",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "benefit",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 1,
+    "source_entity": "role_billing_ops_lead",
+    "source_kind": "intervention",
+    "source_ref": "remove_billing_ops_lead",
+    "status": "computed",
+    "unit": "usd",
+    "value_usd": 190000
+   },
+   {
+    "affected_department": "dept_operations",
+    "affected_entity": "role_billing_specialist",
+    "assumptions": [],
+    "category": "financial",
+    "confidence": 1.0,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_billing_specialist"
+    ],
+    "direction": "decrease",
+    "edge_path": [],
+    "evidence_refs": [],
+    "first_effect_day": 30,
+    "impact_id": "imp_remove_billing_specialist_savings",
+    "level": "direct",
+    "magnitude": 95000.0,
+    "metric": "annual_cost_usd",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "benefit",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 1,
+    "source_entity": "role_billing_specialist",
+    "source_kind": "intervention",
+    "source_ref": "remove_billing_specialist",
+    "status": "computed",
+    "unit": "usd",
+    "value_usd": 95000
+   },
+   {
+    "affected_department": "dept_finance",
+    "affected_entity": "role_revenue_accountant",
+    "assumptions": [],
+    "category": "financial",
+    "confidence": 1.0,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_revenue_accountant"
+    ],
+    "direction": "decrease",
+    "edge_path": [],
+    "evidence_refs": [],
+    "first_effect_day": 30,
+    "impact_id": "imp_remove_revenue_accountant_savings",
+    "level": "direct",
+    "magnitude": 130000.0,
+    "metric": "annual_cost_usd",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "benefit",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 1,
+    "source_entity": "role_revenue_accountant",
+    "source_kind": "intervention",
+    "source_ref": "remove_revenue_accountant",
+    "status": "computed",
+    "unit": "usd",
+    "value_usd": 130000
+   },
+   {
+    "affected_department": "dept_finance",
+    "affected_entity": "role_ar_specialist",
+    "assumptions": [],
+    "category": "financial",
+    "confidence": 1.0,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_ar_specialist"
+    ],
+    "direction": "decrease",
+    "edge_path": [],
+    "evidence_refs": [],
+    "first_effect_day": 30,
+    "impact_id": "imp_remove_ar_specialist_savings",
+    "level": "direct",
+    "magnitude": 85000.0,
+    "metric": "annual_cost_usd",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "benefit",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 1,
+    "source_entity": "role_ar_specialist",
+    "source_kind": "intervention",
+    "source_ref": "remove_ar_specialist",
+    "status": "computed",
+    "unit": "usd",
+    "value_usd": 85000
+   },
+   {
+    "affected_department": "dept_operations",
+    "affected_entity": "kn_billing_exception",
+    "assumptions": [],
+    "category": "ownership",
+    "confidence": 0.9,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_billing_ops_lead",
+     "kn_billing_exception"
+    ],
+    "direction": "decrease",
+    "edge_path": [
+     "e_billing_ops_lead_knows_exception"
+    ],
+    "evidence_refs": [
+     "ev_billing_runbook_gap"
+    ],
+    "first_effect_day": 30,
+    "impact_id": "imp_kn_billing_exception_loss",
+    "level": "dependent",
+    "magnitude": 0.9639,
+    "metric": "capacity_loss",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 5,
+    "source_entity": "role_billing_ops_lead",
+    "source_kind": "intervention",
+    "source_ref": "remove_billing_ops_lead",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": null
+   },
+   {
+    "affected_department": "dept_ai_data",
+    "affected_entity": "kn_warehouse_lineage",
+    "assumptions": [],
+    "category": "ownership",
+    "confidence": 0.9,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_data_platform_lead",
+     "kn_warehouse_lineage"
+    ],
+    "direction": "decrease",
+    "edge_path": [
+     "e_data_platform_lead_knows_lineage"
+    ],
+    "evidence_refs": [
+     "ev_knowledge_matrix_3"
+    ],
+    "first_effect_day": 30,
+    "impact_id": "imp_kn_warehouse_lineage_loss",
+    "level": "dependent",
+    "magnitude": 0.9025,
+    "metric": "capacity_loss",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 5,
+    "source_entity": "role_data_platform_lead",
+    "source_kind": "intervention",
+    "source_ref": "remove_data_platform_lead",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": null
+   },
+   {
+    "affected_department": "dept_finance",
+    "affected_entity": "kpi_gross_margin",
+    "assumptions": [],
+    "category": "business",
+    "confidence": 0.6561,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_billing_ops_lead",
+     "kn_billing_exception",
+     "wf_billing_recon",
+     "wf_invoicing",
+     "kpi_gross_margin"
+    ],
+    "direction": "decrease",
+    "edge_path": [
+     "e_billing_ops_lead_knows_exception",
+     "e_kn_billing_supports_recon",
+     "e_recon_invoicing",
+     "e_invoicing_margin"
+    ],
+    "evidence_refs": [
+     "ev_billing_runbook_gap",
+     "ev_architecture_core",
+     "ev_finance_forecast_q3"
+    ],
+    "first_effect_day": 45,
+    "impact_id": "imp_kpi_gross_margin_loss",
+    "level": "second_order",
+    "magnitude": 0.441128,
+    "metric": "capacity_loss",
+    "origin": "engine",
+    "peak_effect_day": 45,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 2,
+    "source_entity": "role_billing_ops_lead",
+    "source_kind": "intervention",
+    "source_ref": "remove_billing_ops_lead",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": null
+   },
+   {
+    "affected_department": "dept_finance",
+    "affected_entity": "role_ar_specialist",
+    "assumptions": [],
+    "category": "ownership",
+    "confidence": 1.0,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_ar_specialist"
+    ],
+    "direction": "decrease",
+    "edge_path": [],
+    "evidence_refs": [],
+    "first_effect_day": 30,
+    "impact_id": "imp_role_ar_specialist_loss",
+    "level": "direct",
+    "magnitude": 1.0,
+    "metric": "capacity_loss",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 3,
+    "source_entity": "role_ar_specialist",
+    "source_kind": "intervention",
+    "source_ref": "remove_ar_specialist",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": null
+   },
+   {
+    "affected_department": "dept_operations",
+    "affected_entity": "role_billing_ops_lead",
+    "assumptions": [],
+    "category": "ownership",
+    "confidence": 1.0,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_billing_ops_lead"
+    ],
+    "direction": "decrease",
+    "edge_path": [],
+    "evidence_refs": [],
+    "first_effect_day": 30,
+    "impact_id": "imp_role_billing_ops_lead_loss",
+    "level": "direct",
+    "magnitude": 1.0,
+    "metric": "capacity_loss",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 3,
+    "source_entity": "role_billing_ops_lead",
+    "source_kind": "intervention",
+    "source_ref": "remove_billing_ops_lead",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": null
+   },
+   {
+    "affected_department": "dept_operations",
+    "affected_entity": "role_billing_specialist",
+    "assumptions": [],
+    "category": "ownership",
+    "confidence": 1.0,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_billing_specialist"
+    ],
+    "direction": "decrease",
+    "edge_path": [],
+    "evidence_refs": [],
+    "first_effect_day": 30,
+    "impact_id": "imp_role_billing_specialist_loss",
+    "level": "direct",
+    "magnitude": 1.0,
+    "metric": "capacity_loss",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 3,
+    "source_entity": "role_billing_specialist",
+    "source_kind": "intervention",
+    "source_ref": "remove_billing_specialist",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": null
+   },
+   {
+    "affected_department": "dept_finance",
+    "affected_entity": "role_close_accountant",
+    "assumptions": [],
+    "category": "ownership",
+    "confidence": 1.0,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_close_accountant"
+    ],
+    "direction": "decrease",
+    "edge_path": [],
+    "evidence_refs": [],
+    "first_effect_day": 30,
+    "impact_id": "imp_role_close_accountant_loss",
+    "level": "direct",
+    "magnitude": 1.0,
+    "metric": "capacity_loss",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 3,
+    "source_entity": "role_close_accountant",
+    "source_kind": "intervention",
+    "source_ref": "remove_close_accountant",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": null
+   },
+   {
+    "affected_department": "dept_ai_data",
+    "affected_entity": "role_data_platform_lead",
+    "assumptions": [],
+    "category": "ownership",
+    "confidence": 1.0,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_data_platform_lead"
+    ],
+    "direction": "decrease",
+    "edge_path": [],
+    "evidence_refs": [],
+    "first_effect_day": 30,
+    "impact_id": "imp_role_data_platform_lead_loss",
+    "level": "direct",
+    "magnitude": 1.0,
+    "metric": "capacity_loss",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 3,
+    "source_entity": "role_data_platform_lead",
+    "source_kind": "intervention",
+    "source_ref": "remove_data_platform_lead",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": null
+   },
+   {
+    "affected_department": "dept_finance",
+    "affected_entity": "role_gl_accountant",
+    "assumptions": [],
+    "category": "ownership",
+    "confidence": 1.0,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_gl_accountant"
+    ],
+    "direction": "decrease",
+    "edge_path": [],
+    "evidence_refs": [],
+    "first_effect_day": 30,
+    "impact_id": "imp_role_gl_accountant_loss",
+    "level": "direct",
+    "magnitude": 1.0,
+    "metric": "capacity_loss",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 3,
+    "source_entity": "role_gl_accountant",
+    "source_kind": "intervention",
+    "source_ref": "remove_gl_accountant",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": null
+   },
+   {
+    "affected_department": "dept_finance",
+    "affected_entity": "role_reporting_analyst",
+    "assumptions": [],
+    "category": "ownership",
+    "confidence": 1.0,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_reporting_analyst"
+    ],
+    "direction": "decrease",
+    "edge_path": [],
+    "evidence_refs": [],
+    "first_effect_day": 30,
+    "impact_id": "imp_role_reporting_analyst_loss",
+    "level": "direct",
+    "magnitude": 1.0,
+    "metric": "capacity_loss",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 3,
+    "source_entity": "role_reporting_analyst",
+    "source_kind": "intervention",
+    "source_ref": "remove_reporting_analyst",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": null
+   },
+   {
+    "affected_department": "dept_finance",
+    "affected_entity": "role_revenue_accountant",
+    "assumptions": [],
+    "category": "ownership",
+    "confidence": 1.0,
+    "constraint_refs": [],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_revenue_accountant"
+    ],
+    "direction": "decrease",
+    "edge_path": [],
+    "evidence_refs": [],
+    "first_effect_day": 30,
+    "impact_id": "imp_role_revenue_accountant_loss",
+    "level": "direct",
+    "magnitude": 1.0,
+    "metric": "capacity_loss",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 3,
+    "source_entity": "role_revenue_accountant",
+    "source_kind": "intervention",
+    "source_ref": "remove_revenue_accountant",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": null
+   },
+   {
+    "affected_department": "dept_operations",
+    "affected_entity": "wf_billing_recon",
+    "assumptions": [],
+    "category": "operational",
+    "confidence": 0.81,
+    "constraint_refs": [
+     "c_stranded",
+     "c_customer"
+    ],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_billing_ops_lead",
+     "kn_billing_exception",
+     "wf_billing_recon"
+    ],
+    "direction": "decrease",
+    "edge_path": [
+     "e_billing_ops_lead_knows_exception",
+     "e_kn_billing_supports_recon"
+    ],
+    "evidence_refs": [
+     "ev_billing_runbook_gap"
+    ],
+    "first_effect_day": 30,
+    "impact_id": "imp_wf_billing_recon_loss",
+    "level": "second_order",
+    "magnitude": 0.95731,
+    "metric": "capacity_loss",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 5,
+    "source_entity": "role_billing_ops_lead",
+    "source_kind": "intervention",
+    "source_ref": "remove_billing_ops_lead",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": 288628965
+   },
+   {
+    "affected_department": "dept_finance",
+    "affected_entity": "wf_financial_close",
+    "assumptions": [],
+    "category": "operational",
+    "confidence": 0.81,
+    "constraint_refs": [
+     "c_stranded"
+    ],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_data_platform_lead",
+     "kn_warehouse_lineage",
+     "wf_financial_close"
+    ],
+    "direction": "decrease",
+    "edge_path": [
+     "e_data_platform_lead_knows_lineage",
+     "e_lineage_supports_close"
+    ],
+    "evidence_refs": [
+     "ev_knowledge_matrix_3"
+    ],
+    "first_effect_day": 30,
+    "impact_id": "imp_wf_financial_close_loss",
+    "level": "second_order",
+    "magnitude": 0.900403,
+    "metric": "capacity_loss",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 5,
+    "source_entity": "role_data_platform_lead",
+    "source_kind": "intervention",
+    "source_ref": "remove_data_platform_lead",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": 75408751
+   },
+   {
+    "affected_department": "dept_operations",
+    "affected_entity": "wf_invoicing",
+    "assumptions": [],
+    "category": "operational",
+    "confidence": 0.729,
+    "constraint_refs": [
+     "c_stranded",
+     "c_customer"
+    ],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "role_billing_ops_lead",
+     "kn_billing_exception",
+     "wf_billing_recon",
+     "wf_invoicing"
+    ],
+    "direction": "decrease",
+    "edge_path": [
+     "e_billing_ops_lead_knows_exception",
+     "e_kn_billing_supports_recon",
+     "e_recon_invoicing"
+    ],
+    "evidence_refs": [
+     "ev_billing_runbook_gap",
+     "ev_architecture_core"
+    ],
+    "first_effect_day": 45,
+    "impact_id": "imp_wf_invoicing_loss",
+    "level": "second_order",
+    "magnitude": 0.689263,
+    "metric": "capacity_loss",
+    "origin": "engine",
+    "peak_effect_day": 45,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 4,
+    "source_entity": "role_billing_ops_lead",
+    "source_kind": "intervention",
+    "source_ref": "remove_billing_ops_lead",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": 264676992
+   },
+   {
+    "affected_department": "dept_operations",
+    "affected_entity": "wf_billing_recon",
+    "assumptions": [
+     "kn_billing_exception is lost: no holder capacity left and 35% documented"
+    ],
+    "category": "ownership",
+    "confidence": 0.9,
+    "constraint_refs": [
+     "c_stranded",
+     "c_customer"
+    ],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "kn_billing_exception",
+     "wf_billing_recon"
+    ],
+    "direction": "decrease",
+    "edge_path": [
+     "e_kn_billing_supports_recon"
+    ],
+    "evidence_refs": [
+     "ev_billing_runbook_gap"
+    ],
+    "first_effect_day": 30,
+    "impact_id": "imp_wf_billing_recon_knowledge_kn_billing_exception",
+    "level": "dependent",
+    "magnitude": 0.65,
+    "metric": "knowledge_lost",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 4,
+    "source_entity": "kn_billing_exception",
+    "source_kind": "intervention",
+    "source_ref": "remove_billing_specialist",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": null
+   },
+   {
+    "affected_department": "dept_finance",
+    "affected_entity": "wf_financial_close",
+    "assumptions": [
+     "kn_warehouse_lineage is lost: no holder capacity left and 20% documented"
+    ],
+    "category": "ownership",
+    "confidence": 0.9,
+    "constraint_refs": [
+     "c_stranded"
+    ],
+    "decision_id": "dec_workforce_knowledge",
+    "dependency_path": [
+     "kn_warehouse_lineage",
+     "wf_financial_close"
+    ],
+    "direction": "decrease",
+    "edge_path": [
+     "e_lineage_supports_close"
+    ],
+    "evidence_refs": [
+     "ev_knowledge_matrix_3"
+    ],
+    "first_effect_day": 30,
+    "impact_id": "imp_wf_financial_close_knowledge_kn_warehouse_lineage",
+    "level": "dependent",
+    "magnitude": 0.8,
+    "metric": "knowledge_lost",
+    "origin": "engine",
+    "peak_effect_day": 30,
+    "polarity": "harm",
+    "scenario_id": "scn_run_acceptance_act_now_none",
+    "severity": 4,
+    "source_entity": "kn_warehouse_lineage",
+    "source_kind": "intervention",
+    "source_ref": "remove_data_platform_lead",
+    "status": "computed",
+    "unit": "ratio",
+    "value_usd": null
+   }
+  ],
+  "intervention_ids": [
+   "remove_close_accountant",
+   "remove_gl_accountant",
+   "remove_reporting_analyst",
+   "remove_data_platform_lead",
+   "remove_billing_ops_lead",
+   "remove_billing_specialist",
+   "remove_revenue_accountant",
+   "remove_ar_specialist"
+  ],
+  "knowledge_coverage": [
+   {
+    "dependent_workflow_ids": [
+     "wf_billing_recon"
+    ],
+    "documented_pct": 0.35,
+    "holder_capacity_fte_after": 0.0,
+    "holder_capacity_fte_before": 9.0,
+    "holders_after": [],
+    "holders_before": [
+     "role_billing_ops_lead",
+     "role_billing_specialist"
+    ],
+    "knowledge_id": "kn_billing_exception",
+    "lost": true,
+    "reasons": [
+     "lost holders role_billing_ops_lead, role_billing_specialist",
+     "0 holders left with 0 FTE; 35% documented",
+     "lost: no holder capacity left and less than 50% documented",
+     "wf_billing_recon: its exception path is only 20% documented, below the 35% ordinary documentation"
+    ]
+   },
+   {
+    "dependent_workflow_ids": [
+     "wf_financial_close"
+    ],
+    "documented_pct": 0.2,
+    "holder_capacity_fte_after": 0.0,
+    "holder_capacity_fte_before": 2.0,
+    "holders_after": [],
+    "holders_before": [
+     "role_data_platform_lead"
+    ],
+    "knowledge_id": "kn_warehouse_lineage",
+    "lost": true,
+    "reasons": [
+     "lost holders role_data_platform_lead",
+     "0 holders left with 0 FTE; 20% documented",
+     "lost: no holder capacity left and less than 50% documented"
+    ]
+   }
+  ],
+  "mode": "quick",
+  "plan_id": null,
+  "pressures_triggered": [],
+  "rejection_reasons": [
+   "c_stranded: stranded_workflows is 2 (wf_billing_recon, wf_financial_close); it must be == 0, so the hard constraint fails",
+   "c_customer: customer_impact_pct is 95.73% (wf_billing_recon); it must be <= 2.00%, so the hard constraint fails"
+  ],
+  "result_id": "res_run_acceptance_quick_a2e7584e3e04",
+  "risk": {
+   "components": {
+    "capability_workflow": 25.0,
+    "compliance_control": 0.0,
+    "customer_revenue": 20.0,
+    "execution_uncertainty": 0.8718,
+    "financial": 25.0
+   },
+   "level": "high",
+   "score": 70.8718,
+   "settings_version": 1
+  },
+  "run_id": "run_acceptance",
+  "scenario_id": "scn_run_acceptance_act_now_none",
+  "seed": null,
+  "value": {
+   "added_cost_usd": 628714708,
+   "avoided_failure_cost_usd": 0,
+   "displaced_work_cost_usd": 628714708,
+   "expected_business_loss_usd": 0,
+   "gross_savings_usd": 1070000,
+   "migration_cost_usd": 0,
+   "monthly_net_usd": [
+    0,
+    -57378610,
+    -114437220,
+    -171495829,
+    -228554439,
+    -285613049,
+    -342671659,
+    -399730269,
+    -456788879,
+    -513847488,
+    -570906098,
+    -627964708
+   ],
+   "net_value_usd": -627964708,
+   "p10_net_value_usd": null,
+   "p50_net_value_usd": null,
+   "p90_net_value_usd": null,
+   "pressure_cost_usd": 0,
+   "rebound_cost_usd": 0,
+   "termination_cost_usd": 0,
+   "transition_cost_usd": 320000
+  },
+  "workflow_coverage": [
+   {
+    "automation_pct": 0.3,
+    "backup_count_after": 0,
+    "criticality": "critical",
+    "documented_pct": 0.35,
+    "exception_documented_pct": 0.2,
+    "min_qualified_owners": 1,
+    "owner_capacity_fte_after": 0.0,
+    "owner_capacity_fte_before": 8.4,
+    "owners_after": [],
+    "owners_before": [
+     "role_ar_specialist",
+     "role_billing_ops_lead",
+     "role_billing_specialist",
+     "role_revenue_accountant"
+    ],
+    "reasons": [
+     "lost qualified owners role_ar_specialist, role_billing_ops_lead, role_billing_specialist, role_revenue_accountant",
+     "0 qualified owners left for a minimum of 1",
+     "0 independent backups left; recent execution coverage 100% -> 0%",
+     "35% documented; exception path 20% documented; 30% automated",
+     "recovery knowledge lost: kn_billing_exception",
+     "critical workflow: a replacement owner takes 120 days to train against a maximum downtime of 2 days"
+    ],
+    "replacement_cost_usd": 300000,
+    "stranded": true,
+    "training_days_required": 120,
+    "workflow_id": "wf_billing_recon"
+   },
+   {
+    "automation_pct": 0.4,
+    "backup_count_after": 0,
+    "criticality": "critical",
+    "documented_pct": 0.5,
+    "exception_documented_pct": 0.25,
+    "min_qualified_owners": 1,
+    "owner_capacity_fte_after": 0.0,
+    "owner_capacity_fte_before": 5.4,
+    "owners_after": [],
+    "owners_before": [
+     "role_close_accountant",
+     "role_gl_accountant",
+     "role_reporting_analyst"
+    ],
+    "reasons": [
+     "lost qualified owners role_close_accountant, role_gl_accountant, role_reporting_analyst",
+     "0 qualified owners left for a minimum of 1",
+     "0 independent backups left; recent execution coverage 100% -> 0%",
+     "50% documented; exception path 25% documented; 40% automated",
+     "recovery knowledge lost: kn_warehouse_lineage",
+     "critical workflow: a replacement owner takes 120 days to train against a maximum downtime of 3 days"
+    ],
+    "replacement_cost_usd": 220000,
+    "stranded": true,
+    "training_days_required": 120,
+    "workflow_id": "wf_financial_close"
+   }
+  ]
+ },
+ "run_id": "run_acceptance",
+ "simulate": {
+  "act_now": {
+   "affected_department_ids": [
+    "dept_ai_data",
+    "dept_finance",
+    "dept_operations"
+   ],
+   "assumptions": [
+    "Midpoint edge strengths; every value is a point estimate; baseline pressures are priced in expected-value form (hazards as probability x cost per event x months, ranges at their point values)",
+    "added_cost_usd includes $628,714,708 displaced work: harmed workflows and systems priced at loss x failure_cost_per_day_usd until the horizon",
+    "Full mode falls back to expected value until uncertainty sampling exists (plan E-03); the seed is recorded so the run can be reproduced",
+    "Every value is a point estimate, not a simulated range: p10 = p50 = p90 = net_value_usd in this mode",
+    "p_better_than_inaction is a yes/no comparison of point estimates in this mode (1.0 or 0.0), not a probability"
+   ],
+   "computed_at": "2026-09-26T00:00:00Z",
+   "constraint_results": [
+    {
+     "constraint_id": "c_compliance",
+     "explanation": "compliance_controls_broken is 0; it must be == 0, so the hard constraint passes",
+     "hard": true,
+     "impact_ids": [],
+     "metric": "compliance_controls_broken",
+     "operator": "==",
+     "passed": true,
+     "threshold": 0.0,
+     "value": 0.0
+    },
+    {
+     "constraint_id": "c_stranded",
+     "explanation": "stranded_workflows is 2 (wf_billing_recon, wf_financial_close); it must be == 0, so the hard constraint fails",
+     "hard": true,
+     "impact_ids": [
+      "imp_wf_billing_recon_loss",
+      "imp_wf_financial_close_loss"
+     ],
+     "metric": "stranded_workflows",
+     "operator": "==",
+     "passed": false,
+     "threshold": 0.0,
+     "value": 2.0
+    },
+    {
+     "constraint_id": "c_customer",
+     "explanation": "customer_impact_pct is 95.73% (wf_billing_recon); it must be <= 2.00%, so the hard constraint fails",
+     "hard": true,
+     "impact_ids": [
+      "imp_wf_billing_recon_loss"
+     ],
+     "metric": "customer_impact_pct",
+     "operator": "<=",
+     "passed": false,
+     "threshold": 2.0,
+     "value": 95.731
+    }
+   ],
+   "feasible": false,
+   "future": "act_now",
+   "goal_met": true,
+   "impacts": [
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_close_accountant",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_close_accountant"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_remove_close_accountant_savings",
+     "level": "direct",
+     "magnitude": 145000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 1,
+     "source_entity": "role_close_accountant",
+     "source_kind": "intervention",
+     "source_ref": "remove_close_accountant",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 145000
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_gl_accountant",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_gl_accountant"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_remove_gl_accountant_savings",
+     "level": "direct",
+     "magnitude": 120000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 1,
+     "source_entity": "role_gl_accountant",
+     "source_kind": "intervention",
+     "source_ref": "remove_gl_accountant",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 120000
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_reporting_analyst",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_reporting_analyst"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_remove_reporting_analyst_savings",
+     "level": "direct",
+     "magnitude": 110000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 1,
+     "source_entity": "role_reporting_analyst",
+     "source_kind": "intervention",
+     "source_ref": "remove_reporting_analyst",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 110000
+    },
+    {
+     "affected_department": "dept_ai_data",
+     "affected_entity": "role_data_platform_lead",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_data_platform_lead"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_remove_data_platform_lead_savings",
+     "level": "direct",
+     "magnitude": 195000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 1,
+     "source_entity": "role_data_platform_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_data_platform_lead",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 195000
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "role_billing_ops_lead",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_billing_ops_lead"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_remove_billing_ops_lead_savings",
+     "level": "direct",
+     "magnitude": 190000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 1,
+     "source_entity": "role_billing_ops_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_ops_lead",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 190000
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "role_billing_specialist",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_billing_specialist"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_remove_billing_specialist_savings",
+     "level": "direct",
+     "magnitude": 95000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 1,
+     "source_entity": "role_billing_specialist",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_specialist",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 95000
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_revenue_accountant",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_revenue_accountant"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_remove_revenue_accountant_savings",
+     "level": "direct",
+     "magnitude": 130000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 1,
+     "source_entity": "role_revenue_accountant",
+     "source_kind": "intervention",
+     "source_ref": "remove_revenue_accountant",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 130000
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_ar_specialist",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_ar_specialist"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_remove_ar_specialist_savings",
+     "level": "direct",
+     "magnitude": 85000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 1,
+     "source_entity": "role_ar_specialist",
+     "source_kind": "intervention",
+     "source_ref": "remove_ar_specialist",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 85000
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "kn_billing_exception",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 0.9,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_billing_ops_lead",
+      "kn_billing_exception"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_billing_ops_lead_knows_exception"
+     ],
+     "evidence_refs": [
+      "ev_billing_runbook_gap"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_kn_billing_exception_loss",
+     "level": "dependent",
+     "magnitude": 0.9639,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 5,
+     "source_entity": "role_billing_ops_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_ops_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_ai_data",
+     "affected_entity": "kn_warehouse_lineage",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 0.9,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_data_platform_lead",
+      "kn_warehouse_lineage"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_data_platform_lead_knows_lineage"
+     ],
+     "evidence_refs": [
+      "ev_knowledge_matrix_3"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_kn_warehouse_lineage_loss",
+     "level": "dependent",
+     "magnitude": 0.9025,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 5,
+     "source_entity": "role_data_platform_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_data_platform_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "kpi_gross_margin",
+     "assumptions": [],
+     "category": "business",
+     "confidence": 0.6561,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_billing_ops_lead",
+      "kn_billing_exception",
+      "wf_billing_recon",
+      "wf_invoicing",
+      "kpi_gross_margin"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_billing_ops_lead_knows_exception",
+      "e_kn_billing_supports_recon",
+      "e_recon_invoicing",
+      "e_invoicing_margin"
+     ],
+     "evidence_refs": [
+      "ev_billing_runbook_gap",
+      "ev_architecture_core",
+      "ev_finance_forecast_q3"
+     ],
+     "first_effect_day": 45,
+     "impact_id": "imp_kpi_gross_margin_loss",
+     "level": "second_order",
+     "magnitude": 0.441128,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 45,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 2,
+     "source_entity": "role_billing_ops_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_ops_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_ar_specialist",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_ar_specialist"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_role_ar_specialist_loss",
+     "level": "direct",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 3,
+     "source_entity": "role_ar_specialist",
+     "source_kind": "intervention",
+     "source_ref": "remove_ar_specialist",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "role_billing_ops_lead",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_billing_ops_lead"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_role_billing_ops_lead_loss",
+     "level": "direct",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 3,
+     "source_entity": "role_billing_ops_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_ops_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "role_billing_specialist",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_billing_specialist"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_role_billing_specialist_loss",
+     "level": "direct",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 3,
+     "source_entity": "role_billing_specialist",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_specialist",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_close_accountant",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_close_accountant"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_role_close_accountant_loss",
+     "level": "direct",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 3,
+     "source_entity": "role_close_accountant",
+     "source_kind": "intervention",
+     "source_ref": "remove_close_accountant",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_ai_data",
+     "affected_entity": "role_data_platform_lead",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_data_platform_lead"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_role_data_platform_lead_loss",
+     "level": "direct",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 3,
+     "source_entity": "role_data_platform_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_data_platform_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_gl_accountant",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_gl_accountant"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_role_gl_accountant_loss",
+     "level": "direct",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 3,
+     "source_entity": "role_gl_accountant",
+     "source_kind": "intervention",
+     "source_ref": "remove_gl_accountant",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_reporting_analyst",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_reporting_analyst"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_role_reporting_analyst_loss",
+     "level": "direct",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 3,
+     "source_entity": "role_reporting_analyst",
+     "source_kind": "intervention",
+     "source_ref": "remove_reporting_analyst",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_revenue_accountant",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_revenue_accountant"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 30,
+     "impact_id": "imp_role_revenue_accountant_loss",
+     "level": "direct",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 3,
+     "source_entity": "role_revenue_accountant",
+     "source_kind": "intervention",
+     "source_ref": "remove_revenue_accountant",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "wf_billing_recon",
+     "assumptions": [],
+     "category": "operational",
+     "confidence": 0.81,
+     "constraint_refs": [
+      "c_stranded",
+      "c_customer"
+     ],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_billing_ops_lead",
+      "kn_billing_exception",
+      "wf_billing_recon"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_billing_ops_lead_knows_exception",
+      "e_kn_billing_supports_recon"
+     ],
+     "evidence_refs": [
+      "ev_billing_runbook_gap"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_wf_billing_recon_loss",
+     "level": "second_order",
+     "magnitude": 0.95731,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 5,
+     "source_entity": "role_billing_ops_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_ops_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": 288628965
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "wf_financial_close",
+     "assumptions": [],
+     "category": "operational",
+     "confidence": 0.81,
+     "constraint_refs": [
+      "c_stranded"
+     ],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_data_platform_lead",
+      "kn_warehouse_lineage",
+      "wf_financial_close"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_data_platform_lead_knows_lineage",
+      "e_lineage_supports_close"
+     ],
+     "evidence_refs": [
+      "ev_knowledge_matrix_3"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_wf_financial_close_loss",
+     "level": "second_order",
+     "magnitude": 0.900403,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 5,
+     "source_entity": "role_data_platform_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_data_platform_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": 75408751
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "wf_invoicing",
+     "assumptions": [],
+     "category": "operational",
+     "confidence": 0.729,
+     "constraint_refs": [
+      "c_stranded",
+      "c_customer"
+     ],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_billing_ops_lead",
+      "kn_billing_exception",
+      "wf_billing_recon",
+      "wf_invoicing"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_billing_ops_lead_knows_exception",
+      "e_kn_billing_supports_recon",
+      "e_recon_invoicing"
+     ],
+     "evidence_refs": [
+      "ev_billing_runbook_gap",
+      "ev_architecture_core"
+     ],
+     "first_effect_day": 45,
+     "impact_id": "imp_wf_invoicing_loss",
+     "level": "second_order",
+     "magnitude": 0.689263,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 45,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 4,
+     "source_entity": "role_billing_ops_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_ops_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": 264676992
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "wf_billing_recon",
+     "assumptions": [
+      "kn_billing_exception is lost: no holder capacity left and 35% documented"
+     ],
+     "category": "ownership",
+     "confidence": 0.9,
+     "constraint_refs": [
+      "c_stranded",
+      "c_customer"
+     ],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "kn_billing_exception",
+      "wf_billing_recon"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_kn_billing_supports_recon"
+     ],
+     "evidence_refs": [
+      "ev_billing_runbook_gap"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_wf_billing_recon_knowledge_kn_billing_exception",
+     "level": "dependent",
+     "magnitude": 0.65,
+     "metric": "knowledge_lost",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 4,
+     "source_entity": "kn_billing_exception",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_specialist",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "wf_financial_close",
+     "assumptions": [
+      "kn_warehouse_lineage is lost: no holder capacity left and 20% documented"
+     ],
+     "category": "ownership",
+     "confidence": 0.9,
+     "constraint_refs": [
+      "c_stranded"
+     ],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "kn_warehouse_lineage",
+      "wf_financial_close"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_lineage_supports_close"
+     ],
+     "evidence_refs": [
+      "ev_knowledge_matrix_3"
+     ],
+     "first_effect_day": 30,
+     "impact_id": "imp_wf_financial_close_knowledge_kn_warehouse_lineage",
+     "level": "dependent",
+     "magnitude": 0.8,
+     "metric": "knowledge_lost",
+     "origin": "engine",
+     "peak_effect_day": 30,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 4,
+     "source_entity": "kn_warehouse_lineage",
+     "source_kind": "intervention",
+     "source_ref": "remove_data_platform_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "wf_billing_recon",
+     "assumptions": [
+      "Billing reconciliation failure: expected value over days 0-365"
+     ],
+     "category": "financial",
+     "confidence": 0.6,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "wf_billing_recon"
+     ],
+     "direction": "increase",
+     "edge_path": [],
+     "evidence_refs": [
+      "ev_incident_31"
+     ],
+     "first_effect_day": 0,
+     "impact_id": "imp_pr_billing_recon_hazard_pressure",
+     "level": "direct",
+     "magnitude": 106167724.0,
+     "metric": "expected_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 365,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 5,
+     "source_entity": "wf_billing_recon",
+     "source_kind": "pressure",
+     "source_ref": "pr_billing_recon_hazard",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 106167724
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "dept_operations",
+     "assumptions": [
+      "Contractor rate growth: expected value over days 0-365"
+     ],
+     "category": "financial",
+     "confidence": 0.8,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "dept_operations"
+     ],
+     "direction": "increase",
+     "edge_path": [],
+     "evidence_refs": [
+      "ev_finance_forecast_q3"
+     ],
+     "first_effect_day": 0,
+     "impact_id": "imp_pr_contractor_cost_growth_pressure",
+     "level": "direct",
+     "magnitude": 211598071.0,
+     "metric": "expected_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 365,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 5,
+     "source_entity": "dept_operations",
+     "source_kind": "pressure",
+     "source_ref": "pr_contractor_cost_growth",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 211598071
+    },
+    {
+     "affected_department": "dept_ai_data",
+     "affected_entity": "kn_warehouse_lineage",
+     "assumptions": [
+      "Warehouse lineage holder leaves: expected value over days 0-365"
+     ],
+     "category": "financial",
+     "confidence": 0.6,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "kn_warehouse_lineage"
+     ],
+     "direction": "increase",
+     "edge_path": [],
+     "evidence_refs": [
+      "ev_knowledge_matrix_3"
+     ],
+     "first_effect_day": 0,
+     "impact_id": "imp_pr_lineage_holder_attrition_pressure",
+     "level": "direct",
+     "magnitude": 43635375.0,
+     "metric": "expected_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 365,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+     "severity": 5,
+     "source_entity": "kn_warehouse_lineage",
+     "source_kind": "pressure",
+     "source_ref": "pr_lineage_holder_attrition",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 43635375
+    }
+   ],
+   "intervention_ids": [
+    "remove_close_accountant",
+    "remove_gl_accountant",
+    "remove_reporting_analyst",
+    "remove_data_platform_lead",
+    "remove_billing_ops_lead",
+    "remove_billing_specialist",
+    "remove_revenue_accountant",
+    "remove_ar_specialist"
+   ],
+   "knowledge_coverage": [
+    {
+     "dependent_workflow_ids": [
+      "wf_billing_recon"
+     ],
+     "documented_pct": 0.35,
+     "holder_capacity_fte_after": 0.0,
+     "holder_capacity_fte_before": 9.0,
+     "holders_after": [],
+     "holders_before": [
+      "role_billing_ops_lead",
+      "role_billing_specialist"
+     ],
+     "knowledge_id": "kn_billing_exception",
+     "lost": true,
+     "reasons": [
+      "lost holders role_billing_ops_lead, role_billing_specialist",
+      "0 holders left with 0 FTE; 35% documented",
+      "lost: no holder capacity left and less than 50% documented",
+      "wf_billing_recon: its exception path is only 20% documented, below the 35% ordinary documentation"
+     ]
+    },
+    {
+     "dependent_workflow_ids": [
+      "wf_financial_close"
+     ],
+     "documented_pct": 0.2,
+     "holder_capacity_fte_after": 0.0,
+     "holder_capacity_fte_before": 2.0,
+     "holders_after": [],
+     "holders_before": [
+      "role_data_platform_lead"
+     ],
+     "knowledge_id": "kn_warehouse_lineage",
+     "lost": true,
+     "reasons": [
+      "lost holders role_data_platform_lead",
+      "0 holders left with 0 FTE; 20% documented",
+      "lost: no holder capacity left and less than 50% documented"
+     ]
+    }
+   ],
+   "mode": "full",
+   "plan_id": "plan_naive",
+   "pressures_triggered": [
+    {
+     "expected_cost_usd": 106167724,
+     "expected_events": 1.769462,
+     "neutralised": false,
+     "pressure_id": "pr_billing_recon_hazard"
+    },
+    {
+     "expected_cost_usd": 211598071,
+     "expected_events": 0.0,
+     "neutralised": false,
+     "pressure_id": "pr_contractor_cost_growth"
+    },
+    {
+     "expected_cost_usd": 43635375,
+     "expected_events": 0.969675,
+     "neutralised": false,
+     "pressure_id": "pr_lineage_holder_attrition"
+    }
+   ],
+   "rejection_reasons": [
+    "c_stranded: stranded_workflows is 2 (wf_billing_recon, wf_financial_close); it must be == 0, so the hard constraint fails",
+    "c_customer: customer_impact_pct is 95.73% (wf_billing_recon); it must be <= 2.00%, so the hard constraint fails"
+   ],
+   "result_id": "res_run_acceptance_act_now_plan_naive",
+   "risk": {
+    "components": {
+     "capability_workflow": 25.0,
+     "compliance_control": 0.0,
+     "customer_revenue": 20.0,
+     "execution_uncertainty": 0.8718,
+     "financial": 25.0
+    },
+    "level": "high",
+    "score": 70.8718,
+    "settings_version": 1
+   },
+   "run_id": "run_acceptance",
+   "scenario_id": "scn_run_acceptance_act_now_plan_naive",
+   "seed": 42,
+   "value": {
+    "added_cost_usd": 628714708,
+    "avoided_failure_cost_usd": 0,
+    "displaced_work_cost_usd": 628714708,
+    "expected_business_loss_usd": 0,
+    "gross_savings_usd": 1070000,
+    "migration_cost_usd": 0,
+    "monthly_net_usd": [
+     -6297945,
+     -81877307,
+     -159735828,
+     -240219498,
+     -323354571,
+     -409167561,
+     -497685245,
+     -588934672,
+     -682943158,
+     -779738293,
+     -879347946,
+     -989365878
+    ],
+    "net_value_usd": -989365878,
+    "p10_net_value_usd": -989365878,
+    "p50_net_value_usd": -989365878,
+    "p90_net_value_usd": -989365878,
+    "pressure_cost_usd": 361401170,
+    "rebound_cost_usd": 0,
+    "termination_cost_usd": 0,
+    "transition_cost_usd": 320000
+   },
+   "workflow_coverage": [
+    {
+     "automation_pct": 0.3,
+     "backup_count_after": 0,
+     "criticality": "critical",
+     "documented_pct": 0.35,
+     "exception_documented_pct": 0.2,
+     "min_qualified_owners": 1,
+     "owner_capacity_fte_after": 0.0,
+     "owner_capacity_fte_before": 8.4,
+     "owners_after": [],
+     "owners_before": [
+      "role_ar_specialist",
+      "role_billing_ops_lead",
+      "role_billing_specialist",
+      "role_revenue_accountant"
+     ],
+     "reasons": [
+      "lost qualified owners role_ar_specialist, role_billing_ops_lead, role_billing_specialist, role_revenue_accountant",
+      "0 qualified owners left for a minimum of 1",
+      "0 independent backups left; recent execution coverage 100% -> 0%",
+      "35% documented; exception path 20% documented; 30% automated",
+      "recovery knowledge lost: kn_billing_exception",
+      "critical workflow: a replacement owner takes 120 days to train against a maximum downtime of 2 days"
+     ],
+     "replacement_cost_usd": 300000,
+     "stranded": true,
+     "training_days_required": 120,
+     "workflow_id": "wf_billing_recon"
+    },
+    {
+     "automation_pct": 0.4,
+     "backup_count_after": 0,
+     "criticality": "critical",
+     "documented_pct": 0.5,
+     "exception_documented_pct": 0.25,
+     "min_qualified_owners": 1,
+     "owner_capacity_fte_after": 0.0,
+     "owner_capacity_fte_before": 5.4,
+     "owners_after": [],
+     "owners_before": [
+      "role_close_accountant",
+      "role_gl_accountant",
+      "role_reporting_analyst"
+     ],
+     "reasons": [
+      "lost qualified owners role_close_accountant, role_gl_accountant, role_reporting_analyst",
+      "0 qualified owners left for a minimum of 1",
+      "0 independent backups left; recent execution coverage 100% -> 0%",
+      "50% documented; exception path 25% documented; 40% automated",
+      "recovery knowledge lost: kn_warehouse_lineage",
+      "critical workflow: a replacement owner takes 120 days to train against a maximum downtime of 3 days"
+     ],
+     "replacement_cost_usd": 220000,
+     "stranded": true,
+     "training_days_required": 120,
+     "workflow_id": "wf_financial_close"
+    }
+   ]
+  },
+  "delay": {
+   "affected_department_ids": [
+    "dept_ai_data",
+    "dept_finance",
+    "dept_operations"
+   ],
+   "assumptions": [
+    "Midpoint edge strengths; every value is a point estimate; baseline pressures are priced in expected-value form (hazards as probability x cost per event x months, ranges at their point values)",
+    "added_cost_usd includes $456,473,127 displaced work: harmed workflows and systems priced at loss x failure_cost_per_day_usd until the horizon",
+    "Delay future: interventions start 90 days later and every neutralisation starts after the delay; gross_savings_usd is the $778,182 realised after day 120 of the $1,070,000 annual run rate, which the goal and constraints are judged on",
+    "Full mode falls back to expected value until uncertainty sampling exists (plan E-03); the seed is recorded so the run can be reproduced",
+    "Every value is a point estimate, not a simulated range: p10 = p50 = p90 = net_value_usd in this mode",
+    "p_better_than_inaction is a yes/no comparison of point estimates in this mode (1.0 or 0.0), not a probability"
+   ],
+   "computed_at": "2026-09-26T00:00:00Z",
+   "constraint_results": [
+    {
+     "constraint_id": "c_compliance",
+     "explanation": "compliance_controls_broken is 0; it must be == 0, so the hard constraint passes",
+     "hard": true,
+     "impact_ids": [],
+     "metric": "compliance_controls_broken",
+     "operator": "==",
+     "passed": true,
+     "threshold": 0.0,
+     "value": 0.0
+    },
+    {
+     "constraint_id": "c_stranded",
+     "explanation": "stranded_workflows is 2 (wf_billing_recon, wf_financial_close); it must be == 0, so the hard constraint fails",
+     "hard": true,
+     "impact_ids": [
+      "imp_wf_billing_recon_loss",
+      "imp_wf_financial_close_loss"
+     ],
+     "metric": "stranded_workflows",
+     "operator": "==",
+     "passed": false,
+     "threshold": 0.0,
+     "value": 2.0
+    },
+    {
+     "constraint_id": "c_customer",
+     "explanation": "customer_impact_pct is 95.73% (wf_billing_recon); it must be <= 2.00%, so the hard constraint fails",
+     "hard": true,
+     "impact_ids": [
+      "imp_wf_billing_recon_loss"
+     ],
+     "metric": "customer_impact_pct",
+     "operator": "<=",
+     "passed": false,
+     "threshold": 2.0,
+     "value": 95.731
+    }
+   ],
+   "feasible": false,
+   "future": "delay",
+   "goal_met": true,
+   "impacts": [
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_close_accountant",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_close_accountant"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 120,
+     "impact_id": "imp_remove_close_accountant_savings",
+     "level": "delayed",
+     "magnitude": 145000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 1,
+     "source_entity": "role_close_accountant",
+     "source_kind": "intervention",
+     "source_ref": "remove_close_accountant",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 145000
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_gl_accountant",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_gl_accountant"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 120,
+     "impact_id": "imp_remove_gl_accountant_savings",
+     "level": "delayed",
+     "magnitude": 120000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 1,
+     "source_entity": "role_gl_accountant",
+     "source_kind": "intervention",
+     "source_ref": "remove_gl_accountant",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 120000
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_reporting_analyst",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_reporting_analyst"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 120,
+     "impact_id": "imp_remove_reporting_analyst_savings",
+     "level": "delayed",
+     "magnitude": 110000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 1,
+     "source_entity": "role_reporting_analyst",
+     "source_kind": "intervention",
+     "source_ref": "remove_reporting_analyst",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 110000
+    },
+    {
+     "affected_department": "dept_ai_data",
+     "affected_entity": "role_data_platform_lead",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_data_platform_lead"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 120,
+     "impact_id": "imp_remove_data_platform_lead_savings",
+     "level": "delayed",
+     "magnitude": 195000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 1,
+     "source_entity": "role_data_platform_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_data_platform_lead",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 195000
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "role_billing_ops_lead",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_billing_ops_lead"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 120,
+     "impact_id": "imp_remove_billing_ops_lead_savings",
+     "level": "delayed",
+     "magnitude": 190000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 1,
+     "source_entity": "role_billing_ops_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_ops_lead",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 190000
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "role_billing_specialist",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_billing_specialist"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 120,
+     "impact_id": "imp_remove_billing_specialist_savings",
+     "level": "delayed",
+     "magnitude": 95000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 1,
+     "source_entity": "role_billing_specialist",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_specialist",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 95000
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_revenue_accountant",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_revenue_accountant"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 120,
+     "impact_id": "imp_remove_revenue_accountant_savings",
+     "level": "delayed",
+     "magnitude": 130000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 1,
+     "source_entity": "role_revenue_accountant",
+     "source_kind": "intervention",
+     "source_ref": "remove_revenue_accountant",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 130000
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_ar_specialist",
+     "assumptions": [],
+     "category": "financial",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_ar_specialist"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 120,
+     "impact_id": "imp_remove_ar_specialist_savings",
+     "level": "delayed",
+     "magnitude": 85000.0,
+     "metric": "annual_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "benefit",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 1,
+     "source_entity": "role_ar_specialist",
+     "source_kind": "intervention",
+     "source_ref": "remove_ar_specialist",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 85000
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "kn_billing_exception",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 0.9,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_billing_ops_lead",
+      "kn_billing_exception"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_billing_ops_lead_knows_exception"
+     ],
+     "evidence_refs": [
+      "ev_billing_runbook_gap"
+     ],
+     "first_effect_day": 120,
+     "impact_id": "imp_kn_billing_exception_loss",
+     "level": "delayed",
+     "magnitude": 0.9639,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 5,
+     "source_entity": "role_billing_ops_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_ops_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_ai_data",
+     "affected_entity": "kn_warehouse_lineage",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 0.9,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_data_platform_lead",
+      "kn_warehouse_lineage"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_data_platform_lead_knows_lineage"
+     ],
+     "evidence_refs": [
+      "ev_knowledge_matrix_3"
+     ],
+     "first_effect_day": 120,
+     "impact_id": "imp_kn_warehouse_lineage_loss",
+     "level": "delayed",
+     "magnitude": 0.9025,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 5,
+     "source_entity": "role_data_platform_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_data_platform_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "kpi_gross_margin",
+     "assumptions": [],
+     "category": "business",
+     "confidence": 0.6561,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_billing_ops_lead",
+      "kn_billing_exception",
+      "wf_billing_recon",
+      "wf_invoicing",
+      "kpi_gross_margin"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_billing_ops_lead_knows_exception",
+      "e_kn_billing_supports_recon",
+      "e_recon_invoicing",
+      "e_invoicing_margin"
+     ],
+     "evidence_refs": [
+      "ev_billing_runbook_gap",
+      "ev_architecture_core",
+      "ev_finance_forecast_q3"
+     ],
+     "first_effect_day": 135,
+     "impact_id": "imp_kpi_gross_margin_loss",
+     "level": "delayed",
+     "magnitude": 0.441128,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 135,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 2,
+     "source_entity": "role_billing_ops_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_ops_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_ar_specialist",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_ar_specialist"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 120,
+     "impact_id": "imp_role_ar_specialist_loss",
+     "level": "delayed",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 3,
+     "source_entity": "role_ar_specialist",
+     "source_kind": "intervention",
+     "source_ref": "remove_ar_specialist",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "role_billing_ops_lead",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_billing_ops_lead"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 120,
+     "impact_id": "imp_role_billing_ops_lead_loss",
+     "level": "delayed",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 3,
+     "source_entity": "role_billing_ops_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_ops_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "role_billing_specialist",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_billing_specialist"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 120,
+     "impact_id": "imp_role_billing_specialist_loss",
+     "level": "delayed",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 3,
+     "source_entity": "role_billing_specialist",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_specialist",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_close_accountant",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_close_accountant"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 120,
+     "impact_id": "imp_role_close_accountant_loss",
+     "level": "delayed",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 3,
+     "source_entity": "role_close_accountant",
+     "source_kind": "intervention",
+     "source_ref": "remove_close_accountant",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_ai_data",
+     "affected_entity": "role_data_platform_lead",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_data_platform_lead"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 120,
+     "impact_id": "imp_role_data_platform_lead_loss",
+     "level": "delayed",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 3,
+     "source_entity": "role_data_platform_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_data_platform_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_gl_accountant",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_gl_accountant"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 120,
+     "impact_id": "imp_role_gl_accountant_loss",
+     "level": "delayed",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 3,
+     "source_entity": "role_gl_accountant",
+     "source_kind": "intervention",
+     "source_ref": "remove_gl_accountant",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_reporting_analyst",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_reporting_analyst"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 120,
+     "impact_id": "imp_role_reporting_analyst_loss",
+     "level": "delayed",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 3,
+     "source_entity": "role_reporting_analyst",
+     "source_kind": "intervention",
+     "source_ref": "remove_reporting_analyst",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "role_revenue_accountant",
+     "assumptions": [],
+     "category": "ownership",
+     "confidence": 1.0,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_revenue_accountant"
+     ],
+     "direction": "decrease",
+     "edge_path": [],
+     "evidence_refs": [],
+     "first_effect_day": 120,
+     "impact_id": "imp_role_revenue_accountant_loss",
+     "level": "delayed",
+     "magnitude": 1.0,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 3,
+     "source_entity": "role_revenue_accountant",
+     "source_kind": "intervention",
+     "source_ref": "remove_revenue_accountant",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "wf_billing_recon",
+     "assumptions": [],
+     "category": "operational",
+     "confidence": 0.81,
+     "constraint_refs": [
+      "c_stranded",
+      "c_customer"
+     ],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_billing_ops_lead",
+      "kn_billing_exception",
+      "wf_billing_recon"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_billing_ops_lead_knows_exception",
+      "e_kn_billing_supports_recon"
+     ],
+     "evidence_refs": [
+      "ev_billing_runbook_gap"
+     ],
+     "first_effect_day": 120,
+     "impact_id": "imp_wf_billing_recon_loss",
+     "level": "delayed",
+     "magnitude": 0.95731,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 5,
+     "source_entity": "role_billing_ops_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_ops_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": 211086855
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "wf_financial_close",
+     "assumptions": [],
+     "category": "operational",
+     "confidence": 0.81,
+     "constraint_refs": [
+      "c_stranded"
+     ],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_data_platform_lead",
+      "kn_warehouse_lineage",
+      "wf_financial_close"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_data_platform_lead_knows_lineage",
+      "e_lineage_supports_close"
+     ],
+     "evidence_refs": [
+      "ev_knowledge_matrix_3"
+     ],
+     "first_effect_day": 120,
+     "impact_id": "imp_wf_financial_close_loss",
+     "level": "delayed",
+     "magnitude": 0.900403,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 5,
+     "source_entity": "role_data_platform_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_data_platform_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": 55149684
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "wf_invoicing",
+     "assumptions": [],
+     "category": "operational",
+     "confidence": 0.729,
+     "constraint_refs": [
+      "c_stranded",
+      "c_customer"
+     ],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "role_billing_ops_lead",
+      "kn_billing_exception",
+      "wf_billing_recon",
+      "wf_invoicing"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_billing_ops_lead_knows_exception",
+      "e_kn_billing_supports_recon",
+      "e_recon_invoicing"
+     ],
+     "evidence_refs": [
+      "ev_billing_runbook_gap",
+      "ev_architecture_core"
+     ],
+     "first_effect_day": 135,
+     "impact_id": "imp_wf_invoicing_loss",
+     "level": "delayed",
+     "magnitude": 0.689263,
+     "metric": "capacity_loss",
+     "origin": "engine",
+     "peak_effect_day": 135,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 4,
+     "source_entity": "role_billing_ops_lead",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_ops_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": 190236588
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "wf_billing_recon",
+     "assumptions": [
+      "kn_billing_exception is lost: no holder capacity left and 35% documented"
+     ],
+     "category": "ownership",
+     "confidence": 0.9,
+     "constraint_refs": [
+      "c_stranded",
+      "c_customer"
+     ],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "kn_billing_exception",
+      "wf_billing_recon"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_kn_billing_supports_recon"
+     ],
+     "evidence_refs": [
+      "ev_billing_runbook_gap"
+     ],
+     "first_effect_day": 120,
+     "impact_id": "imp_wf_billing_recon_knowledge_kn_billing_exception",
+     "level": "delayed",
+     "magnitude": 0.65,
+     "metric": "knowledge_lost",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 4,
+     "source_entity": "kn_billing_exception",
+     "source_kind": "intervention",
+     "source_ref": "remove_billing_specialist",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_finance",
+     "affected_entity": "wf_financial_close",
+     "assumptions": [
+      "kn_warehouse_lineage is lost: no holder capacity left and 20% documented"
+     ],
+     "category": "ownership",
+     "confidence": 0.9,
+     "constraint_refs": [
+      "c_stranded"
+     ],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "kn_warehouse_lineage",
+      "wf_financial_close"
+     ],
+     "direction": "decrease",
+     "edge_path": [
+      "e_lineage_supports_close"
+     ],
+     "evidence_refs": [
+      "ev_knowledge_matrix_3"
+     ],
+     "first_effect_day": 120,
+     "impact_id": "imp_wf_financial_close_knowledge_kn_warehouse_lineage",
+     "level": "delayed",
+     "magnitude": 0.8,
+     "metric": "knowledge_lost",
+     "origin": "engine",
+     "peak_effect_day": 120,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 4,
+     "source_entity": "kn_warehouse_lineage",
+     "source_kind": "intervention",
+     "source_ref": "remove_data_platform_lead",
+     "status": "computed",
+     "unit": "ratio",
+     "value_usd": null
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "wf_billing_recon",
+     "assumptions": [
+      "Billing reconciliation failure: expected value over days 0-365"
+     ],
+     "category": "financial",
+     "confidence": 0.6,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "wf_billing_recon"
+     ],
+     "direction": "increase",
+     "edge_path": [],
+     "evidence_refs": [
+      "ev_incident_31"
+     ],
+     "first_effect_day": 0,
+     "impact_id": "imp_pr_billing_recon_hazard_pressure",
+     "level": "direct",
+     "magnitude": 85489828.0,
+     "metric": "expected_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 365,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 5,
+     "source_entity": "wf_billing_recon",
+     "source_kind": "pressure",
+     "source_ref": "pr_billing_recon_hazard",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 85489828
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "dept_operations",
+     "assumptions": [
+      "Contractor rate growth: expected value over days 0-365"
+     ],
+     "category": "financial",
+     "confidence": 0.8,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "dept_operations"
+     ],
+     "direction": "increase",
+     "edge_path": [],
+     "evidence_refs": [
+      "ev_finance_forecast_q3"
+     ],
+     "first_effect_day": 0,
+     "impact_id": "imp_pr_contractor_cost_growth_pressure",
+     "level": "direct",
+     "magnitude": 211598071.0,
+     "metric": "expected_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 365,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 5,
+     "source_entity": "dept_operations",
+     "source_kind": "pressure",
+     "source_ref": "pr_contractor_cost_growth",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 211598071
+    },
+    {
+     "affected_department": "dept_ai_data",
+     "affected_entity": "kn_warehouse_lineage",
+     "assumptions": [
+      "Warehouse lineage holder leaves: expected value over days 0-365"
+     ],
+     "category": "financial",
+     "confidence": 0.6,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "kn_warehouse_lineage"
+     ],
+     "direction": "increase",
+     "edge_path": [],
+     "evidence_refs": [
+      "ev_knowledge_matrix_3"
+     ],
+     "first_effect_day": 0,
+     "impact_id": "imp_pr_lineage_holder_attrition_pressure",
+     "level": "direct",
+     "magnitude": 36325125.0,
+     "metric": "expected_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 365,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_delay_plan_naive",
+     "severity": 5,
+     "source_entity": "kn_warehouse_lineage",
+     "source_kind": "pressure",
+     "source_ref": "pr_lineage_holder_attrition",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 36325125
+    }
+   ],
+   "intervention_ids": [
+    "remove_close_accountant",
+    "remove_gl_accountant",
+    "remove_reporting_analyst",
+    "remove_data_platform_lead",
+    "remove_billing_ops_lead",
+    "remove_billing_specialist",
+    "remove_revenue_accountant",
+    "remove_ar_specialist"
+   ],
+   "knowledge_coverage": [
+    {
+     "dependent_workflow_ids": [
+      "wf_billing_recon"
+     ],
+     "documented_pct": 0.35,
+     "holder_capacity_fte_after": 0.0,
+     "holder_capacity_fte_before": 9.0,
+     "holders_after": [],
+     "holders_before": [
+      "role_billing_ops_lead",
+      "role_billing_specialist"
+     ],
+     "knowledge_id": "kn_billing_exception",
+     "lost": true,
+     "reasons": [
+      "lost holders role_billing_ops_lead, role_billing_specialist",
+      "0 holders left with 0 FTE; 35% documented",
+      "lost: no holder capacity left and less than 50% documented",
+      "wf_billing_recon: its exception path is only 20% documented, below the 35% ordinary documentation"
+     ]
+    },
+    {
+     "dependent_workflow_ids": [
+      "wf_financial_close"
+     ],
+     "documented_pct": 0.2,
+     "holder_capacity_fte_after": 0.0,
+     "holder_capacity_fte_before": 2.0,
+     "holders_after": [],
+     "holders_before": [
+      "role_data_platform_lead"
+     ],
+     "knowledge_id": "kn_warehouse_lineage",
+     "lost": true,
+     "reasons": [
+      "lost holders role_data_platform_lead",
+      "0 holders left with 0 FTE; 20% documented",
+      "lost: no holder capacity left and less than 50% documented"
+     ]
+    }
+   ],
+   "mode": "full",
+   "plan_id": "plan_naive",
+   "pressures_triggered": [
+    {
+     "expected_cost_usd": 85489828,
+     "expected_events": 1.42483,
+     "neutralised": false,
+     "pressure_id": "pr_billing_recon_hazard"
+    },
+    {
+     "expected_cost_usd": 211598071,
+     "expected_events": 0.0,
+     "neutralised": false,
+     "pressure_id": "pr_contractor_cost_growth"
+    },
+    {
+     "expected_cost_usd": 36325125,
+     "expected_events": 0.807225,
+     "neutralised": false,
+     "pressure_id": "pr_lineage_holder_attrition"
+    }
+   ],
+   "rejection_reasons": [
+    "c_stranded: stranded_workflows is 2 (wf_billing_recon, wf_financial_close); it must be == 0, so the hard constraint fails",
+    "c_customer: customer_impact_pct is 95.73% (wf_billing_recon); it must be <= 2.00%, so the hard constraint fails"
+   ],
+   "result_id": "res_run_acceptance_delay_plan_naive",
+   "risk": {
+    "components": {
+     "capability_workflow": 25.0,
+     "compliance_control": 0.0,
+     "customer_revenue": 20.0,
+     "execution_uncertainty": 0.8718,
+     "financial": 25.0
+    },
+    "level": "high",
+    "score": 70.8718,
+    "settings_version": 1
+   },
+   "run_id": "run_acceptance",
+   "scenario_id": "scn_run_acceptance_delay_plan_naive",
+   "seed": 42,
+   "value": {
+    "added_cost_usd": 456473127,
+    "avoided_failure_cost_usd": 0,
+    "displaced_work_cost_usd": 456473127,
+    "expected_business_loss_usd": 0,
+    "gross_savings_usd": 778182,
+    "migration_cost_usd": 0,
+    "monthly_net_usd": [
+     -6297945,
+     -15169315,
+     -26639844,
+     -40735523,
+     -124093854,
+     -209810102,
+     -298231044,
+     -389383729,
+     -483295474,
+     -579993868,
+     -679506779,
+     -789427969
+    ],
+    "net_value_usd": -789427969,
+    "p10_net_value_usd": -789427969,
+    "p50_net_value_usd": -789427969,
+    "p90_net_value_usd": -789427969,
+    "pressure_cost_usd": 333413024,
+    "rebound_cost_usd": 0,
+    "termination_cost_usd": 0,
+    "transition_cost_usd": 320000
+   },
+   "workflow_coverage": [
+    {
+     "automation_pct": 0.3,
+     "backup_count_after": 0,
+     "criticality": "critical",
+     "documented_pct": 0.35,
+     "exception_documented_pct": 0.2,
+     "min_qualified_owners": 1,
+     "owner_capacity_fte_after": 0.0,
+     "owner_capacity_fte_before": 8.4,
+     "owners_after": [],
+     "owners_before": [
+      "role_ar_specialist",
+      "role_billing_ops_lead",
+      "role_billing_specialist",
+      "role_revenue_accountant"
+     ],
+     "reasons": [
+      "lost qualified owners role_ar_specialist, role_billing_ops_lead, role_billing_specialist, role_revenue_accountant",
+      "0 qualified owners left for a minimum of 1",
+      "0 independent backups left; recent execution coverage 100% -> 0%",
+      "35% documented; exception path 20% documented; 30% automated",
+      "recovery knowledge lost: kn_billing_exception",
+      "critical workflow: a replacement owner takes 120 days to train against a maximum downtime of 2 days"
+     ],
+     "replacement_cost_usd": 300000,
+     "stranded": true,
+     "training_days_required": 120,
+     "workflow_id": "wf_billing_recon"
+    },
+    {
+     "automation_pct": 0.4,
+     "backup_count_after": 0,
+     "criticality": "critical",
+     "documented_pct": 0.5,
+     "exception_documented_pct": 0.25,
+     "min_qualified_owners": 1,
+     "owner_capacity_fte_after": 0.0,
+     "owner_capacity_fte_before": 5.4,
+     "owners_after": [],
+     "owners_before": [
+      "role_close_accountant",
+      "role_gl_accountant",
+      "role_reporting_analyst"
+     ],
+     "reasons": [
+      "lost qualified owners role_close_accountant, role_gl_accountant, role_reporting_analyst",
+      "0 qualified owners left for a minimum of 1",
+      "0 independent backups left; recent execution coverage 100% -> 0%",
+      "50% documented; exception path 25% documented; 40% automated",
+      "recovery knowledge lost: kn_warehouse_lineage",
+      "critical workflow: a replacement owner takes 120 days to train against a maximum downtime of 3 days"
+     ],
+     "replacement_cost_usd": 220000,
+     "stranded": true,
+     "training_days_required": 120,
+     "workflow_id": "wf_financial_close"
+    }
+   ]
+  },
+  "inaction": {
+   "affected_department_ids": [
+    "dept_ai_data",
+    "dept_operations"
+   ],
+   "assumptions": [
+    "Midpoint edge strengths; every value is a point estimate; baseline pressures are priced in expected-value form (hazards as probability x cost per event x months, ranges at their point values)",
+    "Full mode falls back to expected value until uncertainty sampling exists (plan E-03); the seed is recorded so the run can be reproduced",
+    "Every value is a point estimate, not a simulated range: p10 = p50 = p90 = net_value_usd in this mode",
+    "p_better_than_inaction is a yes/no comparison of point estimates in this mode (1.0 or 0.0), not a probability"
+   ],
+   "computed_at": "2026-09-26T00:00:00Z",
+   "constraint_results": [
+    {
+     "constraint_id": "c_compliance",
+     "explanation": "compliance_controls_broken is 0; it must be == 0, so the hard constraint passes",
+     "hard": true,
+     "impact_ids": [],
+     "metric": "compliance_controls_broken",
+     "operator": "==",
+     "passed": true,
+     "threshold": 0.0,
+     "value": 0.0
+    },
+    {
+     "constraint_id": "c_stranded",
+     "explanation": "stranded_workflows is 0; it must be == 0, so the hard constraint passes",
+     "hard": true,
+     "impact_ids": [],
+     "metric": "stranded_workflows",
+     "operator": "==",
+     "passed": true,
+     "threshold": 0.0,
+     "value": 0.0
+    },
+    {
+     "constraint_id": "c_customer",
+     "explanation": "customer_impact_pct is 0.00%; it must be <= 2.00%, so the hard constraint passes",
+     "hard": true,
+     "impact_ids": [],
+     "metric": "customer_impact_pct",
+     "operator": "<=",
+     "passed": true,
+     "threshold": 2.0,
+     "value": 0.0
+    }
+   ],
+   "feasible": true,
+   "future": "inaction",
+   "goal_met": false,
+   "impacts": [
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "wf_billing_recon",
+     "assumptions": [
+      "Billing reconciliation failure: expected value over days 0-365"
+     ],
+     "category": "financial",
+     "confidence": 0.6,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "wf_billing_recon"
+     ],
+     "direction": "increase",
+     "edge_path": [],
+     "evidence_refs": [
+      "ev_incident_31"
+     ],
+     "first_effect_day": 0,
+     "impact_id": "imp_pr_billing_recon_hazard_pressure",
+     "level": "direct",
+     "magnitude": 29200000.0,
+     "metric": "expected_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 365,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_inaction_none",
+     "severity": 5,
+     "source_entity": "wf_billing_recon",
+     "source_kind": "pressure",
+     "source_ref": "pr_billing_recon_hazard",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 29200000
+    },
+    {
+     "affected_department": "dept_operations",
+     "affected_entity": "dept_operations",
+     "assumptions": [
+      "Contractor rate growth: expected value over days 0-365"
+     ],
+     "category": "financial",
+     "confidence": 0.8,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "dept_operations"
+     ],
+     "direction": "increase",
+     "edge_path": [],
+     "evidence_refs": [
+      "ev_finance_forecast_q3"
+     ],
+     "first_effect_day": 0,
+     "impact_id": "imp_pr_contractor_cost_growth_pressure",
+     "level": "direct",
+     "magnitude": 211598071.0,
+     "metric": "expected_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 365,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_inaction_none",
+     "severity": 5,
+     "source_entity": "dept_operations",
+     "source_kind": "pressure",
+     "source_ref": "pr_contractor_cost_growth",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 211598071
+    },
+    {
+     "affected_department": "dept_ai_data",
+     "affected_entity": "kn_warehouse_lineage",
+     "assumptions": [
+      "Warehouse lineage holder leaves: expected value over days 0-365"
+     ],
+     "category": "financial",
+     "confidence": 0.6,
+     "constraint_refs": [],
+     "decision_id": "dec_workforce_knowledge",
+     "dependency_path": [
+      "kn_warehouse_lineage"
+     ],
+     "direction": "increase",
+     "edge_path": [],
+     "evidence_refs": [
+      "ev_knowledge_matrix_3"
+     ],
+     "first_effect_day": 0,
+     "impact_id": "imp_pr_lineage_holder_attrition_pressure",
+     "level": "direct",
+     "magnitude": 16425000.0,
+     "metric": "expected_cost_usd",
+     "origin": "engine",
+     "peak_effect_day": 365,
+     "polarity": "harm",
+     "scenario_id": "scn_run_acceptance_inaction_none",
+     "severity": 5,
+     "source_entity": "kn_warehouse_lineage",
+     "source_kind": "pressure",
+     "source_ref": "pr_lineage_holder_attrition",
+     "status": "computed",
+     "unit": "usd",
+     "value_usd": 16425000
+    }
+   ],
+   "intervention_ids": [],
+   "knowledge_coverage": [],
+   "mode": "full",
+   "plan_id": null,
+   "pressures_triggered": [
+    {
+     "expected_cost_usd": 29200000,
+     "expected_events": 0.486667,
+     "neutralised": false,
+     "pressure_id": "pr_billing_recon_hazard"
+    },
+    {
+     "expected_cost_usd": 211598071,
+     "expected_events": 0.0,
+     "neutralised": false,
+     "pressure_id": "pr_contractor_cost_growth"
+    },
+    {
+     "expected_cost_usd": 16425000,
+     "expected_events": 0.365,
+     "neutralised": false,
+     "pressure_id": "pr_lineage_holder_attrition"
+    }
+   ],
+   "rejection_reasons": [],
+   "result_id": "res_run_acceptance_inaction_none",
+   "risk": {
+    "components": {
+     "capability_workflow": 0.0,
+     "compliance_control": 0.0,
+     "customer_revenue": 0.0,
+     "execution_uncertainty": 0.0,
+     "financial": 25.0
+    },
+    "level": "medium",
+    "score": 25.0,
+    "settings_version": 1
+   },
+   "run_id": "run_acceptance",
+   "scenario_id": "scn_run_acceptance_inaction_none",
+   "seed": 42,
+   "value": {
+    "added_cost_usd": 0,
+    "avoided_failure_cost_usd": 0,
+    "displaced_work_cost_usd": 0,
+    "expected_business_loss_usd": 0,
+    "gross_savings_usd": 0,
+    "migration_cost_usd": 0,
+    "monthly_net_usd": [
+     -6297945,
+     -15169315,
+     -26639844,
+     -40735523,
+     -57482604,
+     -76907602,
+     -99037294,
+     -123898729,
+     -151519223,
+     -181926367,
+     -215148028,
+     -257223071
+    ],
+    "net_value_usd": -257223071,
+    "p10_net_value_usd": -257223071,
+    "p50_net_value_usd": -257223071,
+    "p90_net_value_usd": -257223071,
+    "pressure_cost_usd": 257223071,
+    "rebound_cost_usd": 0,
+    "termination_cost_usd": 0,
+    "transition_cost_usd": 0
+   },
+   "workflow_coverage": []
+  }
+ },
+ "twin_version": "twin_northstar_v1",
+ "vendor_overlap": []
+}
