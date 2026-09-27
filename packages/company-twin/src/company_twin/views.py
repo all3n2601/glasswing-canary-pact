@@ -125,13 +125,16 @@ def _replace_ids(value: Any, pt_to_role: dict[str, str]) -> Any:
 
 
 def aggregate_domain_graph(twin: Twin) -> DomainGraph:
-    """The department-map level for the overview chart (schema section 5.8): the 9
-    departments and ``kpi_company`` as nodes, the 25 FLOWS_TO channels as edges. These
-    channels are stored directly on the twin rather than computed, so this only selects
-    them; it does not re-aggregate entity-level edges.
+    """The department-map level for the overview chart (schema section 5.8): every
+    department, every company-level KPI (a KPI with no ``department_id``), and every
+    other endpoint of a FLOWS_TO channel as nodes; the FLOWS_TO channels as edges.
+    These channels are stored directly on the twin rather than computed, so this only
+    selects them; it does not re-aggregate entity-level edges.
     """
-    nodes = [e for e in twin.entities if e.type == EntityType.department or e.id == "kpi_company"]
     edges = [e for e in twin.edges if e.relation == Relation.FLOWS_TO]
+    endpoints = {n for e in edges for n in (e.source, e.target)}
+    nodes = [e for e in twin.entities if e.type == EntityType.department or e.id in endpoints
+             or (e.type == EntityType.kpi and e.department_id is None)]
     return DomainGraph(nodes=nodes, edges=edges)
 
 

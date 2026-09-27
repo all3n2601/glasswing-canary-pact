@@ -389,6 +389,20 @@ def test_aggregate_domain_graph_returns_departments_and_kpi_company_with_flows_t
     assert all(e.relation == Relation.FLOWS_TO for e in domain.edges)
 
 
+def test_aggregate_domain_graph_selects_company_level_kpis_by_shape_not_by_id():
+    renamed = TWIN.model_copy(deep=True)
+    for e in renamed.entities:
+        if e.id == "kpi_company":
+            e.id = "kpi_overall"
+    for edge in renamed.edges:
+        if edge.target == "kpi_company":
+            edge.target = "kpi_overall"
+    ids = {n.id for n in aggregate_domain_graph(renamed).nodes}
+    assert "kpi_overall" in ids and "kpi_company" not in ids
+    # Department-owned KPIs stay off the department map.
+    assert not ids & {e.id for e in TWIN.entities if e.type == EntityType.kpi and e.department_id}
+
+
 def test_department_detail_matches_the_department_and_its_channels():
     detail = department_detail(TWIN, "dept_finance")
     assert detail.entity.id == "dept_finance"
