@@ -1,47 +1,80 @@
-from enum import StrEnum
-from typing import Any
+"""Company-twin domain models.
 
-from pydantic import BaseModel, ConfigDict, Field
+Single source of truth: the shared contract package ``contracts_py`` (schema v2.1).
+company-twin, simulation-engine and the API now all use the SAME Entity/Edge/Twin
+classes. This module only re-exports them (plus backward-compat aliases and an
+``entity_map`` helper, since ``Twin`` has no such method).
+"""
+
+from __future__ import annotations
+
+from contracts_py.twin import (
+    AgentView,
+    ChannelKind,
+    Criticality,
+    DepartmentBudget,
+    DepartmentDetail,
+    DepartmentProfile,
+    DepartmentStrength,
+    DepartmentSummary,
+    Document,
+    DomainGraph,
+    Edge,
+    Entity,
+    EntityType,
+    Evidence,
+    NeutraliserRef,
+    Organization,
+    OrganizationSettings,
+    Pressure,
+    PressureKind,
+    Relation,
+    Sensitivity,
+    StaffingStrength,
+    StrategicPriority,
+    Twin,
+    ValidationIssue,
+    VersionInfo,
+)
+
+# Backward-compat aliases (pre-unification names used across this package).
+CompanyTwin = Twin
+EntityKind = EntityType
 
 
-class EntityKind(StrEnum):
-    DEPARTMENT = "department"
-    VENDOR = "vendor"
-    DATASET = "dataset"
-    WORKFLOW = "workflow"
-    EMPLOYEE = "employee"
-    SYSTEM = "system"
-    KPI = "kpi"
+def entity_map(twin: Twin) -> dict[str, Entity]:
+    """id -> Entity. contracts_py.Twin has no method for this, so we provide one."""
+    return {e.id: e for e in twin.entities}
 
 
-class Entity(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-
-    id: str
-    kind: EntityKind
-    name: str
-    department_id: str | None = None
-    annual_cost: float | None = Field(default=None, ge=0)
-    metadata: dict[str, Any] = Field(default_factory=dict)
-
-
-class Dependency(BaseModel):
-    source: str
-    target: str
-    relationship: str
-    importance: float = Field(ge=0, le=1)
-    substitutability: float = Field(ge=0, le=1)
-    confidence: float = Field(ge=0, le=1)
-    evidence: str
-
-
-class CompanyTwin(BaseModel):
-    id: str
-    name: str
-    version: str
-    entities: list[Entity]
-    dependencies: list[Dependency]
-
-    def entity_map(self) -> dict[str, Entity]:
-        return {entity.id: entity for entity in self.entities}
-
+__all__ = [
+    "Twin",
+    "CompanyTwin",
+    "Entity",
+    "Edge",
+    "EntityType",
+    "EntityKind",
+    "Relation",
+    "ChannelKind",
+    "Criticality",
+    "Sensitivity",
+    "PressureKind",
+    "Pressure",
+    "NeutraliserRef",
+    "Organization",
+    "OrganizationSettings",
+    "StrategicPriority",
+    "DepartmentProfile",
+    "DepartmentBudget",
+    "DepartmentStrength",
+    "DepartmentSummary",
+    "StaffingStrength",
+    "Document",
+    "Evidence",
+    "VersionInfo",
+    "AgentView",
+    "DomainGraph",
+    "DepartmentDetail",
+    "ValidationIssue",
+    "entity_map",
+]

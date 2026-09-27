@@ -1,0 +1,56 @@
+entity_or_field,value,source_url,sourced_or_modeled,note
+organization.total_annual_budget_usd,1148282590,https://www.tsb.co.uk/content/dam/tsb-public/documents/investors/financial-results-and-reports/2018/tsb-banking-group-ara-2018.pdf,sourced,"TSB 2017 operating expenses GBP 859,300,000 at FX 1.3363"
+organization.total_headcount_fte,8583,https://www.tsb.co.uk/content/dam/tsb-public/documents/investors/financial-results-and-reports/2018/tsb-banking-group-ara-2018.pdf,sourced,TSB 2017 average headcount (not labelled FTE); department split modeled
+organization.annual_revenue_usd,1469662740,https://www.tsb.co.uk/content/dam/tsb-public/documents/investors/financial-results-and-reports/2018/tsb-banking-group-ara-2018.pdf,sourced,TSB 2017 total income
+department budgets and FTE split,see twin.json,,modeled,Shares of the sourced totals by department are assumptions
+role_head_it.annual_cost_usd,334075,,modeled,"1 FTE at GBP 250,000 loaded cost; role only, no individuals"
+role_platform_lead.annual_cost_usd,8552320,,modeled,"40 FTE at GBP 160,000 loaded cost; role only, no individuals"
+role_migration_lead.annual_cost_usd,1443204,,modeled,"6 FTE at GBP 180,000 loaded cost; role only, no individuals"
+role_head_ops.annual_cost_usd,267260,,modeled,"1 FTE at GBP 200,000 loaded cost; role only, no individuals"
+role_payments_lead.annual_cost_usd,7216020,,modeled,"60 FTE at GBP 90,000 loaded cost; role only, no individuals"
+role_fraud_lead.annual_cost_usd,9086840,,modeled,"80 FTE at GBP 85,000 loaded cost; role only, no individuals"
+role_head_digital.annual_cost_usd,253897,,modeled,"1 FTE at GBP 190,000 loaded cost; role only, no individuals"
+role_branch_manager.annual_cost_usd,40423075,,modeled,"550 FTE at GBP 55,000 loaded cost; role only, no individuals"
+role_contact_centre_lead.annual_cost_usd,9621360,,modeled,"120 FTE at GBP 60,000 loaded cost; role only, no individuals"
+role_complaints_lead.annual_cost_usd,11024475,,modeled,"150 FTE at GBP 55,000 loaded cost; role only, no individuals"
+role_head_data.annual_cost_usd,227171,,modeled,"1 FTE at GBP 170,000 loaded cost; role only, no individuals"
+role_head_finance.annual_cost_usd,347438,,modeled,"1 FTE at GBP 260,000 loaded cost; role only, no individuals"
+role_head_risk.annual_cost_usd,347438,,modeled,"1 FTE at GBP 260,000 loaded cost; role only, no individuals"
+role_supplier_risk_lead.annual_cost_usd,1175944,,modeled,"8 FTE at GBP 110,000 loaded cost; role only, no individuals"
+role_head_marketing.annual_cost_usd,227171,,modeled,"1 FTE at GBP 170,000 loaded cost; role only, no individuals"
+vendor_lbg.annual_cost_usd,213808000,https://www.grupbancsabadell.com/corp/files/1454335686414/en_offer_doc_offer_document.pdf,modeled,Expected net saving GBP 160M a year (Sabadell 2015 offer) used as the recurring cost the plan stops; net of the new provider's run cost
+vendor_lbg.migration_cost_usd,0,https://www.grupbancsabadell.com/corp/files/1454335686414/en_offer_doc_offer_document.pdf,modeled,Migration build treated as sunk: funded by LBG's GBP 450M contribution (sourced)
+vendor_lbg.retains_history_after_termination,null (unknown at decision time),https://www.fca.org.uk/publication/final-notices/tsb-bank-plc-2022.pdf,modeled,Planted unknown; public record later showed no rollback was possible
+vendor_sabis.annual_cost_usd,80178000,,modeled,Assumed platform run cost; not public
+vendor_sabis_subsuppliers,85,https://www.fca.org.uk/publication/final-notices/tsb-bank-plc-2022.pdf,sourced,85 third parties the bank had not assessed
+sys_lbg_platform.failure_cost_per_day_usd,0,,modeled,"Base assumption times calibration CAL_FCPD=0.3715, so the naive plan's modeled harm matches the documented 2018 charges"
+sys_proteo4uk.failure_cost_per_day_usd,334350,,modeled,"Base assumption times calibration CAL_FCPD=0.3715, so the naive plan's modeled harm matches the documented 2018 charges"
+sys_digital_channels.failure_cost_per_day_usd,222900,,modeled,"Base assumption times calibration CAL_FCPD=0.3715, so the naive plan's modeled harm matches the documented 2018 charges"
+sys_telephony.failure_cost_per_day_usd,92875,,modeled,"Base assumption times calibration CAL_FCPD=0.3715, so the naive plan's modeled harm matches the documented 2018 charges"
+sys_branch_platform.failure_cost_per_day_usd,111450,,modeled,"Base assumption times calibration CAL_FCPD=0.3715, so the naive plan's modeled harm matches the documented 2018 charges"
+sys_payments_gateway.failure_cost_per_day_usd,185750,,modeled,"Base assumption times calibration CAL_FCPD=0.3715, so the naive plan's modeled harm matches the documented 2018 charges"
+ds_customer_ledger.customers,5200000,https://www.fca.org.uk/news/press-releases/tsb-fined-48m-operational-resilience-failings,sourced,
+wf_service_recovery.failure_cost_per_day_usd,594400,,modeled,"Base assumption times calibration CAL_FCPD=0.3715, so the naive plan's modeled harm matches the documented 2018 charges"
+wf_digital_banking.failure_cost_per_day_usd,260050,,modeled,"Base assumption times calibration CAL_FCPD=0.3715, so the naive plan's modeled harm matches the documented 2018 charges"
+wf_telephone_banking.failure_cost_per_day_usd,92875,,modeled,"Base assumption times calibration CAL_FCPD=0.3715, so the naive plan's modeled harm matches the documented 2018 charges"
+wf_branch_servicing.failure_cost_per_day_usd,111450,,modeled,"Base assumption times calibration CAL_FCPD=0.3715, so the naive plan's modeled harm matches the documented 2018 charges"
+wf_payments_processing.failure_cost_per_day_usd,148600,,modeled,"Base assumption times calibration CAL_FCPD=0.3715, so the naive plan's modeled harm matches the documented 2018 charges"
+wf_fraud_detection.failure_cost_per_day_usd,92875,,modeled,"Base assumption times calibration CAL_FCPD=0.3715, so the naive plan's modeled harm matches the documented 2018 charges"
+wf_complaints_handling.failure_cost_per_day_usd,130025,,modeled,"Base assumption times calibration CAL_FCPD=0.3715, so the naive plan's modeled harm matches the documented 2018 charges"
+wf_supplier_oversight.failure_cost_per_day_usd,22290,,modeled,"Base assumption times calibration CAL_FCPD=0.3715, so the naive plan's modeled harm matches the documented 2018 charges"
+kpi_complaints.kpi_baseline,30000,,modeled,"Pre-migration yearly complaints assumed; 2018 actual 225,492 migration complaints is sourced"
+seg_personal.arr_usd,556193864,https://www.tsb.co.uk/content/dam/tsb-public/documents/investors/financial-results-and-reports/2018/tsb-banking-group-ara-2018.pdf,modeled,90% of 2017 total income (sourced) times calibration CAL_ARR=0.4205: income exposed to channel disruption
+seg_business.arr_usd,61799318,https://www.tsb.co.uk/content/dam/tsb-public/documents/investors/financial-results-and-reports/2018/tsb-banking-group-ara-2018.pdf,modeled,10% of 2017 total income (sourced) times calibration CAL_ARR=0.4205: income exposed to channel disruption
+outcome.complaints,225492,https://www.fca.org.uk/publication/final-notices/tsb-bank-plc-2022.pdf,sourced,Complaints linked to the migration
+outcome.redress_gbp,32705762,https://www.fca.org.uk/publication/final-notices/tsb-bank-plc-2022.pdf,sourced,Redress paid to customers
+outcome.charges_2018_gbp,330200000,https://www.tsb.co.uk/content/dam/tsb-public/documents/investors/financial-results-and-reports/2018/tsb-banking-group-ara-2018.pdf,sourced,"Post-migration charges in 2018; calibration target. Breakdown GBP M: redress 107.3, rectification 17.9, fraud and operational losses 49.1, additional resource 122.4, waived income 33.5"
+outcome.sabis_recovery_gbp,153000000,https://www.tsb.co.uk/content/dam/tsb-public/documents/investors/financial-results-and-reports/2018/tsb-banking-group-ara-2018.pdf,sourced,"Estimated recovery from the provider, accrued in 2018, not yet paid"
+outcome.back_to_normal,2018-12-10,https://www.fca.org.uk/publication/final-notices/tsb-bank-plc-2022.pdf,sourced,Business as usual about 7.5 months after the 22 Apr 2018 go-live
+outcome.original_target_date,2017-11-05,https://www.fca.org.uk/publication/final-notices/tsb-bank-plc-2022.pdf,sourced,Delayed to April 2018; phased migration considered and rejected
+outcome.fca_fine_gbp,29750000,https://www.fca.org.uk/news/press-releases/tsb-fined-48m-operational-resilience-failings,sourced,20 Dec 2022
+outcome.pra_fine_gbp,18900000,https://www.bankofengland.co.uk/news/2022/december/tsb-fined-for-operational-resilience-failings,sourced,20 Dec 2022
+outcome.lbg_contribution_gbp,450000000,https://www.grupbancsabadell.com/corp/files/1454335686414/en_offer_doc_offer_document.pdf,sourced,Previous owner's contribution to the migration
+fx_usd_per_gbp_2018,1.3363,https://www.federalreserve.gov/releases/g5a/20190102/,sourced,Federal Reserve G.5A annual average 2018
+mit_assured_rollback_path.one_time_cost_usd,53452000,,modeled,Assumed one-time cost; not public
+mit_recovery_runbook.one_time_cost_usd,4008900,,modeled,Assumed one-time cost; not public
+mit_complaints_surge_playbook.one_time_cost_usd,2672600,,modeled,Assumed one-time cost; not public

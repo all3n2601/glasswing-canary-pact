@@ -1,0 +1,1880 @@
+{
+  "$defs": {
+    "ActionType": {
+      "enum": [
+        "assess_change",
+        "remove_vendor",
+        "reduce_capacity",
+        "add_capacity",
+        "remove_roles",
+        "stop_project",
+        "start_project",
+        "delay_project",
+        "invest"
+      ],
+      "title": "ActionType",
+      "type": "string"
+    },
+    "BusinessModel": {
+      "enum": [
+        "b2b",
+        "b2c",
+        "b2b2c",
+        "marketplace",
+        "public_service",
+        "mixed"
+      ],
+      "title": "BusinessModel",
+      "type": "string"
+    },
+    "ChannelKind": {
+      "enum": [
+        "constraint",
+        "budget",
+        "capability",
+        "signal",
+        "value"
+      ],
+      "title": "ChannelKind",
+      "type": "string"
+    },
+    "Criticality": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Criticality",
+      "type": "string"
+    },
+    "DepartmentBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "annual_budget_usd": {
+          "minimum": 0,
+          "title": "Annual Budget Usd",
+          "type": "integer"
+        },
+        "spent_ytd_usd": {
+          "minimum": 0,
+          "title": "Spent Ytd Usd",
+          "type": "integer"
+        },
+        "fixed_cost_pct": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Fixed Cost Pct",
+          "type": "number"
+        },
+        "budget_owner_role_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^(?:role_)[a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Budget Owner Role Id"
+        }
+      },
+      "required": [
+        "annual_budget_usd",
+        "spent_ytd_usd",
+        "fixed_cost_pct"
+      ],
+      "title": "DepartmentBudget",
+      "type": "object"
+    },
+    "DepartmentGap": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^(?:gap_)[a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "category": {
+          "$ref": "#/$defs/StrengthCategory"
+        },
+        "severity": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Severity",
+          "type": "integer"
+        },
+        "affected_entity_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Affected Entity Ids",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "category",
+        "severity"
+      ],
+      "title": "DepartmentGap",
+      "type": "object"
+    },
+    "DepartmentProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "department_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Department Id",
+          "type": "string"
+        },
+        "mission": {
+          "title": "Mission",
+          "type": "string"
+        },
+        "head_role_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^(?:role_)[a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Head Role Id"
+        },
+        "agent_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "staffing": {
+          "$ref": "#/$defs/StaffingStrength"
+        },
+        "budget": {
+          "$ref": "#/$defs/DepartmentBudget"
+        },
+        "strengths": {
+          "items": {
+            "$ref": "#/$defs/DepartmentStrength"
+          },
+          "minItems": 1,
+          "title": "Strengths",
+          "type": "array"
+        },
+        "gaps": {
+          "items": {
+            "$ref": "#/$defs/DepartmentGap"
+          },
+          "title": "Gaps",
+          "type": "array"
+        },
+        "maturity_level": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Maturity Level",
+          "type": "integer"
+        },
+        "owned_entity_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Owned Entity Ids",
+          "type": "array"
+        },
+        "critical_workflow_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Critical Workflow Ids",
+          "type": "array"
+        },
+        "kpi_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Kpi Ids",
+          "type": "array"
+        },
+        "document_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Document Ids",
+          "type": "array"
+        },
+        "documentation_coverage": {
+          "default": 0.0,
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Documentation Coverage",
+          "type": "number"
+        }
+      },
+      "required": [
+        "department_id",
+        "mission",
+        "staffing",
+        "budget",
+        "strengths",
+        "maturity_level"
+      ],
+      "title": "DepartmentProfile",
+      "type": "object"
+    },
+    "DepartmentStrength": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^(?:str_)[a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "category": {
+          "$ref": "#/$defs/StrengthCategory"
+        },
+        "level": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Level",
+          "type": "integer"
+        },
+        "supports_entity_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Supports Entity Ids",
+          "type": "array"
+        },
+        "key_role_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^(?:role_)[a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Key Role Ids",
+          "type": "array"
+        },
+        "concentration": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Concentration",
+          "type": "number"
+        },
+        "evidence_refs": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "category",
+        "level",
+        "concentration"
+      ],
+      "title": "DepartmentStrength",
+      "type": "object"
+    },
+    "DepartmentSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "department_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Department Id",
+          "type": "string"
+        },
+        "mission": {
+          "title": "Mission",
+          "type": "string"
+        },
+        "strength_names": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Strength Names",
+          "type": "array"
+        },
+        "staffing": {
+          "$ref": "#/$defs/StaffingStrength"
+        }
+      },
+      "required": [
+        "department_id",
+        "mission",
+        "staffing"
+      ],
+      "title": "DepartmentSummary",
+      "type": "object"
+    },
+    "Document": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^(?:doc_)[a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "doc_type": {
+          "$ref": "#/$defs/DocumentType"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Department Id"
+        },
+        "owner_role_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^(?:role_)[a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Role Id"
+        },
+        "uri": {
+          "title": "Uri",
+          "type": "string"
+        },
+        "mime_type": {
+          "title": "Mime Type",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/DocumentStatus"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Version"
+        },
+        "last_reviewed": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Reviewed"
+        },
+        "review_cycle_days": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Review Cycle Days"
+        },
+        "sensitivity": {
+          "$ref": "#/$defs/Sensitivity",
+          "default": "general"
+        },
+        "covers_entity_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Covers Entity Ids",
+          "type": "array"
+        },
+        "framework_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Framework Refs",
+          "type": "array"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "page_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page Count"
+        },
+        "checksum_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[a-f0-9]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checksum Sha256"
+        },
+        "synthetic": {
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "ingested": {
+          "default": false,
+          "title": "Ingested",
+          "type": "boolean"
+        },
+        "uploaded_at": {
+          "format": "date-time",
+          "title": "Uploaded At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "doc_type",
+        "uri",
+        "mime_type",
+        "status",
+        "summary",
+        "uploaded_at"
+      ],
+      "title": "Document",
+      "type": "object"
+    },
+    "DocumentStatus": {
+      "enum": [
+        "current",
+        "outdated",
+        "draft",
+        "archived"
+      ],
+      "title": "DocumentStatus",
+      "type": "string"
+    },
+    "DocumentType": {
+      "enum": [
+        "contract",
+        "policy",
+        "runbook",
+        "sop",
+        "architecture_note",
+        "org_chart",
+        "budget_report",
+        "financial_forecast",
+        "kpi_report",
+        "incident_report",
+        "audit_report",
+        "workflow_map",
+        "knowledge_matrix",
+        "meeting_minutes",
+        "strategy_memo",
+        "other"
+      ],
+      "title": "DocumentType",
+      "type": "string"
+    },
+    "Edge": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^(?:ch_|e_)[a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "source": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Target",
+          "type": "string"
+        },
+        "relation": {
+          "$ref": "#/$defs/Relation"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "channel_kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ChannelKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "strength": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Strength",
+          "type": "number"
+        },
+        "strength_range": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Strength Range"
+        },
+        "substitutability": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Substitutability",
+          "type": "number"
+        },
+        "lag_days": {
+          "minimum": 0,
+          "title": "Lag Days",
+          "type": "integer"
+        },
+        "criticality": {
+          "$ref": "#/$defs/Criticality"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "evidence_refs": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "extraction_method": {
+          "anyOf": [
+            {
+              "enum": [
+                "seeded",
+                "keyword",
+                "zero_shot",
+                "canary",
+                "agent"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Extraction Method"
+        },
+        "last_validated": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Validated"
+        }
+      },
+      "required": [
+        "id",
+        "source",
+        "target",
+        "relation",
+        "strength",
+        "substitutability",
+        "lag_days",
+        "criticality",
+        "confidence"
+      ],
+      "title": "Edge",
+      "type": "object"
+    },
+    "Entity": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/EntityType"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Department Id"
+        },
+        "criticality": {
+          "$ref": "#/$defs/Criticality",
+          "default": "medium"
+        },
+        "sensitivity": {
+          "$ref": "#/$defs/Sensitivity",
+          "default": "general"
+        },
+        "annual_cost_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Annual Cost Usd"
+        },
+        "one_time_exit_cost_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "One Time Exit Cost Usd"
+        },
+        "migration_cost_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Migration Cost Usd"
+        },
+        "capacity_fte": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Capacity Fte"
+        },
+        "min_qualified_owners": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Qualified Owners"
+        },
+        "documented_pct": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Documented Pct"
+        },
+        "failure_cost_per_day_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Failure Cost Per Day Usd"
+        },
+        "customer_facing": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Customer Facing"
+        },
+        "completion_pct": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Completion Pct"
+        },
+        "remaining_cost_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Remaining Cost Usd"
+        },
+        "expected_completion_day": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Completion Day"
+        },
+        "retires_entity_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Retires Entity Ids",
+          "type": "array"
+        },
+        "role_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^(?:role_)[a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role Id"
+        },
+        "kpi_baseline": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kpi Baseline"
+        },
+        "kpi_unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Kpi Unit"
+        },
+        "higher_is_better": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Higher Is Better"
+        },
+        "mandatory": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mandatory"
+        },
+        "framework": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Framework"
+        },
+        "arr_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Arr Usd"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "geographies": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Geographies",
+          "type": "array"
+        },
+        "history_years": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "History Years"
+        },
+        "freshness_days": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Freshness Days"
+        },
+        "accuracy": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accuracy"
+        },
+        "permitted_uses": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Permitted Uses",
+          "type": "array"
+        },
+        "retains_history_after_termination": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Retains History After Termination"
+        },
+        "attribute_group": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attribute Group"
+        },
+        "time_to_train_days": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Time To Train Days"
+        },
+        "replacement_cost_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replacement Cost Usd"
+        },
+        "exception_documented_pct": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exception Documented Pct"
+        },
+        "automation_pct": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Automation Pct"
+        },
+        "max_downtime_days": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Downtime Days"
+        },
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "name"
+      ],
+      "title": "Entity",
+      "type": "object"
+    },
+    "EntityType": {
+      "enum": [
+        "department",
+        "person_token",
+        "role",
+        "knowledge_asset",
+        "system",
+        "vendor",
+        "project",
+        "workflow",
+        "control",
+        "kpi",
+        "customer_segment",
+        "dataset"
+      ],
+      "title": "EntityType",
+      "type": "string"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^(?:ev_)[a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "source_type": {
+          "$ref": "#/$defs/EvidenceSource"
+        },
+        "document_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Document Id",
+          "type": "string"
+        },
+        "location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Location"
+        },
+        "snippet": {
+          "maxLength": 300,
+          "title": "Snippet",
+          "type": "string"
+        },
+        "synthetic": {
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "source_type",
+        "document_id",
+        "snippet"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "EvidenceSource": {
+      "enum": [
+        "contract",
+        "workflow_map",
+        "system_ownership",
+        "kpi_definition",
+        "runbook",
+        "architecture_note",
+        "activity_log",
+        "knowledge_matrix",
+        "policy",
+        "incident",
+        "finance_forecast"
+      ],
+      "title": "EvidenceSource",
+      "type": "string"
+    },
+    "MitigationType": {
+      "enum": [
+        "reassign_owner",
+        "document_runbook",
+        "reassign_on_call",
+        "add_replacement_feed",
+        "resequence_project",
+        "retain_capacity_temporarily"
+      ],
+      "title": "MitigationType",
+      "type": "string"
+    },
+    "NeutraliserRef": {
+      "additionalProperties": false,
+      "properties": {
+        "intervention_type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ActionType"
+            },
+            {
+              "$ref": "#/$defs/MitigationType"
+            }
+          ],
+          "title": "Intervention Type"
+        },
+        "target_entity_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Target Entity Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "intervention_type",
+        "target_entity_id"
+      ],
+      "title": "NeutraliserRef",
+      "type": "object"
+    },
+    "Organization": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^(?:org_)[a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "legal_name": {
+          "title": "Legal Name",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "sector": {
+          "$ref": "#/$defs/Sector"
+        },
+        "sub_sector": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sub Sector"
+        },
+        "secondary_sectors": {
+          "items": {
+            "$ref": "#/$defs/Sector"
+          },
+          "title": "Secondary Sectors",
+          "type": "array"
+        },
+        "business_model": {
+          "$ref": "#/$defs/BusinessModel"
+        },
+        "size_band": {
+          "$ref": "#/$defs/SizeBand"
+        },
+        "headquarters_country": {
+          "title": "Headquarters Country",
+          "type": "string"
+        },
+        "operating_regions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Operating Regions",
+          "type": "array"
+        },
+        "annual_revenue_usd": {
+          "minimum": 0,
+          "title": "Annual Revenue Usd",
+          "type": "integer"
+        },
+        "total_annual_budget_usd": {
+          "minimum": 0,
+          "title": "Total Annual Budget Usd",
+          "type": "integer"
+        },
+        "total_headcount_fte": {
+          "minimum": 0,
+          "title": "Total Headcount Fte",
+          "type": "number"
+        },
+        "fiscal_year_start_month": {
+          "maximum": 12,
+          "minimum": 1,
+          "title": "Fiscal Year Start Month",
+          "type": "integer"
+        },
+        "regulatory_frameworks": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Regulatory Frameworks",
+          "type": "array"
+        },
+        "strategic_priorities": {
+          "items": {
+            "$ref": "#/$defs/StrategicPriority"
+          },
+          "title": "Strategic Priorities",
+          "type": "array"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "legal_name",
+        "display_name",
+        "sector",
+        "business_model",
+        "size_band",
+        "headquarters_country",
+        "annual_revenue_usd",
+        "total_annual_budget_usd",
+        "total_headcount_fte",
+        "fiscal_year_start_month",
+        "description"
+      ],
+      "title": "Organization",
+      "type": "object"
+    },
+    "Pressure": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^(?:pr_)[a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/PressureKind"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "target_entity_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Target Entity Id",
+          "type": "string"
+        },
+        "start_day": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Start Day",
+          "type": "integer"
+        },
+        "end_day": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End Day"
+        },
+        "rate": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rate"
+        },
+        "rate_range": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rate Range"
+        },
+        "step_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step Pct"
+        },
+        "monthly_probability": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Monthly Probability"
+        },
+        "probability_range": {
+          "anyOf": [
+            {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability Range"
+        },
+        "cost_per_event_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost Per Event Usd"
+        },
+        "capacity_sensitivity": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Capacity Sensitivity",
+          "type": "number"
+        },
+        "threshold": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Threshold"
+        },
+        "consequence_cost_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Consequence Cost Usd"
+        },
+        "neutralised_by": {
+          "items": {
+            "$ref": "#/$defs/NeutraliserRef"
+          },
+          "title": "Neutralised By",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "name",
+        "target_entity_id",
+        "description"
+      ],
+      "title": "Pressure",
+      "type": "object"
+    },
+    "PressureKind": {
+      "enum": [
+        "cost_growth",
+        "renewal_step",
+        "hazard",
+        "kpi_drift",
+        "budget_ceiling",
+        "deadline"
+      ],
+      "title": "PressureKind",
+      "type": "string"
+    },
+    "Relation": {
+      "enum": [
+        "OWNS",
+        "BACKS_UP",
+        "KNOWS",
+        "MAINTAINS",
+        "RUNS",
+        "PROVIDES",
+        "CONSUMES",
+        "DEPENDS_ON",
+        "SUPPORTS",
+        "FUNDS",
+        "CONTROLS",
+        "CONTRIBUTES_TO",
+        "SUBSTITUTES_FOR",
+        "FLOWS_TO"
+      ],
+      "title": "Relation",
+      "type": "string"
+    },
+    "Sector": {
+      "enum": [
+        "technology_saas",
+        "financial_services",
+        "banking",
+        "insurance",
+        "healthcare",
+        "pharma_life_sciences",
+        "manufacturing",
+        "retail_ecommerce",
+        "telecom",
+        "energy_utilities",
+        "logistics_transport",
+        "media_entertainment",
+        "professional_services",
+        "education",
+        "public_sector",
+        "nonprofit",
+        "other"
+      ],
+      "title": "Sector",
+      "type": "string"
+    },
+    "Sensitivity": {
+      "enum": [
+        "general",
+        "finance",
+        "hr",
+        "customer",
+        "security"
+      ],
+      "title": "Sensitivity",
+      "type": "string"
+    },
+    "SizeBand": {
+      "enum": [
+        "startup",
+        "smb",
+        "mid_market",
+        "enterprise",
+        "large_enterprise"
+      ],
+      "title": "SizeBand",
+      "type": "string"
+    },
+    "StaffingStrength": {
+      "additionalProperties": false,
+      "properties": {
+        "sanctioned_fte": {
+          "minimum": 0,
+          "title": "Sanctioned Fte",
+          "type": "number"
+        },
+        "actual_fte": {
+          "minimum": 0,
+          "title": "Actual Fte",
+          "type": "number"
+        },
+        "contractors_fte": {
+          "minimum": 0,
+          "title": "Contractors Fte",
+          "type": "number"
+        },
+        "open_positions": {
+          "minimum": 0,
+          "title": "Open Positions",
+          "type": "integer"
+        },
+        "attrition_rate_annual": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Attrition Rate Annual",
+          "type": "number"
+        },
+        "avg_time_to_hire_days": {
+          "minimum": 0,
+          "title": "Avg Time To Hire Days",
+          "type": "integer"
+        },
+        "utilisation": {
+          "maximum": 1.5,
+          "minimum": 0,
+          "title": "Utilisation",
+          "type": "number"
+        }
+      },
+      "required": [
+        "sanctioned_fte",
+        "actual_fte",
+        "contractors_fte",
+        "open_positions",
+        "attrition_rate_annual",
+        "avg_time_to_hire_days",
+        "utilisation"
+      ],
+      "title": "StaffingStrength",
+      "type": "object"
+    },
+    "StrategicPriority": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "rank": {
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "kpi_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Kpi Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "rank"
+      ],
+      "title": "StrategicPriority",
+      "type": "object"
+    },
+    "StrengthCategory": {
+      "enum": [
+        "capability",
+        "expertise",
+        "process",
+        "asset",
+        "relationship",
+        "data"
+      ],
+      "title": "StrengthCategory",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "agent_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Agent Id",
+      "type": "string"
+    },
+    "twin_version": {
+      "title": "Twin Version",
+      "type": "string"
+    },
+    "organization": {
+      "$ref": "#/$defs/Organization"
+    },
+    "department_profile": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DepartmentProfile"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "other_department_summaries": {
+      "items": {
+        "$ref": "#/$defs/DepartmentSummary"
+      },
+      "title": "Other Department Summaries",
+      "type": "array"
+    },
+    "entities": {
+      "items": {
+        "$ref": "#/$defs/Entity"
+      },
+      "title": "Entities",
+      "type": "array"
+    },
+    "edges": {
+      "items": {
+        "$ref": "#/$defs/Edge"
+      },
+      "title": "Edges",
+      "type": "array"
+    },
+    "pressures": {
+      "items": {
+        "$ref": "#/$defs/Pressure"
+      },
+      "title": "Pressures",
+      "type": "array"
+    },
+    "documents": {
+      "items": {
+        "$ref": "#/$defs/Document"
+      },
+      "title": "Documents",
+      "type": "array"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/Evidence"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "redacted_entity_count": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Redacted Entity Count",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "agent_id",
+    "twin_version",
+    "organization"
+  ],
+  "title": "AgentView",
+  "type": "object"
+}

@@ -1,0 +1,2971 @@
+{
+  "$defs": {
+    "ActionType": {
+      "enum": [
+        "assess_change",
+        "remove_vendor",
+        "reduce_capacity",
+        "add_capacity",
+        "remove_roles",
+        "stop_project",
+        "start_project",
+        "delay_project",
+        "invest"
+      ],
+      "title": "ActionType",
+      "type": "string"
+    },
+    "BlastEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Target",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "level": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ImpactLevel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "critical_constraint": {
+          "title": "Critical Constraint",
+          "type": "boolean"
+        },
+        "channel_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Channel Id"
+        }
+      },
+      "required": [
+        "source",
+        "target",
+        "label",
+        "critical_constraint"
+      ],
+      "title": "BlastEdge",
+      "type": "object"
+    },
+    "BlastNode": {
+      "additionalProperties": false,
+      "properties": {
+        "node_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Node Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "decision",
+            "department",
+            "entity",
+            "pressure",
+            "outcome"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "department_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Department Id"
+        },
+        "entity_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entity Id"
+        },
+        "pressure_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pressure Id"
+        },
+        "headline": {
+          "title": "Headline",
+          "type": "string"
+        },
+        "level": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ImpactLevel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "category": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ImpactCategory"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "polarity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Polarity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "severity": {
+          "anyOf": [
+            {
+              "maximum": 5,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Severity"
+        },
+        "value_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Usd"
+        },
+        "first_effect_day": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "First Effect Day"
+        },
+        "impact_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Impact Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "node_id",
+        "kind",
+        "headline"
+      ],
+      "title": "BlastNode",
+      "type": "object"
+    },
+    "BlastRadius": {
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "scenario_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "future": {
+          "$ref": "#/$defs/Future"
+        },
+        "plan_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Plan Id"
+        },
+        "root_node_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Root Node Id",
+          "type": "string"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/BlastNode"
+          },
+          "title": "Nodes",
+          "type": "array"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/BlastEdge"
+          },
+          "title": "Edges",
+          "type": "array"
+        },
+        "departments": {
+          "items": {
+            "$ref": "#/$defs/DepartmentImpactSummary"
+          },
+          "title": "Departments",
+          "type": "array"
+        },
+        "outcome": {
+          "$ref": "#/$defs/CompanyOutcome"
+        }
+      },
+      "required": [
+        "run_id",
+        "scenario_id",
+        "future",
+        "root_node_id",
+        "outcome"
+      ],
+      "title": "BlastRadius",
+      "type": "object"
+    },
+    "Claim": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "calculation",
+            "evidence",
+            "assumption",
+            "agent_validated"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "ref": {
+          "title": "Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "source",
+        "ref"
+      ],
+      "title": "Claim",
+      "type": "object"
+    },
+    "ClaimStatus": {
+      "enum": [
+        "computed",
+        "validated",
+        "hypothesis",
+        "rejected"
+      ],
+      "title": "ClaimStatus",
+      "type": "string"
+    },
+    "CompanyOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "net_value_usd": {
+          "title": "Net Value Usd",
+          "type": "integer"
+        },
+        "risk_level": {
+          "$ref": "#/$defs/RiskLevel"
+        },
+        "headline": {
+          "title": "Headline",
+          "type": "string"
+        }
+      },
+      "required": [
+        "net_value_usd",
+        "risk_level",
+        "headline"
+      ],
+      "title": "CompanyOutcome",
+      "type": "object"
+    },
+    "Constraint": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "metric": {
+          "enum": [
+            "annual_savings_usd",
+            "net_value_usd",
+            "revenue_impact_pct",
+            "customer_impact_pct",
+            "compliance_controls_broken",
+            "stranded_workflows",
+            "critical_systems_degraded",
+            "max_capacity_loss_pct",
+            "critical_coverage_pct"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            "<=",
+            ">=",
+            "=="
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "threshold": {
+          "title": "Threshold",
+          "type": "number"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "hard": {
+          "title": "Hard",
+          "type": "boolean"
+        },
+        "scope_entity_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scope Entity Id"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "metric",
+        "operator",
+        "threshold",
+        "unit",
+        "hard",
+        "description"
+      ],
+      "title": "Constraint",
+      "type": "object"
+    },
+    "ConstraintResult": {
+      "additionalProperties": false,
+      "properties": {
+        "constraint_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Constraint Id",
+          "type": "string"
+        },
+        "metric": {
+          "enum": [
+            "annual_savings_usd",
+            "net_value_usd",
+            "revenue_impact_pct",
+            "customer_impact_pct",
+            "compliance_controls_broken",
+            "stranded_workflows",
+            "critical_systems_degraded",
+            "max_capacity_loss_pct",
+            "critical_coverage_pct"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "operator": {
+          "enum": [
+            "<=",
+            ">=",
+            "=="
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "threshold": {
+          "title": "Threshold",
+          "type": "number"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "hard": {
+          "title": "Hard",
+          "type": "boolean"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        },
+        "impact_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Impact Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "constraint_id",
+        "metric",
+        "operator",
+        "threshold",
+        "value",
+        "hard",
+        "passed",
+        "explanation"
+      ],
+      "title": "ConstraintResult",
+      "type": "object"
+    },
+    "Criticality": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Criticality",
+      "type": "string"
+    },
+    "DecisionBrief": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "default": "2.1.1",
+          "enum": [
+            "2.1.0",
+            "2.1.1"
+          ],
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "decision_id": {
+          "maxLength": 80,
+          "pattern": "^(?:dec_)[a-z0-9_]*$",
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "decision_type": {
+          "$ref": "#/$defs/DecisionType"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "statement": {
+          "title": "Statement",
+          "type": "string"
+        },
+        "goal": {
+          "$ref": "#/$defs/Goal"
+        },
+        "horizon_days": {
+          "default": 365,
+          "exclusiveMinimum": 0,
+          "title": "Horizon Days",
+          "type": "integer"
+        },
+        "candidate_interventions": {
+          "items": {
+            "$ref": "#/$defs/Intervention"
+          },
+          "title": "Candidate Interventions",
+          "type": "array"
+        },
+        "organization_changes": {
+          "items": {
+            "$ref": "#/$defs/OrganizationChange"
+          },
+          "title": "Organization Changes",
+          "type": "array"
+        },
+        "protected_entity_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Protected Entity Ids",
+          "type": "array"
+        },
+        "constraints": {
+          "items": {
+            "$ref": "#/$defs/Constraint"
+          },
+          "title": "Constraints",
+          "type": "array"
+        },
+        "futures": {
+          "items": {
+            "$ref": "#/$defs/Future"
+          },
+          "title": "Futures",
+          "type": "array"
+        },
+        "delay_days": {
+          "default": 90,
+          "minimum": 0,
+          "title": "Delay Days",
+          "type": "integer"
+        },
+        "active_pressure_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 80,
+                "pattern": "^[a-z][a-z0-9_]*$",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Active Pressure Ids"
+        },
+        "seed": {
+          "default": 42,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "mc_samples": {
+          "default": 1000,
+          "minimum": 1,
+          "title": "Mc Samples",
+          "type": "integer"
+        },
+        "created_by": {
+          "title": "Created By",
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision_id",
+        "decision_type",
+        "title",
+        "statement",
+        "goal",
+        "candidate_interventions",
+        "created_by"
+      ],
+      "title": "DecisionBrief",
+      "type": "object"
+    },
+    "DecisionType": {
+      "enum": [
+        "cost_reduction",
+        "vendor_consolidation",
+        "capacity_change",
+        "project_decision",
+        "investment",
+        "restructure",
+        "mixed"
+      ],
+      "title": "DecisionType",
+      "type": "string"
+    },
+    "DepartmentEdit": {
+      "additionalProperties": false,
+      "properties": {
+        "department_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Department Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 80,
+          "minLength": 2,
+          "title": "Name",
+          "type": "string"
+        },
+        "mission": {
+          "maxLength": 500,
+          "minLength": 2,
+          "title": "Mission",
+          "type": "string"
+        },
+        "actual_fte": {
+          "minimum": 0,
+          "title": "Actual Fte",
+          "type": "number"
+        },
+        "annual_budget_usd": {
+          "minimum": 0,
+          "title": "Annual Budget Usd",
+          "type": "integer"
+        },
+        "utilisation": {
+          "default": 0,
+          "maximum": 1.5,
+          "minimum": 0,
+          "title": "Utilisation",
+          "type": "number"
+        },
+        "active": {
+          "default": true,
+          "title": "Active",
+          "type": "boolean"
+        },
+        "agent_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Agent Id"
+        },
+        "assumption": {
+          "maxLength": 300,
+          "minLength": 10,
+          "title": "Assumption",
+          "type": "string"
+        }
+      },
+      "required": [
+        "department_id",
+        "name",
+        "mission",
+        "actual_fte",
+        "annual_budget_usd",
+        "assumption"
+      ],
+      "title": "DepartmentEdit",
+      "type": "object"
+    },
+    "DepartmentImpactSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "department_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Department Id",
+          "type": "string"
+        },
+        "headline": {
+          "title": "Headline",
+          "type": "string"
+        },
+        "polarity": {
+          "$ref": "#/$defs/Polarity"
+        },
+        "severity": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Severity",
+          "type": "integer"
+        },
+        "impact_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Impact Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "department_id",
+        "headline",
+        "polarity",
+        "severity"
+      ],
+      "title": "DepartmentImpactSummary",
+      "type": "object"
+    },
+    "DepartmentScenarioState": {
+      "additionalProperties": false,
+      "properties": {
+        "department_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Department Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "lifecycle": {
+          "enum": [
+            "active",
+            "added",
+            "closed"
+          ],
+          "title": "Lifecycle",
+          "type": "string"
+        },
+        "baseline_fte": {
+          "minimum": 0,
+          "title": "Baseline Fte",
+          "type": "number"
+        },
+        "scenario_fte": {
+          "minimum": 0,
+          "title": "Scenario Fte",
+          "type": "number"
+        },
+        "baseline_budget_usd": {
+          "minimum": 0,
+          "title": "Baseline Budget Usd",
+          "type": "integer"
+        },
+        "scenario_budget_usd": {
+          "minimum": 0,
+          "title": "Scenario Budget Usd",
+          "type": "integer"
+        },
+        "effective_day": {
+          "minimum": 0,
+          "title": "Effective Day",
+          "type": "integer"
+        },
+        "transferred_workflow_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Transferred Workflow Ids",
+          "type": "array"
+        },
+        "modeling_notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Modeling Notes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "department_id",
+        "name",
+        "lifecycle",
+        "baseline_fte",
+        "scenario_fte",
+        "baseline_budget_usd",
+        "scenario_budget_usd",
+        "effective_day"
+      ],
+      "title": "DepartmentScenarioState",
+      "type": "object"
+    },
+    "Direction": {
+      "enum": [
+        "increase",
+        "decrease",
+        "no_change"
+      ],
+      "title": "Direction",
+      "type": "string"
+    },
+    "Future": {
+      "enum": [
+        "act_now",
+        "inaction",
+        "delay",
+        "alternative"
+      ],
+      "title": "Future",
+      "type": "string"
+    },
+    "FutureComparison": {
+      "additionalProperties": false,
+      "properties": {
+        "comparison_id": {
+          "maxLength": 80,
+          "pattern": "^(?:cmp_)[a-z0-9_]*$",
+          "title": "Comparison Id",
+          "type": "string"
+        },
+        "decision_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "run_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "reference_result_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Reference Result Id",
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/$defs/FutureRow"
+          },
+          "title": "Rows",
+          "type": "array"
+        },
+        "best_row_index": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Best Row Index"
+        },
+        "headline": {
+          "title": "Headline",
+          "type": "string"
+        }
+      },
+      "required": [
+        "comparison_id",
+        "decision_id",
+        "run_id",
+        "reference_result_id",
+        "rows",
+        "headline"
+      ],
+      "title": "FutureComparison",
+      "type": "object"
+    },
+    "FutureRow": {
+      "additionalProperties": false,
+      "properties": {
+        "future": {
+          "$ref": "#/$defs/Future"
+        },
+        "plan_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Plan Id"
+        },
+        "result_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Result Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "net_value_p50_usd": {
+          "title": "Net Value P50 Usd",
+          "type": "integer"
+        },
+        "delta_vs_inaction_p10_usd": {
+          "title": "Delta Vs Inaction P10 Usd",
+          "type": "integer"
+        },
+        "delta_vs_inaction_p50_usd": {
+          "title": "Delta Vs Inaction P50 Usd",
+          "type": "integer"
+        },
+        "delta_vs_inaction_p90_usd": {
+          "title": "Delta Vs Inaction P90 Usd",
+          "type": "integer"
+        },
+        "p_better_than_inaction": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "P Better Than Inaction",
+          "type": "number"
+        },
+        "breakeven_day": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Breakeven Day"
+        },
+        "cost_of_delay_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cost Of Delay Usd"
+        },
+        "feasible": {
+          "title": "Feasible",
+          "type": "boolean"
+        },
+        "risk_score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Risk Score",
+          "type": "number"
+        },
+        "monthly_delta_usd": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Monthly Delta Usd",
+          "type": "array"
+        }
+      },
+      "required": [
+        "future",
+        "result_id",
+        "label",
+        "net_value_p50_usd",
+        "delta_vs_inaction_p10_usd",
+        "delta_vs_inaction_p50_usd",
+        "delta_vs_inaction_p90_usd",
+        "p_better_than_inaction",
+        "feasible",
+        "risk_score"
+      ],
+      "title": "FutureRow",
+      "type": "object"
+    },
+    "Goal": {
+      "additionalProperties": false,
+      "properties": {
+        "metric": {
+          "title": "Metric",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "number"
+        },
+        "unit": {
+          "default": "usd",
+          "title": "Unit",
+          "type": "string"
+        },
+        "basis": {
+          "default": "gross",
+          "enum": [
+            "gross",
+            "net"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "direction": {
+          "default": "at_least",
+          "enum": [
+            "at_least",
+            "at_most"
+          ],
+          "title": "Direction",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric",
+        "target"
+      ],
+      "title": "Goal",
+      "type": "object"
+    },
+    "Impact": {
+      "additionalProperties": false,
+      "properties": {
+        "impact_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Impact Id",
+          "type": "string"
+        },
+        "decision_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "scenario_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "source_entity": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Source Entity",
+          "type": "string"
+        },
+        "source_kind": {
+          "enum": [
+            "intervention",
+            "pressure"
+          ],
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "source_ref": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "affected_entity": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Affected Entity",
+          "type": "string"
+        },
+        "affected_department": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Affected Department"
+        },
+        "level": {
+          "$ref": "#/$defs/ImpactLevel"
+        },
+        "category": {
+          "$ref": "#/$defs/ImpactCategory"
+        },
+        "polarity": {
+          "$ref": "#/$defs/Polarity"
+        },
+        "direction": {
+          "$ref": "#/$defs/Direction"
+        },
+        "metric": {
+          "title": "Metric",
+          "type": "string"
+        },
+        "magnitude": {
+          "title": "Magnitude",
+          "type": "number"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Usd"
+        },
+        "severity": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Severity",
+          "type": "integer"
+        },
+        "first_effect_day": {
+          "minimum": 0,
+          "title": "First Effect Day",
+          "type": "integer"
+        },
+        "peak_effect_day": {
+          "minimum": 0,
+          "title": "Peak Effect Day",
+          "type": "integer"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "dependency_path": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Dependency Path",
+          "type": "array"
+        },
+        "edge_path": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Edge Path",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "constraint_refs": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Constraint Refs",
+          "type": "array"
+        },
+        "origin": {
+          "$ref": "#/$defs/Origin"
+        },
+        "status": {
+          "$ref": "#/$defs/ClaimStatus"
+        }
+      },
+      "required": [
+        "impact_id",
+        "decision_id",
+        "scenario_id",
+        "source_entity",
+        "source_kind",
+        "source_ref",
+        "affected_entity",
+        "level",
+        "category",
+        "polarity",
+        "direction",
+        "metric",
+        "magnitude",
+        "unit",
+        "severity",
+        "first_effect_day",
+        "peak_effect_day",
+        "confidence",
+        "origin",
+        "status"
+      ],
+      "title": "Impact",
+      "type": "object"
+    },
+    "ImpactCategory": {
+      "enum": [
+        "ownership",
+        "technical",
+        "operational",
+        "business",
+        "compliance",
+        "financial"
+      ],
+      "title": "ImpactCategory",
+      "type": "string"
+    },
+    "ImpactLevel": {
+      "enum": [
+        "direct",
+        "dependent",
+        "second_order",
+        "delayed",
+        "feedback"
+      ],
+      "title": "ImpactLevel",
+      "type": "string"
+    },
+    "ImplementationStep": {
+      "additionalProperties": false,
+      "properties": {
+        "order": {
+          "minimum": 1,
+          "title": "Order",
+          "type": "integer"
+        },
+        "day": {
+          "minimum": 0,
+          "title": "Day",
+          "type": "integer"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "intervention_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intervention Id"
+        },
+        "gate": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gate"
+        }
+      },
+      "required": [
+        "order",
+        "day",
+        "action"
+      ],
+      "title": "ImplementationStep",
+      "type": "object"
+    },
+    "Intervention": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/InterventionKind"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ActionType"
+            },
+            {
+              "$ref": "#/$defs/MitigationType"
+            }
+          ],
+          "title": "Type"
+        },
+        "target_entity_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Target Entity Id",
+          "type": "string"
+        },
+        "amount_pct": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Amount Pct"
+        },
+        "amount_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Amount Usd"
+        },
+        "start_day": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Start Day",
+          "type": "integer"
+        },
+        "duration_days": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Days"
+        },
+        "one_time_cost_usd": {
+          "default": 0,
+          "minimum": 0,
+          "title": "One Time Cost Usd",
+          "type": "integer"
+        },
+        "new_owner_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^(?:role_)[a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "New Owner Id"
+        },
+        "params": {
+          "additionalProperties": true,
+          "title": "Params",
+          "type": "object"
+        },
+        "rationale": {
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "type",
+        "target_entity_id",
+        "rationale"
+      ],
+      "title": "Intervention",
+      "type": "object"
+    },
+    "InterventionKind": {
+      "enum": [
+        "action",
+        "mitigation"
+      ],
+      "title": "InterventionKind",
+      "type": "string"
+    },
+    "ItemCounterfactual": {
+      "additionalProperties": false,
+      "properties": {
+        "intervention_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Intervention Id",
+          "type": "string"
+        },
+        "contribution_usd": {
+          "title": "Contribution Usd",
+          "type": "integer"
+        },
+        "net_value_without_usd": {
+          "title": "Net Value Without Usd",
+          "type": "integer"
+        },
+        "goal_still_met": {
+          "title": "Goal Still Met",
+          "type": "boolean"
+        },
+        "verdict": {
+          "enum": [
+            "keep",
+            "drop",
+            "borderline"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "intervention_id",
+        "contribution_usd",
+        "net_value_without_usd",
+        "goal_still_met",
+        "verdict",
+        "explanation"
+      ],
+      "title": "ItemCounterfactual",
+      "type": "object"
+    },
+    "KnowledgeCoverage": {
+      "additionalProperties": false,
+      "properties": {
+        "knowledge_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Knowledge Id",
+          "type": "string"
+        },
+        "holders_before": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Holders Before",
+          "type": "array"
+        },
+        "holders_after": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Holders After",
+          "type": "array"
+        },
+        "holder_capacity_fte_before": {
+          "minimum": 0,
+          "title": "Holder Capacity Fte Before",
+          "type": "number"
+        },
+        "holder_capacity_fte_after": {
+          "minimum": 0,
+          "title": "Holder Capacity Fte After",
+          "type": "number"
+        },
+        "documented_pct": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Documented Pct",
+          "type": "number"
+        },
+        "lost": {
+          "title": "Lost",
+          "type": "boolean"
+        },
+        "dependent_workflow_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Dependent Workflow Ids",
+          "type": "array"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "knowledge_id",
+        "holder_capacity_fte_before",
+        "holder_capacity_fte_after",
+        "documented_pct",
+        "lost"
+      ],
+      "title": "KnowledgeCoverage",
+      "type": "object"
+    },
+    "MigrationDifficulty": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "title": "MigrationDifficulty",
+      "type": "string"
+    },
+    "MissingQuestion": {
+      "additionalProperties": false,
+      "properties": {
+        "question_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Question Id",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "uncertain_input": {
+          "title": "Uncertain Input",
+          "type": "string"
+        },
+        "current_assumption": {
+          "title": "Current Assumption",
+          "type": "string"
+        },
+        "answer_type": {
+          "enum": [
+            "boolean",
+            "number",
+            "choice"
+          ],
+          "title": "Answer Type",
+          "type": "string"
+        },
+        "options": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Options",
+          "type": "array"
+        },
+        "changes_recommendation_if": {
+          "title": "Changes Recommendation If",
+          "type": "string"
+        },
+        "value_gap_usd": {
+          "title": "Value Gap Usd",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "question_id",
+        "text",
+        "uncertain_input",
+        "current_assumption",
+        "answer_type",
+        "changes_recommendation_if",
+        "value_gap_usd"
+      ],
+      "title": "MissingQuestion",
+      "type": "object"
+    },
+    "MitigationComparison": {
+      "additionalProperties": false,
+      "properties": {
+        "plan_id_before": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Plan Id Before",
+          "type": "string"
+        },
+        "plan_id_after": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Plan Id After",
+          "type": "string"
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/$defs/Intervention"
+          },
+          "title": "Actions",
+          "type": "array"
+        },
+        "before": {
+          "$ref": "#/$defs/SimulationResult"
+        },
+        "after": {
+          "$ref": "#/$defs/SimulationResult"
+        },
+        "restored_entity_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Restored Entity Ids",
+          "type": "array"
+        },
+        "changed_metrics": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Changed Metrics",
+          "type": "array"
+        },
+        "feasible_before": {
+          "title": "Feasible Before",
+          "type": "boolean"
+        },
+        "feasible_after": {
+          "title": "Feasible After",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "plan_id_before",
+        "plan_id_after",
+        "actions",
+        "before",
+        "after",
+        "feasible_before",
+        "feasible_after"
+      ],
+      "title": "MitigationComparison",
+      "type": "object"
+    },
+    "MitigationType": {
+      "enum": [
+        "reassign_owner",
+        "document_runbook",
+        "reassign_on_call",
+        "add_replacement_feed",
+        "resequence_project",
+        "retain_capacity_temporarily"
+      ],
+      "title": "MitigationType",
+      "type": "string"
+    },
+    "MonitorRule": {
+      "additionalProperties": false,
+      "properties": {
+        "metric": {
+          "title": "Metric",
+          "type": "string"
+        },
+        "entity_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Entity Id"
+        },
+        "operator": {
+          "enum": [
+            "<=",
+            ">=",
+            "=="
+          ],
+          "title": "Operator",
+          "type": "string"
+        },
+        "threshold": {
+          "title": "Threshold",
+          "type": "number"
+        },
+        "action": {
+          "enum": [
+            "watch",
+            "pause",
+            "rollback",
+            "escalate"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric",
+        "operator",
+        "threshold",
+        "action",
+        "description"
+      ],
+      "title": "MonitorRule",
+      "type": "object"
+    },
+    "OrganizationChange": {
+      "additionalProperties": false,
+      "properties": {
+        "intervention_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Intervention Id",
+          "type": "string"
+        },
+        "operation": {
+          "enum": [
+            "create",
+            "close",
+            "transfer"
+          ],
+          "title": "Operation",
+          "type": "string"
+        },
+        "department_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Department Id",
+          "type": "string"
+        },
+        "new_department": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DepartmentEdit"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "destination_department_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Destination Department Id"
+        },
+        "workflow_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Workflow Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "intervention_id",
+        "operation",
+        "department_id"
+      ],
+      "title": "OrganizationChange",
+      "type": "object"
+    },
+    "Origin": {
+      "enum": [
+        "engine",
+        "agent",
+        "challenger",
+        "user"
+      ],
+      "title": "Origin",
+      "type": "string"
+    },
+    "OverlapDimension": {
+      "enum": [
+        "record_coverage",
+        "attribute_coverage",
+        "geography",
+        "history_depth",
+        "freshness",
+        "accuracy",
+        "permitted_use",
+        "consumer_teams",
+        "downstream_workflows",
+        "model_features",
+        "substitutability"
+      ],
+      "title": "OverlapDimension",
+      "type": "string"
+    },
+    "Polarity": {
+      "enum": [
+        "benefit",
+        "harm"
+      ],
+      "title": "Polarity",
+      "type": "string"
+    },
+    "Portfolio": {
+      "additionalProperties": false,
+      "properties": {
+        "plan_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Plan Id",
+          "type": "string"
+        },
+        "intervention_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Intervention Ids",
+          "type": "array"
+        },
+        "rank": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rank"
+        },
+        "result": {
+          "$ref": "#/$defs/SimulationResult"
+        }
+      },
+      "required": [
+        "plan_id",
+        "result"
+      ],
+      "title": "Portfolio",
+      "type": "object"
+    },
+    "PortfolioComparison": {
+      "additionalProperties": false,
+      "properties": {
+        "evaluated_count": {
+          "minimum": 0,
+          "title": "Evaluated Count",
+          "type": "integer"
+        },
+        "naive": {
+          "$ref": "#/$defs/Portfolio"
+        },
+        "recommended": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Portfolio"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "alternatives": {
+          "items": {
+            "$ref": "#/$defs/Portfolio"
+          },
+          "title": "Alternatives",
+          "type": "array"
+        }
+      },
+      "required": [
+        "evaluated_count",
+        "naive"
+      ],
+      "title": "PortfolioComparison",
+      "type": "object"
+    },
+    "PressureTrigger": {
+      "additionalProperties": false,
+      "properties": {
+        "pressure_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Pressure Id",
+          "type": "string"
+        },
+        "expected_events": {
+          "minimum": 0,
+          "title": "Expected Events",
+          "type": "number"
+        },
+        "expected_cost_usd": {
+          "title": "Expected Cost Usd",
+          "type": "integer"
+        },
+        "neutralised": {
+          "title": "Neutralised",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "pressure_id",
+        "expected_events",
+        "expected_cost_usd",
+        "neutralised"
+      ],
+      "title": "PressureTrigger",
+      "type": "object"
+    },
+    "Recommendation": {
+      "additionalProperties": false,
+      "properties": {
+        "plan_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Plan Id"
+        },
+        "future": {
+          "$ref": "#/$defs/Future"
+        },
+        "action": {
+          "default": "proceed",
+          "enum": [
+            "proceed",
+            "proceed_with_mitigations",
+            "do_not_proceed",
+            "delay"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "result_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Result Id",
+          "type": "string"
+        },
+        "headline": {
+          "title": "Headline",
+          "type": "string"
+        },
+        "claims": {
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "title": "Claims",
+          "type": "array"
+        },
+        "mitigated_plan_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mitigated Plan Id"
+        },
+        "mitigated_result_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mitigated Result Id"
+        }
+      },
+      "required": [
+        "future",
+        "result_id",
+        "headline"
+      ],
+      "title": "Recommendation",
+      "type": "object"
+    },
+    "RiskComponents": {
+      "additionalProperties": false,
+      "properties": {
+        "financial": {
+          "minimum": 0,
+          "title": "Financial",
+          "type": "number"
+        },
+        "capability_workflow": {
+          "minimum": 0,
+          "title": "Capability Workflow",
+          "type": "number"
+        },
+        "customer_revenue": {
+          "minimum": 0,
+          "title": "Customer Revenue",
+          "type": "number"
+        },
+        "compliance_control": {
+          "minimum": 0,
+          "title": "Compliance Control",
+          "type": "number"
+        },
+        "execution_uncertainty": {
+          "minimum": 0,
+          "title": "Execution Uncertainty",
+          "type": "number"
+        }
+      },
+      "required": [
+        "financial",
+        "capability_workflow",
+        "customer_revenue",
+        "compliance_control",
+        "execution_uncertainty"
+      ],
+      "title": "RiskComponents",
+      "type": "object"
+    },
+    "RiskLevel": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "RiskLevel",
+      "type": "string"
+    },
+    "RiskScore": {
+      "additionalProperties": false,
+      "properties": {
+        "score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Score",
+          "type": "number"
+        },
+        "level": {
+          "$ref": "#/$defs/RiskLevel"
+        },
+        "settings_version": {
+          "minimum": 1,
+          "title": "Settings Version",
+          "type": "integer"
+        },
+        "components": {
+          "$ref": "#/$defs/RiskComponents"
+        }
+      },
+      "required": [
+        "score",
+        "level",
+        "settings_version",
+        "components"
+      ],
+      "title": "RiskScore",
+      "type": "object"
+    },
+    "SimulationResult": {
+      "additionalProperties": false,
+      "properties": {
+        "result_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Result Id",
+          "type": "string"
+        },
+        "run_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "scenario_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "future": {
+          "$ref": "#/$defs/Future"
+        },
+        "plan_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Plan Id"
+        },
+        "mode": {
+          "enum": [
+            "quick",
+            "full"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "seed": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Seed"
+        },
+        "intervention_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Intervention Ids",
+          "type": "array"
+        },
+        "department_states": {
+          "items": {
+            "$ref": "#/$defs/DepartmentScenarioState"
+          },
+          "title": "Department States",
+          "type": "array"
+        },
+        "value": {
+          "$ref": "#/$defs/ValueBreakdown"
+        },
+        "goal_met": {
+          "title": "Goal Met",
+          "type": "boolean"
+        },
+        "constraint_results": {
+          "items": {
+            "$ref": "#/$defs/ConstraintResult"
+          },
+          "title": "Constraint Results",
+          "type": "array"
+        },
+        "impacts": {
+          "items": {
+            "$ref": "#/$defs/Impact"
+          },
+          "title": "Impacts",
+          "type": "array"
+        },
+        "workflow_coverage": {
+          "items": {
+            "$ref": "#/$defs/WorkflowCoverage"
+          },
+          "title": "Workflow Coverage",
+          "type": "array"
+        },
+        "knowledge_coverage": {
+          "items": {
+            "$ref": "#/$defs/KnowledgeCoverage"
+          },
+          "title": "Knowledge Coverage",
+          "type": "array"
+        },
+        "pressures_triggered": {
+          "items": {
+            "$ref": "#/$defs/PressureTrigger"
+          },
+          "title": "Pressures Triggered",
+          "type": "array"
+        },
+        "risk": {
+          "$ref": "#/$defs/RiskScore"
+        },
+        "affected_department_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Affected Department Ids",
+          "type": "array"
+        },
+        "feasible": {
+          "title": "Feasible",
+          "type": "boolean"
+        },
+        "rejection_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Rejection Reasons",
+          "type": "array"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "computed_at": {
+          "format": "date-time",
+          "title": "Computed At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result_id",
+        "run_id",
+        "scenario_id",
+        "future",
+        "mode",
+        "value",
+        "goal_met",
+        "risk",
+        "feasible",
+        "computed_at"
+      ],
+      "title": "SimulationResult",
+      "type": "object"
+    },
+    "ValueBreakdown": {
+      "additionalProperties": false,
+      "properties": {
+        "gross_savings_usd": {
+          "title": "Gross Savings Usd",
+          "type": "integer"
+        },
+        "transition_cost_usd": {
+          "title": "Transition Cost Usd",
+          "type": "integer"
+        },
+        "added_cost_usd": {
+          "title": "Added Cost Usd",
+          "type": "integer"
+        },
+        "rebound_cost_usd": {
+          "title": "Rebound Cost Usd",
+          "type": "integer"
+        },
+        "expected_business_loss_usd": {
+          "title": "Expected Business Loss Usd",
+          "type": "integer"
+        },
+        "pressure_cost_usd": {
+          "title": "Pressure Cost Usd",
+          "type": "integer"
+        },
+        "avoided_failure_cost_usd": {
+          "title": "Avoided Failure Cost Usd",
+          "type": "integer"
+        },
+        "net_value_usd": {
+          "title": "Net Value Usd",
+          "type": "integer"
+        },
+        "monthly_net_usd": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Monthly Net Usd",
+          "type": "array"
+        },
+        "p10_net_value_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "P10 Net Value Usd"
+        },
+        "p50_net_value_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "P50 Net Value Usd"
+        },
+        "p90_net_value_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "P90 Net Value Usd"
+        },
+        "termination_cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Contract termination fees paid to exit vendors or projects.",
+          "title": "Termination Cost Usd"
+        },
+        "migration_cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "One-time cost of moving work or data onto a replacement.",
+          "title": "Migration Cost Usd"
+        },
+        "displaced_work_cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cost of work pushed onto remaining teams by the change.",
+          "title": "Displaced Work Cost Usd"
+        }
+      },
+      "required": [
+        "gross_savings_usd",
+        "transition_cost_usd",
+        "added_cost_usd",
+        "rebound_cost_usd",
+        "expected_business_loss_usd",
+        "pressure_cost_usd",
+        "avoided_failure_cost_usd",
+        "net_value_usd"
+      ],
+      "title": "ValueBreakdown",
+      "type": "object"
+    },
+    "VendorOverlap": {
+      "additionalProperties": false,
+      "properties": {
+        "vendor_a": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Vendor A",
+          "type": "string"
+        },
+        "vendor_b": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Vendor B",
+          "type": "string"
+        },
+        "dimensions": {
+          "additionalProperties": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/OverlapDimension"
+          },
+          "title": "Dimensions",
+          "type": "object"
+        },
+        "overall_overlap": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Overall Overlap",
+          "type": "number"
+        },
+        "shared_dataset_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Shared Dataset Ids",
+          "type": "array"
+        },
+        "unique_dataset_ids_a": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Unique Dataset Ids A",
+          "type": "array"
+        },
+        "unique_dataset_ids_b": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Unique Dataset Ids B",
+          "type": "array"
+        },
+        "migration_difficulty": {
+          "$ref": "#/$defs/MigrationDifficulty"
+        }
+      },
+      "required": [
+        "vendor_a",
+        "vendor_b",
+        "dimensions",
+        "overall_overlap",
+        "migration_difficulty"
+      ],
+      "title": "VendorOverlap",
+      "type": "object"
+    },
+    "VersionInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "twin_version": {
+          "title": "Twin Version",
+          "type": "string"
+        },
+        "settings_version": {
+          "minimum": 1,
+          "title": "Settings Version",
+          "type": "integer"
+        },
+        "prompt_version": {
+          "title": "Prompt Version",
+          "type": "string"
+        },
+        "model_id": {
+          "title": "Model Id",
+          "type": "string"
+        },
+        "engine_version": {
+          "title": "Engine Version",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "as_of_date": {
+          "format": "date",
+          "title": "As Of Date",
+          "type": "string"
+        },
+        "data_snapshot_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Data Snapshot Id"
+        },
+        "policy_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Policy Version"
+        },
+        "coefficient_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Coefficient Version"
+        },
+        "created_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Created By"
+        }
+      },
+      "required": [
+        "twin_version",
+        "settings_version",
+        "prompt_version",
+        "model_id",
+        "engine_version",
+        "created_at",
+        "as_of_date"
+      ],
+      "title": "VersionInfo",
+      "type": "object"
+    },
+    "WorkflowCoverage": {
+      "additionalProperties": false,
+      "properties": {
+        "workflow_id": {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Workflow Id",
+          "type": "string"
+        },
+        "criticality": {
+          "$ref": "#/$defs/Criticality"
+        },
+        "owners_before": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Owners Before",
+          "type": "array"
+        },
+        "owners_after": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Owners After",
+          "type": "array"
+        },
+        "min_qualified_owners": {
+          "minimum": 0,
+          "title": "Min Qualified Owners",
+          "type": "integer"
+        },
+        "backup_count_after": {
+          "minimum": 0,
+          "title": "Backup Count After",
+          "type": "integer"
+        },
+        "documented_pct": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Documented Pct",
+          "type": "number"
+        },
+        "stranded": {
+          "title": "Stranded",
+          "type": "boolean"
+        },
+        "reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        },
+        "owner_capacity_fte_before": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Capacity Fte Before"
+        },
+        "owner_capacity_fte_after": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Capacity Fte After"
+        },
+        "exception_documented_pct": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exception Documented Pct"
+        },
+        "automation_pct": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Automation Pct"
+        },
+        "training_days_required": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Training Days Required"
+        },
+        "replacement_cost_usd": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replacement Cost Usd"
+        }
+      },
+      "required": [
+        "workflow_id",
+        "criticality",
+        "min_qualified_owners",
+        "backup_count_after",
+        "documented_pct",
+        "stranded"
+      ],
+      "title": "WorkflowCoverage",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "2.1.1",
+      "enum": [
+        "2.1.0",
+        "2.1.1"
+      ],
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "package_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Package Id",
+      "type": "string"
+    },
+    "run_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "decision_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Decision Id",
+      "type": "string"
+    },
+    "versions": {
+      "$ref": "#/$defs/VersionInfo"
+    },
+    "brief": {
+      "$ref": "#/$defs/DecisionBrief"
+    },
+    "recommendation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Recommendation"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "futures": {
+      "$ref": "#/$defs/FutureComparison"
+    },
+    "portfolios": {
+      "$ref": "#/$defs/PortfolioComparison"
+    },
+    "blast_radius_act_now": {
+      "$ref": "#/$defs/BlastRadius"
+    },
+    "blast_radius_inaction": {
+      "$ref": "#/$defs/BlastRadius"
+    },
+    "department_impacts": {
+      "items": {
+        "$ref": "#/$defs/DepartmentImpactSummary"
+      },
+      "title": "Department Impacts",
+      "type": "array"
+    },
+    "critical_risks": {
+      "items": {
+        "$ref": "#/$defs/Impact"
+      },
+      "title": "Critical Risks",
+      "type": "array"
+    },
+    "mitigations": {
+      "items": {
+        "$ref": "#/$defs/MitigationComparison"
+      },
+      "title": "Mitigations",
+      "type": "array"
+    },
+    "vendor_overlaps": {
+      "items": {
+        "$ref": "#/$defs/VendorOverlap"
+      },
+      "title": "Vendor Overlaps",
+      "type": "array"
+    },
+    "counterfactuals": {
+      "items": {
+        "$ref": "#/$defs/ItemCounterfactual"
+      },
+      "title": "Counterfactuals",
+      "type": "array"
+    },
+    "missing_information": {
+      "items": {
+        "$ref": "#/$defs/MissingQuestion"
+      },
+      "title": "Missing Information",
+      "type": "array"
+    },
+    "implementation": {
+      "items": {
+        "$ref": "#/$defs/ImplementationStep"
+      },
+      "title": "Implementation",
+      "type": "array"
+    },
+    "monitoring": {
+      "items": {
+        "$ref": "#/$defs/MonitorRule"
+      },
+      "title": "Monitoring",
+      "type": "array"
+    },
+    "assumptions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Assumptions",
+      "type": "array"
+    },
+    "open_questions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Open Questions",
+      "type": "array"
+    },
+    "missing_perspectives": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Missing Perspectives",
+      "type": "array"
+    },
+    "status": {
+      "default": "awaiting_approval",
+      "enum": [
+        "awaiting_approval",
+        "approved",
+        "rejected",
+        "another_scenario_requested"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "package_id",
+    "run_id",
+    "decision_id",
+    "versions",
+    "brief",
+    "futures",
+    "portfolios",
+    "blast_radius_act_now",
+    "blast_radius_inaction",
+    "created_at"
+  ],
+  "title": "DecisionPackage",
+  "type": "object"
+}

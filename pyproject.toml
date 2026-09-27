@@ -4,9 +4,19 @@ members = [
   "packages/company-twin",
   "packages/simulation-engine",
   "packages/agent-orchestration",
+  "packages/contracts-py",
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["apps/api/tests"]
+markers = [
+  "live_agents: calls the configured live model provider and may incur usage costs",
+]
+testpaths = [
+  "apps/api/tests",
+  "packages/contracts-py/tests",
+  "packages/company-twin/tests",
+  "packages/simulation-engine/tests",
+  "packages/agent-orchestration/tests",
+  "packages/simulation-engine/tests",
+]
 pythonpath = ["apps/api/src"]
-

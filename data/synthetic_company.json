@@ -1,38 +1,6071 @@
 {
-  "id": "company_northstar",
-  "name": "Northstar Technologies",
-  "version": "1.0.0",
-  "entities": [
-    {"id":"dept_finance","kind":"department","name":"Finance","metadata":{}},
-    {"id":"dept_sales","kind":"department","name":"Sales","metadata":{}},
-    {"id":"dept_marketing","kind":"department","name":"Marketing","metadata":{}},
-    {"id":"dept_engineering","kind":"department","name":"Engineering","metadata":{}},
-    {"id":"dept_compliance","kind":"department","name":"Compliance","metadata":{}},
-    {"id":"vendor_atlas","kind":"vendor","name":"Atlas Data","annual_cost":1800000000,"metadata":{"coverage":0.91,"unique_coverage":0.12,"transition_cost":80000000}},
-    {"id":"vendor_beacon","kind":"vendor","name":"Beacon Enrichment","annual_cost":1200000000,"metadata":{"coverage":0.76,"unique_coverage":0.03,"transition_cost":40000000}},
-    {"id":"vendor_census","kind":"vendor","name":"Census Signals","annual_cost":1400000000,"metadata":{"coverage":0.68,"unique_coverage":0.24,"transition_cost":100000000}},
-    {"id":"vendor_diligence","kind":"vendor","name":"Diligence Verify","annual_cost":900000000,"metadata":{"coverage":0.42,"unique_coverage":0.31,"transition_cost":60000000,"critical":true}},
-    {"id":"vendor_echo","kind":"vendor","name":"Echo Markets","annual_cost":1000000000,"metadata":{"coverage":0.71,"unique_coverage":0.04,"transition_cost":35000000}},
-    {"id":"vendor_flux","kind":"vendor","name":"Flux Intent","annual_cost":950000000,"metadata":{"coverage":0.59,"unique_coverage":0.18,"transition_cost":70000000}},
-    {"id":"vendor_grove","kind":"vendor","name":"Grove Firmographics","annual_cost":750000000,"metadata":{"coverage":0.63,"unique_coverage":0.05,"transition_cost":30000000}},
-    {"id":"workflow_enrichment","kind":"workflow","name":"Lead enrichment","department_id":"dept_sales","metadata":{"criticality":0.8}},
-    {"id":"workflow_targeting","kind":"workflow","name":"Campaign targeting","department_id":"dept_marketing","metadata":{"criticality":0.7}},
-    {"id":"workflow_verification","kind":"workflow","name":"Customer verification","department_id":"dept_compliance","metadata":{"criticality":1.0}},
-    {"id":"kpi_pipeline","kind":"kpi","name":"Qualified pipeline","department_id":"dept_sales","metadata":{}},
-    {"id":"kpi_cac","kind":"kpi","name":"Customer acquisition cost","department_id":"dept_marketing","metadata":{}},
-    {"id":"kpi_compliance","kind":"kpi","name":"Compliance coverage","department_id":"dept_compliance","metadata":{}}
+  "schema_version": "2.1.1",
+  "version": {
+    "twin_version": "twin_northstar_v1",
+    "settings_version": 1,
+    "prompt_version": "p1",
+    "model_id": "configurable",
+    "engine_version": "e1",
+    "created_at": "2026-09-26T12:00:00Z",
+    "as_of_date": "2026-09-26"
+  },
+  "organization": {
+    "id": "org_northstar",
+    "legal_name": "Northstar Technologies Inc.",
+    "display_name": "Northstar Technologies",
+    "sector": "technology_saas",
+    "sub_sector": "Enterprise revenue, billing, and data software",
+    "secondary_sectors": [
+      "financial_services"
+    ],
+    "business_model": "b2b",
+    "size_band": "large_enterprise",
+    "headquarters_country": "US",
+    "operating_regions": [
+      "US",
+      "EU",
+      "APAC"
+    ],
+    "annual_revenue_usd": 120000000000,
+    "total_annual_budget_usd": 40000000000,
+    "total_headcount_fte": 60000.0,
+    "fiscal_year_start_month": 1,
+    "regulatory_frameworks": [
+      "SOC2",
+      "GDPR",
+      "PCI_DSS",
+      "SOX"
+    ],
+    "strategic_priorities": [
+      {
+        "id": "sp_retention",
+        "text": "Protect enterprise retention",
+        "rank": 1,
+        "kpi_ids": [
+          "kpi_net_retention"
+        ]
+      },
+      {
+        "id": "sp_margin",
+        "text": "Expand gross margin by two points",
+        "rank": 2,
+        "kpi_ids": [
+          "kpi_gross_margin"
+        ]
+      }
+    ],
+    "description": "Large enterprise software company selling revenue, billing, and data products to businesses in the US, EU, and APAC. It buys external data from seven vendors costing $8B a year.",
+    "evidence_refs": [
+      "ev_strategy_memo_1"
+    ]
+  },
+  "department_profiles": [
+    {
+      "department_id": "dept_engineering",
+      "mission": "Build and run the revenue-critical product systems.",
+      "head_role_id": "role_eng_manager",
+      "agent_id": "engineering",
+      "staffing": {
+        "sanctioned_fte": 17300.0,
+        "actual_fte": 16300.0,
+        "contractors_fte": 1000.0,
+        "open_positions": 900,
+        "attrition_rate_annual": 0.14,
+        "avg_time_to_hire_days": 55,
+        "utilisation": 1.05
+      },
+      "budget": {
+        "annual_budget_usd": 9000000000,
+        "spent_ytd_usd": 6534000000,
+        "fixed_cost_pct": 0.3,
+        "budget_owner_role_id": "role_eng_manager"
+      },
+      "strengths": [
+        {
+          "id": "str_eng_core",
+          "name": "Core platform engineering",
+          "category": "capability",
+          "level": 4,
+          "supports_entity_ids": [
+            "sys_core_api"
+          ],
+          "key_role_ids": [
+            "role_eng_manager"
+          ],
+          "concentration": 0.45,
+          "evidence_refs": [
+            "ev_architecture_core"
+          ]
+        },
+        {
+          "id": "str_eng_security",
+          "name": "Security engineering",
+          "category": "capability",
+          "level": 4,
+          "supports_entity_ids": [
+            "ctl_access_control"
+          ],
+          "key_role_ids": [
+            "role_security_eng"
+          ],
+          "concentration": 0.5,
+          "evidence_refs": [
+            "ev_architecture_core"
+          ]
+        },
+        {
+          "id": "str_eng_reliability",
+          "name": "Reliability engineering",
+          "category": "process",
+          "level": 3,
+          "supports_entity_ids": [
+            "kpi_uptime_sla"
+          ],
+          "key_role_ids": [
+            "role_eng_manager"
+          ],
+          "concentration": 0.4,
+          "evidence_refs": []
+        }
+      ],
+      "gaps": [],
+      "maturity_level": 3
+    },
+    {
+      "department_id": "dept_operations",
+      "mission": "Keep customer-facing platforms and billing operations running.",
+      "head_role_id": "role_sre",
+      "agent_id": "operations",
+      "staffing": {
+        "sanctioned_fte": 6400.0,
+        "actual_fte": 5800.0,
+        "contractors_fte": 600.0,
+        "open_positions": 400,
+        "attrition_rate_annual": 0.14,
+        "avg_time_to_hire_days": 55,
+        "utilisation": 1.12
+      },
+      "budget": {
+        "annual_budget_usd": 3100000000,
+        "spent_ytd_usd": 2250600000,
+        "fixed_cost_pct": 0.35,
+        "budget_owner_role_id": "role_sre"
+      },
+      "strengths": [
+        {
+          "id": "str_ops_incident_response",
+          "name": "Fast incident response",
+          "category": "process",
+          "level": 4,
+          "supports_entity_ids": [
+            "wf_incident_mgmt",
+            "sys_billing_platform"
+          ],
+          "key_role_ids": [
+            "role_sre"
+          ],
+          "concentration": 0.4,
+          "evidence_refs": [
+            "ev_incident_review_q2"
+          ]
+        },
+        {
+          "id": "str_ops_billing_recon",
+          "name": "Billing reconciliation know-how",
+          "category": "expertise",
+          "level": 5,
+          "supports_entity_ids": [
+            "wf_billing_recon"
+          ],
+          "key_role_ids": [
+            "role_billing_ops_lead"
+          ],
+          "concentration": 0.85,
+          "evidence_refs": [
+            "ev_knowledge_matrix_billing"
+          ]
+        }
+      ],
+      "gaps": [],
+      "maturity_level": 3
+    },
+    {
+      "department_id": "dept_ai_data",
+      "mission": "Own data pipelines, models, scores and analytics.",
+      "head_role_id": "role_data_lead",
+      "agent_id": "ai_data",
+      "staffing": {
+        "sanctioned_fte": 5000.0,
+        "actual_fte": 4500.0,
+        "contractors_fte": 500.0,
+        "open_positions": 300,
+        "attrition_rate_annual": 0.14,
+        "avg_time_to_hire_days": 55,
+        "utilisation": 1.0
+      },
+      "budget": {
+        "annual_budget_usd": 4000000000,
+        "spent_ytd_usd": 2904000000,
+        "fixed_cost_pct": 0.35,
+        "budget_owner_role_id": "role_data_lead"
+      },
+      "strengths": [
+        {
+          "id": "str_data_pipeline",
+          "name": "Data pipeline engineering",
+          "category": "data",
+          "level": 4,
+          "supports_entity_ids": [
+            "sys_data_pipeline"
+          ],
+          "key_role_ids": [
+            "role_data_lead"
+          ],
+          "concentration": 0.7,
+          "evidence_refs": [
+            "ev_data_pipeline_runbook"
+          ]
+        },
+        {
+          "id": "str_data_ml",
+          "name": "ML modeling and scoring",
+          "category": "capability",
+          "level": 3,
+          "supports_entity_ids": [
+            "sys_ml_scoring"
+          ],
+          "key_role_ids": [
+            "role_ml_eng"
+          ],
+          "concentration": 0.5,
+          "evidence_refs": []
+        },
+        {
+          "id": "str_data_lineage",
+          "name": "Warehouse lineage knowledge",
+          "category": "data",
+          "level": 4,
+          "supports_entity_ids": [
+            "wf_financial_close"
+          ],
+          "key_role_ids": [
+            "role_data_platform_lead"
+          ],
+          "concentration": 0.9,
+          "evidence_refs": [
+            "ev_knowledge_matrix_3"
+          ]
+        }
+      ],
+      "gaps": [],
+      "maturity_level": 3
+    },
+    {
+      "department_id": "dept_product",
+      "mission": "Own roadmap, releases and transformation projects.",
+      "head_role_id": "role_product_lead",
+      "agent_id": "product",
+      "staffing": {
+        "sanctioned_fte": 4300.0,
+        "actual_fte": 4000.0,
+        "contractors_fte": 300.0,
+        "open_positions": 250,
+        "attrition_rate_annual": 0.14,
+        "avg_time_to_hire_days": 55,
+        "utilisation": 1.0
+      },
+      "budget": {
+        "annual_budget_usd": 3500000000,
+        "spent_ytd_usd": 2541000000,
+        "fixed_cost_pct": 0.25,
+        "budget_owner_role_id": "role_product_lead"
+      },
+      "strengths": [
+        {
+          "id": "str_prod_delivery",
+          "name": "Roadmap and delivery management",
+          "category": "process",
+          "level": 3,
+          "supports_entity_ids": [
+            "proj_billing_modernization"
+          ],
+          "key_role_ids": [
+            "role_product_lead"
+          ],
+          "concentration": 0.5,
+          "evidence_refs": []
+        },
+        {
+          "id": "str_prod_discovery",
+          "name": "Product discovery and UX",
+          "category": "capability",
+          "level": 3,
+          "supports_entity_ids": [
+            "kpi_net_retention"
+          ],
+          "key_role_ids": [
+            "role_ux"
+          ],
+          "concentration": 0.4,
+          "evidence_refs": []
+        }
+      ],
+      "gaps": [],
+      "maturity_level": 3
+    },
+    {
+      "department_id": "dept_sales",
+      "mission": "Win and expand enterprise and mid-market revenue.",
+      "head_role_id": "role_ae",
+      "agent_id": "sales",
+      "staffing": {
+        "sanctioned_fte": 9500.0,
+        "actual_fte": 9000.0,
+        "contractors_fte": 500.0,
+        "open_positions": 600,
+        "attrition_rate_annual": 0.14,
+        "avg_time_to_hire_days": 55,
+        "utilisation": 1.05
+      },
+      "budget": {
+        "annual_budget_usd": 8000000000,
+        "spent_ytd_usd": 5808000000,
+        "fixed_cost_pct": 0.2,
+        "budget_owner_role_id": "role_ae"
+      },
+      "strengths": [
+        {
+          "id": "str_sales_enterprise",
+          "name": "Enterprise selling",
+          "category": "relationship",
+          "level": 4,
+          "supports_entity_ids": [
+            "seg_enterprise"
+          ],
+          "key_role_ids": [
+            "role_ae"
+          ],
+          "concentration": 0.4,
+          "evidence_refs": [
+            "ev_finance_forecast_q3"
+          ]
+        },
+        {
+          "id": "str_sales_solutions",
+          "name": "Solutions and deal engineering",
+          "category": "capability",
+          "level": 3,
+          "supports_entity_ids": [
+            "seg_midmarket"
+          ],
+          "key_role_ids": [
+            "role_sales_eng"
+          ],
+          "concentration": 0.4,
+          "evidence_refs": []
+        }
+      ],
+      "gaps": [],
+      "maturity_level": 3
+    },
+    {
+      "department_id": "dept_marketing",
+      "mission": "Demand generation, segmentation and acquisition.",
+      "head_role_id": "role_pmm",
+      "agent_id": "marketing",
+      "staffing": {
+        "sanctioned_fte": 2700.0,
+        "actual_fte": 2500.0,
+        "contractors_fte": 200.0,
+        "open_positions": 150,
+        "attrition_rate_annual": 0.14,
+        "avg_time_to_hire_days": 55,
+        "utilisation": 1.0
+      },
+      "budget": {
+        "annual_budget_usd": 2500000000,
+        "spent_ytd_usd": 1815000000,
+        "fixed_cost_pct": 0.15,
+        "budget_owner_role_id": "role_pmm"
+      },
+      "strengths": [
+        {
+          "id": "str_mkt_demand",
+          "name": "Digital demand generation",
+          "category": "capability",
+          "level": 3,
+          "supports_entity_ids": [
+            "kpi_pipeline"
+          ],
+          "key_role_ids": [
+            "role_pmm"
+          ],
+          "concentration": 0.4,
+          "evidence_refs": []
+        },
+        {
+          "id": "str_mkt_analytics",
+          "name": "Marketing analytics and attribution",
+          "category": "data",
+          "level": 3,
+          "supports_entity_ids": [
+            "kpi_pipeline"
+          ],
+          "key_role_ids": [
+            "role_demand_gen"
+          ],
+          "concentration": 0.4,
+          "evidence_refs": []
+        }
+      ],
+      "gaps": [],
+      "maturity_level": 3
+    },
+    {
+      "department_id": "dept_customer_success",
+      "mission": "Protect retention, SLAs and customer health.",
+      "head_role_id": "role_support_lead",
+      "agent_id": "customer_success",
+      "staffing": {
+        "sanctioned_fte": 8800.0,
+        "actual_fte": 8000.0,
+        "contractors_fte": 800.0,
+        "open_positions": 500,
+        "attrition_rate_annual": 0.14,
+        "avg_time_to_hire_days": 55,
+        "utilisation": 1.08
+      },
+      "budget": {
+        "annual_budget_usd": 4500000000,
+        "spent_ytd_usd": 3267000000,
+        "fixed_cost_pct": 0.4,
+        "budget_owner_role_id": "role_support_lead"
+      },
+      "strengths": [
+        {
+          "id": "str_cs_retention",
+          "name": "Retention and escalation management",
+          "category": "process",
+          "level": 3,
+          "supports_entity_ids": [
+            "kpi_net_retention"
+          ],
+          "key_role_ids": [
+            "role_csm"
+          ],
+          "concentration": 0.4,
+          "evidence_refs": []
+        },
+        {
+          "id": "str_cs_support",
+          "name": "Support operations",
+          "category": "process",
+          "level": 3,
+          "supports_entity_ids": [
+            "wf_customer_onboarding"
+          ],
+          "key_role_ids": [
+            "role_support_lead"
+          ],
+          "concentration": 0.4,
+          "evidence_refs": []
+        }
+      ],
+      "gaps": [],
+      "maturity_level": 3
+    },
+    {
+      "department_id": "dept_finance",
+      "mission": "Own budget, cost targets, financial KPIs, vendor contracts and the close.",
+      "head_role_id": "role_controller",
+      "agent_id": "finance",
+      "staffing": {
+        "sanctioned_fte": 3200.0,
+        "actual_fte": 3000.0,
+        "contractors_fte": 200.0,
+        "open_positions": 200,
+        "attrition_rate_annual": 0.14,
+        "avg_time_to_hire_days": 55,
+        "utilisation": 1.0
+      },
+      "budget": {
+        "annual_budget_usd": 3400000000,
+        "spent_ytd_usd": 2468400000,
+        "fixed_cost_pct": 0.45,
+        "budget_owner_role_id": "role_controller"
+      },
+      "strengths": [
+        {
+          "id": "str_fin_fpna",
+          "name": "Driver-based FP&A",
+          "category": "capability",
+          "level": 4,
+          "supports_entity_ids": [
+            "kpi_gross_margin"
+          ],
+          "key_role_ids": [
+            "role_finance_analyst"
+          ],
+          "concentration": 0.5,
+          "evidence_refs": [
+            "ev_finance_forecast_q3"
+          ]
+        },
+        {
+          "id": "str_fin_close",
+          "name": "Monthly close know-how",
+          "category": "expertise",
+          "level": 4,
+          "supports_entity_ids": [
+            "wf_financial_close"
+          ],
+          "key_role_ids": [
+            "role_controller"
+          ],
+          "concentration": 0.6,
+          "evidence_refs": [
+            "ev_sop_financial_close_lineage"
+          ]
+        },
+        {
+          "id": "str_fin_procurement",
+          "name": "Vendor and procurement management",
+          "category": "process",
+          "level": 3,
+          "supports_entity_ids": [
+            "kn_vendor_contracts"
+          ],
+          "key_role_ids": [
+            "role_procurement"
+          ],
+          "concentration": 0.4,
+          "evidence_refs": []
+        }
+      ],
+      "gaps": [],
+      "maturity_level": 3
+    },
+    {
+      "department_id": "dept_compliance",
+      "mission": "Own controls, auditability and regulatory posture.",
+      "head_role_id": "role_grc_lead",
+      "agent_id": "compliance",
+      "staffing": {
+        "sanctioned_fte": 2800.0,
+        "actual_fte": 2500.0,
+        "contractors_fte": 300.0,
+        "open_positions": 200,
+        "attrition_rate_annual": 0.14,
+        "avg_time_to_hire_days": 55,
+        "utilisation": 1.05
+      },
+      "budget": {
+        "annual_budget_usd": 2000000000,
+        "spent_ytd_usd": 1452000000,
+        "fixed_cost_pct": 0.55,
+        "budget_owner_role_id": "role_grc_lead"
+      },
+      "strengths": [
+        {
+          "id": "str_comp_soc2",
+          "name": "SOC 2 control mapping",
+          "category": "expertise",
+          "level": 5,
+          "supports_entity_ids": [
+            "ctl_soc2_audit_logging"
+          ],
+          "key_role_ids": [
+            "role_grc_lead"
+          ],
+          "concentration": 0.9,
+          "evidence_refs": [
+            "ev_soc2_register_intro"
+          ]
+        },
+        {
+          "id": "str_comp_privacy",
+          "name": "GDPR / PCI privacy program",
+          "category": "expertise",
+          "level": 4,
+          "supports_entity_ids": [
+            "ctl_data_retention",
+            "ctl_pci_carddata"
+          ],
+          "key_role_ids": [
+            "role_privacy_counsel"
+          ],
+          "concentration": 0.7,
+          "evidence_refs": [
+            "ev_soc2_register_intro"
+          ]
+        },
+        {
+          "id": "str_comp_kyc",
+          "name": "KYC screening operation",
+          "category": "process",
+          "level": 3,
+          "supports_entity_ids": [
+            "wf_kyc_screening",
+            "ctl_kyc_screening"
+          ],
+          "key_role_ids": [
+            "role_grc_lead"
+          ],
+          "concentration": 0.5,
+          "evidence_refs": []
+        }
+      ],
+      "gaps": [],
+      "maturity_level": 3
+    }
   ],
-  "dependencies": [
-    {"source":"vendor_atlas","target":"workflow_enrichment","relationship":"PROVIDES","importance":0.8,"substitutability":0.7,"confidence":0.92,"evidence":"Data inventory"},
-    {"source":"vendor_beacon","target":"workflow_enrichment","relationship":"PROVIDES","importance":0.55,"substitutability":0.9,"confidence":0.88,"evidence":"Data inventory"},
-    {"source":"vendor_census","target":"workflow_targeting","relationship":"PROVIDES","importance":0.9,"substitutability":0.25,"confidence":0.91,"evidence":"Campaign feature registry"},
-    {"source":"vendor_diligence","target":"workflow_verification","relationship":"PROVIDES","importance":1.0,"substitutability":0.05,"confidence":0.98,"evidence":"Compliance control register"},
-    {"source":"vendor_echo","target":"workflow_targeting","relationship":"PROVIDES","importance":0.48,"substitutability":0.88,"confidence":0.84,"evidence":"Marketing inventory"},
-    {"source":"vendor_flux","target":"workflow_targeting","relationship":"PROVIDES","importance":0.72,"substitutability":0.45,"confidence":0.86,"evidence":"Campaign feature registry"},
-    {"source":"vendor_grove","target":"workflow_enrichment","relationship":"PROVIDES","importance":0.42,"substitutability":0.86,"confidence":0.82,"evidence":"Data inventory"},
-    {"source":"workflow_enrichment","target":"kpi_pipeline","relationship":"INFLUENCES","importance":0.8,"substitutability":0.2,"confidence":0.82,"evidence":"Sales analytics"},
-    {"source":"workflow_targeting","target":"kpi_cac","relationship":"INFLUENCES","importance":0.7,"substitutability":0.3,"confidence":0.78,"evidence":"Marketing attribution"},
-    {"source":"workflow_verification","target":"kpi_compliance","relationship":"CONTROLS","importance":1.0,"substitutability":0.0,"confidence":0.97,"evidence":"Compliance policy"}
+  "entities": [
+    {
+      "id": "dept_engineering",
+      "type": "department",
+      "name": "Engineering",
+      "criticality": "high",
+      "sensitivity": "general",
+      "annual_cost_usd": 9000000000,
+      "capacity_fte": 17300.0,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "dept_operations",
+      "type": "department",
+      "name": "Operations",
+      "criticality": "high",
+      "sensitivity": "general",
+      "annual_cost_usd": 3100000000,
+      "capacity_fte": 6400.0,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "dept_ai_data",
+      "type": "department",
+      "name": "AI and Data",
+      "criticality": "high",
+      "sensitivity": "general",
+      "annual_cost_usd": 4000000000,
+      "capacity_fte": 5000.0,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "dept_product",
+      "type": "department",
+      "name": "Product",
+      "criticality": "high",
+      "sensitivity": "general",
+      "annual_cost_usd": 3500000000,
+      "capacity_fte": 4300.0,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "dept_sales",
+      "type": "department",
+      "name": "Sales",
+      "criticality": "high",
+      "sensitivity": "general",
+      "annual_cost_usd": 8000000000,
+      "capacity_fte": 9500.0,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "dept_marketing",
+      "type": "department",
+      "name": "Marketing",
+      "criticality": "high",
+      "sensitivity": "general",
+      "annual_cost_usd": 2500000000,
+      "capacity_fte": 2700.0,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "dept_customer_success",
+      "type": "department",
+      "name": "Customer Success",
+      "criticality": "high",
+      "sensitivity": "general",
+      "annual_cost_usd": 4500000000,
+      "capacity_fte": 8800.0,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "dept_finance",
+      "type": "department",
+      "name": "Finance",
+      "criticality": "high",
+      "sensitivity": "general",
+      "annual_cost_usd": 3400000000,
+      "capacity_fte": 3200.0,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "dept_compliance",
+      "type": "department",
+      "name": "Compliance",
+      "criticality": "high",
+      "sensitivity": "general",
+      "annual_cost_usd": 2000000000,
+      "capacity_fte": 2800.0,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "kpi_company",
+      "type": "kpi",
+      "name": "Company KPIs",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "kpi_baseline": 0.0,
+      "kpi_unit": "index",
+      "higher_is_better": true,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_staff_eng",
+      "type": "role",
+      "name": "Staff Software Engineer",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_engineering",
+      "annual_cost_usd": 205000,
+      "capacity_fte": 20.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_security_eng",
+      "type": "role",
+      "name": "Security Engineer",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_engineering",
+      "annual_cost_usd": 190000,
+      "capacity_fte": 8.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_eng_manager",
+      "type": "role",
+      "name": "Engineering Manager",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_engineering",
+      "annual_cost_usd": 210000,
+      "capacity_fte": 6.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": [
+        "ev_eng_release_context"
+      ]
+    },
+    {
+      "id": "role_qa_eng",
+      "type": "role",
+      "name": "QA Engineer",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_engineering",
+      "annual_cost_usd": 150000,
+      "capacity_fte": 8.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_billing_ops_lead",
+      "type": "role",
+      "name": "Billing Operations Lead",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "annual_cost_usd": 22230000,
+      "capacity_fte": 90.0,
+      "time_to_train_days": 120,
+      "replacement_cost_usd": 9000000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_sre",
+      "type": "role",
+      "name": "Site Reliability Engineer",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "annual_cost_usd": 175000,
+      "capacity_fte": 12.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": [
+        "ev_incident_review_q2"
+      ]
+    },
+    {
+      "id": "role_platform_eng",
+      "type": "role",
+      "name": "Platform Engineer",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "annual_cost_usd": 165000,
+      "capacity_fte": 8.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_data_lead",
+      "type": "role",
+      "name": "Head of AI and Data",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_ai_data",
+      "annual_cost_usd": 220000,
+      "capacity_fte": 4.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
+      ]
+    },
+    {
+      "id": "role_ml_eng",
+      "type": "role",
+      "name": "ML Engineer",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_ai_data",
+      "annual_cost_usd": 180000,
+      "capacity_fte": 9.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_analytics_eng",
+      "type": "role",
+      "name": "Analytics Engineer",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_ai_data",
+      "annual_cost_usd": 165000,
+      "capacity_fte": 6.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_pm",
+      "type": "role",
+      "name": "Product Manager",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_product",
+      "annual_cost_usd": 175000,
+      "capacity_fte": 8.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_product_lead",
+      "type": "role",
+      "name": "Group Product Manager",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_product",
+      "annual_cost_usd": 195000,
+      "capacity_fte": 3.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": [
+        "ev_product_roadmap_context"
+      ]
+    },
+    {
+      "id": "role_ux",
+      "type": "role",
+      "name": "UX Designer",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_product",
+      "annual_cost_usd": 150000,
+      "capacity_fte": 5.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_ae",
+      "type": "role",
+      "name": "Account Executive",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_sales",
+      "annual_cost_usd": 160000,
+      "capacity_fte": 20.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": [
+        "ev_sales_playbook_context"
+      ]
+    },
+    {
+      "id": "role_sales_eng",
+      "type": "role",
+      "name": "Solutions Engineer",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_sales",
+      "annual_cost_usd": 175000,
+      "capacity_fte": 8.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_sdr",
+      "type": "role",
+      "name": "Sales Development Rep",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_sales",
+      "annual_cost_usd": 110000,
+      "capacity_fte": 12.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_pmm",
+      "type": "role",
+      "name": "Product Marketing Manager",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_marketing",
+      "annual_cost_usd": 150000,
+      "capacity_fte": 8.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": [
+        "ev_marketing_attribution_context"
+      ]
+    },
+    {
+      "id": "role_demand_gen",
+      "type": "role",
+      "name": "Demand Gen Manager",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_marketing",
+      "annual_cost_usd": 150000,
+      "capacity_fte": 6.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_brand",
+      "type": "role",
+      "name": "Brand and Comms Manager",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_marketing",
+      "annual_cost_usd": 140000,
+      "capacity_fte": 4.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_csm",
+      "type": "role",
+      "name": "Customer Success Manager",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_customer_success",
+      "annual_cost_usd": 140000,
+      "capacity_fte": 18.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_support_lead",
+      "type": "role",
+      "name": "Support Team Lead",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_customer_success",
+      "annual_cost_usd": 130000,
+      "capacity_fte": 10.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
+    },
+    {
+      "id": "role_onboarding",
+      "type": "role",
+      "name": "Onboarding Specialist",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_customer_success",
+      "annual_cost_usd": 120000,
+      "capacity_fte": 12.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_finance_analyst",
+      "type": "role",
+      "name": "Finance Analyst",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_finance",
+      "annual_cost_usd": 150000,
+      "capacity_fte": 9.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_procurement",
+      "type": "role",
+      "name": "Procurement Manager",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_finance",
+      "annual_cost_usd": 150000,
+      "capacity_fte": 3.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_controller",
+      "type": "role",
+      "name": "Controller",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_finance",
+      "annual_cost_usd": 175000,
+      "capacity_fte": 4.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": [
+        "ev_sop_financial_close_lineage"
+      ]
+    },
+    {
+      "id": "role_grc_lead",
+      "type": "role",
+      "name": "GRC Lead",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "annual_cost_usd": 170000,
+      "capacity_fte": 3.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": [
+        "ev_soc2_register_intro"
+      ]
+    },
+    {
+      "id": "role_privacy_counsel",
+      "type": "role",
+      "name": "Privacy Counsel",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "annual_cost_usd": 175000,
+      "capacity_fte": 3.0,
+      "time_to_train_days": 30,
+      "replacement_cost_usd": 40000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_close_accountant",
+      "type": "role",
+      "name": "Close Accountant",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_finance",
+      "annual_cost_usd": 22620000,
+      "capacity_fte": 120.0,
+      "time_to_train_days": 120,
+      "replacement_cost_usd": 10800000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_gl_accountant",
+      "type": "role",
+      "name": "General Ledger Accountant",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_finance",
+      "annual_cost_usd": 23400000,
+      "capacity_fte": 150.0,
+      "time_to_train_days": 90,
+      "replacement_cost_usd": 10500000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_reporting_analyst",
+      "type": "role",
+      "name": "Financial Reporting Analyst",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_finance",
+      "annual_cost_usd": 12870000,
+      "capacity_fte": 90.0,
+      "time_to_train_days": 75,
+      "replacement_cost_usd": 5400000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_data_platform_lead",
+      "type": "role",
+      "name": "Data Platform Lead",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_ai_data",
+      "annual_cost_usd": 15210000,
+      "capacity_fte": 60.0,
+      "time_to_train_days": 150,
+      "replacement_cost_usd": 7200000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_billing_specialist",
+      "type": "role",
+      "name": "Billing Specialist",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "annual_cost_usd": 22230000,
+      "capacity_fte": 180.0,
+      "time_to_train_days": 90,
+      "replacement_cost_usd": 12600000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_revenue_accountant",
+      "type": "role",
+      "name": "Revenue Accountant",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_finance",
+      "annual_cost_usd": 20280000,
+      "capacity_fte": 120.0,
+      "time_to_train_days": 90,
+      "replacement_cost_usd": 9000000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "role_ar_specialist",
+      "type": "role",
+      "name": "Accounts Receivable Specialist",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_finance",
+      "annual_cost_usd": 26520000,
+      "capacity_fte": 240.0,
+      "time_to_train_days": 60,
+      "replacement_cost_usd": 13200000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_01",
+      "type": "person_token",
+      "name": "Person token 01",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_engineering",
+      "role_id": "role_staff_eng",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_02",
+      "type": "person_token",
+      "name": "Person token 02",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_engineering",
+      "role_id": "role_security_eng",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_03",
+      "type": "person_token",
+      "name": "Person token 03",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_engineering",
+      "role_id": "role_eng_manager",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_04",
+      "type": "person_token",
+      "name": "Person token 04",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_engineering",
+      "role_id": "role_qa_eng",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_05",
+      "type": "person_token",
+      "name": "Person token 05",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_operations",
+      "role_id": "role_billing_ops_lead",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_06",
+      "type": "person_token",
+      "name": "Person token 06",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_operations",
+      "role_id": "role_sre",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_07",
+      "type": "person_token",
+      "name": "Person token 07",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_operations",
+      "role_id": "role_platform_eng",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_08",
+      "type": "person_token",
+      "name": "Person token 08",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_ai_data",
+      "role_id": "role_data_lead",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_09",
+      "type": "person_token",
+      "name": "Person token 09",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_ai_data",
+      "role_id": "role_ml_eng",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_10",
+      "type": "person_token",
+      "name": "Person token 10",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_ai_data",
+      "role_id": "role_analytics_eng",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_11",
+      "type": "person_token",
+      "name": "Person token 11",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_product",
+      "role_id": "role_pm",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_12",
+      "type": "person_token",
+      "name": "Person token 12",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_product",
+      "role_id": "role_product_lead",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_13",
+      "type": "person_token",
+      "name": "Person token 13",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_product",
+      "role_id": "role_ux",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_14",
+      "type": "person_token",
+      "name": "Person token 14",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_sales",
+      "role_id": "role_ae",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_15",
+      "type": "person_token",
+      "name": "Person token 15",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_sales",
+      "role_id": "role_sales_eng",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_16",
+      "type": "person_token",
+      "name": "Person token 16",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_sales",
+      "role_id": "role_sdr",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_17",
+      "type": "person_token",
+      "name": "Person token 17",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_marketing",
+      "role_id": "role_pmm",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_18",
+      "type": "person_token",
+      "name": "Person token 18",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_marketing",
+      "role_id": "role_demand_gen",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_19",
+      "type": "person_token",
+      "name": "Person token 19",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_marketing",
+      "role_id": "role_brand",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_20",
+      "type": "person_token",
+      "name": "Person token 20",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_customer_success",
+      "role_id": "role_csm",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_21",
+      "type": "person_token",
+      "name": "Person token 21",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_customer_success",
+      "role_id": "role_support_lead",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_22",
+      "type": "person_token",
+      "name": "Person token 22",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_customer_success",
+      "role_id": "role_onboarding",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_23",
+      "type": "person_token",
+      "name": "Person token 23",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_finance",
+      "role_id": "role_finance_analyst",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_24",
+      "type": "person_token",
+      "name": "Person token 24",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_finance",
+      "role_id": "role_procurement",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_25",
+      "type": "person_token",
+      "name": "Person token 25",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_finance",
+      "role_id": "role_controller",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_26",
+      "type": "person_token",
+      "name": "Person token 26",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_compliance",
+      "role_id": "role_grc_lead",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_27",
+      "type": "person_token",
+      "name": "Person token 27",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_compliance",
+      "role_id": "role_privacy_counsel",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_28",
+      "type": "person_token",
+      "name": "Person token 28",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_finance",
+      "role_id": "role_close_accountant",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_29",
+      "type": "person_token",
+      "name": "Person token 29",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_finance",
+      "role_id": "role_gl_accountant",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_30",
+      "type": "person_token",
+      "name": "Person token 30",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_finance",
+      "role_id": "role_reporting_analyst",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_31",
+      "type": "person_token",
+      "name": "Person token 31",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_ai_data",
+      "role_id": "role_data_platform_lead",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_32",
+      "type": "person_token",
+      "name": "Person token 32",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_operations",
+      "role_id": "role_billing_specialist",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_33",
+      "type": "person_token",
+      "name": "Person token 33",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_finance",
+      "role_id": "role_revenue_accountant",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "pt_34",
+      "type": "person_token",
+      "name": "Person token 34",
+      "criticality": "medium",
+      "sensitivity": "hr",
+      "department_id": "dept_finance",
+      "role_id": "role_ar_specialist",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "sys_core_api",
+      "type": "system",
+      "name": "core-api",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_engineering",
+      "annual_cost_usd": 8000000,
+      "failure_cost_per_day_usd": 3000000,
+      "customer_facing": true,
+      "migration_cost_usd": 3200000,
+      "tags": [],
+      "evidence_refs": [
+        "ev_eng_release_context"
+      ]
+    },
+    {
+      "id": "sys_customer_portal",
+      "type": "system",
+      "name": "customer-portal",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_engineering",
+      "annual_cost_usd": 4000000,
+      "failure_cost_per_day_usd": 1500000,
+      "customer_facing": true,
+      "migration_cost_usd": 1600000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "sys_billing_platform",
+      "type": "system",
+      "name": "billing-platform",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "annual_cost_usd": 6000000,
+      "failure_cost_per_day_usd": 2500000,
+      "customer_facing": true,
+      "migration_cost_usd": 2400000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "sys_invoicing",
+      "type": "system",
+      "name": "invoicing-service",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "annual_cost_usd": 3000000,
+      "failure_cost_per_day_usd": 2000000,
+      "customer_facing": true,
+      "migration_cost_usd": 1200000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "sys_cloud_platform",
+      "type": "system",
+      "name": "cloud-platform",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "annual_cost_usd": 9000000,
+      "failure_cost_per_day_usd": 3000000,
+      "customer_facing": false,
+      "migration_cost_usd": 3600000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "sys_sso_gateway",
+      "type": "system",
+      "name": "sso-gateway",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "annual_cost_usd": 2000000,
+      "failure_cost_per_day_usd": 1000000,
+      "customer_facing": true,
+      "migration_cost_usd": 800000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "sys_data_pipeline",
+      "type": "system",
+      "name": "data-pipeline",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_ai_data",
+      "annual_cost_usd": 4500000,
+      "failure_cost_per_day_usd": 800000,
+      "customer_facing": false,
+      "migration_cost_usd": 1800000,
+      "tags": [],
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
+      ]
+    },
+    {
+      "id": "sys_ml_scoring",
+      "type": "system",
+      "name": "ml-scoring-service",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_ai_data",
+      "annual_cost_usd": 3500000,
+      "failure_cost_per_day_usd": 500000,
+      "customer_facing": false,
+      "migration_cost_usd": 1400000,
+      "tags": [
+        "ml_model"
+      ],
+      "evidence_refs": []
+    },
+    {
+      "id": "sys_audit_service",
+      "type": "system",
+      "name": "audit-log-service",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "annual_cost_usd": 2200000,
+      "failure_cost_per_day_usd": 700000,
+      "customer_facing": false,
+      "migration_cost_usd": 880000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "sys_data_warehouse",
+      "type": "system",
+      "name": "data-warehouse",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_ai_data",
+      "annual_cost_usd": 3800000,
+      "failure_cost_per_day_usd": 300000,
+      "customer_facing": false,
+      "migration_cost_usd": 1520000,
+      "tags": [],
+      "aliases": [
+        "sys_warehouse_new"
+      ],
+      "evidence_refs": []
+    },
+    {
+      "id": "sys_crm",
+      "type": "system",
+      "name": "crm",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_sales",
+      "annual_cost_usd": 5000000,
+      "failure_cost_per_day_usd": 1200000,
+      "customer_facing": false,
+      "migration_cost_usd": 2000000,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ds_audit_log",
+      "type": "dataset",
+      "name": "Audit-log event stream",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "attribute_group": "audit_log",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ds_firmographics",
+      "type": "dataset",
+      "name": "Firmographics",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_sales",
+      "attribute_group": "firmographics",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ds_contact_data",
+      "type": "dataset",
+      "name": "Contact data",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_sales",
+      "attribute_group": "contact",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ds_corporate_linkage",
+      "type": "dataset",
+      "name": "Corporate linkage",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "attribute_group": "corporate_linkage",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ds_intent_signals",
+      "type": "dataset",
+      "name": "Intent signals",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_marketing",
+      "attribute_group": "intent",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ds_identity_verification",
+      "type": "dataset",
+      "name": "Identity verification",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "attribute_group": "identity",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ds_market_intel",
+      "type": "dataset",
+      "name": "Market intelligence",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_marketing",
+      "attribute_group": "market_intel",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ds_account_intel",
+      "type": "dataset",
+      "name": "Account intelligence",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_sales",
+      "attribute_group": "account_intel",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ds_usage",
+      "type": "dataset",
+      "name": "Product usage signals",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_product",
+      "attribute_group": "usage",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ds_geo_risk",
+      "type": "dataset",
+      "name": "Geographic and macroeconomic risk",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "attribute_group": "geo_risk",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ds_geo_risk_emerging",
+      "type": "dataset",
+      "name": "Emerging-market geographic risk (APAC, LATAM)",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "attribute_group": "geo_risk",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "vendor_apex",
+      "type": "vendor",
+      "name": "ApexData",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_sales",
+      "annual_cost_usd": 1600000000,
+      "one_time_exit_cost_usd": 60000000,
+      "migration_cost_usd": 100000000,
+      "geographies": [
+        "NA",
+        "EU",
+        "APAC",
+        "LATAM"
+      ],
+      "history_years": 15,
+      "freshness_days": 7,
+      "accuracy": 0.93,
+      "permitted_uses": [
+        "sales_prospecting",
+        "marketing",
+        "model_training"
+      ],
+      "tags": [],
+      "evidence_refs": [],
+      "retains_history_after_termination": true
+    },
+    {
+      "id": "vendor_beacon",
+      "type": "vendor",
+      "name": "BeaconIQ",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_sales",
+      "annual_cost_usd": 1200000000,
+      "one_time_exit_cost_usd": 40000000,
+      "migration_cost_usd": 55000000,
+      "geographies": [
+        "NA",
+        "EU"
+      ],
+      "history_years": 8,
+      "freshness_days": 14,
+      "accuracy": 0.87,
+      "permitted_uses": [
+        "sales_prospecting"
+      ],
+      "tags": [],
+      "evidence_refs": [],
+      "retains_history_after_termination": true
+    },
+    {
+      "id": "vendor_cinder",
+      "type": "vendor",
+      "name": "CinderSignals",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_marketing",
+      "annual_cost_usd": 1400000000,
+      "one_time_exit_cost_usd": 50000000,
+      "migration_cost_usd": 90000000,
+      "geographies": [
+        "NA",
+        "EU",
+        "APAC"
+      ],
+      "history_years": 5,
+      "freshness_days": 2,
+      "accuracy": 0.85,
+      "permitted_uses": [
+        "marketing",
+        "sales_prospecting"
+      ],
+      "tags": [],
+      "evidence_refs": [],
+      "retains_history_after_termination": true
+    },
+    {
+      "id": "vendor_delta",
+      "type": "vendor",
+      "name": "DeltaVerify",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "annual_cost_usd": 900000000,
+      "one_time_exit_cost_usd": 30000000,
+      "migration_cost_usd": 50000000,
+      "geographies": [
+        "NA",
+        "EU",
+        "APAC",
+        "LATAM"
+      ],
+      "history_years": 12,
+      "freshness_days": 3,
+      "accuracy": 0.97,
+      "permitted_uses": [
+        "kyc",
+        "compliance"
+      ],
+      "tags": [],
+      "evidence_refs": [],
+      "retains_history_after_termination": true
+    },
+    {
+      "id": "vendor_echo",
+      "type": "vendor",
+      "name": "EchoMarket",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_marketing",
+      "annual_cost_usd": 1100000000,
+      "one_time_exit_cost_usd": 50000000,
+      "migration_cost_usd": 75000000,
+      "geographies": [
+        "NA",
+        "EU"
+      ],
+      "history_years": 6,
+      "freshness_days": 21,
+      "accuracy": 0.82,
+      "permitted_uses": [
+        "marketing",
+        "strategy"
+      ],
+      "tags": [],
+      "evidence_refs": [],
+      "retains_history_after_termination": null
+    },
+    {
+      "id": "vendor_flux",
+      "type": "vendor",
+      "name": "FluxBehavior",
+      "criticality": "low",
+      "sensitivity": "general",
+      "department_id": "dept_product",
+      "annual_cost_usd": 800000000,
+      "one_time_exit_cost_usd": 25000000,
+      "migration_cost_usd": 40000000,
+      "geographies": [
+        "NA",
+        "EU",
+        "APAC"
+      ],
+      "history_years": 4,
+      "freshness_days": 1,
+      "accuracy": 0.9,
+      "permitted_uses": [
+        "product_analytics",
+        "model_training"
+      ],
+      "tags": [],
+      "evidence_refs": [],
+      "retains_history_after_termination": true
+    },
+    {
+      "id": "vendor_granite",
+      "type": "vendor",
+      "name": "GraniteGeo",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "annual_cost_usd": 1000000000,
+      "one_time_exit_cost_usd": 35000000,
+      "migration_cost_usd": 55000000,
+      "geographies": [
+        "NA",
+        "EU",
+        "APAC",
+        "LATAM"
+      ],
+      "history_years": 20,
+      "freshness_days": 30,
+      "accuracy": 0.9,
+      "permitted_uses": [
+        "risk",
+        "operations"
+      ],
+      "tags": [],
+      "evidence_refs": [],
+      "retains_history_after_termination": true
+    },
+    {
+      "id": "wf_billing_recon",
+      "type": "workflow",
+      "name": "Billing reconciliation",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "min_qualified_owners": 1,
+      "failure_cost_per_day_usd": 900000,
+      "documented_pct": 0.35,
+      "customer_facing": true,
+      "exception_documented_pct": 0.2,
+      "automation_pct": 0.3,
+      "max_downtime_days": 2,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "wf_invoicing",
+      "type": "workflow",
+      "name": "Invoice generation and dispatch",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "min_qualified_owners": 2,
+      "failure_cost_per_day_usd": 1200000,
+      "documented_pct": 0.5,
+      "customer_facing": true,
+      "exception_documented_pct": 0.55,
+      "automation_pct": 0.6,
+      "max_downtime_days": 2,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "wf_incident_mgmt",
+      "type": "workflow",
+      "name": "Incident response and on-call",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "min_qualified_owners": 2,
+      "failure_cost_per_day_usd": 600000,
+      "documented_pct": 0.5,
+      "customer_facing": false,
+      "exception_documented_pct": 0.6,
+      "automation_pct": 0.5,
+      "max_downtime_days": 7,
+      "tags": [],
+      "evidence_refs": [
+        "ev_incident_review_q2"
+      ]
+    },
+    {
+      "id": "wf_soc2_evidence",
+      "type": "workflow",
+      "name": "SOC 2 audit-evidence collection",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "min_qualified_owners": 1,
+      "failure_cost_per_day_usd": 150000,
+      "documented_pct": 0.5,
+      "customer_facing": false,
+      "exception_documented_pct": 0.6,
+      "automation_pct": 0.5,
+      "max_downtime_days": 7,
+      "tags": [],
+      "evidence_refs": [
+        "ev_soc2_register_intro"
+      ]
+    },
+    {
+      "id": "wf_customer_onboarding",
+      "type": "workflow",
+      "name": "Customer onboarding",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_customer_success",
+      "min_qualified_owners": 2,
+      "failure_cost_per_day_usd": 300000,
+      "documented_pct": 0.5,
+      "customer_facing": true,
+      "exception_documented_pct": 0.6,
+      "automation_pct": 0.5,
+      "max_downtime_days": 7,
+      "tags": [],
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
+    },
+    {
+      "id": "wf_data_refresh",
+      "type": "workflow",
+      "name": "Data pipeline refresh",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_ai_data",
+      "min_qualified_owners": 2,
+      "failure_cost_per_day_usd": 400000,
+      "documented_pct": 0.5,
+      "customer_facing": false,
+      "exception_documented_pct": 0.6,
+      "automation_pct": 0.5,
+      "max_downtime_days": 7,
+      "tags": [],
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
+      ]
+    },
+    {
+      "id": "wf_financial_close",
+      "type": "workflow",
+      "name": "Monthly financial close",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_finance",
+      "min_qualified_owners": 1,
+      "failure_cost_per_day_usd": 250000,
+      "documented_pct": 0.5,
+      "customer_facing": false,
+      "exception_documented_pct": 0.25,
+      "automation_pct": 0.4,
+      "max_downtime_days": 3,
+      "tags": [],
+      "evidence_refs": [
+        "ev_sop_financial_close_lineage"
+      ]
+    },
+    {
+      "id": "wf_lead_scoring",
+      "type": "workflow",
+      "name": "Lead scoring",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_sales",
+      "min_qualified_owners": 1,
+      "failure_cost_per_day_usd": 500000,
+      "documented_pct": 0.7,
+      "customer_facing": false,
+      "exception_documented_pct": 0.6,
+      "automation_pct": 0.5,
+      "max_downtime_days": 7,
+      "tags": [],
+      "evidence_refs": [
+        "ev_sales_playbook_context"
+      ]
+    },
+    {
+      "id": "wf_campaign_targeting",
+      "type": "workflow",
+      "name": "Campaign targeting",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_marketing",
+      "min_qualified_owners": 1,
+      "failure_cost_per_day_usd": 400000,
+      "documented_pct": 0.65,
+      "customer_facing": false,
+      "exception_documented_pct": 0.6,
+      "automation_pct": 0.5,
+      "max_downtime_days": 7,
+      "tags": [],
+      "evidence_refs": [
+        "ev_marketing_attribution_context"
+      ]
+    },
+    {
+      "id": "wf_account_planning",
+      "type": "workflow",
+      "name": "Account planning",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_sales",
+      "min_qualified_owners": 1,
+      "failure_cost_per_day_usd": 600000,
+      "documented_pct": 0.6,
+      "customer_facing": false,
+      "exception_documented_pct": 0.6,
+      "automation_pct": 0.5,
+      "max_downtime_days": 7,
+      "tags": [],
+      "evidence_refs": [
+        "ev_sales_playbook_context"
+      ]
+    },
+    {
+      "id": "wf_kyc_screening",
+      "type": "workflow",
+      "name": "KYC screening",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "min_qualified_owners": 1,
+      "failure_cost_per_day_usd": 2000000,
+      "documented_pct": 0.5,
+      "customer_facing": false,
+      "exception_documented_pct": 0.7,
+      "automation_pct": 0.6,
+      "max_downtime_days": 1,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "wf_vendor_reconciliation",
+      "type": "workflow",
+      "name": "Vendor reconciliation",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "min_qualified_owners": 2,
+      "failure_cost_per_day_usd": 2500000,
+      "documented_pct": 0.5,
+      "customer_facing": false,
+      "exception_documented_pct": 0.4,
+      "automation_pct": 0.45,
+      "max_downtime_days": 5,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "wf_product_analytics",
+      "type": "workflow",
+      "name": "Product analytics",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_product",
+      "min_qualified_owners": 1,
+      "failure_cost_per_day_usd": 3500000,
+      "documented_pct": 0.6,
+      "customer_facing": false,
+      "exception_documented_pct": 0.6,
+      "automation_pct": 0.5,
+      "max_downtime_days": 7,
+      "tags": [],
+      "evidence_refs": [
+        "ev_product_roadmap_context"
+      ]
+    },
+    {
+      "id": "wf_risk_monitoring",
+      "type": "workflow",
+      "name": "Risk monitoring",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "min_qualified_owners": 1,
+      "failure_cost_per_day_usd": 6000000,
+      "documented_pct": 0.5,
+      "customer_facing": false,
+      "exception_documented_pct": 0.6,
+      "automation_pct": 0.5,
+      "max_downtime_days": 7,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "kn_billing_exception",
+      "type": "knowledge_asset",
+      "name": "Billing-recon exception handling",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "documented_pct": 0.35,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "kn_warehouse_lineage",
+      "type": "knowledge_asset",
+      "name": "Warehouse lineage knowledge",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_ai_data",
+      "documented_pct": 0.2,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "kn_soc2_mapping",
+      "type": "knowledge_asset",
+      "name": "SOC 2 control-to-evidence mapping",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "documented_pct": 0.4,
+      "tags": [],
+      "evidence_refs": [
+        "ev_soc2_register_intro"
+      ]
+    },
+    {
+      "id": "kn_data_format",
+      "type": "knowledge_asset",
+      "name": "Upstream data-format quirk handling",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_ai_data",
+      "documented_pct": 0.3,
+      "tags": [],
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
+      ]
+    },
+    {
+      "id": "kn_oncall",
+      "type": "knowledge_asset",
+      "name": "On-call escalation and recovery",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "documented_pct": 0.7,
+      "tags": [],
+      "evidence_refs": [
+        "ev_incident_review_q2"
+      ]
+    },
+    {
+      "id": "kn_core_arch",
+      "type": "knowledge_asset",
+      "name": "Core-API architecture knowledge",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_engineering",
+      "documented_pct": 0.7,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "kn_release_eng",
+      "type": "knowledge_asset",
+      "name": "Release and deploy engineering",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_engineering",
+      "documented_pct": 0.75,
+      "tags": [],
+      "evidence_refs": [
+        "ev_eng_release_context"
+      ]
+    },
+    {
+      "id": "kn_ml_modeling",
+      "type": "knowledge_asset",
+      "name": "ML scoring model knowledge",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_ai_data",
+      "documented_pct": 0.6,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "kn_roadmap_context",
+      "type": "knowledge_asset",
+      "name": "Product roadmap and customer context",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_product",
+      "documented_pct": 0.7,
+      "tags": [],
+      "evidence_refs": [
+        "ev_product_roadmap_context"
+      ]
+    },
+    {
+      "id": "kn_enterprise_deals",
+      "type": "knowledge_asset",
+      "name": "Enterprise deal and pricing know-how",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_sales",
+      "documented_pct": 0.65,
+      "tags": [],
+      "evidence_refs": [
+        "ev_sales_playbook_context"
+      ]
+    },
+    {
+      "id": "kn_segmentation",
+      "type": "knowledge_asset",
+      "name": "Audience segmentation and attribution",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_marketing",
+      "documented_pct": 0.7,
+      "tags": [],
+      "evidence_refs": [
+        "ev_marketing_attribution_context"
+      ]
+    },
+    {
+      "id": "kn_onboarding_playbook",
+      "type": "knowledge_asset",
+      "name": "Customer onboarding playbook",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_customer_success",
+      "documented_pct": 0.75,
+      "tags": [],
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
+    },
+    {
+      "id": "kn_cs_escalation",
+      "type": "knowledge_asset",
+      "name": "CS escalation handling",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_customer_success",
+      "documented_pct": 0.7,
+      "tags": [],
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
+    },
+    {
+      "id": "kn_vendor_contracts",
+      "type": "knowledge_asset",
+      "name": "Vendor contract and renewal know-how",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_finance",
+      "documented_pct": 0.6,
+      "tags": [],
+      "evidence_refs": [
+        "ev_sop_financial_close_lineage"
+      ]
+    },
+    {
+      "id": "kn_privacy_program",
+      "type": "knowledge_asset",
+      "name": "Privacy program operation",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "documented_pct": 0.7,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ctl_soc2_audit_logging",
+      "type": "control",
+      "name": "SOC 2 CC7.2 - audit logging",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "mandatory": true,
+      "framework": "SOC2",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ctl_access_control",
+      "type": "control",
+      "name": "SOC 2 CC6.1 - logical access",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "mandatory": true,
+      "framework": "SOC2",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ctl_data_retention",
+      "type": "control",
+      "name": "GDPR data retention",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "mandatory": true,
+      "framework": "GDPR",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ctl_pci_carddata",
+      "type": "control",
+      "name": "PCI DSS cardholder data",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "mandatory": true,
+      "framework": "PCI_DSS",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ctl_incident_mgmt",
+      "type": "control",
+      "name": "Incident management",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "mandatory": true,
+      "framework": "SOC2",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ctl_change_mgmt",
+      "type": "control",
+      "name": "Change management",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "mandatory": false,
+      "framework": "SOC2",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ctl_kyc_screening",
+      "type": "control",
+      "name": "KYC screening control",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "mandatory": true,
+      "framework": "SOX",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "ctl_sox_reconciliation",
+      "type": "control",
+      "name": "SOX vendor-spend reconciliation",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "mandatory": true,
+      "framework": "SOX",
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "proj_billing_modernization",
+      "type": "project",
+      "name": "Billing Modernization",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_product",
+      "annual_cost_usd": 8000000,
+      "completion_pct": 0.3,
+      "retires_entity_ids": [],
+      "one_time_exit_cost_usd": 1000000,
+      "remaining_cost_usd": 5600000,
+      "expected_completion_day": 240,
+      "tags": [],
+      "evidence_refs": [
+        "ev_product_roadmap_context"
+      ]
+    },
+    {
+      "id": "proj_soc2_type2",
+      "type": "project",
+      "name": "SOC 2 Type II Certification",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_product",
+      "annual_cost_usd": 4000000,
+      "completion_pct": 0.6,
+      "retires_entity_ids": [],
+      "one_time_exit_cost_usd": 500000,
+      "remaining_cost_usd": 1600000,
+      "expected_completion_day": 90,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "kpi_gross_margin",
+      "type": "kpi",
+      "name": "Gross margin %",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_finance",
+      "kpi_baseline": 62.0,
+      "kpi_unit": "percent",
+      "higher_is_better": true,
+      "tags": [],
+      "evidence_refs": []
+    },
+    {
+      "id": "kpi_net_retention",
+      "type": "kpi",
+      "name": "Net revenue retention",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_customer_success",
+      "kpi_baseline": 112.0,
+      "kpi_unit": "percent",
+      "higher_is_better": true,
+      "tags": [],
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
+    },
+    {
+      "id": "kpi_pipeline",
+      "type": "kpi",
+      "name": "Qualified pipeline",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_marketing",
+      "kpi_baseline": 4500000000.0,
+      "kpi_unit": "usd",
+      "higher_is_better": true,
+      "tags": [],
+      "evidence_refs": [
+        "ev_marketing_attribution_context"
+      ]
+    },
+    {
+      "id": "kpi_uptime_sla",
+      "type": "kpi",
+      "name": "System uptime / SLA",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_operations",
+      "kpi_baseline": 99.9,
+      "kpi_unit": "percent",
+      "higher_is_better": true,
+      "tags": [],
+      "evidence_refs": [
+        "ev_incident_review_q2"
+      ]
+    },
+    {
+      "id": "kpi_soc2_coverage",
+      "type": "kpi",
+      "name": "SOC 2 compliance coverage",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_compliance",
+      "kpi_baseline": 100.0,
+      "kpi_unit": "percent",
+      "higher_is_better": true,
+      "tags": [],
+      "evidence_refs": [
+        "ev_soc2_register_intro"
+      ]
+    },
+    {
+      "id": "kpi_data_refresh_sla",
+      "type": "kpi",
+      "name": "Data refresh SLA",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_ai_data",
+      "kpi_baseline": 99.5,
+      "kpi_unit": "percent",
+      "higher_is_better": true,
+      "tags": [],
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
+      ]
+    },
+    {
+      "id": "kpi_cac",
+      "type": "kpi",
+      "name": "Customer acquisition cost",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_marketing",
+      "kpi_baseline": 42000.0,
+      "kpi_unit": "usd",
+      "higher_is_better": false,
+      "tags": [],
+      "evidence_refs": [
+        "ev_marketing_attribution_context"
+      ]
+    },
+    {
+      "id": "kpi_close_cycle_days",
+      "type": "kpi",
+      "name": "Close cycle days",
+      "criticality": "medium",
+      "sensitivity": "general",
+      "department_id": "dept_finance",
+      "kpi_baseline": 6.5,
+      "kpi_unit": "days",
+      "higher_is_better": false,
+      "tags": [],
+      "evidence_refs": [
+        "ev_sop_financial_close_lineage"
+      ]
+    },
+    {
+      "id": "seg_enterprise",
+      "type": "customer_segment",
+      "name": "Enterprise accounts",
+      "criticality": "critical",
+      "sensitivity": "general",
+      "department_id": "dept_sales",
+      "arr_usd": 80000000000,
+      "tags": [],
+      "evidence_refs": [
+        "ev_sales_playbook_context"
+      ]
+    },
+    {
+      "id": "seg_midmarket",
+      "type": "customer_segment",
+      "name": "Mid-market accounts",
+      "criticality": "high",
+      "sensitivity": "general",
+      "department_id": "dept_sales",
+      "arr_usd": 25000000000,
+      "tags": [],
+      "evidence_refs": []
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_eng_manager_owns_core_api",
+      "source": "role_eng_manager",
+      "target": "sys_core_api",
+      "relation": "OWNS",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_eng_release_context"
+      ]
+    },
+    {
+      "id": "e_data_lead_owns_refresh",
+      "source": "role_data_lead",
+      "target": "wf_data_refresh",
+      "relation": "OWNS",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.25,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
+      ]
+    },
+    {
+      "id": "e_product_lead_owns_analytics",
+      "source": "role_product_lead",
+      "target": "wf_product_analytics",
+      "relation": "OWNS",
+      "strength": 0.75,
+      "strength_range": [
+        0.525,
+        0.975
+      ],
+      "substitutability": 0.35,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_product_roadmap_context"
+      ]
+    },
+    {
+      "id": "e_ae_owns_account_planning",
+      "source": "role_ae",
+      "target": "wf_account_planning",
+      "relation": "OWNS",
+      "strength": 0.75,
+      "strength_range": [
+        0.525,
+        0.975
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_sales_playbook_context"
+      ]
+    },
+    {
+      "id": "e_pmm_owns_campaign_targeting",
+      "source": "role_pmm",
+      "target": "wf_campaign_targeting",
+      "relation": "OWNS",
+      "strength": 0.75,
+      "strength_range": [
+        0.525,
+        0.975
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_marketing_attribution_context"
+      ]
+    },
+    {
+      "id": "e_support_lead_owns_onboarding",
+      "source": "role_support_lead",
+      "target": "wf_customer_onboarding",
+      "relation": "OWNS",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
+    },
+    {
+      "id": "e_grc_lead_owns_kyc",
+      "source": "role_grc_lead",
+      "target": "wf_kyc_screening",
+      "relation": "OWNS",
+      "strength": 0.85,
+      "strength_range": [
+        0.595,
+        1.0
+      ],
+      "substitutability": 0.2,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_kyc_screening_inputs"
+      ]
+    },
+    {
+      "id": "e_close_accountant_owns_close",
+      "source": "role_close_accountant",
+      "target": "wf_financial_close",
+      "relation": "OWNS",
+      "strength": 0.5,
+      "strength_range": [
+        0.35,
+        0.65
+      ],
+      "substitutability": 0.2,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_sop_financial_close_lineage"
+      ]
+    },
+    {
+      "id": "e_gl_accountant_owns_close",
+      "source": "role_gl_accountant",
+      "target": "wf_financial_close",
+      "relation": "OWNS",
+      "strength": 0.5,
+      "strength_range": [
+        0.35,
+        0.65
+      ],
+      "substitutability": 0.2,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_sop_financial_close_lineage"
+      ]
+    },
+    {
+      "id": "e_reporting_analyst_backs_close",
+      "source": "role_reporting_analyst",
+      "target": "wf_financial_close",
+      "relation": "BACKS_UP",
+      "strength": 0.3,
+      "strength_range": [
+        0.21,
+        0.39
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_sop_financial_close_lineage"
+      ]
+    },
+    {
+      "id": "e_data_platform_lead_knows_lineage",
+      "source": "role_data_platform_lead",
+      "target": "kn_warehouse_lineage",
+      "relation": "KNOWS",
+      "strength": 0.95,
+      "strength_range": [
+        0.665,
+        1.0
+      ],
+      "substitutability": 0.05,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_knowledge_matrix_3"
+      ]
+    },
+    {
+      "id": "e_lineage_supports_close",
+      "source": "kn_warehouse_lineage",
+      "target": "wf_financial_close",
+      "relation": "SUPPORTS",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.1,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_knowledge_matrix_3"
+      ]
+    },
+    {
+      "id": "e_billing_ops_lead_owns_recon",
+      "source": "role_billing_ops_lead",
+      "target": "wf_billing_recon",
+      "relation": "OWNS",
+      "strength": 0.6,
+      "strength_range": [
+        0.42,
+        0.78
+      ],
+      "substitutability": 0.2,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_knowledge_matrix_billing"
+      ]
+    },
+    {
+      "id": "e_billing_specialist_owns_recon",
+      "source": "role_billing_specialist",
+      "target": "wf_billing_recon",
+      "relation": "OWNS",
+      "strength": 0.5,
+      "strength_range": [
+        0.35,
+        0.65
+      ],
+      "substitutability": 0.2,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_knowledge_matrix_billing"
+      ]
+    },
+    {
+      "id": "e_revenue_accountant_backs_recon",
+      "source": "role_revenue_accountant",
+      "target": "wf_billing_recon",
+      "relation": "BACKS_UP",
+      "strength": 0.3,
+      "strength_range": [
+        0.21,
+        0.39
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_billing_runbook_gap"
+      ]
+    },
+    {
+      "id": "e_ar_specialist_backs_recon",
+      "source": "role_ar_specialist",
+      "target": "wf_billing_recon",
+      "relation": "BACKS_UP",
+      "strength": 0.3,
+      "strength_range": [
+        0.21,
+        0.39
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_billing_runbook_gap"
+      ]
+    },
+    {
+      "id": "e_billing_ops_lead_knows_exception",
+      "source": "role_billing_ops_lead",
+      "target": "kn_billing_exception",
+      "relation": "KNOWS",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.1,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_billing_runbook_gap"
+      ]
+    },
+    {
+      "id": "e_billing_specialist_knows_exception",
+      "source": "role_billing_specialist",
+      "target": "kn_billing_exception",
+      "relation": "KNOWS",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.1,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_billing_runbook_gap"
+      ]
+    },
+    {
+      "id": "e_kn_billing_supports_recon",
+      "source": "kn_billing_exception",
+      "target": "wf_billing_recon",
+      "relation": "SUPPORTS",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.1,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_billing_runbook_gap"
+      ]
+    },
+    {
+      "id": "e_sre_owns_incident",
+      "source": "role_sre",
+      "target": "wf_incident_mgmt",
+      "relation": "OWNS",
+      "strength": 0.7,
+      "strength_range": [
+        0.49,
+        0.91
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_incident_review_q2"
+      ]
+    },
+    {
+      "id": "e_grc_lead_knows_soc2_mapping",
+      "source": "role_grc_lead",
+      "target": "kn_soc2_mapping",
+      "relation": "KNOWS",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.15,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_soc2_register_intro"
+      ]
+    },
+    {
+      "id": "e_kn_soc2_supports_evidence",
+      "source": "kn_soc2_mapping",
+      "target": "wf_soc2_evidence",
+      "relation": "SUPPORTS",
+      "strength": 0.85,
+      "strength_range": [
+        0.595,
+        1.0
+      ],
+      "substitutability": 0.2,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_soc2_register_intro"
+      ]
+    },
+    {
+      "id": "e_data_lead_knows_format",
+      "source": "role_data_lead",
+      "target": "kn_data_format",
+      "relation": "KNOWS",
+      "strength": 0.85,
+      "strength_range": [
+        0.595,
+        1.0
+      ],
+      "substitutability": 0.2,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
+      ]
+    },
+    {
+      "id": "e_kn_format_supports_refresh",
+      "source": "kn_data_format",
+      "target": "wf_data_refresh",
+      "relation": "SUPPORTS",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.2,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
+      ]
+    },
+    {
+      "id": "e_privacy_counsel_knows_privacy",
+      "source": "role_privacy_counsel",
+      "target": "kn_privacy_program",
+      "relation": "KNOWS",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": []
+    },
+    {
+      "id": "e_billing_platform_recon",
+      "source": "sys_billing_platform",
+      "target": "wf_billing_recon",
+      "relation": "SUPPORTS",
+      "strength": 0.85,
+      "strength_range": [
+        0.595,
+        1.0
+      ],
+      "substitutability": 0.25,
+      "lag_days": 15,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_architecture_core"
+      ]
+    },
+    {
+      "id": "e_recon_invoicing",
+      "source": "wf_billing_recon",
+      "target": "wf_invoicing",
+      "relation": "SUPPORTS",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.2,
+      "lag_days": 15,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_architecture_core"
+      ]
+    },
+    {
+      "id": "e_sso_portal",
+      "source": "sys_sso_gateway",
+      "target": "sys_customer_portal",
+      "relation": "SUPPORTS",
+      "strength": 0.7,
+      "strength_range": [
+        0.49,
+        0.91
+      ],
+      "substitutability": 0.4,
+      "lag_days": 7,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_architecture_core"
+      ]
+    },
+    {
+      "id": "e_cloud_core",
+      "source": "sys_cloud_platform",
+      "target": "sys_core_api",
+      "relation": "SUPPORTS",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.5,
+      "lag_days": 7,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_architecture_core"
+      ]
+    },
+    {
+      "id": "e_crm_lead_scoring",
+      "source": "sys_crm",
+      "target": "wf_lead_scoring",
+      "relation": "SUPPORTS",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_architecture_core"
+      ]
+    },
+    {
+      "id": "e_crm_account_planning",
+      "source": "sys_crm",
+      "target": "wf_account_planning",
+      "relation": "SUPPORTS",
+      "strength": 0.7,
+      "strength_range": [
+        0.49,
+        0.91
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_architecture_core"
+      ]
+    },
+    {
+      "id": "e_data_pipeline_refresh",
+      "source": "sys_data_pipeline",
+      "target": "wf_data_refresh",
+      "relation": "SUPPORTS",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.15,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
+      ]
+    },
+    {
+      "id": "e_auditsvc_provides_auditlog",
+      "source": "sys_audit_service",
+      "target": "ds_audit_log",
+      "relation": "PROVIDES",
+      "strength": 0.95,
+      "strength_range": [
+        0.665,
+        1.0
+      ],
+      "substitutability": 0.1,
+      "lag_days": 1,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_soc2_register_intro"
+      ]
+    },
+    {
+      "id": "e_auditlog_supports_soc2",
+      "source": "ds_audit_log",
+      "target": "ctl_soc2_audit_logging",
+      "relation": "SUPPORTS",
+      "strength": 1.0,
+      "strength_range": [
+        0.7,
+        1.0
+      ],
+      "substitutability": 0.05,
+      "lag_days": 1,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_soc2_register_intro"
+      ]
+    },
+    {
+      "id": "e_auditlog_consumed_by_recon",
+      "source": "ds_audit_log",
+      "target": "wf_vendor_reconciliation",
+      "relation": "CONSUMES",
+      "strength": 0.6,
+      "strength_range": [
+        0.42,
+        0.78
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_recon_inputs"
+      ]
+    },
+    {
+      "id": "e_apex_provides_firmographics",
+      "source": "vendor_apex",
+      "target": "ds_firmographics",
+      "relation": "PROVIDES",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.5,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_beacon_provides_firmographics",
+      "source": "vendor_beacon",
+      "target": "ds_firmographics",
+      "relation": "PROVIDES",
+      "strength": 0.7,
+      "strength_range": [
+        0.49,
+        0.91
+      ],
+      "substitutability": 0.8,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_echo_provides_firmographics",
+      "source": "vendor_echo",
+      "target": "ds_firmographics",
+      "relation": "PROVIDES",
+      "strength": 0.5,
+      "strength_range": [
+        0.35,
+        0.65
+      ],
+      "substitutability": 0.6,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_apex_provides_contact_data",
+      "source": "vendor_apex",
+      "target": "ds_contact_data",
+      "relation": "PROVIDES",
+      "strength": 0.85,
+      "strength_range": [
+        0.595,
+        1.0
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_beacon_provides_contact_data",
+      "source": "vendor_beacon",
+      "target": "ds_contact_data",
+      "relation": "PROVIDES",
+      "strength": 0.7,
+      "strength_range": [
+        0.49,
+        0.91
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_apex_provides_corporate_linkage",
+      "source": "vendor_apex",
+      "target": "ds_corporate_linkage",
+      "relation": "PROVIDES",
+      "strength": 0.95,
+      "strength_range": [
+        0.665,
+        1.0
+      ],
+      "substitutability": 0.05,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_cinder_provides_intent",
+      "source": "vendor_cinder",
+      "target": "ds_intent_signals",
+      "relation": "PROVIDES",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.75,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_echo_provides_intent",
+      "source": "vendor_echo",
+      "target": "ds_intent_signals",
+      "relation": "PROVIDES",
+      "strength": 0.4,
+      "strength_range": [
+        0.28,
+        0.52
+      ],
+      "substitutability": 0.6,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_delta_provides_identity",
+      "source": "vendor_delta",
+      "target": "ds_identity_verification",
+      "relation": "PROVIDES",
+      "strength": 0.95,
+      "strength_range": [
+        0.665,
+        1.0
+      ],
+      "substitutability": 0.05,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_apex_provides_market_intel",
+      "source": "vendor_apex",
+      "target": "ds_market_intel",
+      "relation": "PROVIDES",
+      "strength": 0.7,
+      "strength_range": [
+        0.49,
+        0.91
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_cinder_provides_market_intel",
+      "source": "vendor_cinder",
+      "target": "ds_market_intel",
+      "relation": "PROVIDES",
+      "strength": 0.7,
+      "strength_range": [
+        0.49,
+        0.91
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_echo_provides_market_intel",
+      "source": "vendor_echo",
+      "target": "ds_market_intel",
+      "relation": "PROVIDES",
+      "strength": 0.7,
+      "strength_range": [
+        0.49,
+        0.91
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_echo_provides_account_intel",
+      "source": "vendor_echo",
+      "target": "ds_account_intel",
+      "relation": "PROVIDES",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.15,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_flux_provides_usage",
+      "source": "vendor_flux",
+      "target": "ds_usage",
+      "relation": "PROVIDES",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.1,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_granite_provides_geo_risk",
+      "source": "vendor_granite",
+      "target": "ds_geo_risk",
+      "relation": "PROVIDES",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_delta_provides_geo_risk",
+      "source": "vendor_delta",
+      "target": "ds_geo_risk",
+      "relation": "PROVIDES",
+      "strength": 0.6,
+      "strength_range": [
+        0.42,
+        0.78
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_granite_provides_geo_risk_emerging",
+      "source": "vendor_granite",
+      "target": "ds_geo_risk_emerging",
+      "relation": "PROVIDES",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.05,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_granite_emerging_geo_risk"
+      ]
+    },
+    {
+      "id": "e_firmographics_consumed_leadscoring",
+      "source": "ds_firmographics",
+      "target": "wf_lead_scoring",
+      "relation": "CONSUMES",
+      "strength": 0.7,
+      "strength_range": [
+        0.49,
+        0.91
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": []
+    },
+    {
+      "id": "e_firmographics_consumed_campaign",
+      "source": "ds_firmographics",
+      "target": "wf_campaign_targeting",
+      "relation": "CONSUMES",
+      "strength": 0.6,
+      "strength_range": [
+        0.42,
+        0.78
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": []
+    },
+    {
+      "id": "e_contactdata_consumed_leadscoring",
+      "source": "ds_contact_data",
+      "target": "wf_lead_scoring",
+      "relation": "CONSUMES",
+      "strength": 0.7,
+      "strength_range": [
+        0.49,
+        0.91
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": []
+    },
+    {
+      "id": "e_corporate_linkage_consumed_kyc",
+      "source": "ds_corporate_linkage",
+      "target": "wf_kyc_screening",
+      "relation": "CONSUMES",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.05,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_kyc_screening_inputs"
+      ]
+    },
+    {
+      "id": "e_intent_consumed_campaign",
+      "source": "ds_intent_signals",
+      "target": "wf_campaign_targeting",
+      "relation": "CONSUMES",
+      "strength": 0.7,
+      "strength_range": [
+        0.49,
+        0.91
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": []
+    },
+    {
+      "id": "e_identity_consumed_kyc",
+      "source": "ds_identity_verification",
+      "target": "wf_kyc_screening",
+      "relation": "CONSUMES",
+      "strength": 0.95,
+      "strength_range": [
+        0.665,
+        1.0
+      ],
+      "substitutability": 0.05,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_kyc_screening_inputs"
+      ]
+    },
+    {
+      "id": "e_market_intel_consumed_campaign",
+      "source": "ds_market_intel",
+      "target": "wf_campaign_targeting",
+      "relation": "CONSUMES",
+      "strength": 0.5,
+      "strength_range": [
+        0.35,
+        0.65
+      ],
+      "substitutability": 0.5,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": []
+    },
+    {
+      "id": "e_market_intel_consumed_account_planning",
+      "source": "ds_market_intel",
+      "target": "wf_account_planning",
+      "relation": "CONSUMES",
+      "strength": 0.6,
+      "strength_range": [
+        0.42,
+        0.78
+      ],
+      "substitutability": 0.5,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": []
+    },
+    {
+      "id": "e_account_intel_consumed_account_planning",
+      "source": "ds_account_intel",
+      "target": "wf_account_planning",
+      "relation": "CONSUMES",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.2,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_dataset_matrix"
+      ]
+    },
+    {
+      "id": "e_usage_consumed_product_analytics",
+      "source": "ds_usage",
+      "target": "wf_product_analytics",
+      "relation": "CONSUMES",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.1,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": []
+    },
+    {
+      "id": "e_geo_risk_consumed_risk_monitoring",
+      "source": "ds_geo_risk",
+      "target": "wf_risk_monitoring",
+      "relation": "CONSUMES",
+      "strength": 0.7,
+      "strength_range": [
+        0.49,
+        0.91
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": []
+    },
+    {
+      "id": "e_geo_risk_emerging_consumed_risk_monitoring",
+      "source": "ds_geo_risk_emerging",
+      "target": "wf_risk_monitoring",
+      "relation": "CONSUMES",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.05,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_granite_emerging_geo_risk"
+      ]
+    },
+    {
+      "id": "e_market_intel_consumed_ml_scoring",
+      "source": "ds_market_intel",
+      "target": "sys_ml_scoring",
+      "relation": "CONSUMES",
+      "strength": 0.5,
+      "strength_range": [
+        0.35,
+        0.65
+      ],
+      "substitutability": 0.5,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": []
+    },
+    {
+      "id": "e_intent_consumed_ml_scoring",
+      "source": "ds_intent_signals",
+      "target": "sys_ml_scoring",
+      "relation": "CONSUMES",
+      "strength": 0.5,
+      "strength_range": [
+        0.35,
+        0.65
+      ],
+      "substitutability": 0.5,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": []
+    },
+    {
+      "id": "e_kyc_supports_control",
+      "source": "wf_kyc_screening",
+      "target": "ctl_kyc_screening",
+      "relation": "SUPPORTS",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.1,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_kyc_screening_inputs"
+      ]
+    },
+    {
+      "id": "e_recon_supports_sox",
+      "source": "wf_vendor_reconciliation",
+      "target": "ctl_sox_reconciliation",
+      "relation": "SUPPORTS",
+      "strength": 0.85,
+      "strength_range": [
+        0.595,
+        1.0
+      ],
+      "substitutability": 0.15,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_vendor_recon_inputs"
+      ]
+    },
+    {
+      "id": "e_ctl_access_sso",
+      "source": "sys_sso_gateway",
+      "target": "ctl_access_control",
+      "relation": "SUPPORTS",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.2,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_architecture_core"
+      ]
+    },
+    {
+      "id": "e_access_soc2_coverage",
+      "source": "ctl_access_control",
+      "target": "kpi_soc2_coverage",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.2,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_architecture_core"
+      ]
+    },
+    {
+      "id": "e_ctl_incident_wf",
+      "source": "wf_incident_mgmt",
+      "target": "ctl_incident_mgmt",
+      "relation": "SUPPORTS",
+      "strength": 0.85,
+      "strength_range": [
+        0.595,
+        1.0
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_incident_review_q2"
+      ]
+    },
+    {
+      "id": "e_incident_uptime",
+      "source": "wf_incident_mgmt",
+      "target": "kpi_uptime_sla",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.75,
+      "strength_range": [
+        0.525,
+        0.975
+      ],
+      "substitutability": 0.25,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_incident_review_q2"
+      ]
+    },
+    {
+      "id": "e_ctl_pci_billing",
+      "source": "sys_billing_platform",
+      "target": "ctl_pci_carddata",
+      "relation": "SUPPORTS",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_architecture_core"
+      ]
+    },
+    {
+      "id": "e_soc2evidence_coverage",
+      "source": "wf_soc2_evidence",
+      "target": "kpi_soc2_coverage",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.1,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_soc2_register_intro"
+      ]
+    },
+    {
+      "id": "e_data_refresh_sla",
+      "source": "wf_data_refresh",
+      "target": "kpi_data_refresh_sla",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.15,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_data_pipeline_runbook"
+      ]
+    },
+    {
+      "id": "e_cc72_coverage",
+      "source": "ctl_soc2_audit_logging",
+      "target": "kpi_soc2_coverage",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 1.0,
+      "strength_range": [
+        0.7,
+        1.0
+      ],
+      "substitutability": 0.05,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_soc2_register_intro"
+      ]
+    },
+    {
+      "id": "e_leadscoring_pipeline",
+      "source": "wf_lead_scoring",
+      "target": "kpi_pipeline",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.7,
+      "strength_range": [
+        0.49,
+        0.91
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": []
+    },
+    {
+      "id": "e_campaign_pipeline",
+      "source": "wf_campaign_targeting",
+      "target": "kpi_pipeline",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.35,
+        0.65
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_marketing_attribution_context"
+      ]
+    },
+    {
+      "id": "e_account_planning_retention",
+      "source": "wf_account_planning",
+      "target": "kpi_net_retention",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.6,
+      "strength_range": [
+        0.42,
+        0.78
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_sales_playbook_context"
+      ]
+    },
+    {
+      "id": "e_product_analytics_retention",
+      "source": "wf_product_analytics",
+      "target": "kpi_net_retention",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.35,
+        0.65
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_product_roadmap_context"
+      ]
+    },
+    {
+      "id": "e_risk_monitoring_margin",
+      "source": "wf_risk_monitoring",
+      "target": "kpi_gross_margin",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.35,
+        0.65
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": []
+    },
+    {
+      "id": "e_invoicing_margin",
+      "source": "wf_invoicing",
+      "target": "kpi_gross_margin",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.8,
+      "strength_range": [
+        0.56,
+        1.0
+      ],
+      "substitutability": 0.2,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_finance_forecast_q3"
+      ]
+    },
+    {
+      "id": "e_core_uptime",
+      "source": "sys_core_api",
+      "target": "kpi_uptime_sla",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.2,
+      "lag_days": 0,
+      "criticality": "critical",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_architecture_core"
+      ]
+    },
+    {
+      "id": "e_onboarding_retention",
+      "source": "wf_customer_onboarding",
+      "target": "kpi_net_retention",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.6,
+      "strength_range": [
+        0.42,
+        0.78
+      ],
+      "substitutability": 0.4,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
+    },
+    {
+      "id": "e_close_cycle",
+      "source": "wf_financial_close",
+      "target": "kpi_close_cycle_days",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.9,
+      "strength_range": [
+        0.63,
+        1.0
+      ],
+      "substitutability": 0.15,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_sop_financial_close_lineage"
+      ]
+    },
+    {
+      "id": "e_enterprise_margin",
+      "source": "seg_enterprise",
+      "target": "kpi_gross_margin",
+      "relation": "CONTRIBUTES_TO",
+      "strength": 0.7,
+      "strength_range": [
+        0.49,
+        0.91
+      ],
+      "substitutability": 0.3,
+      "lag_days": 0,
+      "criticality": "high",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_finance_forecast_q3"
+      ]
+    },
+    {
+      "id": "e_kn_core_arch",
+      "source": "kn_core_arch",
+      "target": "sys_core_api",
+      "relation": "SUPPORTS",
+      "strength": 0.5,
+      "strength_range": [
+        0.35,
+        0.65
+      ],
+      "substitutability": 0.5,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_architecture_core"
+      ]
+    },
+    {
+      "id": "e_kn_release",
+      "source": "kn_release_eng",
+      "target": "sys_core_api",
+      "relation": "SUPPORTS",
+      "strength": 0.4,
+      "strength_range": [
+        0.28,
+        0.52
+      ],
+      "substitutability": 0.6,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_eng_release_context"
+      ]
+    },
+    {
+      "id": "e_kn_mlmodel",
+      "source": "kn_ml_modeling",
+      "target": "sys_ml_scoring",
+      "relation": "SUPPORTS",
+      "strength": 0.5,
+      "strength_range": [
+        0.35,
+        0.65
+      ],
+      "substitutability": 0.5,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": []
+    },
+    {
+      "id": "e_kn_roadmap",
+      "source": "kn_roadmap_context",
+      "target": "proj_billing_modernization",
+      "relation": "SUPPORTS",
+      "strength": 0.4,
+      "strength_range": [
+        0.28,
+        0.52
+      ],
+      "substitutability": 0.6,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_product_roadmap_context"
+      ]
+    },
+    {
+      "id": "e_kn_deals",
+      "source": "kn_enterprise_deals",
+      "target": "seg_enterprise",
+      "relation": "SUPPORTS",
+      "strength": 0.4,
+      "strength_range": [
+        0.28,
+        0.52
+      ],
+      "substitutability": 0.5,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_sales_playbook_context"
+      ]
+    },
+    {
+      "id": "e_kn_segmentation",
+      "source": "kn_segmentation",
+      "target": "kpi_pipeline",
+      "relation": "SUPPORTS",
+      "strength": 0.4,
+      "strength_range": [
+        0.28,
+        0.52
+      ],
+      "substitutability": 0.6,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_marketing_attribution_context"
+      ]
+    },
+    {
+      "id": "e_kn_onboarding",
+      "source": "kn_onboarding_playbook",
+      "target": "wf_customer_onboarding",
+      "relation": "SUPPORTS",
+      "strength": 0.5,
+      "strength_range": [
+        0.35,
+        0.65
+      ],
+      "substitutability": 0.5,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
+    },
+    {
+      "id": "e_kn_cs_escalation",
+      "source": "kn_cs_escalation",
+      "target": "wf_customer_onboarding",
+      "relation": "SUPPORTS",
+      "strength": 0.4,
+      "strength_range": [
+        0.28,
+        0.52
+      ],
+      "substitutability": 0.6,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_customer_success_context"
+      ]
+    },
+    {
+      "id": "e_kn_vendorcontracts",
+      "source": "kn_vendor_contracts",
+      "target": "wf_vendor_reconciliation",
+      "relation": "SUPPORTS",
+      "strength": 0.4,
+      "strength_range": [
+        0.28,
+        0.52
+      ],
+      "substitutability": 0.6,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": []
+    },
+    {
+      "id": "e_kn_privacy",
+      "source": "kn_privacy_program",
+      "target": "ctl_data_retention",
+      "relation": "SUPPORTS",
+      "strength": 0.5,
+      "strength_range": [
+        0.35,
+        0.65
+      ],
+      "substitutability": 0.5,
+      "lag_days": 0,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": []
+    },
+    {
+      "id": "ch_finance_engineering_budget",
+      "source": "dept_finance",
+      "target": "dept_engineering",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "budget limits",
+      "channel_kind": "budget"
+    },
+    {
+      "id": "ch_finance_marketing_budget",
+      "source": "dept_finance",
+      "target": "dept_marketing",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "budget limits",
+      "channel_kind": "budget"
+    },
+    {
+      "id": "ch_finance_operations_cost",
+      "source": "dept_finance",
+      "target": "dept_operations",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "cost targets",
+      "channel_kind": "budget"
+    },
+    {
+      "id": "ch_finance_sales_revenue",
+      "source": "dept_finance",
+      "target": "dept_sales",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "revenue targets",
+      "channel_kind": "budget"
+    },
+    {
+      "id": "ch_ai_data_engineering_models",
+      "source": "dept_ai_data",
+      "target": "dept_engineering",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "models and data",
+      "channel_kind": "capability"
+    },
+    {
+      "id": "ch_ai_data_marketing_scores",
+      "source": "dept_ai_data",
+      "target": "dept_marketing",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "scores and segments",
+      "channel_kind": "capability"
+    },
+    {
+      "id": "ch_engineering_product_features",
+      "source": "dept_engineering",
+      "target": "dept_product",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "features and platforms",
+      "channel_kind": "capability"
+    },
+    {
+      "id": "ch_engineering_operations_automation",
+      "source": "dept_engineering",
+      "target": "dept_operations",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "automation",
+      "channel_kind": "capability"
+    },
+    {
+      "id": "ch_operations_engineering_incidents",
+      "source": "dept_operations",
+      "target": "dept_engineering",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "incidents and capacity",
+      "channel_kind": "signal"
+    },
+    {
+      "id": "ch_product_sales_roadmap",
+      "source": "dept_product",
+      "target": "dept_sales",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "roadmap and releases",
+      "channel_kind": "capability"
+    },
+    {
+      "id": "ch_product_cs_product",
+      "source": "dept_product",
+      "target": "dept_customer_success",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "product changes",
+      "channel_kind": "capability"
+    },
+    {
+      "id": "ch_marketing_sales_qualified",
+      "source": "dept_marketing",
+      "target": "dept_sales",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "qualified leads",
+      "channel_kind": "signal"
+    },
+    {
+      "id": "ch_sales_product_customer",
+      "source": "dept_sales",
+      "target": "dept_product",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "customer demand",
+      "channel_kind": "signal"
+    },
+    {
+      "id": "ch_sales_cs_commitments",
+      "source": "dept_sales",
+      "target": "dept_customer_success",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "commitments",
+      "channel_kind": "signal"
+    },
+    {
+      "id": "ch_cs_product_feedback",
+      "source": "dept_customer_success",
+      "target": "dept_product",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "feedback and churn signals",
+      "channel_kind": "signal"
+    },
+    {
+      "id": "ch_compliance_ai_data_controls",
+      "source": "dept_compliance",
+      "target": "dept_ai_data",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "controls",
+      "channel_kind": "constraint"
+    },
+    {
+      "id": "ch_compliance_engineering_policies",
+      "source": "dept_compliance",
+      "target": "dept_engineering",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "policies",
+      "channel_kind": "constraint"
+    },
+    {
+      "id": "ch_compliance_operations_process",
+      "source": "dept_compliance",
+      "target": "dept_operations",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "process controls",
+      "channel_kind": "constraint"
+    },
+    {
+      "id": "ch_finance_kpi_profitability",
+      "source": "dept_finance",
+      "target": "kpi_company",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "profitability",
+      "channel_kind": "value"
+    },
+    {
+      "id": "ch_marketing_kpi_acquisition",
+      "source": "dept_marketing",
+      "target": "kpi_company",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "acquisition cost",
+      "channel_kind": "value"
+    },
+    {
+      "id": "ch_sales_kpi_pipeline",
+      "source": "dept_sales",
+      "target": "kpi_company",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "pipeline",
+      "channel_kind": "value"
+    },
+    {
+      "id": "ch_product_kpi_delivery",
+      "source": "dept_product",
+      "target": "kpi_company",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "delivery",
+      "channel_kind": "value"
+    },
+    {
+      "id": "ch_cs_kpi_retention",
+      "source": "dept_customer_success",
+      "target": "kpi_company",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "retention",
+      "channel_kind": "value"
+    },
+    {
+      "id": "ch_sales_marketing_launch",
+      "source": "dept_sales",
+      "target": "dept_marketing",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "launch timing",
+      "channel_kind": "signal"
+    },
+    {
+      "id": "ch_operations_compliance_evidence",
+      "source": "dept_operations",
+      "target": "dept_compliance",
+      "relation": "FLOWS_TO",
+      "strength": 0.5,
+      "strength_range": [
+        0.3,
+        0.7
+      ],
+      "substitutability": 0.3,
+      "lag_days": 30,
+      "criticality": "medium",
+      "confidence": 0.9,
+      "evidence_refs": [
+        "ev_department_map_v1"
+      ],
+      "label": "control evidence",
+      "channel_kind": "signal"
+    }
+  ],
+  "pressures": [
+    {
+      "id": "pr_apex_renewal",
+      "kind": "renewal_step",
+      "name": "Apex auto-renewal uplift",
+      "target_entity_id": "vendor_apex",
+      "start_day": 60,
+      "end_day": null,
+      "step_pct": 8.0,
+      "capacity_sensitivity": 0.0,
+      "neutralised_by": [
+        {
+          "intervention_type": "remove_vendor",
+          "target_entity_id": "vendor_apex"
+        }
+      ],
+      "evidence_refs": [
+        "ev_apex_msa_renewal"
+      ],
+      "description": "Apex auto-renews at +8% on day 60."
+    },
+    {
+      "id": "pr_echo_renewal",
+      "kind": "renewal_step",
+      "name": "Echo renewal uplift",
+      "target_entity_id": "vendor_echo",
+      "start_day": 120,
+      "end_day": null,
+      "step_pct": 12.0,
+      "capacity_sensitivity": 0.0,
+      "neutralised_by": [
+        {
+          "intervention_type": "remove_vendor",
+          "target_entity_id": "vendor_echo"
+        }
+      ],
+      "evidence_refs": [
+        "ev_echo_msa_clause_9"
+      ],
+      "description": "Echo renews at +12% on day 120."
+    },
+    {
+      "id": "pr_flux_usage_growth",
+      "kind": "cost_growth",
+      "name": "Flux usage-based growth",
+      "target_entity_id": "vendor_flux",
+      "start_day": 0,
+      "end_day": null,
+      "rate": 0.015,
+      "rate_range": [
+        0.01,
+        0.02
+      ],
+      "capacity_sensitivity": 0.0,
+      "neutralised_by": [
+        {
+          "intervention_type": "remove_vendor",
+          "target_entity_id": "vendor_flux"
+        }
+      ],
+      "evidence_refs": [
+        "ev_finance_forecast_q3"
+      ],
+      "description": "Flux usage costs grow about 1.5% a month."
+    },
+    {
+      "id": "pr_vendor_recon_hazard",
+      "kind": "hazard",
+      "name": "Vendor reconciliation failure",
+      "target_entity_id": "wf_vendor_reconciliation",
+      "start_day": 0,
+      "end_day": null,
+      "monthly_probability": 0.03,
+      "probability_range": [
+        0.02,
+        0.05
+      ],
+      "cost_per_event_usd": 40000000,
+      "capacity_sensitivity": 2.5,
+      "neutralised_by": [],
+      "evidence_refs": [
+        "ev_incident_22"
+      ],
+      "description": "Reconciliation fails a few times a year; likelier if its inputs or owners weaken."
+    },
+    {
+      "id": "pr_billing_recon_hazard",
+      "kind": "hazard",
+      "name": "Billing reconciliation failure",
+      "target_entity_id": "wf_billing_recon",
+      "start_day": 0,
+      "end_day": null,
+      "monthly_probability": 0.04,
+      "probability_range": [
+        0.02,
+        0.06
+      ],
+      "cost_per_event_usd": 60000000,
+      "capacity_sensitivity": 3.0,
+      "neutralised_by": [
+        {
+          "intervention_type": "document_runbook",
+          "target_entity_id": "wf_billing_recon"
+        }
+      ],
+      "evidence_refs": [
+        "ev_incident_31"
+      ],
+      "description": "Billing reconciliation fails about twice a year; likelier if its owners lose capacity."
+    },
+    {
+      "id": "pr_lineage_holder_attrition",
+      "kind": "hazard",
+      "name": "Warehouse lineage holder leaves",
+      "target_entity_id": "kn_warehouse_lineage",
+      "start_day": 0,
+      "end_day": null,
+      "monthly_probability": 0.03,
+      "probability_range": [
+        0.02,
+        0.05
+      ],
+      "cost_per_event_usd": 45000000,
+      "capacity_sensitivity": 2.0,
+      "neutralised_by": [
+        {
+          "intervention_type": "document_runbook",
+          "target_entity_id": "kn_warehouse_lineage"
+        }
+      ],
+      "evidence_refs": [
+        "ev_knowledge_matrix_3"
+      ],
+      "description": "Only one role knows the warehouse lineage; if it leaves, the financial close slips."
+    },
+    {
+      "id": "pr_contractor_cost_growth",
+      "kind": "cost_growth",
+      "name": "Contractor rate growth",
+      "target_entity_id": "dept_operations",
+      "start_day": 0,
+      "end_day": null,
+      "rate": 0.01,
+      "rate_range": [
+        0.005,
+        0.015
+      ],
+      "capacity_sensitivity": 0.0,
+      "neutralised_by": [],
+      "evidence_refs": [
+        "ev_finance_forecast_q3"
+      ],
+      "description": "Contractor rates rise about 1% a month."
+    }
+  ],
+  "documents": [
+    {
+      "id": "doc_department_map",
+      "title": "Department operating-model map",
+      "doc_type": "architecture_note",
+      "department_id": null,
+      "owner_role_id": null,
+      "uri": "artifacts/doc_department_map.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [],
+      "framework_refs": [],
+      "summary": "How departments fund, constrain and supply each other.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_billing_recon_runbook",
+      "title": "Billing reconciliation runbook",
+      "doc_type": "runbook",
+      "department_id": "dept_operations",
+      "owner_role_id": "role_billing_ops_lead",
+      "uri": "artifacts/doc_billing_recon_runbook.md",
+      "mime_type": "text/markdown",
+      "status": "outdated",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_billing_recon"
+      ],
+      "framework_refs": [
+        "SOX"
+      ],
+      "summary": "Monthly reconciliation steps; exception-handling section missing since the vendor change.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z",
+      "version": "v1.4",
+      "last_reviewed": "2025-03-10",
+      "review_cycle_days": 180
+    },
+    {
+      "id": "doc_invoicing_sop",
+      "title": "Invoicing SOP",
+      "doc_type": "sop",
+      "department_id": "dept_operations",
+      "owner_role_id": "role_billing_ops_lead",
+      "uri": "artifacts/doc_invoicing_sop.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_invoicing"
+      ],
+      "framework_refs": [
+        "SOX"
+      ],
+      "summary": "Standard operating procedure for invoice generation and dispatch.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_incident_report",
+      "title": "Incident review",
+      "doc_type": "incident_report",
+      "department_id": "dept_operations",
+      "owner_role_id": null,
+      "uri": "artifacts/doc_incident_report.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_incident_mgmt",
+        "wf_billing_recon",
+        "wf_vendor_reconciliation"
+      ],
+      "framework_refs": [],
+      "summary": "Reconciliation failures happen a few times a year; likelier when owners lose capacity.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_soc2_register",
+      "title": "SOC 2 control register",
+      "doc_type": "audit_report",
+      "department_id": "dept_compliance",
+      "owner_role_id": null,
+      "uri": "artifacts/doc_soc2_register.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "ctl_soc2_audit_logging",
+        "ctl_access_control",
+        "wf_soc2_evidence",
+        "ctl_data_retention",
+        "ctl_pci_carddata"
+      ],
+      "framework_refs": [
+        "SOC2",
+        "GDPR",
+        "PCI_DSS"
+      ],
+      "summary": "Mapping of SOC 2, GDPR and PCI controls to their evidence sources.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_finance_forecast",
+      "title": "FY forecast",
+      "doc_type": "financial_forecast",
+      "department_id": "dept_finance",
+      "owner_role_id": null,
+      "uri": "artifacts/doc_finance_forecast.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "kpi_gross_margin"
+      ],
+      "framework_refs": [],
+      "summary": "Cost and revenue forecast; Flux usage and contractor rates both rising.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_procurement_register",
+      "title": "Vendor and procurement register",
+      "doc_type": "contract",
+      "department_id": "dept_finance",
+      "owner_role_id": null,
+      "uri": "artifacts/doc_procurement_register.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "vendor_apex",
+        "vendor_beacon",
+        "vendor_cinder",
+        "vendor_delta",
+        "vendor_echo",
+        "vendor_flux",
+        "vendor_granite",
+        "kn_vendor_contracts"
+      ],
+      "framework_refs": [],
+      "summary": "Vendor spend, renewal dates and substitutability notes across all seven vendors.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_knowledge_matrix",
+      "title": "Role knowledge matrix",
+      "doc_type": "knowledge_matrix",
+      "department_id": null,
+      "owner_role_id": null,
+      "uri": "artifacts/doc_knowledge_matrix.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "kn_billing_exception",
+        "kn_warehouse_lineage",
+        "kn_soc2_mapping"
+      ],
+      "framework_refs": [],
+      "summary": "Role holders and documentation status for each critical knowledge area.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_data_pipeline_runbook",
+      "title": "Data pipeline runbook",
+      "doc_type": "runbook",
+      "department_id": "dept_ai_data",
+      "owner_role_id": null,
+      "uri": "artifacts/doc_data_pipeline_runbook.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_data_refresh",
+        "sys_data_pipeline",
+        "kpi_data_refresh_sla"
+      ],
+      "framework_refs": [],
+      "summary": "Refresh schedule, backfills and failure recovery for the data pipeline.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_architecture",
+      "title": "System architecture notes",
+      "doc_type": "architecture_note",
+      "department_id": "dept_engineering",
+      "owner_role_id": null,
+      "uri": "artifacts/doc_architecture.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "sys_core_api",
+        "sys_billing_platform",
+        "sys_audit_service",
+        "sys_crm"
+      ],
+      "framework_refs": [],
+      "summary": "Service dependency map for core, billing, audit and CRM systems.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_eng_release",
+      "title": "Release engineering guide",
+      "doc_type": "runbook",
+      "department_id": "dept_engineering",
+      "owner_role_id": null,
+      "uri": "artifacts/doc_eng_release.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "role_eng_manager",
+        "kn_release_eng",
+        "sys_core_api",
+        "kpi_uptime_sla"
+      ],
+      "framework_refs": [],
+      "summary": "Build, test and deploy pipeline for core services.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_product_roadmap",
+      "title": "Product roadmap",
+      "doc_type": "strategy_memo",
+      "department_id": "dept_product",
+      "owner_role_id": null,
+      "uri": "artifacts/doc_product_roadmap.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "proj_billing_modernization",
+        "proj_soc2_type2",
+        "wf_product_analytics",
+        "kn_roadmap_context"
+      ],
+      "framework_refs": [],
+      "summary": "Sequenced roadmap of transformation projects and releases.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_mkt_attribution",
+      "title": "Marketing attribution model",
+      "doc_type": "kpi_report",
+      "department_id": "dept_marketing",
+      "owner_role_id": null,
+      "uri": "artifacts/doc_mkt_attribution.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_campaign_targeting",
+        "kpi_pipeline",
+        "kpi_cac",
+        "kn_segmentation"
+      ],
+      "framework_refs": [],
+      "summary": "Multi-touch attribution feeding qualified pipeline.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_sales_playbook",
+      "title": "Enterprise sales playbook",
+      "doc_type": "sop",
+      "department_id": "dept_sales",
+      "owner_role_id": null,
+      "uri": "artifacts/doc_sales_playbook.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_lead_scoring",
+        "wf_account_planning",
+        "seg_enterprise",
+        "seg_midmarket",
+        "kn_enterprise_deals"
+      ],
+      "framework_refs": [],
+      "summary": "Enterprise qualification, pricing and close motion.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_cs_runbook",
+      "title": "Customer onboarding and escalation runbook",
+      "doc_type": "runbook",
+      "department_id": "dept_customer_success",
+      "owner_role_id": null,
+      "uri": "artifacts/doc_cs_runbook.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_customer_onboarding",
+        "kn_onboarding_playbook",
+        "kn_cs_escalation",
+        "kpi_net_retention"
+      ],
+      "framework_refs": [],
+      "summary": "Onboarding steps and escalation paths for enterprise accounts.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_sop_financial_close",
+      "title": "Monthly financial close SOP",
+      "doc_type": "sop",
+      "department_id": "dept_finance",
+      "owner_role_id": "role_controller",
+      "uri": "artifacts/doc_sop_financial_close.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_financial_close"
+      ],
+      "framework_refs": [],
+      "summary": "Monthly close steps; defers warehouse-lineage questions to the Data Platform Lead.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_kyc_screening_sop",
+      "title": "KYC screening SOP",
+      "doc_type": "sop",
+      "department_id": "dept_compliance",
+      "owner_role_id": null,
+      "uri": "artifacts/doc_kyc_screening_sop.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_kyc_screening",
+        "ds_identity_verification",
+        "ds_corporate_linkage"
+      ],
+      "framework_refs": [
+        "SOX"
+      ],
+      "summary": "KYC screening uses the Identity verification and Corporate linkage datasets.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_apex_msa",
+      "title": "ApexData master services agreement",
+      "doc_type": "contract",
+      "department_id": "dept_finance",
+      "owner_role_id": "role_procurement",
+      "uri": "artifacts/doc_apex_msa.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "vendor_apex"
+      ],
+      "framework_refs": [],
+      "summary": "ApexData master services agreement: term, renewal, pricing and exit terms.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_beacon_msa",
+      "title": "BeaconIQ master services agreement",
+      "doc_type": "contract",
+      "department_id": "dept_finance",
+      "owner_role_id": "role_procurement",
+      "uri": "artifacts/doc_beacon_msa.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "vendor_beacon"
+      ],
+      "framework_refs": [],
+      "summary": "BeaconIQ master services agreement: term, renewal, pricing and exit terms.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_cinder_msa",
+      "title": "CinderSignals master services agreement",
+      "doc_type": "contract",
+      "department_id": "dept_finance",
+      "owner_role_id": "role_procurement",
+      "uri": "artifacts/doc_cinder_msa.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "vendor_cinder"
+      ],
+      "framework_refs": [],
+      "summary": "CinderSignals master services agreement: term, renewal, pricing and exit terms.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_delta_msa",
+      "title": "DeltaVerify master services agreement",
+      "doc_type": "contract",
+      "department_id": "dept_finance",
+      "owner_role_id": "role_procurement",
+      "uri": "artifacts/doc_delta_msa.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "vendor_delta"
+      ],
+      "framework_refs": [],
+      "summary": "DeltaVerify master services agreement: term, renewal, pricing and exit terms.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_echo_msa",
+      "title": "EchoMarket master services agreement",
+      "doc_type": "contract",
+      "department_id": "dept_finance",
+      "owner_role_id": "role_procurement",
+      "uri": "artifacts/doc_echo_msa.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "vendor_echo"
+      ],
+      "framework_refs": [],
+      "summary": "EchoMarket master services agreement: term, renewal, pricing and exit terms.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_flux_msa",
+      "title": "FluxBehavior master services agreement",
+      "doc_type": "contract",
+      "department_id": "dept_finance",
+      "owner_role_id": "role_procurement",
+      "uri": "artifacts/doc_flux_msa.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "vendor_flux"
+      ],
+      "framework_refs": [],
+      "summary": "FluxBehavior master services agreement: term, renewal, pricing and exit terms.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_granite_msa",
+      "title": "GraniteGeo master services agreement",
+      "doc_type": "contract",
+      "department_id": "dept_finance",
+      "owner_role_id": "role_procurement",
+      "uri": "artifacts/doc_granite_msa.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "vendor_granite"
+      ],
+      "framework_refs": [],
+      "summary": "GraniteGeo master services agreement: term, renewal, pricing and exit terms.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_data_vendor_inventory",
+      "title": "External data vendor inventory",
+      "doc_type": "architecture_note",
+      "department_id": "dept_ai_data",
+      "owner_role_id": null,
+      "uri": "artifacts/doc_data_vendor_inventory.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "vendor_apex",
+        "vendor_beacon",
+        "vendor_cinder",
+        "vendor_delta",
+        "vendor_echo",
+        "vendor_flux",
+        "vendor_granite",
+        "ds_firmographics",
+        "ds_contact_data",
+        "ds_corporate_linkage",
+        "ds_intent_signals",
+        "ds_identity_verification",
+        "ds_market_intel",
+        "ds_account_intel",
+        "ds_usage",
+        "ds_geo_risk",
+        "ds_geo_risk_emerging"
+      ],
+      "framework_refs": [],
+      "summary": "Vendor-to-dataset feed matrix with attribute groups and consuming workflows.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_vendor_recon_workflow_map",
+      "title": "Vendor reconciliation workflow map",
+      "doc_type": "workflow_map",
+      "department_id": "dept_operations",
+      "owner_role_id": null,
+      "uri": "artifacts/doc_vendor_recon_workflow_map.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_vendor_reconciliation",
+        "ds_audit_log",
+        "ctl_sox_reconciliation"
+      ],
+      "framework_refs": [
+        "SOX"
+      ],
+      "summary": "Inputs and control dependencies for the monthly vendor reconciliation workflow.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_incident_response_runbook",
+      "title": "Incident response runbook",
+      "doc_type": "runbook",
+      "department_id": "dept_operations",
+      "owner_role_id": "role_sre",
+      "uri": "artifacts/doc_incident_response_runbook.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_incident_mgmt"
+      ],
+      "framework_refs": [],
+      "summary": "On-call escalation and recovery steps for incident response.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_soc2_evidence_sop",
+      "title": "SOC 2 evidence collection SOP",
+      "doc_type": "sop",
+      "department_id": "dept_compliance",
+      "owner_role_id": "role_grc_lead",
+      "uri": "artifacts/doc_soc2_evidence_sop.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_soc2_evidence"
+      ],
+      "framework_refs": [
+        "SOC2"
+      ],
+      "summary": "Standard operating procedure for collecting and filing SOC 2 audit evidence.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_vendor_recon_sop",
+      "title": "Vendor reconciliation SOP",
+      "doc_type": "sop",
+      "department_id": "dept_operations",
+      "owner_role_id": "role_billing_ops_lead",
+      "uri": "artifacts/doc_vendor_recon_sop.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_vendor_reconciliation"
+      ],
+      "framework_refs": [
+        "SOX"
+      ],
+      "summary": "Standard operating procedure for the monthly vendor reconciliation workflow.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    },
+    {
+      "id": "doc_risk_monitoring_runbook",
+      "title": "Risk monitoring runbook",
+      "doc_type": "runbook",
+      "department_id": "dept_operations",
+      "owner_role_id": null,
+      "uri": "artifacts/doc_risk_monitoring_runbook.md",
+      "mime_type": "text/markdown",
+      "status": "current",
+      "sensitivity": "general",
+      "covers_entity_ids": [
+        "wf_risk_monitoring"
+      ],
+      "framework_refs": [],
+      "summary": "Monitoring and response steps for geographic and macroeconomic risk signals.",
+      "synthetic": true,
+      "ingested": true,
+      "uploaded_at": "2026-09-26T12:00:00Z"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_department_map_v1",
+      "source_type": "architecture_note",
+      "document_id": "doc_department_map",
+      "location": null,
+      "snippet": "Finance sets budget limits for Engineering and Marketing.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_billing_runbook_gap",
+      "source_type": "runbook",
+      "document_id": "doc_billing_recon_runbook",
+      "location": "section 6",
+      "snippet": "Exception path is undocumented; only the billing owners can resolve a failed run.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_knowledge_matrix_billing",
+      "source_type": "knowledge_matrix",
+      "document_id": "doc_billing_recon_runbook",
+      "location": null,
+      "snippet": "Billing reconciliation know-how is concentrated in two roles.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_invoicing_sop",
+      "source_type": "workflow_map",
+      "document_id": "doc_invoicing_sop",
+      "location": null,
+      "snippet": "Invoicing runs after reconciliation completes.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_incident_22",
+      "source_type": "incident",
+      "document_id": "doc_incident_report",
+      "location": "INC-22",
+      "snippet": "A failed vendor reconciliation cost about $40M to correct.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_incident_31",
+      "source_type": "incident",
+      "document_id": "doc_incident_report",
+      "location": "INC-31",
+      "snippet": "A failed billing reconciliation cost about $60M in credits and rework.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_incident_review_q2",
+      "source_type": "incident",
+      "document_id": "doc_incident_report",
+      "location": null,
+      "snippet": "Incident response resolved P1s within SLA in Q2.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_soc2_register_intro",
+      "source_type": "policy",
+      "document_id": "doc_soc2_register",
+      "location": null,
+      "snippet": "CC7.2 requires continuous audit-log evidence retained for 12 months.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_finance_forecast_q3",
+      "source_type": "finance_forecast",
+      "document_id": "doc_finance_forecast",
+      "location": null,
+      "snippet": "Flux usage costs rise about 1.5% a month; contractor rates rise about 1% a month.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_knowledge_matrix_3",
+      "source_type": "knowledge_matrix",
+      "document_id": "doc_knowledge_matrix",
+      "location": null,
+      "snippet": "Warehouse lineage is held by one role and is about 20% documented.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_data_pipeline_runbook",
+      "source_type": "runbook",
+      "document_id": "doc_data_pipeline_runbook",
+      "location": null,
+      "snippet": "Refresh recovers from a failed batch via replay.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_architecture_core",
+      "source_type": "architecture_note",
+      "document_id": "doc_architecture",
+      "location": null,
+      "snippet": "Invoicing consumes the reconciled ledger from billing-recon; billing runs on billing-platform.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_eng_release_context",
+      "source_type": "runbook",
+      "document_id": "doc_eng_release",
+      "location": null,
+      "snippet": "Engineering owns the core API release path; the Engineering Manager coordinates releases and rollback readiness.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_product_roadmap_context",
+      "source_type": "policy",
+      "document_id": "doc_product_roadmap",
+      "location": null,
+      "snippet": "Product analytics informs roadmap sequencing and the Billing Modernization delivery plan.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_marketing_attribution_context",
+      "source_type": "kpi_definition",
+      "document_id": "doc_mkt_attribution",
+      "location": null,
+      "snippet": "Campaign targeting uses audience segmentation and is measured through qualified pipeline and acquisition cost.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_sales_playbook_context",
+      "source_type": "workflow_map",
+      "document_id": "doc_sales_playbook",
+      "location": null,
+      "snippet": "Sales uses lead scoring for qualification and account planning for enterprise expansion and retention.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_customer_success_context",
+      "source_type": "runbook",
+      "document_id": "doc_cs_runbook",
+      "location": null,
+      "snippet": "Customer Success owns onboarding and escalation readiness, with net revenue retention as the outcome measure.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_sop_financial_close_lineage",
+      "source_type": "workflow_map",
+      "document_id": "doc_sop_financial_close",
+      "location": null,
+      "snippet": "The monthly close SOP defers warehouse lineage questions to the Data Platform Lead.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_kyc_screening_inputs",
+      "source_type": "workflow_map",
+      "document_id": "doc_kyc_screening_sop",
+      "location": null,
+      "snippet": "KYC screening reads the Identity verification dataset and the Corporate linkage dataset.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_apex_msa_renewal",
+      "source_type": "contract",
+      "document_id": "doc_apex_msa",
+      "location": "clause 12.2",
+      "snippet": "Apex Data auto-renews on day 60 with an 8% price uplift.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_beacon_msa_terms",
+      "source_type": "contract",
+      "document_id": "doc_beacon_msa",
+      "location": "schedule 1",
+      "snippet": "BeaconIQ term end, notice period and exit fee.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_cinder_msa_terms",
+      "source_type": "contract",
+      "document_id": "doc_cinder_msa",
+      "location": "clause 4",
+      "snippet": "CinderSignals is the exclusive licensed source of intent signals.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_delta_msa_terms",
+      "source_type": "contract",
+      "document_id": "doc_delta_msa",
+      "location": "schedule 1",
+      "snippet": "DeltaVerify term end, notice period and exit fee.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_echo_msa_clause_9",
+      "source_type": "contract",
+      "document_id": "doc_echo_msa",
+      "location": "clause 9",
+      "snippet": "EchoMarket renews on day 120 with a 12% price uplift; the termination section does not say whether EchoMarket history is retained after exit.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_flux_usage_pricing",
+      "source_type": "contract",
+      "document_id": "doc_flux_msa",
+      "location": "schedule 2",
+      "snippet": "FluxBehavior is billed per record consumed.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_granite_msa_terms",
+      "source_type": "contract",
+      "document_id": "doc_granite_msa",
+      "location": "schedule 1",
+      "snippet": "GraniteGeo term end, notice period and exit fee.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_echo_history_retention",
+      "source_type": "contract",
+      "document_id": "doc_echo_msa",
+      "location": "section 14",
+      "snippet": "The termination section does not say whether EchoMarket history is retained after exit.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_vendor_dataset_matrix",
+      "source_type": "architecture_note",
+      "document_id": "doc_data_vendor_inventory",
+      "location": "table 1",
+      "snippet": "Vendor-to-dataset feed matrix with attribute groups and consuming workflows.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_granite_emerging_geo_risk",
+      "source_type": "architecture_note",
+      "document_id": "doc_data_vendor_inventory",
+      "location": "table 2",
+      "snippet": "GraniteGeo alone supplies emerging-market (APAC, LATAM) geo-risk data, which risk monitoring reads.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_vendor_recon_inputs",
+      "source_type": "workflow_map",
+      "document_id": "doc_vendor_recon_workflow_map",
+      "location": "step 2",
+      "snippet": "Vendor reconciliation inputs include the internal audit-log dataset.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_echo_account_intel_feed",
+      "source_type": "workflow_map",
+      "document_id": "doc_vendor_recon_workflow_map",
+      "location": "section 3.4",
+      "snippet": "The Account intelligence dataset also feeds the Vendor reconciliation workflow each month.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_incident_response_runbook_steps",
+      "source_type": "runbook",
+      "document_id": "doc_incident_response_runbook",
+      "location": null,
+      "snippet": "PLACEHOLDER: final wording pending - incident response on-call escalation and recovery steps.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_soc2_evidence_sop_steps",
+      "source_type": "policy",
+      "document_id": "doc_soc2_evidence_sop",
+      "location": null,
+      "snippet": "PLACEHOLDER: final wording pending - SOC 2 evidence collection and filing steps.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_vendor_recon_sop_steps",
+      "source_type": "workflow_map",
+      "document_id": "doc_vendor_recon_sop",
+      "location": null,
+      "snippet": "PLACEHOLDER: final wording pending - monthly vendor reconciliation procedure steps.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_risk_monitoring_runbook_steps",
+      "source_type": "runbook",
+      "document_id": "doc_risk_monitoring_runbook",
+      "location": null,
+      "snippet": "PLACEHOLDER: final wording pending - risk monitoring detection and response steps.",
+      "synthetic": true
+    },
+    {
+      "id": "ev_strategy_memo_1",
+      "source_type": "policy",
+      "document_id": "doc_department_map",
+      "location": null,
+      "snippet": "Protect enterprise retention first, then expand gross margin.",
+      "synthetic": true
+    }
   ]
 }
-

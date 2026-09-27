@@ -14,3 +14,9 @@ build/
 *.tsbuildinfo
 .coverage
 htmlcov/
+runs/
+.auth-secret
+# Per-run eval rows; ablation.json and ablation.csv stay committable.
+data/artifacts/eval/eval_runs.json
+data/artifacts/llm_cache/
+/.playwright-cli/*.log

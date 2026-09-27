@@ -1,14 +1,80 @@
-from .graph import build_graph, downstream_paths
-from .loader import load_company_twin
-from .models import CompanyTwin, Dependency, Entity, EntityKind
+from .adventureworks import ADVENTUREWORKS_TABLES, build_adventureworks_twin
+from .documents import document_is_stale, documented_workflow_ids
+from .graph import (
+    affected_departments,
+    blast_set,
+    build_graph,
+    downstream_paths,
+    list_dependencies,
+    reachable_departments,
+    upstream_paths,
+)
+from .loader import TwinValidationError, build_twin, load_company_twin, load_mitigation_catalog, load_twin
+from .models import (
+    AgentView,
+    CompanyTwin,
+    DepartmentDetail,
+    DomainGraph,
+    Edge,
+    Entity,
+    EntityKind,
+    EntityType,
+    Organization,
+    OrganizationSettings,
+    Pressure,
+    Relation,
+    Twin,
+    ValidationIssue,
+    entity_map,
+)
+from .validate import validate_twin
+from .versioning import AGENT_EDGE_DEFAULTS, clone, clone_with_edges, edge_from_agent_dependency, widen_uncertainty
+from .views import aggregate_domain_graph, build_agent_view, department_detail, to_role_level
 
 __all__ = [
     "CompanyTwin",
-    "Dependency",
+    "Twin",
     "Entity",
+    "EntityType",
     "EntityKind",
+    "Edge",
+    "Relation",
+    "Organization",
+    "OrganizationSettings",
+    "Pressure",
+    "AgentView",
+    "DomainGraph",
+    "DepartmentDetail",
+    "ValidationIssue",
+    "entity_map",
     "build_graph",
     "downstream_paths",
+    "upstream_paths",
+    "affected_departments",
+    "blast_set",
+    "list_dependencies",
+    "reachable_departments",
     "load_company_twin",
+    "load_twin",
+    "load_mitigation_catalog",
+    "validate_twin",
+    "clone",
+    "clone_with_edges",
+    "edge_from_agent_dependency",
+    "AGENT_EDGE_DEFAULTS",
+    "widen_uncertainty",
+    "build_agent_view",
+    "to_role_level",
+    "aggregate_domain_graph",
+    "department_detail",
+    "document_is_stale",
+    "documented_workflow_ids",
+    "build_twin",
+    "TwinValidationError",
+    "build_adventureworks_twin",
+    "ADVENTUREWORKS_TABLES",
+    "edit_department",
+    "edit_organization",
 ]
 
+from .departments import edit_department, edit_organization

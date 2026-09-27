@@ -1,17 +1,22 @@
 import type { Metadata } from "next";
-import "@xyflow/react/dist/style.css";
+
+import { AuthProvider } from "@/components/auth-provider";
+import { SimulationOutcomeProvider } from "@/components/simulation-outcome-provider";
+import { getSession } from "@/lib/auth-server";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Canary Pact",
-  description: "See the organizational blast radius before committing to a decision.",
+  title: "Canary Pact · Organizational simulation",
+  description: "Explore the organizational blast radius of a decision before committing.",
+  icons: { icon: "/canary-pact-logo-v3.png" },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const session = await getSession();
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body><AuthProvider initialUser={session.user} unavailable={session.unavailable}><SimulationOutcomeProvider>{children}</SimulationOutcomeProvider></AuthProvider></body>
     </html>
   );
 }
-

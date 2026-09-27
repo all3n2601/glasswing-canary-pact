@@ -1,0 +1,70 @@
+{
+  "$defs": {
+    "Future": {
+      "enum": [
+        "act_now",
+        "inaction",
+        "delay",
+        "alternative"
+      ],
+      "title": "Future",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "scenario_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "run_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "future": {
+      "$ref": "#/$defs/Future"
+    },
+    "plan_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Plan Id"
+    },
+    "delay_days": {
+      "minimum": 0,
+      "title": "Delay Days",
+      "type": "integer"
+    },
+    "baseline_twin_version": {
+      "title": "Baseline Twin Version",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "scenario_id",
+    "run_id",
+    "future",
+    "delay_days",
+    "baseline_twin_version",
+    "created_at"
+  ],
+  "title": "Scenario",
+  "type": "object"
+}

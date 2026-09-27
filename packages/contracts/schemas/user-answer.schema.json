@@ -1,0 +1,42 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "question_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Question Id",
+      "type": "string"
+    },
+    "value": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "title": "Value"
+    },
+    "answered_by": {
+      "title": "Answered By",
+      "type": "string"
+    },
+    "answered_at": {
+      "format": "date-time",
+      "title": "Answered At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "question_id",
+    "value",
+    "answered_by",
+    "answered_at"
+  ],
+  "title": "UserAnswer",
+  "type": "object"
+}

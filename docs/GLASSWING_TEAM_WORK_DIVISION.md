@@ -192,7 +192,7 @@ tests/api/
 - [ ] Detect disagreements, missing evidence, and decision-changing unknowns.
 - [ ] Generate clarification questions using sensitivity-analysis thresholds supplied by the engine.
 - [ ] Generate the executive explanation, alternatives, mitigation plan, monitoring plan, and rollback conditions.
-- [ ] Implement offline replay using saved agent responses so the demo does not depend on live model availability.
+- [ ] Use live agent suggestions only; surface unavailable agents without mock or recorded substitutes.
 - [ ] Expose the agreed REST endpoints and publish OpenAPI documentation.
 
 ### Minimum API surface
@@ -216,7 +216,7 @@ GET  /scenarios/{scenario_id}/report
 - Invalid requests return understandable validation errors.
 - Agent failures degrade gracefully and do not erase deterministic results.
 - Each claim in the executive report links to evidence, an assumption, or a deterministic calculation.
-- The complete demo can run using offline replay.
+- A failed live agent appears as a missing perspective and never injects recorded advice.
 - API contract tests pass using Person 4's mock payloads.
 
 ### Must not modify
@@ -275,7 +275,7 @@ deployment/
 - Every API state has loading, success, empty, and error handling.
 - The main demo completes without editing data manually.
 - A judge can identify the recommendation, affected departments, savings, risks, and evidence within two minutes.
-- The demo can recover from an unavailable live model by using offline replay.
+- The demo surfaces unavailable live agents while retaining deterministic calculations.
 - The deployed version passes the end-to-end smoke test.
 
 ### Must not modify
@@ -354,7 +354,7 @@ This is the first end-to-end milestone and should happen early.
 
 - Stop adding features.
 - Fix only demo-blocking defects.
-- Verify offline replay.
+- Verify missing live-agent perspectives are surfaced without substitution.
 - Run the complete demo three times.
 - Capture screenshots and a backup demo recording.
 
@@ -371,7 +371,7 @@ The project is complete when:
 - [ ] Gross savings, displaced costs, migration costs, and estimated business loss are shown separately.
 - [ ] Department agents add explanations without overriding deterministic calculations.
 - [ ] Users can compare alternatives and re-simulate mitigations.
-- [ ] The application works with offline replay if the live model is unavailable.
+- [ ] The application never substitutes mock or recorded agent suggestions when a live model is unavailable.
 - [ ] The complete demonstration is deployed and reproducible.
 
 ## 12. Scope Guardrails

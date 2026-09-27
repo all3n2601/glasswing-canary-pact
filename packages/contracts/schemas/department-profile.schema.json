@@ -1,0 +1,353 @@
+{
+  "$defs": {
+    "DepartmentBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "annual_budget_usd": {
+          "minimum": 0,
+          "title": "Annual Budget Usd",
+          "type": "integer"
+        },
+        "spent_ytd_usd": {
+          "minimum": 0,
+          "title": "Spent Ytd Usd",
+          "type": "integer"
+        },
+        "fixed_cost_pct": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Fixed Cost Pct",
+          "type": "number"
+        },
+        "budget_owner_role_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^(?:role_)[a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Budget Owner Role Id"
+        }
+      },
+      "required": [
+        "annual_budget_usd",
+        "spent_ytd_usd",
+        "fixed_cost_pct"
+      ],
+      "title": "DepartmentBudget",
+      "type": "object"
+    },
+    "DepartmentGap": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^(?:gap_)[a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "category": {
+          "$ref": "#/$defs/StrengthCategory"
+        },
+        "severity": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Severity",
+          "type": "integer"
+        },
+        "affected_entity_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Affected Entity Ids",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "category",
+        "severity"
+      ],
+      "title": "DepartmentGap",
+      "type": "object"
+    },
+    "DepartmentStrength": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "pattern": "^(?:str_)[a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "category": {
+          "$ref": "#/$defs/StrengthCategory"
+        },
+        "level": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Level",
+          "type": "integer"
+        },
+        "supports_entity_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Supports Entity Ids",
+          "type": "array"
+        },
+        "key_role_ids": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^(?:role_)[a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Key Role Ids",
+          "type": "array"
+        },
+        "concentration": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Concentration",
+          "type": "number"
+        },
+        "evidence_refs": {
+          "items": {
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "category",
+        "level",
+        "concentration"
+      ],
+      "title": "DepartmentStrength",
+      "type": "object"
+    },
+    "StaffingStrength": {
+      "additionalProperties": false,
+      "properties": {
+        "sanctioned_fte": {
+          "minimum": 0,
+          "title": "Sanctioned Fte",
+          "type": "number"
+        },
+        "actual_fte": {
+          "minimum": 0,
+          "title": "Actual Fte",
+          "type": "number"
+        },
+        "contractors_fte": {
+          "minimum": 0,
+          "title": "Contractors Fte",
+          "type": "number"
+        },
+        "open_positions": {
+          "minimum": 0,
+          "title": "Open Positions",
+          "type": "integer"
+        },
+        "attrition_rate_annual": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Attrition Rate Annual",
+          "type": "number"
+        },
+        "avg_time_to_hire_days": {
+          "minimum": 0,
+          "title": "Avg Time To Hire Days",
+          "type": "integer"
+        },
+        "utilisation": {
+          "maximum": 1.5,
+          "minimum": 0,
+          "title": "Utilisation",
+          "type": "number"
+        }
+      },
+      "required": [
+        "sanctioned_fte",
+        "actual_fte",
+        "contractors_fte",
+        "open_positions",
+        "attrition_rate_annual",
+        "avg_time_to_hire_days",
+        "utilisation"
+      ],
+      "title": "StaffingStrength",
+      "type": "object"
+    },
+    "StrengthCategory": {
+      "enum": [
+        "capability",
+        "expertise",
+        "process",
+        "asset",
+        "relationship",
+        "data"
+      ],
+      "title": "StrengthCategory",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "active": {
+      "default": true,
+      "title": "Active",
+      "type": "boolean"
+    },
+    "department_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Department Id",
+      "type": "string"
+    },
+    "mission": {
+      "title": "Mission",
+      "type": "string"
+    },
+    "head_role_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "pattern": "^(?:role_)[a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Head Role Id"
+    },
+    "agent_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Agent Id"
+    },
+    "staffing": {
+      "$ref": "#/$defs/StaffingStrength"
+    },
+    "budget": {
+      "$ref": "#/$defs/DepartmentBudget"
+    },
+    "strengths": {
+      "items": {
+        "$ref": "#/$defs/DepartmentStrength"
+      },
+      "minItems": 1,
+      "title": "Strengths",
+      "type": "array"
+    },
+    "gaps": {
+      "items": {
+        "$ref": "#/$defs/DepartmentGap"
+      },
+      "title": "Gaps",
+      "type": "array"
+    },
+    "maturity_level": {
+      "maximum": 5,
+      "minimum": 1,
+      "title": "Maturity Level",
+      "type": "integer"
+    },
+    "owned_entity_ids": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Owned Entity Ids",
+      "type": "array"
+    },
+    "critical_workflow_ids": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Critical Workflow Ids",
+      "type": "array"
+    },
+    "kpi_ids": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Kpi Ids",
+      "type": "array"
+    },
+    "document_ids": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Document Ids",
+      "type": "array"
+    },
+    "documentation_coverage": {
+      "default": 0.0,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Documentation Coverage",
+      "type": "number"
+    }
+  },
+  "required": [
+    "department_id",
+    "mission",
+    "staffing",
+    "budget",
+    "strengths",
+    "maturity_level"
+  ],
+  "title": "DepartmentProfile",
+  "type": "object"
+}

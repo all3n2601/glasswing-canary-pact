@@ -1,0 +1,229 @@
+{
+  "twin_version": null,
+  "schema_version": "2.1.1",
+  "organization": {
+    "id": "org_northstar",
+    "legal_name": "Northstar Technologies Inc.",
+    "display_name": "Northstar Technologies",
+    "sector": "technology_saas",
+    "sub_sector": "Enterprise revenue, billing, and data software",
+    "secondary_sectors": [
+      "financial_services"
+    ],
+    "business_model": "b2b",
+    "size_band": "large_enterprise",
+    "headquarters_country": "US",
+    "operating_regions": [
+      "US",
+      "EU",
+      "APAC"
+    ],
+    "annual_revenue_usd": 120000000000,
+    "total_annual_budget_usd": 40000000000,
+    "total_headcount_fte": 60000.0,
+    "fiscal_year_start_month": 1,
+    "regulatory_frameworks": [
+      "SOC2",
+      "GDPR",
+      "PCI_DSS",
+      "SOX"
+    ],
+    "strategic_priorities": [
+      {
+        "id": "sp_retention",
+        "text": "Protect enterprise retention",
+        "rank": 1,
+        "kpi_ids": [
+          "kpi_net_retention"
+        ]
+      },
+      {
+        "id": "sp_margin",
+        "text": "Expand gross margin by two points",
+        "rank": 2,
+        "kpi_ids": [
+          "kpi_gross_margin"
+        ]
+      }
+    ],
+    "description": "Large enterprise software company selling revenue, billing, and data products to businesses in the US, EU, and APAC. It buys external data from seven vendors costing $8B a year.",
+    "evidence_refs": [
+      "ev_strategy_memo_1"
+    ]
+  },
+  "departments": [
+    {
+      "department_id": "dept_engineering",
+      "name": "Engineering",
+      "mission": "Build and run the revenue-critical product systems.",
+      "actual_fte": 16300.0,
+      "annual_budget_usd": 9000000000,
+      "utilisation": 1.05,
+      "maturity_level": 3,
+      "enabled": true,
+      "active": true,
+      "agent_id": null
+    },
+    {
+      "department_id": "dept_operations",
+      "name": "Operations",
+      "mission": "Keep customer-facing platforms and billing operations running.",
+      "actual_fte": 5800.0,
+      "annual_budget_usd": 3100000000,
+      "utilisation": 1.12,
+      "maturity_level": 3,
+      "enabled": true,
+      "active": true,
+      "agent_id": null
+    },
+    {
+      "department_id": "dept_ai_data",
+      "name": "AI and Data",
+      "mission": "Own data pipelines, models, scores and analytics.",
+      "actual_fte": 4500.0,
+      "annual_budget_usd": 4000000000,
+      "utilisation": 1.0,
+      "maturity_level": 3,
+      "enabled": true,
+      "active": true,
+      "agent_id": null
+    },
+    {
+      "department_id": "dept_product",
+      "name": "Product",
+      "mission": "Own roadmap, releases and transformation projects.",
+      "actual_fte": 4000.0,
+      "annual_budget_usd": 3500000000,
+      "utilisation": 1.0,
+      "maturity_level": 3,
+      "enabled": true,
+      "active": true,
+      "agent_id": null
+    },
+    {
+      "department_id": "dept_sales",
+      "name": "Sales",
+      "mission": "Win and expand enterprise and mid-market revenue.",
+      "actual_fte": 9000.0,
+      "annual_budget_usd": 8000000000,
+      "utilisation": 1.05,
+      "maturity_level": 3,
+      "enabled": true,
+      "active": true,
+      "agent_id": null
+    },
+    {
+      "department_id": "dept_marketing",
+      "name": "Marketing",
+      "mission": "Demand generation, segmentation and acquisition.",
+      "actual_fte": 2500.0,
+      "annual_budget_usd": 2500000000,
+      "utilisation": 1.0,
+      "maturity_level": 3,
+      "enabled": true,
+      "active": true,
+      "agent_id": null
+    },
+    {
+      "department_id": "dept_customer_success",
+      "name": "Customer Success",
+      "mission": "Protect retention, SLAs and customer health.",
+      "actual_fte": 8000.0,
+      "annual_budget_usd": 4500000000,
+      "utilisation": 1.08,
+      "maturity_level": 3,
+      "enabled": true,
+      "active": true,
+      "agent_id": null
+    },
+    {
+      "department_id": "dept_finance",
+      "name": "Finance",
+      "mission": "Own budget, cost targets, financial KPIs, vendor contracts and the close.",
+      "actual_fte": 3000.0,
+      "annual_budget_usd": 3400000000,
+      "utilisation": 1.0,
+      "maturity_level": 3,
+      "enabled": true,
+      "active": true,
+      "agent_id": null
+    },
+    {
+      "department_id": "dept_compliance",
+      "name": "Compliance",
+      "mission": "Own controls, auditability and regulatory posture.",
+      "actual_fte": 2500.0,
+      "annual_budget_usd": 2000000000,
+      "utilisation": 1.05,
+      "maturity_level": 3,
+      "enabled": true,
+      "active": true,
+      "agent_id": null
+    }
+  ],
+  "settings": {
+    "settings_id": "set_default",
+    "organization_id": null,
+    "settings_version": 1,
+    "updated_by": "system",
+    "updated_at": "2026-09-26T00:00:00Z",
+    "display_currency": "USD",
+    "money_display_scale": "auto",
+    "timezone": "UTC",
+    "locale": "en-US",
+    "default_horizon_days": 365,
+    "default_futures": [
+      "act_now",
+      "inaction",
+      "delay"
+    ],
+    "default_delay_days": 90,
+    "mc_samples": 1000,
+    "default_seed": 42,
+    "propagation_max_hops": 4,
+    "min_impact_threshold": 0.02,
+    "risk_appetite": "balanced",
+    "risk_level_thresholds": {
+      "medium": 25.0,
+      "high": 50.0,
+      "critical": 75.0
+    },
+    "risk_weights": {
+      "financial": 25.0,
+      "capability_workflow": 25.0,
+      "customer_revenue": 20.0,
+      "compliance_control": 20.0,
+      "execution_uncertainty": 10.0
+    },
+    "optimizer_objective": "max_net_value",
+    "default_constraints": [],
+    "always_protected_entity_ids": [],
+    "require_human_approval": true,
+    "anonymize_people": true,
+    "enabled_agent_ids": [
+      "finance",
+      "engineering",
+      "ai_data",
+      "operations",
+      "product",
+      "marketing",
+      "sales",
+      "customer_success",
+      "compliance",
+      "challenger",
+      "people_knowledge"
+    ],
+    "llm_mode": "live",
+    "model_id_strong": null,
+    "model_id_fast": null,
+    "max_tool_calls": 3,
+    "temperature": 0.4,
+    "agent_timeout_seconds": 45,
+    "doc_staleness_days": 365,
+    "required_doc_types_per_workflow": [
+      "runbook",
+      "sop"
+    ],
+    "sector_preset_id": null
+  }
+}

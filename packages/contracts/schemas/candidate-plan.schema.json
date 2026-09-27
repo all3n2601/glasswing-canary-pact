@@ -1,0 +1,58 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "plan_id": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "label": {
+      "title": "Label",
+      "type": "string"
+    },
+    "intervention_ids": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Intervention Ids",
+      "type": "array"
+    },
+    "source": {
+      "enum": [
+        "naive",
+        "enumerated",
+        "optimizer",
+        "agent",
+        "user",
+        "mitigated"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "parent_plan_id": {
+      "anyOf": [
+        {
+          "maxLength": 80,
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parent Plan Id"
+    }
+  },
+  "required": [
+    "plan_id",
+    "label",
+    "intervention_ids",
+    "source"
+  ],
+  "title": "CandidatePlan",
+  "type": "object"
+}

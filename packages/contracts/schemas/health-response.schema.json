@@ -1,0 +1,58 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "status": {
+      "default": "ok",
+      "enum": [
+        "ok",
+        "degraded"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "2.1.1",
+      "enum": [
+        "2.1.0",
+        "2.1.1"
+      ],
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "storage": {
+      "default": "file",
+      "enum": [
+        "file",
+        "postgres"
+      ],
+      "title": "Storage",
+      "type": "string"
+    },
+    "storage_write_failures": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Storage Write Failures",
+      "type": "integer"
+    },
+    "engine_impl": {
+      "default": "stub",
+      "enum": [
+        "stub",
+        "real"
+      ],
+      "title": "Engine Impl",
+      "type": "string"
+    },
+    "twin_impl": {
+      "default": "stub",
+      "enum": [
+        "stub",
+        "real"
+      ],
+      "title": "Twin Impl",
+      "type": "string"
+    }
+  },
+  "title": "HealthResponse",
+  "type": "object"
+}

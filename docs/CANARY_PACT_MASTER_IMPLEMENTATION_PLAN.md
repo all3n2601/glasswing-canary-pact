@@ -81,8 +81,8 @@ The implementation must preserve these ideas from the main plan:
 - Mitigation re-simulation
 - Item-level counterfactuals
 - Sensitivity-based missing-question selection
-- Saved run events and deterministic replay
-- Mock-first parallel development
+- Persisted run events and audit history
+- Live-only agent suggestions with explicit unavailable states
 - Frozen JSON contracts in Hour 0
 - A planted ground-truth graph for evaluation
 - Explicit honest limitations
@@ -91,7 +91,7 @@ The implementation must preserve these ideas from the main plan:
 
 | Excluded idea | Reason |
 |---|---|
-| 3D office and avatars | Adds visual and integration risk without improving the decision engine |
+| Decorative 3D office expansion | Dynamic departments and an evidence-backed board review were approved on 2026-09-27; implement only the bounded scope in Section 31 |
 | Long free-form agent debate | Slow, expensive, difficult to validate, and distracts from the twin |
 | Person-level “fire/retain” recommendations | Creates ethical, legal, and product-positioning risk |
 | Autonomous execution | Human approval must remain mandatory |
@@ -270,7 +270,7 @@ Agents may identify potential impacts, challenge assumptions, extract dependenci
 15. Mitigation engine
 16. Sensitivity and missing-question selector
 17. Explanation and decision-package generator
-18. Event stream, replay, and audit log
+18. Event stream, run-state restoration, and audit log
 19. Web dashboard
 
 ### 5.3 Recommended hackathon stack
@@ -581,6 +581,10 @@ DETERMINISTIC IMPACT PROPAGATION
       ↓
 ONE CROSS-AGENT CHALLENGE ROUND
       ↓
+ONE TARGETED DEPARTMENT RESPONSE ROUND
+      ↓
+VALIDATE REPLIES + PROPAGATE NEW DEPENDENCIES
+      ↓
 CONSTRAINT FILTER + OPTIMIZATION
       ↓
 FULL UNCERTAINTY RUN ON FINALISTS
@@ -611,11 +615,13 @@ This preserves the department-agent concept without wasting time and tokens on i
 - Output merging waits until the first pass completes.
 - Deterministic propagation runs after merging.
 - One challenge round is serially triggered from the merged blast radius.
-- Final optimization runs only after challenges are resolved or labeled unresolved.
+- One targeted response round follows the challenge: at most three departments, each answering at most three objections in severity order. Each receives its prior assessment, linked objections, and the updated permission-filtered simulation context.
+- Reply positions are revised, supported, or unresolved. Supported/revised positions require visible evidence references and do not establish consensus or resolve the criticism automatically.
+- Final optimization runs after reply validation and dependency propagation; unaddressed concerns remain in the decision package.
 
 ### 9.3 Convergence
 
-Stop agent iteration after one challenge round for the hackathon. Production may stop when:
+User-approved extension (2026-09-27): stop agent iteration after one challenge round and one bounded targeted response round. Do not respond recursively to replies. Production may stop when:
 
 - no new severity-3-or-higher risk is found;
 - no new dependency is proposed;
@@ -649,6 +655,8 @@ async def run_decision(brief: DecisionBrief) -> DecisionPackage:
 
     challenged = await challenger.review(run.top_candidates(3))
     run.merge_challenges(challenged)
+    replies = await respond_to_targeted_objections(run, max_agents=3, max_issues_per_agent=3)
+    run.validate_and_merge_replies(replies)
     rerun_changed_candidates(run)
 
     feasible = constraints.filter(run.candidates, brief.constraints)
@@ -666,7 +674,6 @@ async def run_decision(brief: DecisionBrief) -> DecisionPackage:
         question=question,
         mitigated=mitigated,
     )
-    run.save_replay()
     return package
 ```
 
@@ -727,7 +734,7 @@ Tools are read-only except submission of structured hypotheses and assessments.
 - Convert unsupported facts into hypotheses.
 - Require evidence references for factual dependency claims.
 - Retry once after validation failure.
-- Fall back to a cached assessment if the retry fails.
+- Mark the assessment unavailable if the retry fails.
 
 ### 10.5 Agent context management
 
@@ -743,7 +750,6 @@ Tools are read-only except submission of structured hypotheses and assessments.
 An agent failure must never block the deterministic engine.
 
 - Mark the agent assessment unavailable.
-- Use cached output if the demo is in replay or fallback mode.
 - Surface the missing perspective in the final package.
 - Increase uncertainty for dependencies owned by that department.
 - Continue if hard constraints can still be evaluated.
@@ -766,7 +772,7 @@ An agent failure must never block the deterministic engine.
 - Runs only on the top three alternatives plus inaction and delay
 - Samples uncertain edge weights and impact coefficients
 - Returns P10/P50/P90 ranges
-- Uses a fixed random seed for reproducible replays
+- Uses a fixed random seed for reproducible results
 
 ### 11.2 Scenario futures
 
@@ -917,7 +923,6 @@ Ask only the top question during the demo.
 - `POST /api/runs/{id}/decision`
 - `GET /api/runs/{id}/recommendation`
 - `GET /api/audit`
-- `GET /api/replays`
 
 ### 12.2 Run lifecycle
 
@@ -952,7 +957,7 @@ Emit typed events for:
 - recommendation completed;
 - human decision recorded.
 
-Persist events in sequence so the same run can be replayed exactly.
+Persist events in sequence so run history and audit state can be restored exactly.
 
 ### 12.4 LLM wrapper
 
@@ -964,10 +969,9 @@ One wrapper owns:
 - retry with backoff;
 - concurrency semaphore;
 - token budget;
-- prompt and response logging;
+- prompt metadata and response metrics;
 - response validation;
-- mock mode;
-- cached fallback mode.
+- explicit unavailable results when live calls fail.
 
 No application module calls a provider SDK directly.
 
@@ -1041,6 +1045,10 @@ The user selects the naive vendor cut. The graph turns red as data loss propagat
 ### 13.8 Secondary hero moment
 
 The user applies the workforce reduction. Two workflows immediately become stranded because knowledge coverage falls to zero. A mitigation plan restores backup coverage and changes the scenario from infeasible to conditionally feasible.
+
+### 13.9 Interactive office and structured board review
+
+The existing office becomes a data-driven view of the company twin, with department inspection, proposed organization changes, dependency paths, and time-based impacts. A board-review mode presents actual agent assessments and the existing challenger pass. Section 31 defines the approved implementation sequence and acceptance checks. The graph and accessible department list remain available alongside the office.
 
 ---
 
@@ -1117,9 +1125,6 @@ canary-pact/
 │   ├── graph_eval.py
 │   ├── engine_tests.py
 │   └── agent_checks.py
-├── cache/
-│   ├── sample_run.json
-│   └── golden_run.json
 ├── runs/
 ├── frontend/
 │   ├── app/
@@ -1131,13 +1136,13 @@ canary-pact/
 
 ---
 
-## 15. Mock-first integration strategy
+## 15. Contract-first integration strategy
 
 No owner waits for another owner.
 
 ### Hour-0 shared artifact
 
-Create `cache/sample_run.json` containing the complete expected event stream for the golden vendor demo. This file lets the frontend, event player, and decision-package UI work before the real engine or agents are ready.
+Publish schema-valid example payloads for each frozen contract, including event variants and loading, success, empty, and error responses. These fixtures let downstream layers build before upstream implementations are ready, but they are development inputs only and must never be served as recorded agent advice.
 
 ### Parallel development
 
@@ -1145,16 +1150,16 @@ Create `cache/sample_run.json` containing the complete expected event stream for
 |---|---|
 | Twin and engine | Real synthetic company and ground-truth graph |
 | Agents | Stub `run_quick_impact()` with frozen schema |
-| Backend | `sample_run.json` and contract fixtures |
-| Frontend | Replay event stream from `sample_run.json` |
+| Backend | Frozen contracts and schema-valid request/response fixtures |
+| Frontend | Mock API payloads covering every required UI state |
 
 ### Integration sequence
 
 1. Engine replaces the quick-impact stub.
 2. Agent assessments feed the real event ledger.
 3. Backend streams real events.
-4. Frontend swaps replay source for live source.
-5. Full vendor run is saved as `golden_run.json`.
+4. Frontend consumes the live run event source.
+5. The full vendor run is validated against deterministic acceptance checks.
 6. Workforce proof reuses the same contracts and UI.
 
 ---
@@ -1163,13 +1168,13 @@ Create `cache/sample_run.json` containing the complete expected event stream for
 
 ### Phase 0 — Freeze the product contract
 
-**Exit condition:** schemas, golden storyline, dataset totals, constraints, and UI event sequence are agreed.
+**Exit condition:** schemas, reference scenarios, dataset totals, constraints, and UI event sequence are agreed.
 
 - Freeze all schemas in `contracts/`.
 - Freeze seven vendors totaling $8B.
 - Freeze the $2B objective and hard constraints.
 - Freeze workforce scenario entities and expected stranded workflows.
-- Create `sample_run.json`.
+- Prepare the live-provider test configuration.
 - Assign directory ownership.
 
 ### Phase 1 — Build the company twin
@@ -1206,7 +1211,7 @@ Create `cache/sample_run.json` containing the complete expected event stream for
 - Implement tools and structured outputs.
 - Validate and merge assessments.
 - Add challenger pass.
-- Add timeout, retry, token budget, mock mode, and fallback.
+- Add timeout, retry, token budget, and missing-perspective handling.
 
 ### Phase 4 — Build futures and uncertainty
 
@@ -1239,11 +1244,11 @@ Create `cache/sample_run.json` containing the complete expected event stream for
 - Implement stranded-workflow rules.
 - Add role-level privacy rules.
 - Run the same orchestration and blast-radius pipeline.
-- Save the workforce golden replay.
+- Verify the workforce scenario with live department agents.
 
 ### Phase 7 — Build frontend and resilience
 
-**Exit condition:** both scenarios play end-to-end live and offline.
+**Exit condition:** both scenarios run end-to-end with live agents and surface provider failures honestly.
 
 - Build twin map.
 - Build decision composer.
@@ -1252,7 +1257,6 @@ Create `cache/sample_run.json` containing the complete expected event stream for
 - Build futures comparison.
 - Build decision package and audit view.
 - Add one-click reset.
-- Add replay mode.
 - Record backup video.
 
 ---
@@ -1265,14 +1269,14 @@ Create `cache/sample_run.json` containing the complete expected event stream for
 - Freeze contracts and dataset.
 - Confirm model access.
 - Create branches and directory ownership.
-- Create `sample_run.json`.
+- Publish schema-valid cross-layer example payloads.
 
 ### Build block 1
 
 - Twin owner: dataset, graph, clone, validation.
 - Engine owner: overlap, change operators, constraints.
 - Agent/backend owner: LLM wrapper, Pydantic models, orchestrator skeleton.
-- Frontend owner: application shell and replay-driven twin graph.
+- Frontend owner: application shell and live-event-driven twin graph.
 
 ### Build block 2
 
@@ -1280,7 +1284,7 @@ Create `cache/sample_run.json` containing the complete expected event stream for
 - Complete graph impact propagation.
 - Run all 128 portfolios.
 - Complete one department-agent call.
-- Connect sample event stream to UI.
+- Connect the live event stream to the UI.
 
 ### Build block 3
 
@@ -1294,12 +1298,12 @@ Create `cache/sample_run.json` containing the complete expected event stream for
 - Complete decision package.
 - Add missing question and mitigation re-simulation.
 - Add compact workforce scenario.
-- Save golden runs.
+- Verify both live scenarios against their deterministic acceptance checks.
 
 ### Final block
 
 - Test seeded results.
-- Test offline replay.
+- Test live-agent failure and missing-perspective handling.
 - Fix only correctness and demo blockers.
 - Record backup video.
 - Write submission and rehearse.
@@ -1322,7 +1326,7 @@ Never cut:
 - naive-versus-recommended comparison;
 - traceable blast radius;
 - workforce stranded-workflow proof;
-- replay fallback;
+- explicit unavailable-agent handling;
 - human approval.
 
 ---
@@ -1333,7 +1337,7 @@ Never cut:
 |---|---|---|
 | Twin/data owner | Dataset, graph, evidence, cloning, views, knowledge model, graph evaluation | `data/`, `twin/`, `eval/graph_eval.py` |
 | Engine owner | Changes, overlap, propagation, futures, constraints, optimization, forecast, mitigations, sensitivity | `engine/`, engine tests |
-| Agent/backend owner | LLM wrapper, agents, orchestration, APIs, events, replay, audit | `agents/`, `orchestration/`, `backend/`, `llm/` |
+| Agent/backend owner | LLM wrapper, agents, orchestration, APIs, events, run restoration, audit | `agents/`, `orchestration/`, `backend/`, `llm/` |
 | Frontend/product owner | UX, graph, blast radius, futures, decision package, demo, pitch, submission | `frontend/`, product fixtures, demo assets |
 
 The team integrates through frozen contracts. `main` must remain runnable. Merge small changes frequently.
@@ -1381,7 +1385,7 @@ The team integrates through frozen contracts. `main` must remain runnable. Merge
 - Every material factual claim has evidence.
 - Agent numbers agree with deterministic tool results.
 - One challenge round surfaces the planted missed dependency.
-- Timeout and malformed output fall back safely.
+- Timeout and malformed output surface an unavailable assessment without substituting recorded advice.
 
 ### 19.5 Simulation tests
 
@@ -1397,7 +1401,7 @@ The team integrates through frozen contracts. `main` must remain runnable. Merge
 ### 19.6 Demo tests
 
 - Live run completes twice from reset.
-- Offline replay completes twice with network disabled.
+- A forced live-agent failure surfaces the missing perspective without substituting recorded advice.
 - Browser refresh restores the selected run.
 - The UI works at projector resolution.
 - Every figure shown can be traced to a result or labeled assumption.
@@ -1409,13 +1413,13 @@ The team integrates through frozen contracts. `main` must remain runnable. Merge
 
 | Failure | Behavior |
 |---|---|
-| Model timeout | Retry once, then use cached agent result and mark fallback |
-| Malformed agent JSON | Validate, repair safe fields, retry once, then fallback |
+| Model timeout | Retry once, then mark the agent unavailable |
+| Malformed agent JSON | Validate, repair safe fields, retry once, then mark unavailable |
 | Missing department assessment | Continue, increase uncertainty, surface missing perspective |
 | Constraint engine error | Fail closed; do not recommend the plan |
 | Live event disconnect | Reconnect from last sequence number |
-| Frontend refresh | Reload run state and replay remaining events |
-| Provider outage | Use `golden_run.json` |
+| Frontend refresh | Reload run state and resume events from the last persisted sequence |
+| Provider outage | Continue deterministic calculations, surface missing perspectives, and withhold unsupported suggestions |
 | Invalid decision brief | Return field-level validation errors |
 | No feasible plan | Explain violated constraints and show closest alternatives |
 | Incomplete evidence | Label hypothesis and ask for verification |
@@ -1462,7 +1466,7 @@ Record for every model call:
 - input/output token counts;
 - latency;
 - validation failures;
-- fallback use.
+- unavailable status and validation errors.
 
 Record for every decision:
 
@@ -1489,7 +1493,6 @@ Record for every decision:
 - Department-agent first pass: under 60 seconds wall time with bounded parallelism
 - Final full simulation: under 10 seconds for top alternatives
 - Complete live run: under 2 minutes
-- Offline replay: configurable 30–90 seconds
 
 ### Controls
 
@@ -1497,9 +1500,7 @@ Record for every decision:
 - Per-agent tool-call limit
 - Per-call timeout
 - Per-run token ceiling
-- Development mock mode
 - Cached fixed prompt prefixes
-- Golden-run replay
 
 ---
 
@@ -1510,7 +1511,7 @@ Record for every decision:
 | Agent orchestration exceeds available time | High | High | Dynamic routing, one challenge round, frozen schemas, cached outputs |
 | Agents hallucinate dependencies | Medium | High | Evidence requirement, unknown-ID rejection, deterministic validation |
 | Results look hard-coded | Medium | High | Compute 128 portfolios, expose constraints, add AI graph-extraction evaluation |
-| Live model is slow or unavailable | Medium | Critical | Mock mode, golden replay, backup video |
+| Live model is slow or unavailable | Medium | Critical | Bounded retry, missing-perspective state, deterministic results, backup video |
 | Vendor assumptions are challenged | High | Medium | Show assumptions, confidence, sensitivity, and synthetic labels |
 | Workforce scenario appears like a layoff recommender | Medium | High | Role/workflow-level output only; no named-person ranking |
 | Contract drift blocks integration | Medium | High | Freeze schemas in Hour 0 and add contract tests |
@@ -1566,7 +1567,7 @@ The project is complete for the hackathon only when:
 - the workforce scenario detects both stranded workflows;
 - one mitigation is re-simulated;
 - every important claim has evidence or an assumption label;
-- a complete run can be replayed offline;
+- live agent failures are surfaced without substituting recorded advice;
 - the user must approve or reject the recommendation;
 - the demo has been rehearsed successfully at least three times.
 
@@ -1626,7 +1627,7 @@ These limitations should be stated clearly. The product’s value is making depe
 
 This backlog is the build order. A task is complete only when its acceptance check passes.
 
-### Milestone A — Contracts and golden story
+### Milestone A — Contracts and reference scenarios
 
 | ID | Task | Owner | Depends on | Acceptance check |
 |---|---|---|---|---|
@@ -1634,7 +1635,7 @@ This backlog is the build order. A task is complete only when its acceptance che
 | A-02 | Create six JSON schemas | Agent/backend | A-01 | Valid and invalid fixtures behave as expected |
 | A-03 | Define seven-vendor fixture and coefficients | Twin/data | A-01 | Costs total $8B; expected winning plan documented |
 | A-04 | Define workforce fixture | Twin/data | A-01 | Removing eight role tokens strands exactly two workflows |
-| A-05 | Write `sample_run.json` | Frontend + agent/backend | A-02–A-04 | Event stream tells the complete vendor demo and validates |
+| A-05 | Publish cross-layer example payloads | Frontend + agent/backend | A-02–A-04 | Schema-valid fixtures cover required API, event, and UI states without recorded agent advice |
 
 ### Milestone B — Company twin
 
@@ -1663,13 +1664,13 @@ This backlog is the build order. A task is complete only when its acceptance che
 
 | ID | Task | Owner | Depends on | Acceptance check |
 |---|---|---|---|---|
-| D-01 | Implement model wrapper and mock mode | Agent/backend | A-02 | Mock and one live structured call validate |
+| D-01 | Implement live model wrapper | Agent/backend | A-02 | One live structured call validates |
 | D-02 | Implement deterministic phase state machine | Agent/backend | D-01, B-04 | Run phases progress and persist in order |
 | D-03 | Implement dynamic agent routing | Agent/backend | B-05, D-02 | Vendor and workforce scenarios route different agent sets |
 | D-04 | Implement department prompts and tools | Agent/backend | D-01, C-03 | Agents can inspect evidence and call quick simulation |
 | D-05 | Validate and merge assessments | Agent/backend | D-04 | Unknown IDs rejected; valid impacts enter ledger |
 | D-06 | Implement one challenger pass | Agent/backend | D-05 | Planted overlooked dependency is surfaced |
-| D-07 | Add timeout, retry, fallback, and budgets | Agent/backend | D-01–D-06 | Forced provider failure still completes run |
+| D-07 | Add timeout, retry, unavailable states, and budgets | Agent/backend | D-01–D-06 | Forced provider failure surfaces a missing perspective |
 
 ### Milestone E — Futures and decision intelligence
 
@@ -1683,14 +1684,14 @@ This backlog is the build order. A task is complete only when its acceptance che
 | E-06 | Implement missing-fact selector | Engine | E-03 | Planted sensitive unknown ranks first |
 | E-07 | Implement mitigation re-simulation | Engine | C-07, E-03 | Knowledge transfer or data migration changes feasibility |
 
-### Milestone F — Backend and replay
+### Milestone F — Backend and audit history
 
 | ID | Task | Owner | Depends on | Acceptance check |
 |---|---|---|---|---|
 | F-01 | Implement run and decision APIs | Agent/backend | D-02, C-06 | API creates run and returns stable IDs |
 | F-02 | Implement typed event stream | Agent/backend | F-01 | Events arrive in sequence and validate |
 | F-03 | Persist runs and audit decisions | Agent/backend | F-02 | Refresh restores complete run and approval record |
-| F-04 | Implement replay source | Agent/backend | F-02, A-05 | Saved run replays without model access |
+| F-04 | Restore persisted run state | Agent/backend | F-02, A-05 | Refresh restores run and audit history without re-running agents |
 | F-05 | Add one-click reset | Agent/backend + frontend | F-04 | Demo returns to baseline in one action |
 
 ### Milestone G — Product experience
@@ -1703,7 +1704,7 @@ This backlog is the build order. A task is complete only when its acceptance che
 | G-04 | Futures comparison | Frontend | E-01–E-04 | Act, inaction, delay, and alternatives compare consistently |
 | G-05 | Decision package | Frontend | E-05–E-07 | Recommendation, assumptions, mitigation, and rollback visible |
 | G-06 | Workforce proof | Frontend | C-07, E-07 | Stranded workflows and mitigated state are unmistakable |
-| G-07 | Offline golden replay | Frontend | F-04 | Full pitch path succeeds with network disabled |
+| G-07 | Missing-agent state | Frontend | F-04 | Provider failure is visible and no recorded suggestion is substituted |
 
 ### Milestone H — Evaluation and delivery
 
@@ -1727,7 +1728,7 @@ Required:
 
 - Decision, impact, agent assessment, simulation result, event, and twin schemas validated
 - Both scenario fixtures defined
-- `sample_run.json` committed
+- Cross-layer example payloads committed and schema-valid
 
 If this gate is not complete, parallel implementation must not begin.
 
@@ -1751,7 +1752,7 @@ Required:
 - At least three affected agents run in parallel
 - Outputs validate and merge
 - Agent findings alter or enrich the blast radius without overriding deterministic facts
-- Fallback completes the run after a forced model failure
+- A forced model failure leaves deterministic results intact and surfaces the missing perspective
 
 ### Gate 4 — Complete vendor decision
 
@@ -1778,8 +1779,190 @@ Required:
 Required:
 
 - Live run succeeds
-- Offline replay succeeds
+- Missing live-agent perspectives are surfaced without fallback advice
 - One-click reset succeeds
 - Backup video exists
 - Final README and submission are complete
 - Three timed rehearsals succeed
+
+---
+
+## 31. Approved expansion: interactive office and structured board review
+
+**Approved:** 2026-09-27, following the user's request for dynamic departments, richer office interactions, and a visualization of agents presenting and defending their findings. This section supersedes the earlier exclusion of the 3D office only for this scope. It does not authorize free-form agent debate, autonomous organizational actions, another demonstration scenario, or a new service/framework.
+
+**Outcome:** A user can inspect their company, add or reduce departments in a proposed scenario, compare the changed organization with its baseline, and follow evidence-backed departmental assessments around the meeting table. Agents explain; the engine calculates; the user decides.
+
+**Delivery order:** Verify core behavior → agree contracts → persist department changes → make the office dynamic → show scenario effects → connect live events → present the board review → verify both existing demos. These are implementation tasks, not claims that the current product already supports them.
+
+### 31.1 Current implementation and concrete gaps
+
+| Area | Current implementation | Required change |
+|---|---|---|
+| Office scene | `apps/web/components/office-scene.tsx` loads one GLB, animates six fixed routes from the forecast day, and toggles named workstations plus six generic slots | Render zones and representatives from stable IDs; separate agent activity from forecast playback |
+| Department placement | `apps/web/lib/simulation-view.ts` has fixed coordinates and cycles through six fallback positions | Assign stable, non-overlapping slots with explicit overflow behavior |
+| Department controls | Onboarding toggles local state; the organization settings save handler acknowledges local changes without persisting those edits | Persist validated company changes and refresh the server-backed profile before reporting success; preserve the existing working context-addition flow |
+| Results | The dashboard applies the recommended result (or naive fallback), polls run state, and switches to the graph on completion | Keep the user's chosen view; explicitly select baseline, plan, future, and mitigation result |
+| Live events | The API has a WebSocket event stream and persisted event history; the web client does not consume individual events | Add authenticated incremental event access through the existing web proxy and recover by sequence |
+| Assessments | The orchestrator publishes started/completed/failed and challenge events; the API exposes perspectives | Present validated outputs and the approved targeted response round without fabricating dialogue or invoking models during playback |
+| Agent mapping | The roster and routing include built-in department IDs | Support explicit profile-to-agent mapping for additional departments, or show an unavailable perspective |
+| Web verification | The web package's current test command prints a placeholder message | Establish real behavior checks using existing verification tools; a successful placeholder command is insufficient |
+
+### 31.2 Experience and state rules
+
+The authenticated simulation office is the primary surface. The public landing illustration may reuse the renderer but must remain visibly illustrative and must not load private company data.
+
+1. **Explore company:** click a zone or choose it from an accessible list; focus the camera and open its existing detail panel. Show capacity, budget, workflows, dependencies, and evidence. Hover previews are optional conveniences, never the only way to inspect a department.
+2. **Edit company baseline:** create, edit, or archive a department through a saved, versioned company change. Validate owned work and references before archiving. An archived department remains available to historical runs. A display filter only hides a zone; it never changes the twin or simulation scope.
+3. **Test a proposed change:** open a draft from the selected department, add capacity, reduce capacity, introduce a department, or propose its closure and work transfer. Preview the proposed shape immediately with an “Unsimulated draft” label. Calculate consequences only after an explicit simulation request.
+4. **Compare outcomes:** retain baseline zone locations and show added zones, ghost outlines for closed departments, and affected dependencies. Select the exact plan/future/result. Mitigated results appear only after re-simulation succeeds.
+5. **Review at the table:** open live analysis or a labeled review of a completed run. Inspect each representative's actual findings and the challenger output. End with the existing decision package and human approval controls.
+
+Maintain separate state for `run_id`, baseline twin version, scenario/plan/future/result selection, selected department, view mode, live event cursor, and forecast day. Animation time is presentation-only. A day-30 effect must not imply that an agent takes 30 days to answer. Changing the baseline while reviewing an older run must not change that run's scene, evidence, or numbers.
+
+### 31.3 Contracts and domain decisions
+
+Complete these decisions in the contract-owning layer before downstream implementation:
+
+- Reuse `DepartmentProfile`, department entities, `AgentSpec`, `Intervention`, `Impact`, `AgentAssessment`, `Event`, `RunState`, and `DecisionPackage`. Reconcile the handwritten web profile projection with generated contracts; do not create a third domain model.
+- Define typed department create/update/archive requests with an expected twin version. Apply changes atomically and reject stale edits. Return the saved version and validated profile. Require a stable ID, mission, ownership, staffing/budget inputs, evidence or explicit assumptions, and an optional supported agent mapping. Incomplete departments can exist but must show missing modeling inputs.
+- For scenario capacity changes, use the existing `add_capacity` and `reduce_capacity` interventions. Confirm backend behavior for zero capacity, cost caps, dependencies, and knowledge coverage; do not equate zero capacity with deleting an entity.
+- Full department creation, closure, and ownership transfer need explicit scenario semantics beyond toggling `enabled`. Specify a typed, optional organization-change collection on the scenario request/brief, applied only to a cloned twin. Cover new department IDs, effective days, transferred workflow ownership, unresolved obligations, and transition assumptions. Do not encode these operations as arbitrary prose or silently reinterpret an existing action.
+- Preserve existing consumers by defaulting new optional collections to empty. Any enum expansion or other change that an existing consumer cannot accept requires the separate breaking-contract approval and coordinated migration described in Section 8 and `AGENTS.md`.
+- Expose engine-owned per-department baseline/scenario capacity and budget values, lifecycle state, and effective day when existing results do not contain them. The UI may format these values but may not calculate capacity, savings, feasibility, or impact propagation. A result with insufficient evidence says “Not modeled,” not “No impact.”
+- Keep coordinates, camera targets, animation poses, and visual slots in web presentation state; they are not company facts. Key saved layout preferences by organization and stable department IDs, independently from run events and numerical results.
+- Use existing event/assessment fields first. Only add correlation fields if necessary to distinguish agent, plan, pass, and retry. Update Python models in the existing `packages/contracts-py`, JSON schemas, TypeScript contracts, fixture payloads, and contract/API tests together. Do not create a new contracts package.
+
+### 31.4 Phased implementation backlog
+
+#### O-00 — Establish the baseline and freeze the extension contracts
+
+**Owners:** Frontend/integration, twin/contracts, engine, and agent/backend owners. **Depends on:** existing core release gates.
+
+- Verify the deterministic vendor slice and workforce knowledge-loss behavior before optional visual work. Resolve failures in their owning layer.
+- Inspect the actual GLB object hierarchy and reusable geometry. Identify baked desks, avatars, and labels that would remain visible after a department is removed.
+- Freeze the changes in Section 31.3 and publish valid/invalid example payloads for a created department, a capacity cut, closure with unresolved work, and a transfer. These are tests of the two existing scenarios, not a third product demo.
+- Define verification cases for 0, 1, 6, 12, and 24 departments, plus long names and custom IDs. Confirm installed tools for web tests; read the repository's installed Next.js guidance before editing web code.
+
+**Exit check:** Existing core failures are resolved or explicitly block the affected phase; contract fixtures validate; owners agree on the representation of lifecycle changes and result values.
+
+#### O-01 — Persist department changes and simulate structural changes
+
+**Owners:** Twin/contracts for company state; engine for scenario operators; API for transport; frontend for forms. **Depends on:** O-00.
+
+- Extend the existing company-twin package to create/update/archive departments with graph validation, evidence references, stable IDs, and new twin versions. Retain historical snapshots and reject dangling ownership references.
+- Add the necessary operations inside the existing API and persistence mechanism. Wire onboarding/settings save actions to them; show pending, success, validation, version-conflict, and server-error states. Invalidate department details, graph, and profile caches by twin version after a successful save.
+- In the simulation engine, apply proposed creation/closure/transfer operations to an isolated scenario. Reuse capacity operators where their semantics match; validate transfer destinations and expose unresolved ownership instead of inventing a replacement team.
+- Calculate affected workflows, costs, capacity, knowledge coverage, constraints, and time-based effects in the engine. New departments without roles/dependencies/evidence cannot silently provide quantified coverage or safe outcomes.
+- Resolve additional department routing from explicit profile mappings and the shared graph, including departments represented by the same supported specialist. Build permission-filtered context for the actual department IDs rather than relying solely on the built-in roster IDs. Preserve mandatory cross-company reviewers. If no supported perspective exists, report it as unavailable.
+
+**Exit check:** A created department survives refresh; stale edits fail safely; proposed removal/transfer leaves the baseline unchanged; impacted workflows and financial results reconcile; custom IDs receive the right context or an honest missing-perspective state.
+
+#### O-02 — Replace fixed scene slots with a dynamic office
+
+**Owner:** Frontend. **Depends on:** O-00; integrates O-01 saved profiles.
+
+- Keep the existing Three.js/React Three Fiber stack. Reuse the office shell and reusable furniture geometry; remove or hide baked department furniture so it cannot duplicate generated zones. Update the existing Blender source and GLB together if asset changes are necessary.
+- Generate one zone for each active department. Use stable slot assignments, reserve removed slots while comparing a scenario, and append new slots around the central table. Do not derive positions from array indices or reuse slots modulo six.
+- Use outer rows and an explicit office-page control beyond 24 visible zones; display the full department count and preserve access through the list/graph. No department silently disappears or overlaps another.
+- Generate representatives and seat positions from actual participants. Representatives denote departmental perspectives, not individual employees; display exact staffing as text/capacity indicators rather than rendering one avatar per employee.
+- Add click-to-focus, selection highlighting, reset camera, and accessible list controls. Reuse the department metrics sidebar and evidence UI. Add reduced-motion behavior and an error boundary/loading state with graph/list fallback for asset or WebGL failure.
+
+**Exit check:** 0/1/6/12/24 department fixtures render correctly; adding/removing a department updates furniture and labels without moving unchanged zones; overflow remains navigable; selection and data inspection work without 3D input.
+
+#### O-03 — Visualize proposed changes, dependencies, and forecast effects
+
+**Owners:** Frontend; engine/contracts for missing authoritative result data. **Depends on:** O-01, O-02.
+
+- Add an in-context action to prepare a department change in the existing decision composer. Separate local draft previews from saved baselines and completed scenarios; allow cancel/reset.
+- Extend the simulation presentation adapter to take an explicit baseline snapshot and selected result. Remove the implicit recommended-only selection and the automatic graph switch on completion.
+- Draw evidence-backed dependency connections for the selected department. Use backend-provided dependency paths; the browser does not discover authoritative impacts by traversing the graph itself.
+- Render new-zone previews, closed-zone outlines, capacity changes, ownership transfers, and workflow warnings from scenario data. Use text/icons with color; neutral means no reported effect, not confirmed safety.
+- Drive impact appearance by `first_effect_day` and display peak timing and confidence. Do not interpolate numerical forecasts or assume recovery after the peak unless the backend supplies that behavior. Use the requested horizon instead of a fixed 90-day story.
+- Support baseline/proposal/mitigated and act/inaction/delay comparisons where results exist. Preserve positions across views; disable unavailable comparisons with a clear reason.
+
+**Exit check:** The same selected result yields matching values and evidence in office, graph, and decision package; effects respect their dates; closure leaves visible unresolved dependencies; mitigation indicators change only after a successful engine rerun.
+
+#### O-04 — Deliver reliable live events to the web client
+
+**Owners:** Agent/backend and frontend. **Depends on:** O-00; integrates O-03 run selection.
+
+- Add an authenticated HTTP event-history endpoint, for example `GET /runs/{run_id}/event-log?after_sequence=N&limit=...`, in the existing API. Return ordered typed events and the last returned cursor, bounded for large histories. Keep the existing WebSocket route intact.
+- Extend the existing same-origin Next.js proxy allowlist and API client. Use incremental polling initially, approximately once per second while active, with bounded backoff on transient failures. This fits the current proxy, which buffers HTTP responses and does not relay WebSocket upgrades. No new transport dependency or service is needed.
+- Authorize event access consistently with run/package access and apply the same sensitive-content rules used for perspectives. Never expose model credentials or private reasoning in events.
+- Build a deterministic event reducer: filter by run, order by sequence, deduplicate events, and correlate agent/plan/pass/assessment. A failed or invalid assessment must not become successful merely because an `agent_completed` envelope follows it. The same assessment may appear in both completion and challenge events and must not be counted twice.
+- Reconnect from the last applied sequence, fetch all pages, and restore state on refresh. Reconstruct the snapshot before animating new arrivals; do not repeat completed entrances. Abort obsolete requests on run changes and unmount. Stop polling after terminal state and event reconciliation.
+- On disconnect, retain received findings and show reconnecting status; use run-state polling for coarse progress without inventing individual activity. Completed historical review uses only that run's persisted events, clearly labeled, and never substitutes for a failed live agent.
+
+**Exit check:** Duplicate events, delayed responses, reconnects, refresh, terminal failure, and switching runs preserve the correct state without duplicated findings, lost events, credential exposure, or cross-run content.
+
+#### O-05 — Present a structured board review
+
+**Owner:** Frontend, with agent/backend validation. **Depends on:** O-02, O-04; result comparison integrates O-03.
+
+- Add Office / Graph / Board review modes within the existing dashboard. The office table and modular avatars are reused; a second app or scene engine is unnecessary.
+- Seat agents based on actual run participation. Distinguish department representatives from cross-company reviewers such as the challenger. For a larger roster, keep at most 12 representatives in the table view with a paged participant list and explicit hidden count; every finding remains reachable.
+- Map `agent_started` to analyzing, valid completed assessments to findings available, failed/invalid assessments to unavailable, and challenge events to review attention. Animate short arrivals/focus changes from those states; never delay the backend to finish an animation.
+- Present concise claim cards from existing output summaries: position, affected workflow, evidence, assumptions/confidence, objection, and proposed mitigation where supplied. Allow opening the underlying assessment and evidence. Show multiple agents analyzing concurrently; camera focus does not imply serial execution or an actual spoken exchange.
+- Show linked original claims, department/challenger objections, and one real targeted response round. Label revised/supported/unresolved as agent positions; do not present them as consensus or automatic resolution. Missing/invalid replies stay unresolved. Do not generate rebuttals merely to make the meeting dramatic.
+- Keep the central summary synchronized to deterministic feasibility, costs, and selected result. A visually persuasive agent cannot override a hard constraint. End with the existing human decision controls; no agent voting or automatic approval.
+- Present six readable stages in both the board and storyboard: proposal, findings, challenge, response, recalculation, and decision. Play/pause/step controls advance stages rather than raw transport events. Each stage uses the actual recorded history, preserving initial and response assessments separately. Show the engine’s before/after values with their plan identities and timing/dependency paths for modeled effects.
+- Label completed runs as recorded review with the run and twin version. Historical runs without a response round say so explicitly. Speech synthesis, lip-sync, and rounds beyond the single approved response round remain outside this implementation.
+
+**Exit check:** Every displayed claim resolves to an actual assessment/event; a failed agent has no invented speech; the challenge pass and remaining uncertainty are visible; review playback never invokes models or changes results.
+
+#### O-06 — Verify and deliver the complete flow
+
+**Owners:** All, coordinated by frontend/integration. **Depends on:** O-01–O-05.
+
+- Exercise the vendor demo with naive versus recommended portfolios, department impact paths, and the actual agent review.
+- Exercise the workforce demo with exactly the expected stranded workflows and engine-verified mitigation. Include capacity reductions, department additions, closure/transfer cases, and custom IDs as integration tests of the same contracts.
+- Verify loading, success, empty, and error states for profiles, scene assets, department details, events, assessments, and comparisons. Include expired authentication, API failure, provider failure, refresh during a run, no feasible plan, an unknown department ID, and missing evidence.
+- Check keyboard access, reduced motion, narrow screens, labels at supported zoom levels, and fallback when WebGL is unavailable. Target at least 30 FPS with 24 zones on the documented demo machine; record viewport/device and measure. Use less geometry/shadows or the graph/list fallback if the budget is missed.
+- Run `pnpm typecheck`, `pnpm test`, and `pnpm build`, plus relevant twin/engine/orchestration/API tests and realistic endpoint exercises. Add real web interaction verification; explicitly report if the web test script still only prints a placeholder.
+- Confirm historical baseline isolation, snapshot/result agreement, authorization, and that no change introduced an external system write. Keep temporary screenshots, logs, and generated caches out of commits.
+
+**Exit check:** Both existing demos and all extension acceptance checks pass; no unsupported numerical claim or agent dialogue is presented; remaining limits and verification results are documented in the existing project documentation.
+
+### 31.5 File ownership and implementation boundaries
+
+| Responsibility | Existing home / likely touchpoints |
+|---|---|
+| Shared contracts and generation | `packages/contracts-py/src/contracts_py/`, `packages/contracts/src/`, `packages/contracts/schemas/`; update together |
+| Twin mutations, validation, historical state | `packages/company-twin/src/company_twin/` and its tests |
+| Capacity, closure/transfer consequences, mitigation | `packages/simulation-engine/src/simulation_engine/interventions.py`, propagation/knowledge/result modules, and tests |
+| Department mapping and real agent events | `packages/agent-orchestration/src/agent_orchestration/router.py`, `context.py`, `roster.py`, `orchestrator.py`, and tests |
+| API, saved changes, incremental event access | `apps/api/src/canary_api/app.py`, `runtime.py`, `events.py`, `storage.py`, and relevant tests; keep domain operations in their packages |
+| Profile persistence and request transport | Existing onboarding/settings components, `apps/web/lib/canary-api-client.ts`, and `apps/web/app/api/canary/[...path]/route.ts` |
+| Scene, interactions, comparisons | `office-scene.tsx`, `decision-dashboard.tsx`, `department-metrics-sidebar.tsx`, `simulation-view.ts`, existing graph/evidence components |
+| Assets | Existing `apps/web/assets/3d/office.blend` and `apps/web/public/assets/3d/office.glb` |
+
+Create separate web modules only for cohesive responsibilities that now require them: stable scene layout, run-event state reduction, or the board-review panel. Do not create a generic scene framework, parallel dashboard, duplicate result model, speculative database, or new deployment target. The team work-division document's legacy folder names are interpreted through the current repository ownership in `AGENTS.md`.
+
+### 31.6 Scope control and release priority
+
+The minimum complete delivery includes persisted department edits, scenario-isolated addition/reduction/closure behavior, dynamic zones, evidence-backed impacts, real event delivery, and a structured board review. More lifelike movement is polish after those behaviors work.
+
+If time is constrained, defer cinematic cameras, walking paths, and richer furniture first. Preserve accessible cards and simple state-driven representatives. Do not cut baseline isolation, event authenticity, custom-department visibility, evidence links, deterministic validation, or the two core demos. The single bounded response round and six-stage storyboard were approved on 2026-09-27. Any proposal for voice, further rebuttal rounds, arbitrary agent generation, external integrations, or unrelated analytics requires a separate scope decision.
+
+
+### 31.7 Implementation and verification — 2026-09-27
+
+Implemented in the existing applications and packages:
+
+- Versioned department and organization saves with stale-version rejection, validated assumptions, saved settings, and historical run profile/graph/detail reads. PostgreSQL snapshot insertion and activation share a transaction.
+- Scenario-only creation, capacity changes, closure and workflow transfers. New staffing and budget declarations do not fabricate workflow capability. Closure retains obligations and exposes knowledge loss; a workflow ownership transfer does not create trained owners.
+- Dynamic office zones, reusable furniture/representatives, stable ID-based slots, camera selection/reset, accessible department selection, and explicit paging beyond 24 zones. Dense views use compact labels. The public illustration remains separate from actual company state.
+- Quick office previews return a matching deterministic result and blast graph from the same baseline. The dashboard compares baseline, plan/future and mitigation results, preserves the selected view, and uses frozen run snapshots for historical inspection.
+- Authenticated, paginated event history, sequence deduplication, reconnect handling, per-plan/per-pass assessments, real failure states, and recorded review playback. Board findings and evidence come from validated run outputs; there are no invented speeches or additional debate calls.
+- A human decision control records approval, rejection or a scenario request using the served package hash. It does not execute organization changes. Infeasible selected results cannot be approved through this control.
+
+Verification: `pnpm typecheck`, `pnpm test`, and `pnpm build` passed. The regression suite includes both existing demonstration fixtures, 504 passing Python tests (four opt-in integration tests skipped), and 21 passing browser-side behavior tests. The generated Python/JSON/TypeScript contracts agree. Existing company fixture evidence excerpts were synchronized with the shared fixture's added source records; acceptance snapshots include the additive office projection.
+
+Browser verification used a separate local data store and explicitly labeled test-provider assessments. Checked department creation and persistence after refresh, isolated closure at day 30, baseline restoration, a full agent run, frozen source evidence, recorded review stepping, human rejection, scene transitions, and 25-department overflow across two office pages. The reviewed desktop viewport was 919 × 863. Three-dimensional labels use the normal DOM with projected anchors to avoid per-label React root lifecycle errors.
+
+Repeated office hardening: three consecutive focused runs each passed 21 frontend checks and 10 office API/engine tests; a fresh full suite passed 504 Python tests with four opt-in skips. A 1280 × 720 browser pass checked capacity reduction/addition, empty and valid workflow transfer, closure timing, scenario-only addition, saved department persistence, frozen evidence, and three board replay/view-switch cycles. Fixed seated orientation, chair proportions, grounded hand gestures driven by agent activity, board camera framing, overlapping labels and controls, stale asynchronous run/evidence responses, failure-state seats, replay pagination, fractional FTE formatting, and scenario-only detail handling. Added cutaway walls, windows and planters without new assets or dependencies.
+
+Modern office visual pass (user-approved): shared modular furniture now serves the illustrative home scene and the live company view. Added oak workstations with screens and acoustic dividers, varied representative clothing, ergonomic chairs, glass meeting partitions, a lounge and coffee counter, planted greenery, and daylight/evening lighting. Decorative head/hand and plant motion is independently pausable and honors reduced-motion preferences; stronger typing and screen pulses require actual analyzing events. Camera selection eases into focus and yields to manual orbit input. Furniture is isolated in `apps/web/components/office-furnishings.tsx`; no backend, contract, asset download or dependency was introduced. Browser verification used the current 16-department company at 1280 × 720 and repeated lighting, pause/resume, selection and camera-reset controls three times. Full verification passed 608 Python tests (four opt-in skips), 21 frontend tests, typecheck and production build.
+
+Verification limits: paid live-provider calls and a configured PostgreSQL integration environment were not exercised; the 30 FPS target and narrow-device performance have not been measured. The current office projection presents final department staffing changes at their effective date; more detailed multi-stage staffing timelines remain a limitation. Cross-process concurrent baseline editing has not been exercised. Cinematic walking, speech and lip-sync remain outside this delivery.

@@ -1,0 +1,42 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "decision": {
+      "enum": [
+        "approve",
+        "reject",
+        "request_scenario"
+      ],
+      "title": "Decision",
+      "type": "string"
+    },
+    "decided_by": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Decided By"
+    },
+    "notes": {
+      "default": "",
+      "title": "Notes",
+      "type": "string"
+    },
+    "package_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Package Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "decision",
+    "package_hash"
+  ],
+  "title": "HumanDecisionRequest",
+  "type": "object"
+}

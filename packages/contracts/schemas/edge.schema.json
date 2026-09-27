@@ -1,0 +1,198 @@
+{
+  "$defs": {
+    "ChannelKind": {
+      "enum": [
+        "constraint",
+        "budget",
+        "capability",
+        "signal",
+        "value"
+      ],
+      "title": "ChannelKind",
+      "type": "string"
+    },
+    "Criticality": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Criticality",
+      "type": "string"
+    },
+    "Relation": {
+      "enum": [
+        "OWNS",
+        "BACKS_UP",
+        "KNOWS",
+        "MAINTAINS",
+        "RUNS",
+        "PROVIDES",
+        "CONSUMES",
+        "DEPENDS_ON",
+        "SUPPORTS",
+        "FUNDS",
+        "CONTROLS",
+        "CONTRIBUTES_TO",
+        "SUBSTITUTES_FOR",
+        "FLOWS_TO"
+      ],
+      "title": "Relation",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "maxLength": 80,
+      "pattern": "^(?:ch_|e_)[a-z0-9_]*$",
+      "title": "Id",
+      "type": "string"
+    },
+    "source": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Source",
+      "type": "string"
+    },
+    "target": {
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Target",
+      "type": "string"
+    },
+    "relation": {
+      "$ref": "#/$defs/Relation"
+    },
+    "label": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Label"
+    },
+    "channel_kind": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ChannelKind"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "strength": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Strength",
+      "type": "number"
+    },
+    "strength_range": {
+      "anyOf": [
+        {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Strength Range"
+    },
+    "substitutability": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Substitutability",
+      "type": "number"
+    },
+    "lag_days": {
+      "minimum": 0,
+      "title": "Lag Days",
+      "type": "integer"
+    },
+    "criticality": {
+      "$ref": "#/$defs/Criticality"
+    },
+    "confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "evidence_refs": {
+      "items": {
+        "maxLength": 80,
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "title": "Evidence Refs",
+      "type": "array"
+    },
+    "extraction_method": {
+      "anyOf": [
+        {
+          "enum": [
+            "seeded",
+            "keyword",
+            "zero_shot",
+            "canary",
+            "agent"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Extraction Method"
+    },
+    "last_validated": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Last Validated"
+    }
+  },
+  "required": [
+    "id",
+    "source",
+    "target",
+    "relation",
+    "strength",
+    "substitutability",
+    "lag_days",
+    "criticality",
+    "confidence"
+  ],
+  "title": "Edge",
+  "type": "object"
+}

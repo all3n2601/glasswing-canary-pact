@@ -5,11 +5,14 @@ description = "Deterministic scenario simulation for Canary Pact"
 requires-python = ">=3.11"
 dependencies = [
   "canary-company-twin",
+  "canary-contracts",
+  "networkx>=3.4",
   "pydantic>=2.10",
 ]
 
 [tool.uv.sources]
 canary-company-twin = { workspace = true }
+canary-contracts = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

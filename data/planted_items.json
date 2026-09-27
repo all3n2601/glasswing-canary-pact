@@ -1,0 +1,24 @@
+{
+  "note": "Reference for the demo and the Challenger's AgentView filtering (plan D-06). Synthetic. Replaces the removed identity -> SSO -> SOC 2 planted chain.",
+  "planted_edge": {
+    "id": "e_account_intel_consumed_by_vendor_reconciliation",
+    "source": "ds_account_intel",
+    "relation": "CONSUMES",
+    "target": "wf_vendor_reconciliation",
+    "evidence_refs": [
+      "ev_echo_account_intel_feed"
+    ],
+    "document_id": "doc_vendor_recon_workflow_map",
+    "description": "Account intelligence (vendor_echo's unique dataset) also feeds Vendor reconciliation, which supports the SOX reconciliation control. Left out of edges[] so the Challenger must find it; once validated, removing Beacon + Echo puts the mandatory ctl_sox_reconciliation at risk (Beacon + Echo stays feasible and recommended) until add_replacement_feed moves ds_account_intel to vendor_cinder.",
+    "challenger_should_flag": true
+  },
+  "planted_unknown": {
+    "entity_id": "vendor_echo",
+    "field": "retains_history_after_termination",
+    "intended_value": null,
+    "description": "Unknown whether EchoMarket retains history after contract termination (2.1.1 CR3 field; not yet in the 2.1.0 model). The missing-fact selector should rank this question first (plan E-06, V-11).",
+    "evidence_refs": [
+      "ev_echo_history_retention"
+    ]
+  }
+}

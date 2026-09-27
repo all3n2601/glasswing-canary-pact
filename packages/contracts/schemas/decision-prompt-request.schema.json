@@ -1,0 +1,23 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "prompt": {
+      "maxLength": 4000,
+      "minLength": 10,
+      "title": "Prompt",
+      "type": "string"
+    },
+    "horizon_days": {
+      "default": 365,
+      "exclusiveMinimum": 0,
+      "maximum": 3650,
+      "title": "Horizon Days",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "prompt"
+  ],
+  "title": "DecisionPromptRequest",
+  "type": "object"
+}
