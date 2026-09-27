@@ -153,12 +153,14 @@ version = "0.1.0"
 source = { editable = "packages/simulation-engine" }
 dependencies = [
     { name = "canary-company-twin" },
+    { name = "canary-contracts" },
     { name = "pydantic" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "canary-company-twin", editable = "packages/company-twin" },
+    { name = "canary-contracts", editable = "packages/contracts-py" },
     { name = "pydantic", specifier = ">=2.10" },
 ]
 
