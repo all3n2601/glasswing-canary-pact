@@ -1,6 +1,9 @@
 """Blast radius: the drawable graph of one simulation result (plan section 13.4; schema v2.2.0 section 7.10, rule 14).
 
-- The root is a ``decision`` node for the plan (``plan_id``, or the scenario when there is none).
+- The root is a ``decision`` node for the plan (``plan_id``, or the scenario when there is none);
+  the inaction root is labelled "Do nothing".
+- Every baseline pressure with an expected cost is a ``pressure`` node on the root's first ring
+  ("Pressure" edges), feeding the entity it acts on.
 - Every affected entity is one node: ``department`` for a department entity, ``entity`` otherwise.
   Its headline, level, severity, and money come from its impacts (harm first, then benefit).
 - Each impact adds one edge from the nearest node on its dependency path (the root for the
@@ -42,6 +45,8 @@ def money(usd: int) -> str:
 
 
 def _impact_headline(impact: Impact, name: str) -> str:
+    if impact.source_kind == "pressure":
+        return f"{name}: {money(impact.value_usd or 0)} expected pressure cost"
     if impact.unit == "usd":
         return f"{name}: {money(impact.value_usd or 0)} a year saved"
     verb = "loses" if impact.polarity is Polarity.harm else "gains"
@@ -62,6 +67,14 @@ def blast_radius(result: SimulationResult, twin: Twin) -> BlastRadius:
         by_entity.setdefault(impact.affected_entity, []).append(impact)
 
     nodes = [BlastNode(node_id=root, kind="decision", headline=root_headline)]
+    pressure_impacts = sorted((i for i in result.impacts if i.source_kind == "pressure"), key=lambda i: i.source_ref)
+    for impact in pressure_impacts:
+        nodes.append(BlastNode(
+            node_id=impact.source_ref, kind="pressure", pressure_id=impact.source_ref,
+            headline=f"Pressure on {ents[impact.affected_entity].name}: {money(impact.value_usd or 0)} expected cost",
+            level=impact.level, category=impact.category, polarity=impact.polarity, severity=impact.severity,
+            value_usd=impact.value_usd, first_effect_day=impact.first_effect_day, impact_ids=[impact.impact_id],
+        ))
     for entity_id in sorted(by_entity):
         entity = ents[entity_id]
         impacts = sorted(by_entity[entity_id], key=lambda i: (i.polarity is not Polarity.harm, -i.severity))
@@ -77,7 +90,15 @@ def blast_radius(result: SimulationResult, twin: Twin) -> BlastRadius:
         ))
 
     edges: dict[tuple[str, str], BlastEdge] = {}
+    for impact in pressure_impacts:
+        edges[(root, impact.source_ref)] = BlastEdge(source=root, target=impact.source_ref, label="Pressure",
+                                                     level=impact.level, critical_constraint=False)
+        edges[(impact.source_ref, impact.affected_entity)] = BlastEdge(
+            source=impact.source_ref, target=impact.affected_entity, label="Pressure", level=impact.level,
+            critical_constraint=False)
     for impact in result.impacts:
+        if impact.source_kind == "pressure":
+            continue
         path = impact.dependency_path or [impact.affected_entity]
         parents = [n for n in path[:-1] if n in by_entity]
         source = parents[-1] if parents else root

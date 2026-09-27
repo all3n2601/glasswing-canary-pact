@@ -140,9 +140,21 @@ def test_128_portfolios_run_in_under_5_seconds():
     assert time.perf_counter() - started < 5
 
 
-def test_only_vendor_briefs_are_searched():
-    with pytest.raises(NotImplementedError):
-        optimize(TWIN, WORKFORCE)
+def test_workforce_briefs_evaluate_their_single_eight_role_plan():
+    comparison = optimize(TWIN, WORKFORCE, run_id="run_opt")
+    assert comparison.evaluated_count == 1 and comparison.alternatives == []
+    naive = comparison.naive
+    assert naive.plan_id == "plan_remove_eight_roles"
+    assert naive.intervention_ids == [i.id for i in WORKFORCE.candidate_interventions]
+    # The plan strands two workflows, so it is not recommended: recommended is the best feasible portfolio.
+    assert not naive.result.feasible and naive.rank is None and comparison.recommended is None
+    assert check_result(comparison, TWIN) == []
+
+    safe = WORKFORCE.model_copy(update={"constraints": []})
+    relaxed = optimize(TWIN, safe, run_id="run_opt")
+    assert relaxed.recommended is not None and relaxed.recommended.plan_id == "plan_remove_eight_roles"
+    assert relaxed.recommended.rank == 1 and relaxed.naive.plan_id == relaxed.recommended.plan_id
+    assert check_result(relaxed, TWIN) == []
 
 
 def test_vendor_entities_carry_the_exit_and_migration_costs_the_engine_charges():

@@ -14,8 +14,9 @@ Every line of ``ValueBreakdown`` is priced separately and the net is their exact
 - rebound: run cost that continues because a project that would retire it stopped or slipped.
 - expected_business_loss: revenue at risk, ``L * arr_usd * days / 365`` for each harmed customer
   segment.
-- pressure and avoided_failure: priced by the futures comparison and mitigation (plan E-02,
-  E-07); zero for a single act-now evaluation.
+- pressure: the expected cost of the baseline pressures still active in the future
+  (``pressures.py``); zero in the pressure-free quick evaluation the optimizer ranks on.
+- avoided_failure: hazard costs prevented by mitigations (plan E-07); zero until then.
 
 ``monthly_net_usd`` is cumulative: one-off costs land in the month the first intervention
 starts, recurring lines accrue evenly after it, and the last month equals the net exactly.
@@ -60,14 +61,19 @@ def price_harms(twin: Twin, impacts: list[Impact], horizon_days: int) -> PricedL
     return PricedLines(sum(displaced.values()), sum(lost.values()), displaced, lost)
 
 
+def accrual_days(start_day: int, horizon_days: int) -> int:
+    """Days over which recurring lines accrue in ``monthly_net``, from ``start_day`` to the last month's end."""
+    return max(0, max(1, horizon_days // DAYS_PER_MONTH) * DAYS_PER_MONTH - start_day)
+
+
 def monthly_net(recurring_net: int, one_off: int, start_day: int, horizon_days: int) -> list[int]:
     """Cumulative net per month; ``recurring_net - one_off`` is the last value exactly."""
     months = max(1, horizon_days // DAYS_PER_MONTH)
-    accrual_days = max(1, months * DAYS_PER_MONTH - start_day)
+    accrual = max(1, accrual_days(start_day, horizon_days))
     series = []
     for m in range(1, months):
         day = m * DAYS_PER_MONTH
-        elapsed = min(1.0, max(0, day - start_day) / accrual_days)
+        elapsed = min(1.0, max(0, day - start_day) / accrual)
         series.append(round(recurring_net * elapsed) - (one_off if day > start_day else 0))
     return [*series, recurring_net - one_off]
 
