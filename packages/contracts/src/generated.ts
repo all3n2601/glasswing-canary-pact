@@ -1581,6 +1581,8 @@ export interface Recommendation {
   result_id: string;
   headline: string;
   claims?: Claim[];
+  mitigated_plan_id?: string | null;
+  mitigated_result_id?: string | null;
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema

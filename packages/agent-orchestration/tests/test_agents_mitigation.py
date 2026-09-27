@@ -105,8 +105,11 @@ def test_feasible_mitigated_plan_that_beats_the_best_row_is_recommended(brief, t
     assert len(package.mitigations) >= 1 and recorder.of(EventType.mitigation_applied)
     recommendation = package.recommendation
     assert recommendation.action == "proceed_with_mitigations" and recommendation.future is Future.act_now
-    winner = package.mitigations[0]
-    assert (recommendation.plan_id, recommendation.result_id) == (winner.plan_id_after, winner.after.result_id)
+    winner = next(m for m in package.mitigations if m.plan_id_before == recommendation.plan_id)
+    base_row = next(r for r in package.futures.rows if r.result_id == recommendation.result_id)
+    assert (base_row.future, base_row.plan_id) == (Future.act_now, winner.plan_id_before)
+    assert (recommendation.mitigated_plan_id, recommendation.mitigated_result_id) == (
+        winner.plan_id_after, winner.after.result_id)
     # The stub's naive plan is infeasible before mitigation, so the engine's conditional framing is used.
     assert not winner.feasible_before
     assert "conditionally feasible with coverage restored" in recommendation.headline
@@ -183,7 +186,8 @@ def test_real_engine_workforce_mitigations_beat_doing_nothing(settings, monkeypa
     winner = next(m for m in package.mitigations if m.feasible_after)
     assert not winner.feasible_before and winner.after.value.net_value_usd > inaction.net_value_p50_usd
     assert package.recommendation.action == "proceed_with_mitigations"
-    assert package.recommendation.plan_id == winner.plan_id_after
+    assert package.recommendation.plan_id == winner.plan_id_before
+    assert package.recommendation.mitigated_plan_id == winner.plan_id_after
 
 
 def test_real_engine_vendor_top_question_is_echo_history(settings, monkeypatch) -> None:
@@ -206,8 +210,9 @@ def test_already_feasible_plan_leads_with_the_mitigation_and_engine_risk(brief, 
     package, _ = run(brief, twin, settings, FeasibleBefore())
     recommendation, winner = package.recommendation, package.mitigations[0]
     assert recommendation.action == "proceed_with_mitigations"
-    assert recommendation.headline.startswith("Migrate Account intelligence")
-    assert "first, then proceed" in recommendation.headline
+    assert recommendation.headline.startswith("Proceed with 1 mitigation first: migrate Account intelligence")
+    assert "Restores" not in recommendation.headline and recommendation.headline.count(". ") == 1
+    assert any(c.text.startswith("Restores ") for c in recommendation.claims)
     assert f"{winner.before.risk.score:.1f} ({winner.before.risk.level.value}) before" in recommendation.headline
     assert f"{winner.after.risk.score:.1f} ({winner.after.risk.level.value}) after" in recommendation.headline
 
@@ -241,7 +246,8 @@ def test_real_engine_vendor_passes_its_feasible_alternative_and_migrates_first(s
     assert any(r.future is Future.alternative for r in package.futures.rows)
     recommendation = package.recommendation
     assert recommendation.action == "proceed_with_mitigations"
-    assert recommendation.headline.startswith("Migrate Account intelligence from EchoMarket")
+    assert recommendation.headline.startswith(
+        "Proceed with 1 mitigation first: migrate Account intelligence from EchoMarket to ")
 
 
 def _spy(self, engine, name):
@@ -253,3 +259,19 @@ def _spy(self, engine, name):
         return function(*args, **kwargs)
 
     return wrapper
+
+
+@pytest.mark.parametrize("name", ["vendor_scenario.json", "workforce_scenario.json"])
+def test_mitigated_recommendation_points_at_a_futures_row_the_agents_assessed(name, settings, monkeypatch) -> None:
+    monkeypatch.setenv("ENGINE_IMPL", "real")
+    monkeypatch.setenv("TWIN_IMPL", "real")
+    brief, twin, engine = _real(name)
+    package, recorder = run(brief, twin, settings, engine)
+    recommendation = package.recommendation
+    assert recommendation.action == "proceed_with_mitigations"
+    assert recommendation.result_id in {r.result_id for r in package.futures.rows}
+    first_pass = [e.payload for e in recorder.of(EventType.agent_completed) if e.payload.pass_type == "first_pass"]
+    assert any(a.plan_id == recommendation.plan_id for a in first_pass)
+    winner = next(m for m in package.mitigations if m.plan_id_after == recommendation.mitigated_plan_id)
+    assert winner.plan_id_before == recommendation.plan_id
+    assert winner.after.result_id == recommendation.mitigated_result_id

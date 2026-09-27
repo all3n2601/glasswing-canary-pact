@@ -289,3 +289,14 @@ def test_proceed_with_mitigations_only_when_acting() -> None:
     for future in ("inaction", "delay"):
         with pytest.raises(ValidationError, match="does not match future"):
             Recommendation.model_validate(base | {"future": future})
+
+
+def test_recommendation_mitigated_pointers_are_optional() -> None:
+    from contracts_py.package import Recommendation
+
+    base = {"plan_id": "plan_a", "future": "act_now", "result_id": "res_a", "headline": "h"}
+    assert Recommendation.model_validate(base).mitigated_plan_id is None
+    mitigated = Recommendation.model_validate(base | {"action": "proceed_with_mitigations",
+                                                     "mitigated_plan_id": "plan_a_mitigated",
+                                                     "mitigated_result_id": "res_a_mitigated"})
+    assert (mitigated.plan_id, mitigated.mitigated_plan_id) == ("plan_a", "plan_a_mitigated")
