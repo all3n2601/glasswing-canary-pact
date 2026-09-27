@@ -93,14 +93,15 @@
       "annual_cost_usd": 1000000000,
       "one_time_exit_cost_usd": 35000000,
       "consumers": [
-        "ds_geo_risk"
+        "ds_geo_risk",
+        "ds_geo_risk_emerging"
       ],
       "consuming_departments": [
         "dept_finance",
         "dept_operations"
       ],
-      "coverage": 3,
-      "min_substitutability": 0.1,
+      "coverage": 4,
+      "min_substitutability": 0.05,
       "replaceable": false,
       "irreplaceable_flag": true,
       "replacement_candidates": []

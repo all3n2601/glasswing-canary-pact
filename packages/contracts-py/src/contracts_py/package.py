@@ -39,12 +39,34 @@ def find_person_tokens(value: Any) -> list[str]:
     return found
 
 
+RecommendationAction = Literal["proceed", "do_not_proceed", "delay"]
+ACTION_FOR_FUTURE: dict[Future, RecommendationAction] = {
+    Future.act_now: "proceed",
+    Future.inaction: "do_not_proceed",
+    Future.delay: "delay",
+    Future.alternative: "proceed",
+}
+
+
 class Recommendation(Strict):
-    plan_id: ID
+    # plan_id is None when doing nothing is the recommended future.
+    plan_id: ID | None = None
     future: Future
+    action: RecommendationAction = "proceed"
     result_id: ID
     headline: str
     claims: list[Claim] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def derive_action(self) -> "Recommendation":
+        expected = ACTION_FOR_FUTURE[self.future]
+        if "action" not in self.model_fields_set:
+            self.action = expected
+        elif self.action != expected:
+            raise ValueError(f"action {self.action} does not match future {self.future}")
+        if self.plan_id is None and self.future is not Future.inaction:
+            raise ValueError("only a do-nothing recommendation may have no plan")
+        return self
 
 
 class ImplementationStep(Strict):

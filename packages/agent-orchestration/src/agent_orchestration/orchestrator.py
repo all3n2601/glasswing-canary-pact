@@ -1,3 +1,4 @@
+import hashlib
 import logging
 import operator
 import os
@@ -40,8 +41,9 @@ from agent_orchestration.prompts import assemble
 from agent_orchestration.roster import CHALLENGER, PROMPT_VERSION, ROSTER, model_tier
 from agent_orchestration.router import route_agents
 
-FAILED_STATUSES = {"unavailable", "invalid"}
-MISSING_STATUSES = {"unavailable", "invalid"}
+FAILED_STATUSES = {"fallback_cached", "unavailable", "invalid"}
+# A fallback answer came from a different prompt, so its department counts as unheard.
+MISSING_STATUSES = {"fallback_cached", "unavailable", "invalid"}
 PLAN_SOURCE = {"naive": "naive", "recommended": "optimizer", "alternative": "enumerated"}
 
 
@@ -69,7 +71,7 @@ SIM_MODES = ("full", "quick")
 
 
 def simulation_mode() -> str:
-    """CANARY_SIM_MODE picks the engine's simulate mode; full is the default until the engine implements it."""
+    """CANARY_SIM_MODE picks the engine's simulate mode; full (expected value until Monte Carlo lands) is the default."""
     mode = os.environ.get("CANARY_SIM_MODE", "full").strip() or "full"
     if mode not in SIM_MODES:
         raise ValueError(f"CANARY_SIM_MODE must be one of {', '.join(SIM_MODES)}, got {mode!r}")
@@ -86,6 +88,18 @@ class RunCancelled(RuntimeError):
 
 def _unique(items: list[str]) -> list[str]:
     return list(dict.fromkeys(items))
+
+
+MAX_ID_LENGTH = 80
+
+
+def bounded_id(prefix: str, body: str) -> str:
+    """``prefix + body``, or ``prefix`` plus a hash of ``body`` when that would pass the 80-character ID limit."""
+    # Same scheme as simulation_engine's bounded_id, so the engine and the orchestrator name a scenario alike.
+    candidate = prefix + body
+    if len(candidate) <= MAX_ID_LENGTH:
+        return candidate
+    return prefix + hashlib.sha256(body.encode()).hexdigest()[:24]
 
 
 class _Run:
@@ -132,7 +146,7 @@ class _Run:
         key = (future, plan_id)
         if key not in self.scenarios:
             scenario = Scenario(
-                scenario_id=f"scn_{self.run_id}_{future.value}_{plan_id or 'none'}",
+                scenario_id=bounded_id("scn_", f"{self.run_id}_{future.value}_{plan_id or 'none'}"),
                 run_id=self.run_id,
                 future=future,
                 plan_id=plan_id,
@@ -187,7 +201,8 @@ class _Run:
         assessment = outcome.assessment
         if assessment.status in FAILED_STATUSES:
             reason = "; ".join(assessment.validation.errors) or assessment.status
-            self.publish(EventType.agent_failed, AgentFailed(agent_id=agent_id, reason=reason, fallback_used=False),
+            self.publish(EventType.agent_failed, AgentFailed(agent_id=agent_id, reason=reason,
+                                                             fallback_used=assessment.status == "fallback_cached"),
                          actor=agent_id)
         self.publish(EventType.agent_completed, assessment, actor=agent_id)
         return outcome
@@ -359,10 +374,15 @@ class _Run:
         comparison, act_now, blasts = state["comparison"], state["results"][Future.act_now], state["blasts"]
         best = comparison.rows[comparison.best_row_index] if comparison.best_row_index is not None else None
         recommendation = None
-        if best is not None and best.plan_id is not None:
+        if best is not None:
             claims = [Claim(text=comparison.headline, source="calculation", ref=comparison.comparison_id)]
-            claims += [Claim(text=c.explanation, source="calculation", ref=c.constraint_id)
-                       for c in act_now.constraint_results]
+            if best.plan_id is not None:
+                claims += [Claim(text=c.explanation, source="calculation", ref=c.constraint_id)
+                           for c in act_now.constraint_results]
+            else:
+                # Doing nothing wins: the act-now plan's broken constraints are the reasons, in the engine's words.
+                claims += [Claim(text=c.explanation, source="calculation", ref=c.constraint_id)
+                           for c in act_now.constraint_results if not c.passed]
             claims += [Claim(text=f"{e.source} {e.relation.value} {e.target}", source="agent_validated",
                              ref=e.evidence_refs[0]) for e in state.get("new_edges", []) if e.evidence_refs]
             recommendation = Recommendation(plan_id=best.plan_id, future=best.future, result_id=best.result_id,

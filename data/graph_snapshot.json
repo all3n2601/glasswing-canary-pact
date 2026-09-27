@@ -458,6 +458,13 @@
       "criticality": "medium"
     },
     {
+      "id": "ds_geo_risk_emerging",
+      "type": "dataset",
+      "name": "Emerging-market geographic risk (APAC, LATAM)",
+      "department_id": "dept_operations",
+      "criticality": "medium"
+    },
+    {
       "id": "vendor_apex",
       "type": "vendor",
       "name": "ApexData",
@@ -1219,7 +1226,7 @@
       "target": "ds_geo_risk",
       "relation": "PROVIDES",
       "label": null,
-      "strength": 0.9,
+      "strength": 0.8,
       "criticality": "medium"
     },
     {
@@ -1228,7 +1235,16 @@
       "target": "ds_geo_risk",
       "relation": "PROVIDES",
       "label": null,
-      "strength": 0.3,
+      "strength": 0.6,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_granite_provides_geo_risk_emerging",
+      "source": "vendor_granite",
+      "target": "ds_geo_risk_emerging",
+      "relation": "PROVIDES",
+      "label": null,
+      "strength": 0.9,
       "criticality": "medium"
     },
     {
@@ -1324,6 +1340,15 @@
     {
       "id": "e_geo_risk_consumed_risk_monitoring",
       "source": "ds_geo_risk",
+      "target": "wf_risk_monitoring",
+      "relation": "CONSUMES",
+      "label": null,
+      "strength": 0.7,
+      "criticality": "medium"
+    },
+    {
+      "id": "e_geo_risk_emerging_consumed_risk_monitoring",
+      "source": "ds_geo_risk_emerging",
       "target": "wf_risk_monitoring",
       "relation": "CONSUMES",
       "label": null,

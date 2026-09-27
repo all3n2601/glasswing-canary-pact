@@ -23,7 +23,7 @@ def people_brief() -> DecisionBrief:
 
 @pytest.fixture
 def settings() -> OrganizationSettings:
-    return OrganizationSettings(llm_mode="live")
+    return OrganizationSettings(llm_mode="mock")
 
 
 @pytest.fixture

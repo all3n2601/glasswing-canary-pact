@@ -32,6 +32,15 @@ def test_v8_echo_unique_datasets_are_exactly_account_intel():
             assert p.unique_dataset_ids_b == ["ds_account_intel"]
 
 
+def test_granite_unique_datasets_are_exactly_the_emerging_market_slice():
+    for p in vendor_overlap(TWIN, VENDORS):
+        if "vendor_granite" in (p.vendor_a, p.vendor_b):
+            unique = p.unique_dataset_ids_b if p.vendor_b == "vendor_granite" else p.unique_dataset_ids_a
+            assert unique == ["ds_geo_risk_emerging"]
+        if {p.vendor_a, p.vendor_b} == {"vendor_delta", "vendor_granite"}:
+            assert p.shared_dataset_ids == ["ds_geo_risk"] and p.unique_dataset_ids_a == ["ds_identity_verification"]
+
+
 def test_v8_apex_has_the_highest_unique_contribution():
     contributions = {v: unique_contribution(TWIN, v) for v in VENDORS}
     assert max(contributions, key=contributions.get) == "vendor_apex"

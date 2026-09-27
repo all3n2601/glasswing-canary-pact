@@ -468,8 +468,12 @@
           "type": "array"
         },
         "llm_mode": {
-          "const": "live",
-          "default": "live",
+          "default": "replay",
+          "enum": [
+            "live",
+            "replay",
+            "mock"
+          ],
           "title": "Llm Mode",
           "type": "string"
         },

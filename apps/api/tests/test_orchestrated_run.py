@@ -81,7 +81,7 @@ def test_thread_emitter_publishes_on_the_loop_in_order(monkeypatch) -> None:
 
 
 def test_live_decision_runs_real_orchestrator_to_approval(client, brief_json) -> None:
-    run_id = client.post("/decisions", headers=auth_headers(client), json=brief_json).json()["run_id"]
+    run_id = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=brief_json).json()["run_id"]
     wait_for(client, run_id, "awaiting_approval")
     events = runtime.bus.runs[run_id].events
     assert events[0].type is EventType.run_created
@@ -108,7 +108,7 @@ def test_live_decision_runs_real_orchestrator_to_approval(client, brief_json) ->
 
 
 def test_websocket_mid_orchestrated_run_gets_every_sequence_once(client, brief_json) -> None:
-    run_id = client.post("/decisions", headers=auth_headers(client), json=brief_json).json()["run_id"]
+    run_id = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=brief_json).json()["run_id"]
     with client.websocket_connect(f"/runs/{run_id}/events") as ws:
         received: list[Event] = []
         while not received or not (received[-1].type is EventType.phase_changed
@@ -117,9 +117,45 @@ def test_websocket_mid_orchestrated_run_gets_every_sequence_once(client, brief_j
     assert [e.sequence for e in received] == list(range(1, len(received) + 1))
 
 
+def test_mock_decision_runs_real_orchestrator_to_approval(client, brief_json) -> None:
+    run_id = client.post("/decisions?llm_mode=mock", headers=auth_headers(client), json=brief_json).json()["run_id"]
+    wait_for(client, run_id, "awaiting_approval")
+    events = runtime.bus.runs[run_id].events
+    assert runs.MOCK_FALLBACK_ASSUMPTION not in client.get(f"/runs/{run_id}/package").json()["assumptions"]
+    assessments = [e.payload for e in events if e.type is EventType.agent_completed]
+    assert assessments and all(a.status == "ok" and a.metrics.model_id == "mock" for a in assessments)
+    EventLog.model_validate([e.model_dump(mode="json") for e in events])
+
+
+def test_empty_replay_cache_falls_back_to_mock_with_a_package_assumption(client, brief_json, monkeypatch,
+                                                                         tmp_path) -> None:
+    # Live tests write their answers to the shared cache, so this one points at an empty directory.
+    monkeypatch.setenv("CANARY_LLM_CACHE_DIR", str(tmp_path / "empty_cache"))
+    assert runtime.cache_is_empty(runtime.llm_cache_dir())
+    run_id = client.post("/decisions?llm_mode=replay", headers=auth_headers(client), json=brief_json).json()["run_id"]
+    wait_for(client, run_id, "awaiting_approval")
+    events = runtime.bus.runs[run_id].events
+    assert events[0].type is EventType.run_created
+    assert not [e for e in events if e.type is EventType.settings_updated]
+    package = client.get(f"/runs/{run_id}/package").json()
+    assert package["assumptions"].count(runs.MOCK_FALLBACK_ASSUMPTION) == 1
+    assessments = [e.payload for e in events if e.type is EventType.agent_completed]
+    assert assessments and not [a for a in assessments if a.status in ("unavailable", "fallback_cached")]
+
+
+def test_replay_with_cached_answers_stays_in_replay(monkeypatch, tmp_path) -> None:
+    (tmp_path / "finance").mkdir()
+    (tmp_path / "finance" / "abc.json").write_text(json.dumps({"agent_id": "finance", "decision_id": "dec_a"}))
+    monkeypatch.setenv("CANARY_LLM_CACHE_DIR", str(tmp_path))
+    resolved, fell_back = runs.resolve_llm_settings(OrganizationSettings(), "replay", "dec_a")
+    assert (resolved.llm_mode, fell_back) == ("replay", False)
+    assert runtime.build_llm(resolved).cache_dir == tmp_path
+    live, fell_back = runs.resolve_llm_settings(OrganizationSettings(), "live")
+    assert (live.llm_mode, fell_back) == ("live", False)
+
+
 def test_bad_llm_mode_is_rejected(client, brief_json) -> None:
     assert client.post("/decisions?llm_mode=chatty", headers=auth_headers(client), json=brief_json).status_code == 422
-    assert client.post("/decisions?llm_mode=mock", headers=auth_headers(client), json=brief_json).status_code == 422
 
 
 def test_runtime_seeds_then_loads_the_versioned_company_twin_from_storage(monkeypatch, tmp_path) -> None:
@@ -178,7 +214,7 @@ def test_to_role_level_keeps_person_tokens_out_of_events(client, brief_json, mon
         return json.loads(PERSON_TOKEN.sub("role_billing_ops_lead", text))
 
     monkeypatch.setattr(engine_port, "to_role_level", to_role_level)
-    run_id = client.post("/decisions", headers=auth_headers(client), json=brief_json).json()["run_id"]
+    run_id = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=brief_json).json()["run_id"]
     wait_for(client, run_id, "awaiting_approval")
     assert "SimulationResult" in calls
     assert not PERSON_TOKEN.search(all_event_text(run_id))
@@ -186,7 +222,7 @@ def test_to_role_level_keeps_person_tokens_out_of_events(client, brief_json, mon
 
 def test_person_tokens_left_by_the_engine_fail_the_run_without_leaking(client, brief_json, monkeypatch) -> None:
     leak_person_tokens(monkeypatch, "pt_unknown_07")
-    run_id = client.post("/decisions", headers=auth_headers(client), json=brief_json).json()["run_id"]
+    run_id = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=brief_json).json()["run_id"]
     wait_for(client, run_id, "failed")
     events = runtime.bus.runs[run_id].events
     failures = [e.payload.reason for e in events if e.type is EventType.run_failed]
@@ -197,7 +233,7 @@ def test_person_tokens_left_by_the_engine_fail_the_run_without_leaking(client, b
 def test_live_mode_needs_explicit_opt_in(client, brief_json, monkeypatch) -> None:
     monkeypatch.delenv("CANARY_ALLOW_LIVE", raising=False)
     denied = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=brief_json)
-    assert denied.status_code == 503
+    assert denied.status_code == 403
     assert "CANARY_ALLOW_LIVE" in denied.json()["detail"]
     monkeypatch.setenv("CANARY_ALLOW_LIVE", "true")
     assert runs.live_allowed()
@@ -207,7 +243,7 @@ def test_live_mode_needs_explicit_opt_in(client, brief_json, monkeypatch) -> Non
 
 def test_live_workforce_decision_routes_people_knowledge_and_detects_real_concentration(client) -> None:
     body = workforce_brief().model_dump(mode="json")
-    run_id = client.post("/decisions", headers=auth_headers(client), json=body).json()["run_id"]
+    run_id = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=body).json()["run_id"]
     wait_for(client, run_id, "awaiting_approval")
     events = runtime.bus.runs[run_id].events
     assert "people_knowledge" in [e.payload.agent_id for e in events if e.type is EventType.agent_started]

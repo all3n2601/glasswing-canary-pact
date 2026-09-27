@@ -48,6 +48,8 @@ def money(usd: int) -> str:
 def _impact_headline(impact: Impact, name: str) -> str:
     if impact.source_kind == "pressure":
         return f"{name}: {money(impact.value_usd or 0)} expected pressure cost"
+    if impact.metric == "knowledge_lost":
+        return f"{name} loses {impact.source_entity} ({impact.magnitude:.0%} of it undocumented)"
     if impact.unit == "usd":
         return f"{name}: {money(impact.value_usd or 0)} a year saved"
     verb = "loses" if impact.polarity is Polarity.harm else "gains"

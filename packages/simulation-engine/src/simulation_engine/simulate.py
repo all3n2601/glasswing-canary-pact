@@ -122,8 +122,13 @@ def simulate(twin: Twin, brief: DecisionBrief, scenario: Scenario, plan: Candida
                            f"day {start_day} of the ${v.gross_savings_usd:,} annual run rate, which the goal and "
                            "constraints are judged on")
 
-    harms = {i.affected_entity: Harm(i.magnitude, i.first_effect_day) for i in base.impacts
-             if i.polarity is Polarity.harm and i.unit == "ratio"}
+    # The largest loss at each pressure target drives its hazard (an entity can carry several harms).
+    harms: dict[str, Harm] = {}
+    for i in base.impacts:
+        if i.polarity is Polarity.harm and i.unit == "ratio":
+            current = harms.get(i.affected_entity)
+            if current is None or (i.magnitude, -i.first_effect_day) > (current.magnitude, -current.first_effect_day):
+                harms[i.affected_entity] = Harm(i.magnitude, i.first_effect_day)
     priced = price_pressures(twin, active_pressures(twin, brief.active_pressure_ids), interventions, harms=harms,
                              horizon_days=horizon, decision_id=brief.decision_id, scenario_id=scenario.scenario_id,
                              scale_usd=_severity_scale(twin, brief))
