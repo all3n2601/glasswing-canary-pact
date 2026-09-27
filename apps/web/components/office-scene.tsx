@@ -162,7 +162,8 @@ function World({day, interactive = true, analyzingDepartmentIds, departments, se
       </group>;
     })}
 
-    <ContactShadows position={[0,-0.12,0]} opacity={0.32} scale={floorSize+2} blur={2.5} far={8} frames={1} key={`${board}:${departments?.map(d=>d.label).join(":")}:${participants?.length}`} />
+    {/* Keep the shadow receiver above the floor (-0.12) and seams, but below the rug (-0.09), to avoid z-fighting. */}
+    <ContactShadows position={[0,-0.1,0]} depthWrite={false} opacity={0.32} scale={floorSize+2} blur={2.5} far={8} frames={1} key={`${board}:${departments?.map(d=>d.label).join(":")}:${participants?.length}`} />
     <OrbitControls enabled={interactive} makeDefault enablePan minPolarAngle={0.3} maxPolarAngle={1.25} minDistance={8} maxDistance={65} />
     <CameraFocus reducedMotion={reducedMotion} target={board ? undefined : selected?.position} resetKey={resetKey ?? 0} board={Boolean(board)} wide={floorSize > 28} />
   </>;
@@ -174,7 +175,8 @@ interface OfficeProps {
   participants?: OfficeParticipant[]; onParticipantSelect?: (key: string) => void; resetKey?: number; dependencyPaths?: string[][];
 }
 export function OfficeScene(props: OfficeProps) {
-  const [reducedMotion, setReducedMotion] = useState(true);
+  // The server cannot know the device preference. Keep motion off until it is read after hydration.
+  const [reducedMotion, setReducedMotion] = useState<boolean | null>(null);
   const [motionPaused,setMotionPaused] = useState(false);
   const [evening,setEvening] = useState(false);
   const labels = useRef(new Map<string, HTMLDivElement>());
@@ -188,12 +190,12 @@ export function OfficeScene(props: OfficeProps) {
   const setLabel = (key: string, element: HTMLDivElement | null) => {if(element) labels.current.set(key,element); else labels.current.delete(key);};
   return <SceneBoundary>
     {loading ? <p role="status" className="absolute left-1/2 top-1/2 z-10 rounded-xl bg-white p-3 text-xs">Loading office…</p> : null}
-    <Canvas camera={{position:[25,29,32], fov:38}} dpr={[1,1.5]} gl={{antialias:true,alpha:true}}>
-      <Suspense fallback={null}><World {...props} departments={props.interactive===false && !props.departments ? illustrationDepartments : props.departments} labels={labels} reducedMotion={reducedMotion || motionPaused} evening={evening}/></Suspense>
+    <Canvas camera={{position:[25,29,32], fov:38, near:0.5, far:200}} dpr={[1,1.5]} gl={{antialias:true,alpha:true}}>
+      <Suspense fallback={null}><World {...props} departments={props.interactive===false && !props.departments ? illustrationDepartments : props.departments} labels={labels} reducedMotion={reducedMotion !== false || motionPaused} evening={evening}/></Suspense>
     </Canvas>
     {props.interactive !== false ? <div className={`absolute z-10 flex gap-1 rounded-full border border-white/90 bg-white/90 p-1 text-[10px] text-zinc-600 shadow-sm backdrop-blur ${props.board ? "bottom-3 right-3" : "bottom-40 right-3 sm:bottom-24 sm:right-5"} ${props.selectedDepartmentId ? "lg:right-[460px]" : ""}`}>
       <button type="button" aria-label="Evening lighting" aria-pressed={evening} className="rounded-full px-3 py-2 hover:bg-zinc-100" onClick={()=>setEvening(value=>!value)}>{evening ? "Daylight" : "Evening light"}</button>
-      <button type="button" aria-pressed={motionPaused || reducedMotion} disabled={reducedMotion} title={reducedMotion ? "Your device prefers reduced motion" : "Pause decorative movement; simulation results stay unchanged"} className="rounded-full px-3 py-2 hover:bg-zinc-100 disabled:opacity-50" onClick={()=>setMotionPaused(value=>!value)}>{reducedMotion ? "Reduced motion" : motionPaused ? "Resume room motion" : "Pause room motion"}</button>
+      {reducedMotion !== null ? <button type="button" aria-pressed={motionPaused || reducedMotion} disabled={reducedMotion} title={reducedMotion ? "Your device prefers reduced motion" : "Pause decorative movement; simulation results stay unchanged"} className="rounded-full px-3 py-2 hover:bg-zinc-100 disabled:opacity-50" onClick={()=>setMotionPaused(value=>!value)}>{reducedMotion ? "Reduced motion" : motionPaused ? "Resume room motion" : "Pause room motion"}</button> : null}
     </div> : <p className="pointer-events-none absolute bottom-1 inset-x-0 text-center text-[9px] text-zinc-500">Illustrative office · departmental representatives</p>}
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       {!props.board ? props.departments?.map(department => <div key={department.departmentId} ref={element=>setLabel(department.departmentId,element)} className="pointer-events-auto absolute left-0 top-0" style={{visibility:"hidden"}}>

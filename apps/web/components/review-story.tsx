@@ -15,23 +15,25 @@ const descriptions = [
   "The trade-off, the main risks, and what to check before you commit.",
 ];
 
-export function ReviewStory({events, complete, decisionPackage, onEvidence}: {
+export function ReviewStory({events, complete, decisionPackage, onEvidence, embedded = false, selectedStage, onStageChange}: {
   events: Event[]; complete: boolean; decisionPackage?: DecisionPackage | null; onEvidence?: (id: string) => void;
+  embedded?: boolean; selectedStage?: number | null; onStageChange?: (stage: number | null) => void;
 }) {
   const snapshot = useMemo(() => reviewSnapshot(events, decisionPackage), [events, decisionPackage]);
   const [selected, setSelected] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
-  const stage = selected ?? snapshot.stage;
+  const stage = (onStageChange ? selectedStage : selected) ?? snapshot.stage;
+  const selectStage = onStageChange ?? setSelected;
   useEffect(() => {
     if (!playing) return;
-    const timer = setInterval(() => setSelected(current => {
-      const next = (current ?? 0) + 1;
+    const timer = setTimeout(() => {
+      const next = stage + 1;
       if (next >= 5) setPlaying(false);
-      return Math.min(next, 5);
-    }), 6000);
-    return () => clearInterval(timer);
-  }, [playing]);
-  const choose = (index: number) => {setPlaying(false); setSelected(index);};
+      selectStage(Math.min(next, 5));
+    }, 6000);
+    return () => clearTimeout(timer);
+  }, [playing, stage, selectStage]);
+  const choose = (index: number) => {setPlaying(false); selectStage(index);};
   const sources = (refs: string[] = []) => refs.length > 0 ? <div className="mt-3 flex flex-wrap gap-2">{refs.map(ref =>
     onEvidence ? <button key={ref} onClick={() => onEvidence(ref)} className="break-all rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs text-emerald-900">Source · {ref}</button>
       : <span key={ref} className="break-all text-xs text-zinc-500">Source · {ref}</span>)}</div> : null;
@@ -44,13 +46,13 @@ export function ReviewStory({events, complete, decisionPackage, onEvidence}: {
   const needsReview = Boolean(pkg?.open_questions?.length || pkg?.missing_perspectives?.length || pkg?.missing_information?.length || highlights?.risks.length || pkg?.critical_risks?.length);
   const recommendationLabel = recommendation?.action === "do_not_proceed" ? "Do not proceed" : recommendation?.action === "delay" ? "Delay" : recommendation?.action === "proceed_with_mitigations" ? "Proceed with mitigations" : recommendation?.future === "inaction" ? "Keep the current plan unchanged" : recommendation?.future === "alternative" ? "Consider the alternative plan" : recommendation?.future === "delay" ? "Delay the change" : "Act now";
   const empty = (text: string) => <p role="status" className="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-5 text-sm text-zinc-600">{text}</p>;
-  return <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-zinc-200 bg-white shadow-sm" aria-label="Decision story">
-    <nav className="grid grid-cols-3 gap-1 border-b p-2 lg:grid-cols-6" aria-label="Review stages">
+  return <section className={embedded ? "board-story flex min-h-0 flex-1 flex-col" : "flex min-h-0 flex-1 flex-col rounded-2xl border border-zinc-200 bg-white shadow-sm"} aria-label="Decision story">
+    {!embedded ? <nav className="grid grid-cols-3 gap-1 border-b p-2 lg:grid-cols-6" aria-label="Review stages">
       {REVIEW_STAGES.map((label, index) => <button key={label} onClick={() => choose(index)} aria-current={stage === index ? "step" : undefined}
         className={`flex items-center gap-2 rounded-lg px-2 py-3 text-left text-xs font-medium ${stage === index ? "bg-emerald-950 text-white" : "text-zinc-600 hover:bg-zinc-100"}`}>
         <span className={`grid size-5 shrink-0 place-items-center rounded-full text-[10px] ${stage === index ? "bg-white/20" : "bg-zinc-100"}`}>{index + 1}</span>{label}
       </button>)}
-    </nav>
+    </nav> : null}
     <div className="min-h-0 flex-1 overflow-y-auto p-4">
       <div className={stage === 5 ? "sr-only" : "mb-5"}><p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-700">{complete ? "Recorded review" : "Live review"} · Stage {stage + 1} of 6</p>
         <h2 className="mt-1 text-2xl font-semibold tracking-tight">{REVIEW_STAGES[stage]}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">{descriptions[stage]}</p></div>
@@ -141,7 +143,7 @@ export function ReviewStory({events, complete, decisionPackage, onEvidence}: {
     </div>
     <footer className="flex flex-wrap items-center justify-between gap-2 border-t p-3 text-xs">
       <button className="rounded-lg border px-3 py-2 disabled:opacity-40" disabled={stage === 0} onClick={() => choose(stage - 1)}>← Previous</button>
-      {complete ? <button className="rounded-lg px-3 py-2 text-zinc-600" onClick={() => {if (!playing) setSelected(stage >= 5 ? 0 : stage); setPlaying(!playing);}}>{playing ? "Pause review" : "Play stages"}</button> : <button className="rounded-lg px-3 py-2 text-emerald-700" onClick={() => {setSelected(null); setPlaying(false);}}>Follow live progress</button>}
+      {complete ? <button className="rounded-lg px-3 py-2 text-zinc-600" onClick={() => {if (!playing) selectStage(stage >= 5 ? 0 : stage); setPlaying(!playing);}}>{playing ? "Pause review" : "Play stages"}</button> : <button className="rounded-lg px-3 py-2 text-emerald-700" onClick={() => {selectStage(null); setPlaying(false);}}>Follow live progress</button>}
       <button className="rounded-lg bg-emerald-950 px-3 py-2 text-white disabled:opacity-40" disabled={stage === 5} onClick={() => choose(stage + 1)}>Next stage →</button>
     </footer>
   </section>;

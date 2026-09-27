@@ -84,3 +84,41 @@ test('missing and infeasible recommendations cannot appear as a go-ahead',()=>{
   const inaction=render([event('package_ready',{...decisionPackage,recommendation:{...decisionPackage.recommendation,future:'inaction',plan_id:null}})]);
   assert.match(inaction,/Keep the current plan unchanged/);
 });
+
+test('embedded review follows the selected chapter without duplicating the board navigation',()=>{
+  const events=[event('agent_completed',first),event('package_ready',decisionPackage)];
+  const html=renderToStaticMarkup(React.createElement(ReviewStory,{events,complete:true,embedded:true,selectedStage:1,onStageChange:()=>{}}));
+  assert.match(html,/We can continue/);
+  assert.doesNotMatch(html,/aria-label="Review stages"/);
+  assert.doesNotMatch(html,/Review the risks before acting/);
+  assert.match(html,/Next stage/);
+});
+
+const {BoardReview}=load('components/board-review.tsx',{
+  '@/lib/review-story':story,
+  '@/lib/run-events':load('lib/run-events.ts'),
+  '@/lib/formatters':load('lib/formatters.ts'),
+  './office-scene':{OfficeScene:()=>React.createElement('canvas',{'aria-label':'Board scene'})},
+  './review-story':{ReviewStory},
+  '@/lib/canary-api-client':{canaryApi:{}},
+  './auth-provider':{useAuth:()=>({user:{role:'viewer'}})},
+});
+const renderBoard=(events,props={})=>renderToStaticMarkup(React.createElement(BoardReview,{events,complete:false,error:null,runId:'run_board',packageReady:false,...props}));
+test('board stays present for empty, analyzing and failed reviews without inventing findings',()=>{
+  const empty=renderBoard([]);
+  assert.match(empty,/aria-label="Board scene"/);
+  assert.match(empty,/The table is ready/);
+  const loading=renderBoard([event('agent_started',{agent_id:'operations'})]);
+  assert.match(loading,/1 analyzing/);
+  assert.match(loading,/Operations/);
+  const failed=renderBoard([event('agent_started',{agent_id:'operations'}),event('run_failed',{reason:'Provider timeout'})]);
+  assert.match(failed,/Run interrupted/);
+  assert.match(failed,/Unavailable/);
+  assert.doesNotMatch(failed,/Findings ready/);
+  assert.match(renderBoard([],{error:'Connection lost'}),/Reconnecting: Connection lost/);
+});
+test('completed board preserves findings, calculation identity and human approval boundary',()=>{
+  const html=renderBoard([event('agent_completed',first),event('package_ready',decisionPackage)],{complete:true,packageReady:true,result:{future:'act_now',plan_id:'plan_naive',feasible:false,value:{net_value_usd:62400}}});
+  for(const text of ['Recorded review','Findings ready','Outside modeled constraints','Plan Naive','An approver can record the final decision.']) assert.ok(html.includes(text),text);
+  assert.doesNotMatch(html,/Record human decision<\/button>/);
+});
