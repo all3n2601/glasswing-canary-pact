@@ -105,9 +105,10 @@ Real today:
 
 Mocked today:
 
-- **The simulation engine's money values.** `check_result` and `quick_impact` exist in
-  `simulation_engine` so far. Until the other engine functions land, `simulate`, `compare_futures`,
-  `optimize` and `blast_radius` return fixed stub constants from `apps/api/src/canary_api/stubs/`. Every
+- **The simulation engine's money values.** `simulation_engine` has `check_result`,
+  `quick_impact`, `optimize`, `blast_radius` and quick-mode `simulate` so far. Until
+  `compare_futures` and the inaction and delay futures land, the demo runs on the stub engine,
+  which returns fixed constants from `apps/api/src/canary_api/stubs/`. Every
   package built on them says so in its assumptions ("Stub engine output: fixed constants,
   expected-value mode."). This README will be updated when the engine lands.
 - **The company.** Northstar Technologies is synthetic, and so are its documents and evidence.
