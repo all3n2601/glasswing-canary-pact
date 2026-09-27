@@ -19,7 +19,7 @@ from contracts_py.agents import (
 )
 from contracts_py.engine import Impact
 from contracts_py.enums import ClaimStatus, Criticality, Direction, Origin
-from contracts_py.twin import Edge
+from contracts_py.twin import AgentView, Edge
 
 from agent_orchestration.llm import LLMResult
 from agent_orchestration.prompts import redact_people
@@ -43,7 +43,7 @@ class MergeOutcome:
 
 class _Merger:
     def __init__(self, agent_id: str, context: AgentContext, assessment_id: str, scenario_ids: dict[str, str],
-                 origin: Origin, stale: bool) -> None:
+                 origin: Origin, stale: bool, known_view: AgentView | None = None) -> None:
         self.agent_id = agent_id
         self.context = context
         self.assessment_id = assessment_id
@@ -51,7 +51,8 @@ class _Merger:
         self.origin = origin
         # A fallback answer was written for another prompt, so none of its claims may change numbers.
         self.stale = stale
-        view = context.view
+        # Claims are checked against everything the agent may see, not only the trimmed slice it was prompted with.
+        view = known_view or context.view
         self.known_ids = {e.id for e in view.entities}
         self.known_evidence = {e.id for e in view.evidence}
         self.edges_by_pair = {frozenset((e.source, e.target)): e for e in view.edges}
@@ -233,7 +234,7 @@ def redact_tree(value: Any) -> tuple[Any, int]:
 
 
 def merge(agent_id: str, result: LLMResult, *, context: AgentContext, pass_type: Literal["first_pass", "challenge", "response"],
-          scenario_ids: dict[str, str], created_at: datetime) -> MergeOutcome:
+          scenario_ids: dict[str, str], created_at: datetime, known_view: AgentView | None = None) -> MergeOutcome:
     """Applies the section 7 merge rules; scenario_ids maps "act_now" and "inaction" to scenario IDs."""
     assessment_id = f"asm_{context.run_id}_{agent_id}"
     if pass_type == "response":
@@ -241,7 +242,7 @@ def merge(agent_id: str, result: LLMResult, *, context: AgentContext, pass_type:
     if len(assessment_id) > 80:
         assessment_id = "asm_" + hashlib.sha256(assessment_id.encode()).hexdigest()[:32]
     origin = Origin.challenger if pass_type == "challenge" else Origin.agent
-    merger = _Merger(agent_id, context, assessment_id, scenario_ids, origin, stale=False)
+    merger = _Merger(agent_id, context, assessment_id, scenario_ids, origin, stale=False, known_view=known_view)
     merger.report.errors.extend(result.errors)
     output = challenge = None
     if isinstance(result.output, AgentOutput):

@@ -199,12 +199,18 @@ class _Run:
                                 known_impact_summaries=summaries)
         if not self.agent_evidence:
             context = context.model_copy(update={"view": context.view.model_copy(update={"evidence": []})})
+        # The prompt carries the trimmed context; the merge validates against the agent's full permitted view.
+        full_view = self.engine.build_agent_view(
+            state["twin"], agent_id=spec.agent_id, department_id=spec.department_id,
+            visible_entity_types=spec.visible_entity_types, visible_sensitivity=spec.visible_sensitivity)
+        if not self.agent_evidence:
+            full_view = full_view.model_copy(update={"evidence": []})
         prompt = assemble(agent_id, context)
         self.stop_if_requested(f"the {agent_id} agent call")
         result = self.llm.call(agent_id, prompt.messages, prompt.output_model, prompt_version=PROMPT_VERSION,
                                context=context, fast=model_tier(agent_id) == "fast")
         outcome = merge(agent_id, result, context=context, pass_type=pass_type,  # type: ignore[arg-type]
-                        scenario_ids=self.scenario_ids(plan), created_at=self.clock())
+                        scenario_ids=self.scenario_ids(plan), created_at=self.clock(), known_view=full_view)
         assessment = outcome.assessment
         if assessment.status in FAILED_STATUSES:
             reason = "; ".join(assessment.validation.errors) or assessment.status
@@ -488,6 +494,28 @@ class _Run:
             return f"Migrate {target}{origin} to {self._entity_name(twin, str(replacement))}"
         return f"{str(action.type).replace('_', ' ').capitalize()} for {target}"
 
+    # How a group of same-type mitigations reads in a headline: (singular noun, plural noun) after a verb.
+    ACTION_PHRASES = {
+        "document_runbook": ("document", "runbook", "runbooks"),
+        "reassign_owner": ("reassign", "owner", "owners"),
+        "reassign_on_call": ("reassign", "on-call rota", "on-call rotas"),
+        "add_replacement_feed": ("add", "replacement feed", "replacement feeds"),
+        "resequence_project": ("resequence", "project", "projects"),
+        "retain_capacity_temporarily": ("temporarily retain capacity in", "team", "teams"),
+    }
+
+    def _action_summary(self, actions: list[Intervention], steps: list[str]) -> str:
+        """Replacement feeds are named one by one; other mitigations are counted by type."""
+        parts = [step[0].lower() + step[1:] for step, a in zip(steps, actions) if step.startswith("Migrate ")]
+        counts: dict[str, int] = {}
+        for step, action in zip(steps, actions):
+            if not step.startswith("Migrate "):
+                counts[str(action.type)] = counts.get(str(action.type), 0) + 1
+        for kind, count in counts.items():
+            verb, one, many = self.ACTION_PHRASES.get(kind, (kind.replace("_", " "), "item", "items"))
+            parts.append(f"{verb} {count} {one if count == 1 else many}")
+        return ", ".join(parts)
+
     def mitigated_recommendation(self, state: RunGraphState, mitigations: list[MitigationComparison],
                                  best: Any) -> Recommendation | None:
         """A feasible mitigated plan wins when the engine's own net value beats the best unmitigated row."""
@@ -508,15 +536,16 @@ class _Run:
         steps = [self._describe_action(a, twin, removed) for a in winner.actions]
         restored = [self._entity_name(twin, e) for e in winner.restored_entity_ids]
         conditions = [n for n in after.assumptions if n.startswith("Conditionally feasible")]
+        count = len(winner.actions)
+        risk = (f"Engine risk {before.risk.score:.1f} ({before.risk.level.value}) before, "
+                f"{after.risk.score:.1f} ({after.risk.level.value}) after.")
+        lead = f"Proceed with {count} mitigation{'s' if count != 1 else ''} first: {self._action_summary(winner.actions, steps)}."
         if not winner.feasible_before:
-            # The engine only says feasible under conditions here, so the headline says exactly that.
-            # The engine's full condition list is the first claim; the headline keeps its framing.
-            headline = (f"Proceed with mitigations: {winner.plan_id_after} is conditionally feasible with coverage "
-                        f"restored for {', '.join(restored)}.")
+            # The engine only calls the plan feasible under conditions; its full condition note is the first claim.
+            headline = (f"{lead} The plan becomes conditionally feasible with coverage restored for "
+                        f"{len(restored)} entit{'ies' if len(restored) != 1 else 'y'}. {risk}")
         else:
-            headline = (f"{'; '.join(steps)} first, then proceed. Restores {', '.join(restored)}; engine risk "
-                        f"{before.risk.score:.1f} ({before.risk.level.value}) before, "
-                        f"{after.risk.score:.1f} ({after.risk.level.value}) after.")
+            headline = f"{lead} {risk}"
         claims = [Claim(text=note, source="calculation", ref=after.result_id) for note in conditions]
         claims += [Claim(text=f"{step} ({a.id}: {a.type} on {a.target_entity_id})", source="calculation", ref=a.id)
                    for step, a in zip(steps, winner.actions)]

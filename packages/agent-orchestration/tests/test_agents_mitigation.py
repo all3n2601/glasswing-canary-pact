@@ -206,8 +206,9 @@ def test_already_feasible_plan_leads_with_the_mitigation_and_engine_risk(brief, 
     package, _ = run(brief, twin, settings, FeasibleBefore())
     recommendation, winner = package.recommendation, package.mitigations[0]
     assert recommendation.action == "proceed_with_mitigations"
-    assert recommendation.headline.startswith("Migrate Account intelligence")
-    assert "first, then proceed" in recommendation.headline
+    assert recommendation.headline.startswith("Proceed with 1 mitigation first: migrate Account intelligence")
+    assert "Restores" not in recommendation.headline and recommendation.headline.count(". ") == 1
+    assert any(c.text.startswith("Restores ") for c in recommendation.claims)
     assert f"{winner.before.risk.score:.1f} ({winner.before.risk.level.value}) before" in recommendation.headline
     assert f"{winner.after.risk.score:.1f} ({winner.after.risk.level.value}) after" in recommendation.headline
 
@@ -241,7 +242,8 @@ def test_real_engine_vendor_passes_its_feasible_alternative_and_migrates_first(s
     assert any(r.future is Future.alternative for r in package.futures.rows)
     recommendation = package.recommendation
     assert recommendation.action == "proceed_with_mitigations"
-    assert recommendation.headline.startswith("Migrate Account intelligence from EchoMarket")
+    assert recommendation.headline.startswith(
+        "Proceed with 1 mitigation first: migrate Account intelligence from EchoMarket to ")
 
 
 def _spy(self, engine, name):
