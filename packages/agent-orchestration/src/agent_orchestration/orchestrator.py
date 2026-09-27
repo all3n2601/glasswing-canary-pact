@@ -1,12 +1,20 @@
 import operator
+import os
 import threading
 from datetime import datetime, timezone
 from typing import Annotated, Any, Callable, Protocol, TypedDict
 
 from contracts_py.agents import ChallengerOutput, Claim
 from contracts_py.decision import CandidatePlan, DecisionBrief, Scenario
-from contracts_py.engine import BlastRadius, FutureComparison, Portfolio, PortfolioComparison, SimulationResult
-from contracts_py.enums import Future, RunStatus
+from contracts_py.engine import (
+    BlastRadius,
+    FutureComparison,
+    Portfolio,
+    PortfolioComparison,
+    SimulationResult,
+    VendorOverlap,
+)
+from contracts_py.enums import ActionType, Future, RunStatus
 from contracts_py.events import (
     AgentFailed,
     AgentStarted,
@@ -56,6 +64,17 @@ class RunGraphState(TypedDict, total=False):
     package: DecisionPackage
 
 
+SIM_MODES = ("full", "quick")
+
+
+def simulation_mode() -> str:
+    """CANARY_SIM_MODE picks the engine's simulate mode; full is the default until the engine implements it."""
+    mode = os.environ.get("CANARY_SIM_MODE", "full").strip() or "full"
+    if mode not in SIM_MODES:
+        raise ValueError(f"CANARY_SIM_MODE must be one of {', '.join(SIM_MODES)}, got {mode!r}")
+    return mode
+
+
 class RunFailure(RuntimeError):
     pass
 
@@ -74,6 +93,7 @@ class _Run:
                  should_stop: Callable[[], bool] | None = None, *, challenger: bool = True,
                  agent_evidence: bool = True, feedback: bool = True) -> None:
         self.challenger, self.agent_evidence, self.feedback = challenger, agent_evidence, feedback
+        self.sim_mode = simulation_mode()
         self.brief, self.twin, self.engine, self.settings = brief, twin, engine, settings
         self.llm, self.emit, self.run_id, self.clock = llm, emit, run_id, clock
         self.status = RunStatus.created
@@ -130,7 +150,7 @@ class _Run:
 
     def simulate(self, twin: Twin, future: Future, plan: CandidatePlan | None) -> SimulationResult:
         scenario = self.scenario(future, plan)
-        result = self.engine.simulate(twin, self.brief, scenario, plan if scenario.plan_id else None, "full",
+        result = self.engine.simulate(twin, self.brief, scenario, plan if scenario.plan_id else None, self.sim_mode,
                                       settings=self.settings)
         self.check(result, twin)
         where = {"scenario_id": scenario.scenario_id, "future": future}
@@ -320,6 +340,18 @@ class _Run:
         self.phase(RunStatus.awaiting_approval)
         return {"package": package}
 
+    def vendor_overlaps(self, twin: Twin) -> list[VendorOverlap]:
+        vendor_ids = _unique([i.target_entity_id for i in self.brief.candidate_interventions
+                              if i.type is ActionType.remove_vendor])
+        if not vendor_ids:
+            return []
+        try:
+            return self.engine.vendor_overlap(twin, vendor_ids)
+        except ValueError as exc:
+            # Overlap is supporting detail; a bad vendor id is reported instead of failing the whole run.
+            self.engine_issues.append(f"Engine vendor_overlap: {exc}")
+            return []
+
     def build_package(self, state: RunGraphState) -> DecisionPackage:
         comparison, act_now, blasts = state["comparison"], state["results"][Future.act_now], state["blasts"]
         best = comparison.rows[comparison.best_row_index] if comparison.best_row_index is not None else None
@@ -356,6 +388,7 @@ class _Run:
             "blast_radius_inaction": blasts[Future.inaction],
             "department_impacts": blasts[Future.act_now].departments,
             "critical_risks": [i for i in act_now.impacts if i.severity >= 4],
+            "vendor_overlaps": self.vendor_overlaps(twin),
             "assumptions": _unique([*act_now.assumptions, *self.engine_issues]),
             "open_questions": _unique(questions),
             "missing_perspectives": self.missing_agents(state),

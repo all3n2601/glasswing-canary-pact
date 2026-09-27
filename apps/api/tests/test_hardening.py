@@ -113,3 +113,11 @@ def test_eval_cli_records_twin_impl(tmp_path) -> None:
     assert eval_cli.main(["--mode", "mock", "--out", str(tmp_path)]) == 0
     rows = json.loads((tmp_path / "eval_runs.json").read_text())["rows"]
     assert {row["twin_impl"] for row in rows} == {engine_port.twin_impl()}
+
+
+def test_engine_port_vendor_overlap_follows_engine_impl(monkeypatch) -> None:
+    monkeypatch.delenv("ENGINE_IMPL", raising=False)
+    twin = stub_twin()
+    assert engine_port.vendor_overlap(twin, ["vendor_apex", "vendor_beacon"]) == stub_engine.vendor_overlap(
+        twin, ["vendor_apex", "vendor_beacon"]) != []
+    assert engine_port.vendor_overlap(twin, ["vendor_apex"]) == []

@@ -2,7 +2,7 @@ from datetime import date
 from typing import Any
 
 from contracts_py.decision import CandidatePlan, DecisionBrief, Intervention, Scenario
-from contracts_py.engine import BlastRadius, FutureComparison, PortfolioComparison, SimulationResult
+from contracts_py.engine import BlastRadius, FutureComparison, PortfolioComparison, SimulationResult, VendorOverlap
 from contracts_py.enums import DocumentStatus, EntityType, Future
 from contracts_py.twin import (
     AgentView,
@@ -52,6 +52,12 @@ def optimize(twin: Twin, brief: DecisionBrief, *, settings: OrganizationSettings
     if general_decision.is_general(brief):
         return general_decision.portfolios(brief, twin, run_id)
     return results.portfolio_comparison(run_id, brief.decision_id)
+
+
+def vendor_overlap(twin: Twin, vendor_ids: list[str]) -> list[VendorOverlap]:
+    # Stored stub pairs, limited to pairs whose vendors were both asked about, as the real engine pairs them.
+    wanted = set(vendor_ids)
+    return [o for o in results.vendor_overlaps(VENDOR_DECISION) if {o.vendor_a, o.vendor_b} <= wanted]
 
 
 def blast_radius(result: SimulationResult, twin: Twin) -> BlastRadius:
