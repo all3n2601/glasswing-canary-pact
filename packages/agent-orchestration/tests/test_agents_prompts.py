@@ -12,6 +12,7 @@ from agent_orchestration.prompts import (
     find_repo_root,
     load_manifest,
     redact_people,
+    strip_schema_titles,
     strip_title,
 )
 from orchestration_helpers import make_context
@@ -29,7 +30,9 @@ def test_base_first_schema_last(context) -> None:
     prompt = assemble("finance", context)
     text = prompt.text
     assert text.startswith("You are the Finance agent for Canary Pact.")
-    assert text.endswith(json.dumps(AgentOutput.model_json_schema(), indent=2, sort_keys=True))
+    compact_schema = json.dumps(strip_schema_titles(AgentOutput.model_json_schema()), separators=(",", ":"),
+                                sort_keys=True)
+    assert text.endswith(compact_schema) and '"title"' not in compact_schema
     positions = [text.index(SECTION_TITLES[k]) for k in ("department_knowledge", "agent_context", "output_schema")]
     assert positions == sorted(positions)
     assert [m["role"] for m in prompt.messages] == ["system", "user"]

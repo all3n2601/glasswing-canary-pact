@@ -71,7 +71,7 @@ class Recorder:
 
 
 def make_context(brief: Any, twin: Any, settings: OrganizationSettings, agent_id: str = "operations",
-                 run_id: str = "run_test") -> AgentContext:
+                 run_id: str = "run_test", trim: bool = False) -> AgentContext:
     from canary_api.stubs import results
 
     from agent_orchestration.context import build_context
@@ -79,7 +79,7 @@ def make_context(brief: Any, twin: Any, settings: OrganizationSettings, agent_id
 
     return build_context(ROSTER[agent_id], run_id=run_id, brief=brief, plan=results.plans()[1], twin=twin,
                          engine=stub_engine, act_now=results.act_now_result(run_id, brief.decision_id),
-                         inaction=results.inaction_result(run_id, brief.decision_id), settings=settings)
+                         inaction=results.inaction_result(run_id, brief.decision_id), settings=settings, trim=trim)
 
 
 def person_tokens(text: str) -> list[str]:
