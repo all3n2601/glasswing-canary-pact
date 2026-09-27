@@ -5,7 +5,7 @@ from functools import cache
 from pathlib import Path
 
 from agent_orchestration import AgentLLM, DecisionIntake
-from agent_orchestration.llm import structured_output_mode
+from agent_orchestration.llm import structured_output_mode, thinking_enabled
 from agent_orchestration.orchestrator import simulation_mode
 from contracts_py.twin import OrganizationSettings, Twin
 
@@ -21,6 +21,8 @@ bus = EventBus()
 structured_output_error: str | None = None
 # Set once at startup; every run is refused while it holds an error, since each run calls simulate.
 sim_mode_error: str | None = None
+# Set once at startup; live runs and intake are refused while an LLM thinking setting is invalid.
+thinking_error: str | None = None
 _twin: Twin | None = None
 _stub_twin: Twin | None = None
 twin_lock = RLock()
@@ -102,6 +104,18 @@ def check_structured_output() -> str | None:
         structured_output_error = str(exc)
         log.error("live runs disabled: %s", exc)
     return structured_output_error
+
+
+def check_thinking() -> str | None:
+    global thinking_error
+    try:
+        thinking_enabled()
+        thinking_enabled("challenger")
+        thinking_error = None
+    except ValueError as exc:
+        thinking_error = str(exc)
+        log.error("live runs disabled: %s", exc)
+    return thinking_error
 
 
 def check_sim_mode() -> str | None:
