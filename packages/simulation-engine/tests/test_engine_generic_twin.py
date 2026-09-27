@@ -11,7 +11,15 @@ from __future__ import annotations
 from datetime import date, datetime, timezone
 
 import pytest
-from contracts_py.decision import CandidatePlan, Constraint, DecisionBrief, Goal, Intervention
+from contracts_py.decision import (
+    CandidatePlan,
+    Constraint,
+    DecisionBrief,
+    EngineMetric,
+    Goal,
+    Intervention,
+    Operator,
+)
 from contracts_py.enums import (
     ActionType,
     BusinessModel,
@@ -142,7 +150,7 @@ def logistics_twin_data() -> Twin:
         _edge("ch_dispatch_fleet", "dept_dispatch", "dept_fleet", Relation.FLOWS_TO,
               criticality=Criticality.medium, channel_kind=ChannelKind.capability),
         _edge("ch_fleet_accounts", "dept_fleet", "dept_accounts", Relation.FLOWS_TO,
-              criticality=Criticality.medium, channel_kind=ChannelKind.value),
+              criticality=Criticality.medium, channel_kind=ChannelKind.signal),
     ]
     return Twin(
         version=VersionInfo(twin_version="twin_harbor_freight_v1", settings_version=1, prompt_version="p1",
@@ -180,7 +188,7 @@ def _remove(action: ActionType, target: str, cost: int = 0) -> Intervention:
                         target_entity_id=target, start_day=30, one_time_cost_usd=cost, rationale="Under review")
 
 
-def _constraint(cid: str, metric: str, operator: str, threshold: float, *, hard: bool = True) -> Constraint:
+def _constraint(cid: str, metric: EngineMetric, operator: Operator, threshold: float, *, hard: bool = True) -> Constraint:
     return Constraint(id=cid, metric=metric, operator=operator, threshold=threshold, unit="count", hard=hard,
                       description=cid)
 
@@ -249,6 +257,7 @@ def test_every_future_simulates_cleanly_in_both_modes(twin, mode):
 def test_compare_futures_ranks_acting_now_against_inaction(twin):
     comparison = compare_futures(twin, VENDOR_BRIEF, plan_of(VENDOR_BRIEF, "remove_routemap"), run_id="run_generic")
     assert sorted(r.future.value for r in comparison.rows) == ["act_now", "delay", "inaction"]
+    assert comparison.best_row_index is not None
     assert comparison.rows[comparison.best_row_index].future is Future.act_now
     assert check_result(comparison, twin) == []
 
