@@ -941,6 +941,18 @@ export interface ValueBreakdown {
   p10_net_value_usd?: number | null;
   p50_net_value_usd?: number | null;
   p90_net_value_usd?: number | null;
+  /**
+   * Contract termination fees paid to exit vendors or projects.
+   */
+  termination_cost_usd?: number | null;
+  /**
+   * One-time cost of moving work or data onto a replacement.
+   */
+  migration_cost_usd?: number | null;
+  /**
+   * Cost of work pushed onto remaining teams by the change.
+   */
+  displaced_work_cost_usd?: number | null;
 }
 /**
  * This interface was referenced by `CanaryContracts`'s JSON-Schema

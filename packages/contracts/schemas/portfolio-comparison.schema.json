@@ -814,6 +814,48 @@
           ],
           "default": null,
           "title": "P90 Net Value Usd"
+        },
+        "termination_cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Contract termination fees paid to exit vendors or projects.",
+          "title": "Termination Cost Usd"
+        },
+        "migration_cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "One-time cost of moving work or data onto a replacement.",
+          "title": "Migration Cost Usd"
+        },
+        "displaced_work_cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Cost of work pushed onto remaining teams by the change.",
+          "title": "Displaced Work Cost Usd"
         }
       },
       "required": [
