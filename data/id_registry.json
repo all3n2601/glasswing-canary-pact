@@ -283,7 +283,7 @@
     },
     {
       "id": "dec_workforce_knowledge",
-      "description": "Secondary scenario (plan section 4.2, A-04 acceptance): remove the 8 workforce roles in one plan (plan_remove_eight_roles, no subset search), save at least $1,070,000 gross (sum of the 8 roles' annual_cost_usd). Strands exactly wf_financial_close (loses its only kn_warehouse_lineage holder, role_data_platform_lead) and wf_billing_recon (loses both owners, role_billing_ops_lead and role_billing_specialist, whose exception-path knowledge was never documented); infeasible against c_stranded (W-2). plan_remove_eight_roles_mitigated (reassign_owner to role_controller and role_finance_analyst, document_runbook, retain_capacity_temporarily) restores stranded_workflows == 0 and is conditionally feasible (W-4, W-5)."
+      "description": "Secondary scenario (plan section 4.2, A-04 acceptance): remove the 8 workforce roles in one plan (plan_remove_eight_roles, no subset search), save at least $165,360,000 gross (sum of the 8 roles' annual_cost_usd). Strands exactly wf_financial_close (loses its only kn_warehouse_lineage holder, role_data_platform_lead) and wf_billing_recon (loses both owners, role_billing_ops_lead and role_billing_specialist, whose exception-path knowledge was never documented); infeasible against c_stranded (W-2). plan_remove_eight_roles_mitigated (reassign_owner to role_controller and role_finance_analyst, document_runbook, retain_capacity_temporarily) restores stranded_workflows == 0 and is conditionally feasible (W-4, W-5)."
     }
   ],
   "plans": [

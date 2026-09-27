@@ -4,7 +4,7 @@
   "decision_type": "restructure",
   "title": "Eliminate eight staff roles",
   "statement": "Evaluate the operational consequences of eliminating eight staff roles that currently support two workflows.",
-  "goal": {"metric": "annual_savings_usd", "target": 1070000, "unit": "usd", "basis": "gross", "direction": "at_least"},
+  "goal": {"metric": "annual_savings_usd", "target": 165360000, "unit": "usd", "basis": "gross", "direction": "at_least"},
   "horizon_days": 365,
   "candidate_interventions": [
     {"id": "remove_close_accountant", "kind": "action", "type": "remove_roles", "target_entity_id": "role_close_accountant", "start_day": 30, "one_time_cost_usd": 40000, "params": {}, "rationale": "Role elimination under review"},
