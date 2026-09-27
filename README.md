@@ -28,8 +28,8 @@ The evidence that this goes wrong is public:
   ([Panopto](https://www.panopto.com/company/news/inefficient-knowledge-sharing-costs-large-businesses-47-million-per-year/)).
 - There were **1.2M** announced US job cuts in 2025
   ([Challenger](https://www.challengergray.com/blog/2025-year-end-challenger-report-highest-q4-layoffs-since-2008-lowest-ytd-hiring-since-2010/)).
-- **96%** of large firms run cost programs and spend **$0.20 to $0.90** per dollar of targeted
-  savings ([Deloitte 2026](https://www.prnewswire.com/news-releases/organizations-are-betting-on-cost-transformation-to-fund-growth--but-few-are-capturing-the-full-value-302875992.html)).
+- **96%** of organizations are pursuing, have completed or plan a cost transformation, and **77%**
+  expect to invest **$0.20 to $0.90** for every dollar of savings targeted ([Deloitte 2026](https://www.prnewswire.com/news-releases/organizations-are-betting-on-cost-transformation-to-fund-growth--but-few-are-capturing-the-full-value-302875992.html)).
 
 ## Who pays
 
@@ -37,9 +37,9 @@ The evidence that this goes wrong is public:
 - **Users:** department heads, who review what the cut does to their workflows and approve or reject.
 - **Pricing:** an annual license priced by headcount or by modelled spend.
 - **ROI:** avoided rehire premiums and outages, and savings that stick.
-- **Positioning:** they find the savings; we tell you what breaks. Canary Pact is meant to plug into
-  the planning tools a company already uses (such as Orgvue, Pigment or Workday) as the
-  blast-radius check.
+- **Positioning:** they find the savings; we tell you what breaks. Canary Pact is meant to sit
+  next to the planning tools a company already uses (for example Orgvue, Pigment or Workday) as
+  the blast-radius check; no integration exists yet.
 - **Scope:** it scores teams and systems, never individuals. People appear only as anonymous person
   tokens, which are replaced by their roles before anything reaches a human, and a decision package
   is rejected if any person token remains.
@@ -113,8 +113,8 @@ Mocked today:
   expected-value mode."). This README will be updated when the engine lands.
 - **The company.** Northstar Technologies is synthetic, and so are its documents and evidence.
 
-The measured agent ablations are produced by `uv run python -m canary_api.eval_cli` and written
-to `data/artifacts/eval/ablation.csv`.
+Measured agent ablations can be produced with `uv run python -m canary_api.eval_cli`, which writes
+`data/artifacts/eval/ablation.csv`.
 
 ## Running it
 
@@ -139,6 +139,7 @@ Important environment variables (see `.env.example`; names only here):
   `TWIN_IMPL=real` with the default stub engine runs the real Northstar twin.
 - `SCIFORIUM_API_KEY`, `SCIFORIUM_BASE_URL`, `MODEL_STRONG`, `MODEL_FAST`: live model access.
 - `CANARY_ALLOW_LIVE`: must be `true` before a run may use `llm_mode=live`.
+- `CANARY_STRUCTURED_OUTPUT`: `auto` (default), `json_schema` or `function_calling`.
 - `CANARY_AUTH_SECRET`: token signing secret. If blank, tokens reset on every restart.
 - `CANARY_DEMO_APPROVER_EMAIL`, `CANARY_DEMO_APPROVER_PASSWORD`: create the demo approver.
 - `DATABASE_URL`, `CANARY_DB_SCHEMA`: optional Postgres (tables live in a private `canary` schema).
@@ -159,7 +160,7 @@ Tests and checks:
 ```bash
 uv run pytest -q
 pnpm typecheck
-uv run python -m canary_api.eval_cli --mode mock   # or replay / live
+uv run python -m canary_api.eval_cli --mode mock   # or replay; live needs CANARY_ALLOW_LIVE=true and makes paid model calls
 ```
 
 The Postgres tests run only when `CANARY_TEST_DATABASE_URL` is set; they use a throwaway schema.
@@ -173,7 +174,7 @@ The history of `origin/main` starts on 2026-09-26, the day of the hackathon:
 - 2026-09-26 12:34, M A Allen Febi: "Add repository guardrails for coding agents"
 - 2026-09-26 14:31, Adhithyan245: "Add files via upload (#1)"
 
-Every commit on `dev` is also dated 2026-09-26; `dev` has 32 merge commits from pull requests.
+Every commit on `dev` is also dated during the event.
 
 ## Documents
 
