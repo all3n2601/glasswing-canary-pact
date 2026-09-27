@@ -6,12 +6,14 @@ import json
 import time
 
 from contracts_py.decision import DecisionBrief
+from contracts_py.engine import SimulationResult
 from contracts_py.enums import Future
 from contracts_py.twin import OrganizationSettings
 
 from company_twin import load_twin
 from company_twin.loader import default_fixture_path
 from simulation_engine import check_result, quick_impact
+from simulation_engine.simulate import bounded_id
 
 TWIN = load_twin(default_fixture_path())
 DATA = default_fixture_path().parent
@@ -76,3 +78,14 @@ def test_quick_impact_runs_under_100_ms_on_the_full_fixture():
     started = time.perf_counter()
     quick_impact(TWIN, interventions, brief=VENDOR)
     assert time.perf_counter() - started < 0.1
+
+
+def test_a_70_character_run_id_gives_contract_valid_ids_that_match_the_act_now_scenario():
+    run_id = "run_" + "r" * 66
+    result = quick_impact(TWIN, picks(VENDOR, "remove_beacon", "remove_echo"), brief=VENDOR, run_id=run_id)
+    assert len(run_id) == 70 and len(result.scenario_id) <= 80 and len(result.result_id) <= 80
+    assert result.result_id.startswith("res_") and result.result_id != f"res_{run_id}_quick"
+    assert SimulationResult.model_validate(result.model_dump()) == result
+    # scenario_for's body with no plan; the Scenario contract itself only lets inaction go without a plan.
+    assert result.scenario_id == bounded_id("scn_", f"{run_id}_{Future.act_now.value}_none")
+    assert result.scenario_id == "scn_ef26eae24f33aed85f5faf55"

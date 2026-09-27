@@ -45,6 +45,7 @@ from .interventions import Seed
 MAX_ITERATIONS = 10
 CONVERGENCE_TOLERANCE = 0.001
 DELAYED_AFTER_DAYS = 90
+MAX_ID_LENGTH = 80  # contracts_py.common.ID
 
 CATEGORY_OF: dict[EntityType, ImpactCategory] = {
     EntityType.person_token: ImpactCategory.ownership,
@@ -281,11 +282,20 @@ def constraint_refs(entity: Entity, constraints: list[Constraint]) -> list[str]:
     return refs
 
 
-def impact_id(*parts: str) -> str:
-    candidate = "imp_" + "_".join(parts)
-    if len(candidate) <= 80:
+def bounded_id(prefix: str, body: str) -> str:
+    """``prefix + body``, or ``prefix`` plus a hash of ``body`` when that would pass the contract's 80-character limit.
+
+    Every engine-created ID goes through here; agent_orchestration keeps an identical copy (pinned by tests), so the
+    engine and the orchestrator name a scenario alike.
+    """
+    candidate = prefix + body
+    if len(candidate) <= MAX_ID_LENGTH:
         return candidate
-    return "imp_" + hashlib.sha256(candidate.encode()).hexdigest()[:24]
+    return prefix + hashlib.sha256(body.encode()).hexdigest()[:24]
+
+
+def impact_id(*parts: str) -> str:
+    return bounded_id("imp_", "_".join(parts))
 
 
 def impact_ledger(twin: Twin, propagation: Propagation, *, decision_id: str, scenario_id: str, polarity: Polarity,
