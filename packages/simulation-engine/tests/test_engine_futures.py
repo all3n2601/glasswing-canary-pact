@@ -12,11 +12,11 @@ from contracts_py.twin import Pressure
 
 from company_twin import entity_map, load_twin
 from company_twin.loader import default_fixture_path
-from simulation_engine import blast_radius, check_result, optimize
+from simulation_engine import blast_radius, check_result, compare_futures, optimize, simulate
 from simulation_engine.blast import money
-from simulation_engine.futures import HEADLINE_NOTE, ROW_LABEL_SUFFIX, compare_futures, scenario_for
+from simulation_engine.futures import HEADLINE_NOTE, ROW_LABEL_SUFFIX, scenario_for
 from simulation_engine.pressures import Harm, active_pressures, price_pressures
-from simulation_engine.simulate import EXPECTED_VALUE_ASSUMPTIONS, UNQUANTIFIED_ASSUMPTION, simulate
+from simulation_engine.simulate import EXPECTED_VALUE_ASSUMPTIONS, UNQUANTIFIED_ASSUMPTION
 
 TWIN = load_twin(default_fixture_path())
 DATA = default_fixture_path().parent

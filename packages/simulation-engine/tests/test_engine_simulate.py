@@ -173,6 +173,32 @@ def test_full_and_inaction_futures_are_implemented_and_quick_plans_must_match():
                  "quick")
 
 
+def test_modes_and_plans_must_match_the_scenario():
+    with pytest.raises(ValueError):
+        simulate(TWIN, VENDOR, scenario(), plan("beacon", "echo"), "monte_carlo")
+    with pytest.raises(ValueError):
+        simulate(TWIN, VENDOR, scenario(None, Future.inaction), plan("beacon", "echo"), "quick")
+    with pytest.raises(ValueError):
+        simulate(TWIN, VENDOR, scenario(), None, "quick")
+
+
+def test_one_engine_serves_every_future_and_mode():
+    import importlib
+
+    import simulation_engine
+
+    assert simulation_engine.simulate is importlib.import_module("simulation_engine.simulate").simulate
+    assert simulation_engine.compare_futures is importlib.import_module("simulation_engine.futures").compare_futures
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module("simulation_engine.simulator")
+    for mode in ("quick", "full"):
+        for future in (Future.act_now, Future.inaction, Future.delay):
+            chosen = None if future is Future.inaction else plan("beacon", "echo")
+            result = simulate(TWIN, VENDOR, scenario(None if chosen is None else "plan_beacon_echo", future), chosen,
+                              mode)
+            assert result.mode == mode and result.future is future and check_result(result, TWIN) == []
+
+
 def cut(target: str, pct: float) -> Intervention:
     return Intervention(id="act_cut", kind=InterventionKind.action, type=ActionType.reduce_capacity,
                         target_entity_id=target, amount_pct=pct, rationale="test")
