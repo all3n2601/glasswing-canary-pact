@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
+from functools import lru_cache
 
 import networkx as nx
 from contracts_py.decision import Constraint
@@ -38,8 +39,6 @@ from contracts_py.enums import (
     Relation,
 )
 from contracts_py.twin import Entity, OrganizationSettings, Twin
-
-from company_twin import build_graph
 
 from .interventions import Seed
 
@@ -88,6 +87,37 @@ class Propagation:
     effects: dict[str, Effect]
     iterations: int
     converged: bool
+
+
+NodeKey = tuple[str, EntityType, tuple[str, ...]]
+EdgeKey = tuple[str, str, str, Relation, float, float, int, float, tuple[str, ...]]
+
+
+def _graph(twin: Twin) -> nx.DiGraph:
+    """The dependency graph propagation walks, shared by scenario clones with the same structure.
+
+    Propagation reads only each node's type and evidence and each edge's transfer, timing and
+    evidence fields, so the graph is keyed on those values: the 128 portfolios of one optimize
+    call differ only in their seeds and reuse one graph instead of rebuilding it every time.
+    """
+    nodes = tuple((e.id, e.type, tuple(e.evidence_refs)) for e in twin.entities)
+    edges = tuple((e.source, e.target, e.id, e.relation, e.strength, e.substitutability, e.lag_days, e.confidence,
+                   tuple(e.evidence_refs)) for e in twin.edges)
+    return _cached_graph(nodes, edges)
+
+
+@lru_cache(maxsize=32)
+def _cached_graph(nodes: tuple[NodeKey, ...], edges: tuple[EdgeKey, ...]) -> nx.DiGraph:
+    graph = nx.DiGraph()
+    for entity_id, entity_type, evidence_refs in nodes:
+        graph.add_node(entity_id, type=entity_type, evidence_refs=evidence_refs)
+    for source, target, edge_id, relation, strength, substitutability, lag_days, confidence, evidence_refs in edges:
+        if source not in graph or target not in graph:
+            raise ValueError(f"Edge references an unknown entity: {source} -> {target}")
+        graph.add_edge(source, target, id=edge_id, relation=relation, strength=strength,
+                       substitutability=substitutability, lag_days=lag_days, confidence=confidence,
+                       evidence_refs=evidence_refs)
+    return graph
 
 
 def _transfer(data: dict) -> float:
@@ -171,7 +201,7 @@ def propagate(twin: Twin, seeds: dict[str, Seed], *, settings: OrganizationSetti
     """Propagate direct changes ``seeds`` through ``twin`` (a scenario clone) to a fixed point."""
     settings = settings or OrganizationSettings()
     threshold, max_hops = settings.min_impact_threshold, settings.propagation_max_hops
-    graph = build_graph(twin)
+    graph = _graph(twin)
     unknown = sorted(set(seeds) - set(graph))
     if unknown:
         raise KeyError(f"seeds reference unknown entities: {unknown}")

@@ -248,6 +248,33 @@ def test_to_role_level_maps_pt_ids_inside_knowledge_coverage_holders():
     assert coverage.holders_before == [pt_before.id, pt_after.id]
 
 
+def test_to_role_level_returns_the_same_objects_when_there_is_no_person_token():
+    # "dept_finance" contains "pt_" but is no person token, so the text path must keep it as is.
+    coverage = WorkflowCoverage(
+        workflow_id="wf_redaction_check", criticality="high", owners_before=["dept_finance"], owners_after=["dept_finance"],
+        min_qualified_owners=1, backup_count_after=0, documented_pct=0.4, stranded=False,
+    )
+    payload = {"coverage": coverage, "departments": ["dept_finance", ("dept_legal",)], "note": "adopt_a_plan"}
+
+    mapped = to_role_level(payload, TWIN)
+
+    assert mapped is payload
+    assert mapped["coverage"] is coverage and mapped["departments"] is payload["departments"]
+    assert to_role_level(TWIN, TWIN) is not TWIN  # the twin itself holds person tokens
+
+
+def test_to_role_level_copies_only_the_branches_that_hold_a_person_token():
+    person_token = next(e for e in TWIN.entities if e.type == EntityType.person_token)
+    untouched = {"departments": ["dept_finance"]}
+    payload = {"untouched": untouched, "holders": ("dept_legal", person_token.id)}
+
+    mapped = to_role_level(payload, TWIN)
+
+    assert mapped is not payload and mapped["untouched"] is untouched
+    assert mapped["holders"] == ("dept_legal", person_token.role_id)
+    assert payload["holders"] == ("dept_legal", person_token.id)
+
+
 # ---- A2: edge_from_agent_dependency / clone_with_edges(agent_proposed=True) --
 def test_agent_edge_defaults_cover_every_relation():
     assert set(AGENT_EDGE_DEFAULTS) == set(Relation)
