@@ -12,7 +12,8 @@
   segment is a "Revenue effect"; otherwise "Direct impact" for direct impacts, "Indirect impact"
   for dependent ones, and "Second-order risk" for second-order, delayed, or feedback ones.
 - KPI and customer-segment nodes feed the ``outcome`` node, which carries the net value.
-- Departments are summarised by their harm (or, with none, their benefit) impacts.
+- Departments are summarised by their harm (or, with none, their benefit) impacts; a plan's
+  summaries leave out the baseline pressures, which inaction summarises.
 
 Every edge references existing nodes (rule 14).
 """
@@ -126,7 +127,10 @@ def blast_radius(result: SimulationResult, twin: Twin) -> BlastRadius:
 
     departments = []
     by_department: dict[str, list[Impact]] = {}
-    for impact in result.impacts:
+    # A plan's department summaries show what the plan does; baseline pressures run in every future, so they
+    # are summarised by department only for inaction (they stay on the pressure ring either way).
+    summarised = [i for i in result.impacts if not result.intervention_ids or i.source_kind != "pressure"]
+    for impact in summarised:
         if impact.affected_department:
             by_department.setdefault(impact.affected_department, []).append(impact)
     for department_id in sorted(by_department):

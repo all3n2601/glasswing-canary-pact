@@ -366,3 +366,39 @@ def test_assess_change_plans_say_they_are_unquantified():
     result = simulate(TWIN, brief, scenario_for(TWIN, brief, RUN, Future.act_now, plan), plan, "full")
     assert UNQUANTIFIED_ASSUMPTION in result.assumptions and result.value.gross_savings_usd == 0
     assert UNQUANTIFIED_ASSUMPTION not in run(Future.act_now).assumptions
+
+
+def test_baseline_pressures_are_not_counted_as_the_plans_department_impacts():
+    now, idle = run(Future.act_now), run(Future.inaction)
+    pressure_departments = {i.affected_department for i in now.impacts if i.source_kind == "pressure"}
+    plan_departments = {i.affected_department for i in now.impacts
+                        if i.source_kind != "pressure" and i.affected_department}
+    assert set(now.affected_department_ids) == plan_departments
+    summaries = blast_radius(now, TWIN).departments
+    assert all(ref.startswith("imp_pr_") is False for d in summaries for ref in d.impact_ids)
+    assert pressure_departments - plan_departments  # some departments are only touched by pressures
+    # Inaction's story is the pressures: its departments are the pressure targets'.
+    assert set(idle.affected_department_ids) == {i.affected_department for i in idle.impacts if i.affected_department}
+    assert {d.department_id for d in blast_radius(idle, TWIN).departments} == set(idle.affected_department_ids)
+
+
+def test_pressure_severity_uses_the_company_budget_when_the_goal_is_not_a_positive_amount():
+    zero_goal = VENDOR.model_copy(update={"goal": VENDOR.goal.model_copy(update={"metric": "net_value_usd", "target": 0,
+                                                                              "basis": "net"})})
+    result = simulate(TWIN, zero_goal, scenario_for(TWIN, zero_goal, RUN, Future.inaction, None), None, "full")
+    budget = TWIN.organization.total_annual_budget_usd
+    for impact in (i for i in result.impacts if i.source_kind == "pressure"):
+        assert impact.severity == max(1, min(5, 1 + round(4 * min(1.0, impact.value_usd / budget))))
+    assert max(i.severity for i in result.impacts) < 5
+
+
+def test_a_plan_no_better_than_doing_nothing_is_not_the_best_row():
+    by_id = {i.id: i for i in VENDOR.candidate_interventions}
+    assess = by_id["remove_beacon"].model_copy(update={"id": "assess_beacon", "type": ActionType.assess_change})
+    brief = VENDOR.model_copy(update={"candidate_interventions": [*VENDOR.candidate_interventions, assess],
+                                      "constraints": [], "goal": VENDOR.goal.model_copy(update={
+                                          "metric": "net_value_usd", "target": -10_000_000_000, "basis": "net"})})
+    comparison = compare_futures(TWIN, brief, plan_of(brief, "plan_assess_beacon", "assess_beacon"), run_id=RUN)
+    now = next(r for r in comparison.rows if r.future is Future.act_now)
+    assert now.feasible and now.delta_vs_inaction_p50_usd == 0
+    assert comparison.rows[comparison.best_row_index].future is Future.inaction

@@ -83,6 +83,13 @@ def _interventions(brief: DecisionBrief, scenario: Scenario, plan: CandidatePlan
     return interventions
 
 
+def _severity_scale(twin: Twin, brief: DecisionBrief) -> float:
+    """What a pressure's expected cost is measured against: a positive dollar goal, else the company budget."""
+    if brief.goal.unit == "usd" and brief.goal.target > 0:
+        return brief.goal.target
+    return float(twin.organization.total_annual_budget_usd)
+
+
 def delay_days(brief: DecisionBrief, scenario: Scenario) -> int:
     """The scenario's delay, or the brief's when the scenario leaves it at 0."""
     return scenario.delay_days or brief.delay_days
@@ -119,7 +126,7 @@ def simulate(twin: Twin, brief: DecisionBrief, scenario: Scenario, plan: Candida
              if i.polarity is Polarity.harm and i.unit == "ratio"}
     priced = price_pressures(twin, active_pressures(twin, brief.active_pressure_ids), interventions, harms=harms,
                              horizon_days=horizon, decision_id=brief.decision_id, scenario_id=scenario.scenario_id,
-                             scale_usd=brief.goal.target)
+                             scale_usd=_severity_scale(twin, brief))
     assumptions += priced.assumptions
 
     recurring = gross - v.added_cost_usd - v.rebound_cost_usd - v.expected_business_loss_usd
@@ -148,6 +155,8 @@ def simulate(twin: Twin, brief: DecisionBrief, scenario: Scenario, plan: Candida
     return base.model_copy(update={
         "mode": mode, "seed": brief.seed if mode == "full" else None, "value": value, "impacts": impacts,
         "pressures_triggered": priced.triggers, "feasible": feasible, "rejection_reasons": reasons,
-        "affected_department_ids": sorted({i.affected_department for i in impacts if i.affected_department}),
+        # Baseline pressures run whatever the decision is, so only inaction counts their departments as affected.
+        "affected_department_ids": (base.affected_department_ids if interventions else
+                                    sorted({i.affected_department for i in impacts if i.affected_department})),
         "assumptions": assumptions,
     })

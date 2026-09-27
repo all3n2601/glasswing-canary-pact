@@ -11,7 +11,8 @@ expected-value mode (A12) until Monte Carlo lands (plan E-03):
 - ``breakeven_day`` is the end of the first month whose cumulative net value exceeds inaction's;
 - ``cost_of_delay_usd`` (delay row only) is act-now net value minus delay net value;
 - ``monthly_delta_usd`` is the cumulative difference from inaction per month;
-- ``best_row_index`` is the feasible row with the largest delta, ties to lower risk, then order;
+- ``best_row_index`` is the feasible row with the largest delta; a tie with inaction goes to
+  inaction (acting must be strictly better), other ties to lower risk, then row order;
 - the headline follows the A12 template: "Acting now is worth $X more than doing nothing;
   waiting N days costs $Y.", then says the values are point estimates and p_better is yes/no;
 - every row label ends in "(point estimate)", and each row's result carries the same assumptions.
@@ -122,7 +123,9 @@ def compare_futures(twin: Twin, brief: DecisionBrief, plan: CandidatePlan, *,
         rows.append(_row(run(Future.alternative, alternative), inaction, f"Alternative: {alternative.label}", horizon))
 
     feasible = [n for n, row in enumerate(rows) if row.feasible]
-    best = min(feasible, key=lambda n: (-rows[n].delta_vs_inaction_p50_usd, rows[n].risk_score, n), default=None)
+    # Acting must beat doing nothing: on an equal delta inaction wins, then lower risk, then row order.
+    best = min(feasible, key=lambda n: (-rows[n].delta_vs_inaction_p50_usd, rows[n].future is not Future.inaction,
+                                        rows[n].risk_score, n), default=None)
     return FutureComparison(
         comparison_id=bounded_id("cmp_", f"{run_id}_{plan.plan_id}"), decision_id=brief.decision_id, run_id=run_id,
         reference_result_id=inaction.result_id, rows=rows, best_row_index=best,
