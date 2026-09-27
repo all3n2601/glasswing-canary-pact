@@ -248,6 +248,33 @@ def test_to_role_level_maps_pt_ids_inside_knowledge_coverage_holders():
     assert coverage.holders_before == [pt_before.id, pt_after.id]
 
 
+def test_to_role_level_returns_the_same_objects_when_there_is_no_person_token():
+    # "dept_finance" contains "pt_" but is no person token, so the text path must keep it as is.
+    coverage = WorkflowCoverage(
+        workflow_id="wf_redaction_check", criticality="high", owners_before=["dept_finance"], owners_after=["dept_finance"],
+        min_qualified_owners=1, backup_count_after=0, documented_pct=0.4, stranded=False,
+    )
+    payload = {"coverage": coverage, "departments": ["dept_finance", ("dept_legal",)], "note": "adopt_a_plan"}
+
+    mapped = to_role_level(payload, TWIN)
+
+    assert mapped is payload
+    assert mapped["coverage"] is coverage and mapped["departments"] is payload["departments"]
+    assert to_role_level(TWIN, TWIN) is not TWIN  # the twin itself holds person tokens
+
+
+def test_to_role_level_copies_only_the_branches_that_hold_a_person_token():
+    person_token = next(e for e in TWIN.entities if e.type == EntityType.person_token)
+    untouched = {"departments": ["dept_finance"]}
+    payload = {"untouched": untouched, "holders": ("dept_legal", person_token.id)}
+
+    mapped = to_role_level(payload, TWIN)
+
+    assert mapped is not payload and mapped["untouched"] is untouched
+    assert mapped["holders"] == ("dept_legal", person_token.role_id)
+    assert payload["holders"] == ("dept_legal", person_token.id)
+
+
 # ---- A2: edge_from_agent_dependency / clone_with_edges(agent_proposed=True) --
 def test_agent_edge_defaults_cover_every_relation():
     assert set(AGENT_EDGE_DEFAULTS) == set(Relation)
@@ -360,6 +387,20 @@ def test_aggregate_domain_graph_returns_departments_and_kpi_company_with_flows_t
     } | {"kpi_company"}
     assert domain.edges
     assert all(e.relation == Relation.FLOWS_TO for e in domain.edges)
+
+
+def test_aggregate_domain_graph_selects_company_level_kpis_by_shape_not_by_id():
+    renamed = TWIN.model_copy(deep=True)
+    for e in renamed.entities:
+        if e.id == "kpi_company":
+            e.id = "kpi_overall"
+    for edge in renamed.edges:
+        if edge.target == "kpi_company":
+            edge.target = "kpi_overall"
+    ids = {n.id for n in aggregate_domain_graph(renamed).nodes}
+    assert "kpi_overall" in ids and "kpi_company" not in ids
+    # Department-owned KPIs stay off the department map.
+    assert not ids & {e.id for e in TWIN.entities if e.type == EntityType.kpi and e.department_id}
 
 
 def test_department_detail_matches_the_department_and_its_channels():

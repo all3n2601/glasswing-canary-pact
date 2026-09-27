@@ -8,12 +8,20 @@ from datetime import datetime, timezone
 
 import pytest
 from contracts_py.decision import ENGINE_METRICS, CandidatePlan, DecisionBrief, Intervention, Scenario
-from contracts_py.enums import ActionType, EntityType, Future, InterventionKind
+from contracts_py.enums import ActionType, DocumentStatus, EntityType, Future, InterventionKind
 from contracts_py.twin import OrganizationSettings, RiskWeights
 
 from company_twin import load_twin
 from company_twin.loader import default_fixture_path
-from simulation_engine import apply_interventions, blast_radius, check_result, optimize, quick_impact, simulate
+from simulation_engine import (
+    apply_interventions,
+    blast_radius,
+    check_result,
+    compare_futures,
+    optimize,
+    quick_impact,
+    simulate,
+)
 from simulation_engine.knowledge import downgrade_documented
 
 TWIN = load_twin(default_fixture_path())
@@ -41,6 +49,7 @@ def run(*names: str, plan_id: str = "plan_beacon_echo", settings: OrganizationSe
 PORT_SIGNATURES = {
     simulate: ["twin", "brief", "scenario", "plan", "mode", "*settings"],
     optimize: ["twin", "brief", "*settings", "*run_id"],
+    compare_futures: ["twin", "brief", "plan", "*alternatives", "*settings", "*run_id"],
     blast_radius: ["result", "twin"],
     quick_impact: ["twin", "interventions", "*brief", "*settings", "*run_id"],
 }
@@ -67,8 +76,9 @@ def test_rule_9_every_value_line_is_separate_and_sums_exactly():
                                - v.expected_business_loss_usd - v.pressure_cost_usd + v.avoided_failure_cost_usd)
     assert (v.p10_net_value_usd, v.p50_net_value_usd, v.p90_net_value_usd) == (None, None, None)
     assert len(v.monthly_net_usd) == 12 and v.monthly_net_usd[-1] == v.net_value_usd
-    # Cumulative: nothing before the day-30 start, one-off costs when it lands, then savings accrue.
-    assert v.monthly_net_usd[0] == 0 and v.monthly_net_usd[1] < 0 < v.monthly_net_usd[-1]
+    # Cumulative: only pressure cost before the day-30 start, one-off costs when it lands, then savings accrue.
+    assert v.pressure_cost_usd > 0
+    assert v.monthly_net_usd[0] < 0 and v.monthly_net_usd[1] < 0 < v.monthly_net_usd[-1]
     assert v.monthly_net_usd[1:] == sorted(v.monthly_net_usd[1:])
 
     broken = run("beacon", "echo")
@@ -78,10 +88,12 @@ def test_rule_9_every_value_line_is_separate_and_sums_exactly():
 
 def test_displaced_work_is_priced_on_the_impacts_that_cause_it():
     result = run("beacon", "echo")
-    priced = [i for i in result.impacts if i.polarity.value == "harm" and i.value_usd]
+    priced = [i for i in result.impacts if i.polarity.value == "harm" and i.value_usd and i.source_kind != "pressure"]
     assert {i.affected_entity for i in priced} >= {"wf_account_planning"}
     # The plan makes no investments, so added cost is displaced work alone.
     assert sum(i.value_usd for i in priced) == result.value.added_cost_usd
+    pressures = [i for i in result.impacts if i.source_kind == "pressure"]
+    assert sum(i.value_usd for i in pressures) == result.value.pressure_cost_usd
 
 
 def test_every_brief_constraint_gets_a_result_including_critical_coverage():
@@ -161,6 +173,32 @@ def test_full_and_inaction_futures_are_implemented_and_quick_plans_must_match():
                  "quick")
 
 
+def test_modes_and_plans_must_match_the_scenario():
+    with pytest.raises(ValueError):
+        simulate(TWIN, VENDOR, scenario(), plan("beacon", "echo"), "monte_carlo")
+    with pytest.raises(ValueError):
+        simulate(TWIN, VENDOR, scenario(None, Future.inaction), plan("beacon", "echo"), "quick")
+    with pytest.raises(ValueError):
+        simulate(TWIN, VENDOR, scenario(), None, "quick")
+
+
+def test_one_engine_serves_every_future_and_mode():
+    import importlib
+
+    import simulation_engine
+
+    assert simulation_engine.simulate is importlib.import_module("simulation_engine.simulate").simulate
+    assert simulation_engine.compare_futures is importlib.import_module("simulation_engine.futures").compare_futures
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module("simulation_engine.simulator")
+    for mode in ("quick", "full"):
+        for future in (Future.act_now, Future.inaction, Future.delay):
+            chosen = None if future is Future.inaction else plan("beacon", "echo")
+            result = simulate(TWIN, VENDOR, scenario(None if chosen is None else "plan_beacon_echo", future), chosen,
+                              mode)
+            assert result.mode == mode and result.future is future and check_result(result, TWIN) == []
+
+
 def cut(target: str, pct: float) -> Intervention:
     return Intervention(id="act_cut", kind=InterventionKind.action, type=ActionType.reduce_capacity,
                         target_entity_id=target, amount_pct=pct, rationale="test")
@@ -187,19 +225,33 @@ def test_utilisation_above_one_makes_a_cut_remove_more_capacity():
         pytest.approx(0.1)
 
 
-def test_documentation_coverage_downgrades_stranded_workflows_one_severity_level():
+def test_only_documented_stranded_workflows_in_documented_departments_are_downgraded():
     result = quick_impact(TWIN, WORKFORCE.candidate_interventions, brief=WORKFORCE)
     stranded = {c.workflow_id for c in result.workflow_coverage if c.stranded}
     assert {"wf_financial_close", "wf_billing_recon"} <= stranded
     harms = [i for i in result.impacts if i.affected_entity in stranded and i.polarity.value == "harm"]
-    assert harms and all("documentation coverage" in " ".join(i.assumptions) for i in harms)
-    undocumented = TWIN.model_copy(deep=True)
-    for p in undocumented.department_profiles:
+    # The story gaps count: the outdated runbook and the undocumented lineage soften nothing.
+    assert harms and not any("documentation coverage" in " ".join(i.assumptions) for i in harms)
+    assert downgrade_documented(harms, result.workflow_coverage, TWIN) == harms
+
+    documented = TWIN.model_copy(deep=True)
+    for d in documented.documents:
+        if d.id == "doc_billing_recon_runbook":
+            d.status, d.last_reviewed = DocumentStatus.current, documented.version.as_of_date
+    for e in documented.entities:
+        if e.id == "kn_billing_exception":
+            e.documented_pct = 0.9
+    for p in documented.department_profiles:
+        p.documentation_coverage = 1.0
+    lowered = downgrade_documented(harms, result.workflow_coverage, documented)
+    recon = [n for n, i in enumerate(harms) if i.affected_entity == "wf_billing_recon"]
+    assert recon and all(lowered[n].severity == max(1, harms[n].severity - 1) for n in recon if harms[n].severity > 1)
+    assert all("documentation coverage" in " ".join(lowered[n].assumptions) for n in recon if harms[n].severity > 1)
+    close = [n for n, i in enumerate(harms) if i.affected_entity == "wf_financial_close"]
+    assert all(lowered[n] == harms[n] for n in close)  # kn_warehouse_lineage is still undocumented
+    for p in documented.department_profiles:
         p.documentation_coverage = 0.0
-    kept = downgrade_documented(harms, result.workflow_coverage, undocumented)
-    assert [i.severity for i in kept] == [i.severity for i in harms]
-    lowered = downgrade_documented(harms, result.workflow_coverage, TWIN)
-    assert [i.severity for i in lowered] == [max(1, i.severity - 1) for i in harms]
+    assert downgrade_documented(harms, result.workflow_coverage, documented) == harms
 
 
 def test_workflow_coverage_follows_rule_11():

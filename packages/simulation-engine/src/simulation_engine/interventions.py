@@ -41,7 +41,8 @@ class AppliedScenario:
     gains: dict[str, Seed] = field(default_factory=dict)
     gross_savings_usd: int = 0
     transition_cost_usd: int = 0
-    # The vendor share of transition_cost_usd, kept apart so the plan's separate lines can be shown.
+    # Termination (vendor exit and project cancellation fees) and vendor migration, the parts of
+    # transition_cost_usd reported on their own (ValueBreakdown.termination_cost_usd, migration_cost_usd).
     termination_cost_usd: int = 0
     migration_cost_usd: int = 0
     added_cost_usd: int = 0
@@ -162,6 +163,7 @@ def _stop_project(s: AppliedScenario, i: Intervention, target: Entity, horizon_d
     s.gross_savings_usd += saved
     s.savings_by_intervention[i.id] = saved
     s.transition_cost_usd += target.one_time_exit_cost_usd or 0
+    s.termination_cost_usd += target.one_time_exit_cost_usd or 0
     # What the project would have retired keeps running to the horizon (rebound).
     retire_day = target.expected_completion_day if target.expected_completion_day is not None else horizon_days
     s.rebound_cost_usd += _retired_run_cost(s, target, max(0, horizon_days - max(retire_day, i.start_day)))

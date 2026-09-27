@@ -6,9 +6,9 @@ import pytest
 from contracts_py.enums import Criticality, EntityType, ImpactLevel, Polarity, Relation
 from contracts_py.twin import Edge, Entity, OrganizationSettings
 
-from company_twin import load_twin
+from company_twin import build_graph, load_twin
 from company_twin.loader import default_fixture_path
-from simulation_engine import Seed, apply_interventions, impact_ledger, propagate
+from simulation_engine import Seed, apply_interventions, impact_ledger, propagate, propagation
 
 TWIN = load_twin(default_fixture_path())
 
@@ -121,6 +121,32 @@ def test_removing_vendor_delta_reaches_ctl_kyc_screening():
 
 def test_empty_seeds_produce_no_effects():
     assert propagate(TWIN, {}).effects == {}
+
+
+def test_the_shared_graph_gives_the_same_effects_as_a_freshly_built_one(monkeypatch):
+    brief = _vendor_brief()
+    scenarios = [apply_interventions(TWIN, [i]) for i in brief.candidate_interventions]
+    scenarios.append(apply_interventions(TWIN, list(brief.candidate_interventions)))
+    shared = [propagate(s.twin, s.losses) for s in scenarios]
+    monkeypatch.setattr(propagation, "_graph", build_graph)
+    assert shared == [propagate(s.twin, s.losses) for s in scenarios]
+
+
+def test_clones_with_the_same_structure_share_a_graph_and_any_edit_gets_its_own():
+    first, second = (apply_interventions(TWIN, []).twin for _ in range(2))
+    assert propagation._graph(first) is propagation._graph(second)
+
+    weaker = [e.model_copy(update={"strength": e.strength / 2}) if n == 0 else e for n, e in enumerate(TWIN.edges)]
+    assert propagation._graph(TWIN.model_copy(update={"edges": weaker})) is not propagation._graph(first)
+    first.entities[0].evidence_refs = [*first.entities[0].evidence_refs, "ev_new"]
+    assert propagation._graph(first) is not propagation._graph(second)
+    assert propagation._graph(first).nodes[first.entities[0].id]["evidence_refs"][-1] == "ev_new"
+
+
+def test_an_edge_to_an_unknown_entity_is_still_rejected():
+    broken = edge("sys_src", "sys_missing", 0.5)
+    with pytest.raises(ValueError, match="unknown entity"):
+        propagate(toy([entity("sys_src", EntityType.system)], [broken]), seed("sys_src"))
 
 
 def _vendor_brief():

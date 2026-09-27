@@ -9,21 +9,27 @@ evaluated in quick mode with its goal and hard constraints:
   value: every cost line together), the feasible portfolio with the lowest risk, then every
   rejected portfolio with its failed checks in ``rejection_reasons``.
 
-Feasible portfolios are ranked 1..n in recommendation order; rejected ones have no rank. Only the
-vendor scenario is searched; the workforce scenario evaluates one plan (schema X5).
+Feasible portfolios are ranked 1..n in recommendation order; rejected ones have no rank. Portfolios
+are ranked on their own quick economics, without baseline pressures; ``simulate`` and
+``compare_futures`` add the pressures for the chosen plan's futures.
+
+Only vendor-consolidation briefs are searched (plan section 11.5). Any other brief evaluates one
+plan of all its candidate interventions (schema X5; a subset search for other decisions is not
+approved for v1): it is ``plan_naive``, and it is also the recommended plan only when it is
+feasible (``recommended`` is the best *feasible* portfolio), with ``evaluated_count`` 1.
 """
 
 from __future__ import annotations
 
-from datetime import datetime, time, timezone
 from itertools import combinations
 
-from contracts_py.decision import CandidatePlan, DecisionBrief, Intervention, Scenario
+from contracts_py.decision import DecisionBrief, Intervention
 from contracts_py.engine import Portfolio, PortfolioComparison, SimulationResult
 from contracts_py.enums import DecisionType, Future
 from contracts_py.twin import OrganizationSettings, Twin
 
-from .simulate import bounded_id, simulate
+from .quick import evaluate
+from .simulate import bounded_id
 
 NAIVE_PLAN_ID = "plan_naive"
 
@@ -36,13 +42,19 @@ def plan_id_for(interventions: list[Intervention]) -> str:
 
 def _run(twin: Twin, brief: DecisionBrief, plan_id: str, interventions: list[Intervention],
          settings: OrganizationSettings, run_id: str) -> SimulationResult:
-    plan = CandidatePlan(plan_id=plan_id, label=plan_id, intervention_ids=[i.id for i in interventions],
-                         source="naive" if plan_id == NAIVE_PLAN_ID else "enumerated")
-    scenario = Scenario(scenario_id=bounded_id("scn_", f"{run_id}_{Future.act_now.value}_{plan_id}"), run_id=run_id,
-                        future=Future.act_now, plan_id=plan_id, delay_days=0,
-                        baseline_twin_version=twin.version.twin_version,
-                        created_at=datetime.combine(twin.version.as_of_date, time(), tzinfo=timezone.utc))
-    return simulate(twin, brief, scenario, plan, "quick", settings=settings)
+    scenario_id = bounded_id("scn_", f"{run_id}_{Future.act_now.value}_{plan_id}")
+    return evaluate(twin, interventions, brief=brief, settings=settings, run_id=run_id, scenario_id=scenario_id,
+                    plan_id=plan_id, result_id=bounded_id("res_", scenario_id.removeprefix("scn_")))
+
+
+def _single_plan(twin: Twin, brief: DecisionBrief, settings: OrganizationSettings, run_id: str,
+                 ) -> PortfolioComparison:
+    plan_id = NAIVE_PLAN_ID
+    result = _run(twin, brief, plan_id, list(brief.candidate_interventions), settings, run_id)
+    portfolio = Portfolio(plan_id=plan_id, intervention_ids=result.intervention_ids,
+                          rank=1 if result.feasible else None, result=result)
+    return PortfolioComparison(evaluated_count=1, naive=portfolio,
+                               recommended=portfolio if result.feasible else None, alternatives=[])
 
 
 def _order(result: SimulationResult) -> tuple[int, float, str]:
@@ -65,22 +77,9 @@ def _naive(brief: DecisionBrief, results: dict[frozenset[str], SimulationResult]
 def optimize(twin: Twin, brief: DecisionBrief, *, settings: OrganizationSettings | None = None,
              run_id: str = "run_adhoc") -> PortfolioComparison:
     """Evaluate every portfolio of ``brief``'s candidate interventions and pick naive and recommended."""
-    if brief.decision_type is not DecisionType.vendor_consolidation:
-        settings = settings or OrganizationSettings()
-        result = _run(twin, brief, NAIVE_PLAN_ID, brief.candidate_interventions, settings, run_id)
-        proposed = Portfolio(
-            plan_id=NAIVE_PLAN_ID,
-            intervention_ids=result.intervention_ids,
-            rank=1 if result.feasible else None,
-            result=result,
-        )
-        return PortfolioComparison(
-            evaluated_count=1,
-            naive=proposed,
-            recommended=proposed if result.feasible else None,
-            alternatives=[],
-        )
     settings = settings or OrganizationSettings()
+    if brief.decision_type is not DecisionType.vendor_consolidation:
+        return _single_plan(twin, brief, settings, run_id)
     candidates = brief.candidate_interventions
     results: dict[frozenset[str], SimulationResult] = {}
     for size in range(len(candidates) + 1):

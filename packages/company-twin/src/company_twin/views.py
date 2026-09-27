@@ -82,6 +82,10 @@ def to_role_level(obj: T, twin: Twin) -> T:
     """Replace every ``pt_`` person-token ID in ``obj`` with its ``role_id`` (plan A5;
     schema section 7.13). Walks any pydantic model, list, tuple or dict, however deeply
     nested, so no output layer needs to remember to de-identify person tokens itself.
+
+    Anything holding no person token is returned as the same object rather than a copy, so
+    leveling a large result (every engine event and the decision package) is a walk, not a
+    rebuild of every nested model.
     """
     pt_to_role = {
         e.id: e.role_id for e in twin.entities if e.type == EntityType.person_token and e.role_id is not None
@@ -98,28 +102,39 @@ def _replace_ids(value: Any, pt_to_role: dict[str, str]) -> Any:
             return pt_to_role[value]
         if "pt_" not in value:
             return value
-        # a pt_ id embedded in free text (e.g. "ask pt_07"), not the whole string
-        return _PT_TOKEN.sub(lambda m: pt_to_role.get(m.group(0), m.group(0)), value)
+        # a pt_ id embedded in free text (e.g. "ask pt_07"), not the whole string; "dept_x"
+        # contains "pt_" too, so keep the original when nothing was replaced
+        replaced = _PT_TOKEN.sub(lambda m: pt_to_role.get(m.group(0), m.group(0)), value)
+        return value if replaced == value else replaced
     if isinstance(value, BaseModel):
         updates = {name: _replace_ids(getattr(value, name), pt_to_role) for name in type(value).model_fields}
+        if all(new is getattr(value, name) for name, new in updates.items()):
+            return value
         return value.model_copy(update=updates)
-    if isinstance(value, list):
-        return [_replace_ids(v, pt_to_role) for v in value]
-    if isinstance(value, tuple):
-        return tuple(_replace_ids(v, pt_to_role) for v in value)
+    if isinstance(value, list | tuple):
+        items = [_replace_ids(v, pt_to_role) for v in value]
+        if all(new is old for new, old in zip(items, value)):
+            return value
+        return items if isinstance(value, list) else tuple(items)
     if isinstance(value, dict):
-        return {_replace_ids(k, pt_to_role): _replace_ids(v, pt_to_role) for k, v in value.items()}
+        pairs = [(_replace_ids(k, pt_to_role), _replace_ids(v, pt_to_role)) for k, v in value.items()]
+        if all(k is old_k and v is old_v for (k, v), (old_k, old_v) in zip(pairs, value.items())):
+            return value
+        return dict(pairs)
     return value
 
 
 def aggregate_domain_graph(twin: Twin) -> DomainGraph:
-    """The department-map level for the overview chart (schema section 5.8): the 9
-    departments and ``kpi_company`` as nodes, the 25 FLOWS_TO channels as edges. These
-    channels are stored directly on the twin rather than computed, so this only selects
-    them; it does not re-aggregate entity-level edges.
+    """The department-map level for the overview chart (schema section 5.8): every
+    department, every company-level KPI (a KPI with no ``department_id``), and every
+    other endpoint of a FLOWS_TO channel as nodes; the FLOWS_TO channels as edges.
+    These channels are stored directly on the twin rather than computed, so this only
+    selects them; it does not re-aggregate entity-level edges.
     """
-    nodes = [e for e in twin.entities if e.type == EntityType.department or e.id == "kpi_company"]
     edges = [e for e in twin.edges if e.relation == Relation.FLOWS_TO]
+    endpoints = {n for e in edges for n in (e.source, e.target)}
+    nodes = [e for e in twin.entities if e.type == EntityType.department or e.id in endpoints
+             or (e.type == EntityType.kpi and e.department_id is None)]
     return DomainGraph(nodes=nodes, edges=edges)
 
 
