@@ -195,7 +195,7 @@ def run_eval(*, engine: EnginePort, twin: Twin, brief: DecisionBrief, settings: 
     rows: list[dict[str, Any]] = []
     for config in configs or list(CONFIGS):
         for index in range(1, runs + 1):
-            llm = llm_factory(run_settings) if llm_factory else AgentLLM(run_settings)
+            llm = llm_factory(run_settings) if llm_factory else AgentLLM(run_settings, cache_dir=cache_dir)
             recorder = _Recorder()
             row: dict[str, Any] = {"config": config, "run": index, "engine_impl": engine_impl, "twin_impl": twin_impl,
                                    "llm_mode": llm_mode}
@@ -243,7 +243,7 @@ def format_table(aggregates: list[dict[str, Any]]) -> str:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the decision pipeline ablations and write measured metrics.")
-    parser.add_argument("--mode", choices=["live"], default="live")
+    parser.add_argument("--mode", choices=["mock", "replay", "live"], default="mock")
     parser.add_argument("--runs", type=int, default=1)
     parser.add_argument("--out", type=Path, default=None)
     return parser
@@ -270,6 +270,6 @@ def main(argv: list[str] | None = None, *, engine: EnginePort, twin: Twin, brief
 
 
 if __name__ == "__main__":
-    print("evals needs an injected engine and twin; run: uv run python -m canary_api.eval_cli --mode live",
+    print("evals needs an injected engine and twin; run: uv run python -m canary_api.eval_cli --mode mock",
           file=sys.stderr)
     raise SystemExit(2)

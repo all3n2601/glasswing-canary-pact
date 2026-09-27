@@ -6,7 +6,12 @@ from fastapi.testclient import TestClient
 
 # Set before canary_api is imported so the bus writes to a throwaway directory.
 os.environ["CANARY_RUNS_DIR"] = tempfile.mkdtemp(prefix="canary_runs_")
+os.environ["CANARY_REPLAY_STEP_SECONDS"] = "0.01"
+os.environ["CANARY_LLM_CACHE_DIR"] = tempfile.mkdtemp(prefix="canary_llm_cache_")
 os.environ["CANARY_ALLOW_LIVE"] = "true"
+# Both switches default to real; tests that need the stub set them explicitly.
+os.environ.pop("ENGINE_IMPL", None)
+os.environ.pop("TWIN_IMPL", None)
 # The default suite always runs on the file backend, whatever the shell exports.
 os.environ.pop("DATABASE_URL", None)
 
@@ -35,6 +40,7 @@ def test_live_call(model_id, messages, output_model, *, timeout, temperature, st
 
 runtime.build_llm = lambda settings: AgentLLM(
     settings.model_copy(update={"model_id_strong": "test-live", "model_id_fast": "test-live"}),
+    cache_dir=runtime.llm_cache_dir(),
     live_call=test_live_call,
 )
 

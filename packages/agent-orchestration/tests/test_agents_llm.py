@@ -1,3 +1,5 @@
+import json
+import os
 from types import SimpleNamespace
 
 import httpx
@@ -36,36 +38,81 @@ def call(llm, context, agent_id="operations", messages=MESSAGES):
     return llm.call(agent_id, messages, AgentOutput, prompt_version="p1", context=context)
 
 
-def test_live_success_is_not_recorded(tmp_path, brief, twin, settings, live_settings) -> None:
-    result = call(AgentLLM(live_settings, live_call=FakeLive(VALID)), make_context(brief, twin, settings))
-    assert result.status == "ok" and result.metrics.input_tokens == 10
-    assert list(tmp_path.rglob("*.json")) == []
+def test_replay_round_trip(tmp_path, brief, twin, settings, live_settings) -> None:
+    context = make_context(brief, twin, settings)
+    fake = FakeLive(VALID)
+    live = call(AgentLLM(live_settings, cache_dir=tmp_path, live_call=fake), context)
+    assert live.status == "ok" and live.metrics.input_tokens == 10
+    cached = tmp_path / "operations" / f"{live.metrics.prompt_hash}.json"
+    assert json.loads(cached.read_text())["model_id"] == "test-model"
+
+    replay_settings = live_settings.model_copy(update={"llm_mode": "replay"})
+    replay = AgentLLM(replay_settings, cache_dir=tmp_path)
+    again = call(replay, make_context(brief, twin, settings, run_id="run_other"),
+                 messages=[{**m, "content": m["content"].replace("run_test", "run_other")} for m in MESSAGES])
+    assert again.status == "replayed" and again.output == live.output
+
+    miss = call(replay, context, messages=[{"role": "user", "content": "different"}])
+    assert miss.status == "fallback_cached" and miss.output == live.output
+    assert call(replay, context, agent_id="finance").status == "unavailable"
 
 
 def test_validation_failure_retries_once_with_error(tmp_path, brief, twin, settings, live_settings) -> None:
     fake = FakeLive({"confidence": "high"}, VALID)
-    result = call(AgentLLM(live_settings, live_call=fake), make_context(brief, twin, settings))
+    result = call(AgentLLM(live_settings, cache_dir=tmp_path, live_call=fake), make_context(brief, twin, settings))
     assert result.status == "ok" and result.retries == 1
     assert "failed validation" in fake.seen[1][-1]["content"] and len(fake.seen[1]) == len(MESSAGES) + 1
 
 
 def test_invalid_twice_is_invalid(tmp_path, brief, twin, settings, live_settings) -> None:
     fake = FakeLive({"confidence": "high"}, {})
-    result = call(AgentLLM(live_settings, live_call=fake), make_context(brief, twin, settings))
+    result = call(AgentLLM(live_settings, cache_dir=tmp_path, live_call=fake), make_context(brief, twin, settings))
     assert result.status == "invalid" and result.output is None and len(result.errors) == 2
 
 
-def test_live_error_is_unavailable_without_fallback(brief, twin, settings, live_settings) -> None:
-    down = AgentLLM(live_settings, live_call=FakeLive(TimeoutError("slow")))
-    result = call(down, make_context(brief, twin, settings))
-    assert result.status == "unavailable" and result.output is None
+def test_live_error_falls_back_to_cache(tmp_path, brief, twin, settings, live_settings) -> None:
+    context = make_context(brief, twin, settings)
+    call(AgentLLM(live_settings, cache_dir=tmp_path, live_call=FakeLive(VALID)), context)
+    down = AgentLLM(live_settings, cache_dir=tmp_path, live_call=FakeLive(TimeoutError("slow")))
+    assert call(down, context, messages=[{"role": "user", "content": "new"}]).status == "fallback_cached"
 
 
 def test_live_without_model_id_is_unavailable(tmp_path, brief, twin, settings, monkeypatch) -> None:
     monkeypatch.delenv("CANARY_MODEL_STRONG", raising=False)
-    llm = AgentLLM(OrganizationSettings(llm_mode="live"), live_call=FakeLive(VALID))
+    llm = AgentLLM(OrganizationSettings(llm_mode="live"), cache_dir=tmp_path, live_call=FakeLive(VALID))
     result = call(llm, make_context(brief, twin, settings))
     assert result.status == "unavailable" and "no model id" in result.errors[0]
+
+
+def test_mock_is_deterministic_and_cites_only_view_ids(brief, twin, settings) -> None:
+    context = make_context(brief, twin, settings)
+    llm = AgentLLM(settings)
+    first, second = call(llm, context), call(llm, context)
+    assert first.output == second.output and first.status == "ok"
+    view_ids = {e.id for e in context.view.entities}
+    evidence = {e.id for e in context.view.evidence}
+    assert set(first.output.affected_entities) <= view_ids
+    assert set(first.output.evidence_refs) <= evidence
+
+
+def test_fallback_uses_same_decision_and_newest_mtime(tmp_path, brief, twin, settings, live_settings) -> None:
+    folder = tmp_path / "operations"
+    folder.mkdir()
+
+    def record(name: str, decision_id: str, summary: str, mtime: int) -> None:
+        output = VALID | {"act_now_view": {"summary": summary}}
+        path = folder / f"{name}.json"
+        path.write_text(json.dumps({"agent_id": "operations", "decision_id": decision_id, "output": output}))
+        os.utime(path, (mtime, mtime))
+
+    record("zzz_old", brief.decision_id, "old answer", 1_000)
+    record("aaa_new", brief.decision_id, "new answer", 2_000)
+    record("mmm_other", "dec_other", "other decision", 3_000)
+    replay = AgentLLM(live_settings.model_copy(update={"llm_mode": "replay"}), cache_dir=tmp_path)
+    result = call(replay, make_context(brief, twin, settings))
+    assert result.status == "fallback_cached" and result.output.act_now_view.summary == "new answer"
+    other = brief.model_copy(update={"decision_id": "dec_unseen"})
+    assert call(replay, make_context(other, twin, settings)).status == "unavailable"
 
 
 LLM_ENV = ["SCIFORIUM_API_URL", "SCIFORIUM_BASE_URL", "SCIFORIUM_MODEL", "SCIFORIUM_TEMPERATURE",
@@ -121,9 +168,9 @@ def test_temperature_and_timeout_from_env_unless_settings_set(tmp_path, brief, t
         return LiveReply(VALID)
 
     context = make_context(brief, twin, settings)
-    call(AgentLLM(OrganizationSettings(llm_mode="live"), live_call=live), context)
+    call(AgentLLM(OrganizationSettings(llm_mode="live"), cache_dir=tmp_path, live_call=live), context)
     explicit = OrganizationSettings(llm_mode="live", temperature=0.9, agent_timeout_seconds=30)
-    call(AgentLLM(explicit, live_call=live), context)
+    call(AgentLLM(explicit, cache_dir=tmp_path, live_call=live), context)
     assert seen == [("env-model", 12.0, 0.1), ("env-model", 30.0, 0.9)]
     clean_env.setenv("SCIFORIUM_TEMPERATURE", "warm")
     assert AgentLLM(OrganizationSettings(llm_mode="live")).temperature() == 0.4
@@ -132,7 +179,8 @@ def test_temperature_and_timeout_from_env_unless_settings_set(tmp_path, brief, t
 def test_api_key_never_appears_in_errors(tmp_path, brief, twin, settings, clean_env, caplog) -> None:
     clean_env.setenv("SCIFORIUM_API_KEY", "sk-secret-value")
     clean_env.setenv("SCIFORIUM_MODEL", "env-model")
-    llm = AgentLLM(OrganizationSettings(llm_mode="live"), live_call=FakeLive(ConnectionError("upstream refused")))
+    llm = AgentLLM(OrganizationSettings(llm_mode="live"), cache_dir=tmp_path,
+                   live_call=FakeLive(ConnectionError("upstream refused")))
     result = call(llm, make_context(brief, twin, settings))
     assert result.status == "unavailable"
     assert "sk-secret-value" not in " ".join(result.errors) + caplog.text
@@ -146,7 +194,7 @@ def test_missing_strong_model_falls_back_to_fast(tmp_path, brief, twin, settings
         seen.append(model_id)
         return LiveReply(VALID)
 
-    llm = AgentLLM(OrganizationSettings(llm_mode="live"), live_call=live)
+    llm = AgentLLM(OrganizationSettings(llm_mode="live"), cache_dir=tmp_path, live_call=live)
     result = llm.call("challenger", MESSAGES, AgentOutput, prompt_version="p1",
                       context=make_context(brief, twin, settings), fast=False)
     assert result.status == "ok" and seen == ["fast-model"] and result.metrics.model_id == "fast-model"
@@ -259,14 +307,14 @@ def test_parsing_error_raises_output_invalid(fake_chat, mode) -> None:
 def test_client_passes_env_mode_to_the_call(fake_chat, monkeypatch, tmp_path, brief, twin, settings) -> None:
     monkeypatch.setenv("CANARY_STRUCTURED_OUTPUT", "function_calling")
     fake_chat.script = [reply(parsed_output())]
-    llm = AgentLLM(OrganizationSettings(llm_mode="live", model_id_strong="m"))
+    llm = AgentLLM(OrganizationSettings(llm_mode="live", model_id_strong="m"), cache_dir=tmp_path)
     result = call(llm, make_context(brief, twin, settings))
     assert result.status == "ok" and [m for m, _ in fake_chat.methods] == ["function_calling"]
 
 
 def test_invalid_structured_output_env_raises(fake_chat, monkeypatch, tmp_path, brief, twin, settings) -> None:
     monkeypatch.setenv("CANARY_STRUCTURED_OUTPUT", "xml")
-    llm = AgentLLM(OrganizationSettings(llm_mode="live", model_id_strong="m"))
+    llm = AgentLLM(OrganizationSettings(llm_mode="live", model_id_strong="m"), cache_dir=tmp_path)
     with pytest.raises(ValueError, match="auto, json_schema, function_calling"):
         llm.structured_output()
     with pytest.raises(ValueError, match="CANARY_STRUCTURED_OUTPUT"):

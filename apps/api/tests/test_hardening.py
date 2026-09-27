@@ -38,7 +38,7 @@ def test_invalid_structured_output_blocks_live_runs_at_startup(client, brief_jso
     denied = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=brief_json)
     assert denied.status_code == 503
     assert "CANARY_STRUCTURED_OUTPUT must be one of auto, json_schema, function_calling" in denied.json()["detail"]
-    assert client.post("/decisions?llm_mode=mock", headers=auth_headers(client), json=brief_json).status_code == 422
+    assert client.post("/decisions?llm_mode=mock", headers=auth_headers(client), json=brief_json).status_code == 200
 
 
 def test_valid_structured_output_clears_the_startup_error(monkeypatch, restore_structured_output) -> None:
@@ -110,15 +110,24 @@ def test_eval_cli_live_needs_opt_in(monkeypatch, tmp_path) -> None:
 
 
 def test_eval_cli_records_twin_impl(tmp_path) -> None:
-    assert eval_cli.main(["--mode", "live", "--out", str(tmp_path)]) == 0
+    assert eval_cli.main(["--mode", "mock", "--out", str(tmp_path)]) == 0
     rows = json.loads((tmp_path / "eval_runs.json").read_text())["rows"]
     assert {row["twin_impl"] for row in rows} == {engine_port.twin_impl()}
 
 
-def test_engine_port_vendor_overlap_uses_the_real_engine() -> None:
+def test_engine_port_vendor_overlap_uses_the_real_engine_by_default(monkeypatch) -> None:
+    monkeypatch.delenv("ENGINE_IMPL", raising=False)
     twin = stub_twin()
+    assert engine_port.engine_impl() == "real"
     assert engine_port.vendor_overlap(twin, ["vendor_apex", "vendor_beacon"]) != []
     assert engine_port.vendor_overlap(twin, ["vendor_apex"]) == []
+
+
+def test_engine_port_vendor_overlap_follows_engine_impl_stub(monkeypatch) -> None:
+    monkeypatch.setenv("ENGINE_IMPL", "stub")
+    twin = stub_twin()
+    assert engine_port.vendor_overlap(twin, ["vendor_apex", "vendor_beacon"]) == stub_engine.vendor_overlap(
+        twin, ["vendor_apex", "vendor_beacon"]) != []
 
 
 def test_invalid_sim_mode_blocks_all_runs_at_startup(client, brief_json, monkeypatch, caplog) -> None:
@@ -134,10 +143,10 @@ def test_invalid_sim_mode_blocks_all_runs_at_startup(client, brief_json, monkeyp
             asyncio.run(start_and_stop())
         assert "decision runs disabled" in caplog.text and "CANARY_SIM_MODE" in caplog.text
         monkeypatch.setenv("CANARY_ALLOW_LIVE", "true")
-        denied = client.post("/decisions?llm_mode=live", headers=auth_headers(client), json=brief_json)
-        assert denied.status_code == 503
-        assert "CANARY_SIM_MODE must be one of full, quick" in denied.json()["detail"]
-        assert client.post("/decisions?llm_mode=mock", headers=auth_headers(client), json=brief_json).status_code == 422
+        for mode in ("mock", "live"):
+            denied = client.post(f"/decisions?llm_mode={mode}", headers=auth_headers(client), json=brief_json)
+            assert denied.status_code == 503
+            assert "CANARY_SIM_MODE must be one of full, quick" in denied.json()["detail"]
     finally:
         monkeypatch.delenv("CANARY_SIM_MODE", raising=False)
         runtime.check_sim_mode()

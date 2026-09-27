@@ -65,6 +65,8 @@ TOP_LEVEL: list[type[BaseModel]] = [
     api.QuickSimulateRequest,
     api.FuturesRequest,
     api.OptimizeRequest,
+    api.ReplayInfo,
+    api.ReplayStarted,
     api.OrganizationProfileView,
     api.SignupRequest,
     api.LoginRequest,

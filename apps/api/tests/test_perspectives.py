@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 import time
@@ -8,6 +9,7 @@ from real_data import sample_brief
 from agent_orchestration.router import route_agents
 from canary_api import engine_port, runtime
 from canary_api.events import EventBus
+from canary_api.paths import REPLAYS_DIR
 from contracts_py.agents import AgentAssessment, AgentOutput, CallMetrics, FutureView
 from contracts_py.events import EventType
 
@@ -40,7 +42,7 @@ def expected_order(run_id: str) -> list[str]:
 
 def test_live_run_returns_every_routed_agent_and_the_challenger_in_order(client) -> None:
     brief = sample_brief()
-    run_id = client.post("/decisions", headers=auth_headers(client),
+    run_id = client.post("/decisions?llm_mode=live", headers=auth_headers(client),
                          json=brief.model_dump(mode="json")).json()["run_id"]
     wait_for(client, run_id, "awaiting_approval")
     items = perspectives(client, run_id)
@@ -55,6 +57,18 @@ def test_live_run_returns_every_routed_agent_and_the_challenger_in_order(client)
     challenger_events = [e for e in runtime.bus.runs[run_id].events
                          if e.type in PERSPECTIVE_EVENTS and e.payload.agent_id == "challenger"]
     assert len(challenger_events) >= 1 and agent_ids.count("challenger") == 1
+
+
+def test_replay_returns_the_sample_run_assessments(client) -> None:
+    run_id = client.post("/replays/sample_run/play?speed=4").json()["run_id"]
+    wait_for(client, run_id, "awaiting_approval")
+    items = perspectives(client, run_id)
+    recorded = [e["payload"] for e in json.loads((REPLAYS_DIR / "sample_run.json").read_text())
+                if e["type"] in ("agent_completed", "challenge_raised")]
+    assert len(recorded) == 5
+    assert [a.agent_id for a in items] == [r["agent_id"] for r in recorded]
+    assert [a.assessment_id for a in items] == [r["assessment_id"] for r in recorded]
+    assert all(a.run_id == run_id for a in items)
 
 
 def test_unknown_or_invalid_run_is_404(client) -> None:

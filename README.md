@@ -77,7 +77,7 @@ The evidence that this goes wrong is public:
 The pieces live in:
 
 ```text
-apps/api                     FastAPI service: runs, events, WebSocket, auth, storage
+apps/api                     FastAPI service: runs, events, WebSocket, replay, auth, storage
 apps/web                     Next.js dashboard
 packages/contracts-py        Pydantic contracts (source of the JSON Schemas and TypeScript types)
 packages/contracts           Generated JSON Schemas and TypeScript types
@@ -97,7 +97,8 @@ Real today:
 - **Two scenario briefs:** `data/vendor_scenario.json` (consolidate seven data vendors) and
   `data/workforce_scenario.json` (eliminate eight roles behind two critical workflows).
 - **Live LLM agents** served through Sciforium's OpenAI-compatible API, with structured output,
-  one retry and a timeout. Agent failures are surfaced; recorded advice is never substituted.
+  one retry, a timeout and a replay cache. An answer taken from the cache after a live failure is
+  marked `fallback_cached`, never changes the numbers, and lists the agent as a missing perspective.
 - **The deterministic engine,** `packages/simulation-engine`: `simulate` for every future (act now,
   do nothing, wait), `quick_impact`, `compare_futures`, `optimize`, `blast_radius`,
   `vendor_overlap` and `check_result`. Full mode falls back to expected value (p10 = p50 = p90)
@@ -106,7 +107,7 @@ Real today:
 - **Authentication:** sign-up creates viewers; only an approver can record a decision. There is
   one demo approver, created from environment variables at startup.
 - **Storage:** files and SQLite by default, or Postgres when `DATABASE_URL` is set.
-- **A live-agent eval harness.**
+- **Replay and the eval harness.**
 
 Synthetic or not yet built:
 
@@ -141,14 +142,29 @@ validated twin in the database; it does not generate a local company JSON fixtur
 
 Important environment variables (see `.env.example`; names only here):
 
+- `ENGINE_IMPL` and `TWIN_IMPL`: `real` (default) or `stub`. The twin follows the engine unless set;
+  the stub keeps offline tests and the eval harness running without the real packages.
 - `SCIFORIUM_API_KEY`, `SCIFORIUM_BASE_URL`, `MODEL_STRONG`, `MODEL_FAST`: live model access.
-- `CANARY_ALLOW_LIVE`: must be `true` before a decision run may call live agents.
+- `CANARY_ALLOW_LIVE`: must be `true` before a run may use `llm_mode=live`.
 - `CANARY_STRUCTURED_OUTPUT`: `auto` (default), `json_schema` or `function_calling`.
 - `CANARY_SIM_MODE`: `full` (default; expected value with p10 = p50 = p90 until Monte Carlo lands)
   or `quick` (point values, no percentiles).
 - `CANARY_AUTH_SECRET`: token signing secret. If blank, tokens reset on every restart.
 - `CANARY_DEMO_APPROVER_EMAIL`, `CANARY_DEMO_APPROVER_PASSWORD`: create the demo approver.
 - `DATABASE_URL`, `CANARY_DB_SCHEMA`: optional Postgres (tables live in a private `canary` schema).
+
+LLM modes are chosen per run with `POST /decisions?llm_mode=mock|replay|live`. The default is
+`live` when `CANARY_ALLOW_LIVE` is `true` and `replay` otherwise. Replay answers from the recorded
+cache; when the cache holds nothing for that decision the run uses mock answers and says so in the
+package's assumptions. Every successful live answer is written to the
+cache (`data/artifacts/llm_cache`, or `CANARY_LLM_CACHE_DIR`).
+
+Offline demo with no model or database: start the API and replay the recorded run.
+
+```bash
+curl -X POST "http://localhost:8000/replays/sample_run/play?speed=2"
+# then watch ws://localhost:8000/runs/<run_id>/events or GET /runs/<run_id>/package
+```
 
 Tests and checks:
 
@@ -157,7 +173,7 @@ uv run pytest -q
 pnpm typecheck
 pnpm test
 pnpm build
-uv run python -m canary_api.eval_cli --mode live  # needs CANARY_ALLOW_LIVE=true and makes paid model calls
+uv run python -m canary_api.eval_cli --mode mock   # or replay; live needs CANARY_ALLOW_LIVE=true and makes paid model calls
 ```
 
 The Postgres tests run only when `CANARY_TEST_DATABASE_URL` is set; they use a throwaway schema.

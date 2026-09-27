@@ -4,9 +4,9 @@ import asyncio
 import hashlib
 import logging
 from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator, Literal
+from typing import Any, AsyncIterator, get_args
 
-from fastapi import Depends, FastAPI, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ValidationError
@@ -23,6 +23,9 @@ from contracts_py.api import (
     OrganizationDepartmentSummary,
     OrganizationProfileView,
     QuickSimulateRequest,
+    ReplayInfo,
+    ReplaySpeed,
+    ReplayStarted,
     UserPublic,
 )
 from contracts_py.agents import AgentAssessment
@@ -199,7 +202,7 @@ def document(document_id: str) -> Document:
 
 
 @app.post("/decisions", response_model=DecisionCreated)
-async def create_decision(brief: DecisionBrief, llm_mode: Literal["live"] | None = None,
+async def create_decision(brief: DecisionBrief, llm_mode: runs.LlmMode | None = None,
                           user: UserPublic = Depends(auth.current_user)) -> DecisionCreated:
     try:
         brief = runs.apply_settings_defaults(brief, runtime.settings())
@@ -207,11 +210,12 @@ async def create_decision(brief: DecisionBrief, llm_mode: Literal["live"] | None
         raise HTTPException(status_code=422, detail=exc.errors(include_url=False)) from exc
     if runtime.sim_mode_error:
         raise HTTPException(status_code=503, detail=f"Decision runs are disabled: {runtime.sim_mode_error}")
-    if not runs.live_allowed():
-        raise HTTPException(status_code=503, detail="Live agents are disabled; set CANARY_ALLOW_LIVE=true to enable them")
-    if runtime.structured_output_error:
-        raise HTTPException(status_code=503, detail=f"Live runs are disabled: {runtime.structured_output_error}")
-    return DecisionCreated(run_id=runs.start_run(brief))
+    if (llm_mode or runs.default_llm_mode()) == "live":
+        if not runs.live_allowed():
+            raise HTTPException(status_code=403, detail="llm_mode=live is disabled; set CANARY_ALLOW_LIVE=true to allow it")
+        if runtime.structured_output_error:
+            raise HTTPException(status_code=503, detail=f"Live runs are disabled: {runtime.structured_output_error}")
+    return DecisionCreated(run_id=runs.start_run(brief, llm_mode))
 
 
 @app.post("/decisions/draft", response_model=DecisionDraft)
@@ -339,3 +343,19 @@ def simulate_futures(request: FuturesRequest) -> FutureComparison:
 @app.post("/simulate/optimize", response_model=PortfolioComparison)
 def simulate_optimize(request: OptimizeRequest) -> PortfolioComparison:
     return engine_port.optimize(runtime.twin(), request.brief, settings=runtime.settings())
+
+
+@app.get("/replays", response_model=list[ReplayInfo])
+def replays() -> list[ReplayInfo]:
+    return runs.list_replays()
+
+
+@app.post("/replays/{name}/play", response_model=ReplayStarted)
+async def play_replay(name: str, speed: int = Query(1)) -> ReplayStarted:
+    # Query strings arrive as text, which a Literal[1, 2, 4] parameter would reject.
+    if speed not in get_args(ReplaySpeed):
+        raise HTTPException(status_code=422, detail="speed must be 1, 2 or 4")
+    log = runs.load_replay(name)
+    if log is None:
+        raise HTTPException(status_code=404, detail="Replay not found")
+    return ReplayStarted(run_id=runs.play_replay(log, speed), name=name, speed=speed)  # type: ignore[arg-type]
