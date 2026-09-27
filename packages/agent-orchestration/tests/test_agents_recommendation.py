@@ -67,8 +67,10 @@ def test_real_engine_workforce_brief_gets_a_recommendation(settings) -> None:
     recommendation = package.recommendation
     assert recommendation is not None
     if recommendation.action == "proceed_with_mitigations":
-        winner = next(m for m in package.mitigations if m.plan_id_after == recommendation.plan_id)
-        assert winner.feasible_after and recommendation.result_id == winner.after.result_id
+        winner = next(m for m in package.mitigations if m.plan_id_after == recommendation.mitigated_plan_id)
+        assert winner.feasible_after and recommendation.mitigated_result_id == winner.after.result_id
+        assert recommendation.plan_id == winner.plan_id_before
+        assert recommendation.result_id in {r.result_id for r in package.futures.rows}
     else:
         best = package.futures.rows[package.futures.best_row_index]
         assert recommendation.headline == package.futures.headline and recommendation.future is best.future

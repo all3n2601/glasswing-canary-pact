@@ -462,10 +462,6 @@ class _Run:
         plans = self.plans_by_id(state)
         if recommendation is None or recommendation.plan_id is None:
             plan = plans[state["portfolio"].naive.plan_id]
-        elif recommendation.action == "proceed_with_mitigations":
-            parent = next(c.plan_id_before for c in state.get("mitigations", [])
-                          if c.plan_id_after == recommendation.plan_id)
-            plan = plans[parent]
         else:
             plan = plans.get(recommendation.plan_id, state["plan"])
         try:
@@ -519,8 +515,13 @@ class _Run:
     def mitigated_recommendation(self, state: RunGraphState, mitigations: list[MitigationComparison],
                                  best: Any) -> Recommendation | None:
         """A feasible mitigated plan wins when the engine's own net value beats the best unmitigated row."""
+        # Only a mitigation of a plan with an act-now futures row can be recommended: that row and its assessments
+        # are what the package shows, and the mitigated plan rides along in mitigated_plan_id.
+        base_rows = {row.plan_id: row for row in state["comparison"].rows if row.future is Future.act_now and row.plan_id}
         winner = None
         for comparison in mitigations:
+            if comparison.plan_id_before not in base_rows:
+                continue
             value = comparison.after.value.net_value_usd
             beats_best = best is None or value > best.net_value_p50_usd
             if comparison.feasible_after and beats_best and (
@@ -556,8 +557,9 @@ class _Run:
                             source="calculation", ref=after.result_id))
         claims.append(Claim(text=f"Engine net value with mitigations: {after.value.net_value_usd:,} USD",
                             source="calculation", ref=after.result_id))
-        return Recommendation(plan_id=winner.plan_id_after, future=Future.act_now, action="proceed_with_mitigations",
-                              result_id=after.result_id, headline=headline, claims=claims)
+        return Recommendation(plan_id=winner.plan_id_before, future=Future.act_now, action="proceed_with_mitigations",
+                              result_id=base_rows[winner.plan_id_before].result_id, headline=headline, claims=claims,
+                              mitigated_plan_id=winner.plan_id_after, mitigated_result_id=after.result_id)
 
     def generating_package(self, state: RunGraphState) -> RunGraphState:
         self.phase(RunStatus.generating_package)
