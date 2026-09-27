@@ -5,13 +5,13 @@ from pydantic import ValidationError
 
 from contracts_py.common import SCHEMA_VERSION
 from contracts_py.decision import ENGINE_METRICS, Constraint, DecisionBrief
-from contracts_py.engine import KnowledgeCoverage, SimulationResult, VendorOverlap, WorkflowCoverage
+from contracts_py.engine import KnowledgeCoverage, SimulationResult, ValueBreakdown, VendorOverlap, WorkflowCoverage
 from contracts_py.enums import MigrationDifficulty, OverlapDimension
 from contracts_py.events import RunState
 from contracts_py.package import DecisionPackage
 from contracts_py.twin import ALWAYS_ENABLED_AGENTS, CORE_AGENT_IDS, Edge, Entity, OrganizationSettings, VersionInfo
 
-from test_contracts_rules import NOW, package_data
+from test_contracts_rules import NOW, breakdown, package_data
 
 
 def overlap() -> VendorOverlap:
@@ -251,3 +251,16 @@ def test_knowledge_coverage_rejects_negative_capacity() -> None:
     for field in ("holder_capacity_fte_before", "holder_capacity_fte_after"):
         with pytest.raises(ValidationError):
             KnowledgeCoverage.model_validate(base | {field: -0.5})
+
+
+def test_value_breakdown_optional_cost_split() -> None:
+    plain = ValueBreakdown.model_validate(breakdown())
+    assert (plain.termination_cost_usd, plain.migration_cost_usd, plain.displaced_work_cost_usd) == (None, None, None)
+    split = ValueBreakdown.model_validate(breakdown(termination_cost_usd=50_000, migration_cost_usd=120_000,
+                                                   displaced_work_cost_usd=0))
+    assert split.net_value_usd == plain.net_value_usd and split.migration_cost_usd == 120_000
+    for bad in ({"termination_cost_usd": -1}, {"migration_cost_usd": 120_000.5}):
+        with pytest.raises(ValidationError):
+            ValueBreakdown.model_validate(breakdown(**bad))
+    with pytest.raises(ValidationError, match="does not equal components"):
+        ValueBreakdown.model_validate(breakdown(net_value_usd=1, monthly_net_usd=[1], migration_cost_usd=10))

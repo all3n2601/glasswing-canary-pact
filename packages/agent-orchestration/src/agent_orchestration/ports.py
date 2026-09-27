@@ -1,7 +1,7 @@
 from typing import Any, Protocol
 
 from contracts_py.decision import CandidatePlan, DecisionBrief, Intervention, Scenario
-from contracts_py.engine import BlastRadius, FutureComparison, PortfolioComparison, SimulationResult
+from contracts_py.engine import BlastRadius, FutureComparison, PortfolioComparison, SimulationResult, VendorOverlap
 from contracts_py.enums import EntityType, Sensitivity
 from contracts_py.twin import AgentView, Edge, OrganizationSettings, Twin, ValidationIssue
 
@@ -23,6 +23,8 @@ class EnginePort(Protocol):
                  run_id: str = "run_adhoc") -> PortfolioComparison: ...
 
     def blast_radius(self, result: SimulationResult, twin: Twin) -> BlastRadius: ...
+
+    def vendor_overlap(self, twin: Twin, vendor_ids: list[str]) -> list[VendorOverlap]: ...
 
     def check_result(self, obj: Any, twin: Twin) -> list[ValidationIssue]: ...
 

@@ -15,7 +15,37 @@
     "test": {
       "dependsOn": ["^test"],
       "outputs": ["coverage/**"]
+    },
+    "@canary-pact/api#test": {
+      "dependsOn": ["^test"],
+      "outputs": ["coverage/**"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/packages/*/src/**",
+        "$TURBO_ROOT$/packages/*/tests/**",
+        "$TURBO_ROOT$/packages/*/pyproject.toml",
+        "$TURBO_ROOT$/pyproject.toml",
+        "$TURBO_ROOT$/uv.lock",
+        "$TURBO_ROOT$/data/**",
+        "!$TURBO_ROOT$/**/__pycache__/**",
+        "!$TURBO_ROOT$/data/artifacts/llm_cache/**",
+        "!$TURBO_ROOT$/data/artifacts/eval/**"
+      ]
+    },
+    "@canary-pact/api#typecheck": {
+      "dependsOn": ["^typecheck"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/packages/*/src/**",
+        "$TURBO_ROOT$/packages/*/tests/**",
+        "$TURBO_ROOT$/packages/*/pyproject.toml",
+        "$TURBO_ROOT$/pyproject.toml",
+        "$TURBO_ROOT$/uv.lock",
+        "$TURBO_ROOT$/data/**",
+        "!$TURBO_ROOT$/**/__pycache__/**",
+        "!$TURBO_ROOT$/data/artifacts/llm_cache/**",
+        "!$TURBO_ROOT$/data/artifacts/eval/**"
+      ]
     }
   }
 }
-

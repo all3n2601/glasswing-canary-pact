@@ -6,6 +6,6 @@
     "dev": "uv run uvicorn canary_api.app:app --reload --env-file ../../.env --host 0.0.0.0 --port 8000",
     "build": "uv run python -m compileall -q src",
     "typecheck": "uv run pyright src",
-    "test": "uv run pytest"
+    "test": "uv run --directory ../.. pytest -q"
   }
 }
