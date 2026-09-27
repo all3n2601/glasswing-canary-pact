@@ -1,19 +1,18 @@
-"""Build a Canary Pact twin from Microsoft's public AdventureWorks CSV data.
+"""Build a Canary Pact twin from Microsoft's public AdventureWorks OLTP tables.
 
-The source files are streamed into memory from Microsoft's repository.  This
-module never writes a local fixture; callers can validate the returned twin and
-persist it in the application's database.
+This module is a pure transformation: it performs no network access, file
+reads, environment lookups, or clock reads.  An outer adapter fetches the
+tables named in ``ADVENTUREWORKS_TABLES`` (tab-delimited, UTF-8 with BOM) and
+passes the parsed rows in together with an explicit ``created_at``.
 """
 
 from __future__ import annotations
 
-import csv
-import io
 import re
 from collections import defaultdict
-from datetime import date, datetime, timezone
+from collections.abc import Mapping, Sequence
+from datetime import datetime
 from decimal import Decimal
-from urllib.request import Request, urlopen
 
 from contracts_py.enums import (
     BusinessModel,
@@ -45,12 +44,12 @@ from contracts_py.twin import (
 )
 
 
-SOURCE_BASE = (
+# Provenance recorded on the twin's documents; this module never fetches it.
+_PROVENANCE_BASE = (
     "https://raw.githubusercontent.com/microsoft/sql-server-samples/master/"
     "samples/databases/adventure-works/oltp-install-script"
 )
-SOURCE_LICENSE = "https://github.com/microsoft/sql-server-samples/blob/master/license.txt"
-FILES = (
+ADVENTUREWORKS_TABLES: tuple[str, ...] = (
     "Department.csv",
     "Employee.csv",
     "EmployeeDepartmentHistory.csv",
@@ -69,17 +68,7 @@ FILES = (
     "SalesOrderDetail.csv",
 )
 
-
-def _download(filename: str) -> list[list[str]]:
-    request = Request(f"{SOURCE_BASE}/{filename}", headers={"User-Agent": "Canary-Pact/0.1"})
-    with urlopen(request, timeout=60) as response:  # noqa: S310 - fixed Microsoft source
-        text = response.read().decode("utf-8-sig")
-    return list(csv.reader(io.StringIO(text), delimiter="\t"))
-
-
-def fetch_adventureworks() -> dict[str, list[list[str]]]:
-    """Download the required public CSV tables without creating local files."""
-    return {filename: _download(filename) for filename in FILES}
+AdventureWorksTables = Mapping[str, Sequence[Sequence[str]]]
 
 
 def _slug(value: str, limit: int = 52) -> str:
@@ -95,7 +84,7 @@ def _year(value: str) -> int:
     return int(value[:4])
 
 
-def _years(rows: list[list[str]], index: int) -> int:
+def _years(rows: Sequence[Sequence[str]], index: int) -> int:
     return max(1, len({_year(row[index]) for row in rows if row[index]}))
 
 
@@ -151,13 +140,21 @@ AGENT_BY_DEPARTMENT = {
 
 
 def build_adventureworks_twin(
-    tables: dict[str, list[list[str]]] | None = None,
+    tables: AdventureWorksTables,
     *,
-    created_at: datetime | None = None,
+    created_at: datetime,
+    twin_version: str | None = None,
 ) -> Twin:
-    """Transform AdventureWorks OLTP rows into the current Twin contract."""
-    data = tables or fetch_adventureworks()
-    created_at = created_at or datetime.now(timezone.utc)
+    """Transform AdventureWorks OLTP rows into the current Twin contract.
+
+    ``tables`` maps every name in ``ADVENTUREWORKS_TABLES`` to its parsed rows
+    (header-less, as in Microsoft's install script).  The result depends only on
+    the arguments: ``twin_version`` defaults to ``adventureworks-<created_at date>``.
+    """
+    missing = [name for name in ADVENTUREWORKS_TABLES if name not in tables]
+    if missing:
+        raise ValueError(f"missing AdventureWorks tables: {', '.join(missing)}")
+    data = tables
     as_of = created_at.date()
 
     department_rows = data["Department.csv"]
@@ -520,25 +517,25 @@ def build_adventureworks_twin(
 
     documents = [
         Document(id="doc_aw_departments", title="AdventureWorks departments and employee assignments",
-                 doc_type=DocumentType.org_chart, uri=f"{SOURCE_BASE}/Department.csv", mime_type="text/csv",
+                 doc_type=DocumentType.org_chart, uri=f"{_PROVENANCE_BASE}/Department.csv", mime_type="text/csv",
                  status=DocumentStatus.current, summary="Microsoft sample department structure and current employee assignments.",
                  covers_entity_ids=[entity.id for entity in entities
                                     if entity.type in {EntityType.department, EntityType.role}],
                  synthetic=False, ingested=True, uploaded_at=created_at),
         Document(id="doc_aw_purchasing", title="AdventureWorks purchasing records", department_id=dept_id["5"],
-                 doc_type=DocumentType.contract, uri=f"{SOURCE_BASE}/PurchaseOrderHeader.csv", mime_type="text/csv",
+                 doc_type=DocumentType.contract, uri=f"{_PROVENANCE_BASE}/PurchaseOrderHeader.csv", mime_type="text/csv",
                  status=DocumentStatus.current, summary="Public vendor, product-vendor, and purchase-order records.",
                  covers_entity_ids=[entity.id for entity in entities if entity.type is EntityType.vendor]
                  + ["wf_aw_procurement", "kpi_aw_purchase_spend"],
                  synthetic=False, ingested=True, uploaded_at=created_at),
         Document(id="doc_aw_production", title="AdventureWorks production records", department_id=dept_id["7"],
-                 doc_type=DocumentType.workflow_map, uri=f"{SOURCE_BASE}/WorkOrderRouting.csv", mime_type="text/csv",
+                 doc_type=DocumentType.workflow_map, uri=f"{_PROVENANCE_BASE}/WorkOrderRouting.csv", mime_type="text/csv",
                  status=DocumentStatus.current, summary="Public product, work-order, routing, and work-center records.",
                  covers_entity_ids=[entity.id for entity in entities if entity.type is EntityType.system]
                  + [*workflow_by_category.values(), "wf_aw_quality", "kpi_aw_scrap_rate"],
                  synthetic=False, ingested=True, uploaded_at=created_at),
         Document(id="doc_aw_sales", title="AdventureWorks sales records", department_id=dept_id["3"],
-                 doc_type=DocumentType.kpi_report, uri=f"{SOURCE_BASE}/SalesOrderHeader.csv", mime_type="text/csv",
+                 doc_type=DocumentType.kpi_report, uri=f"{_PROVENANCE_BASE}/SalesOrderHeader.csv", mime_type="text/csv",
                  status=DocumentStatus.current, summary="Public sales-order records used to derive revenue and delivery KPIs.",
                  covers_entity_ids=["wf_aw_sales_fulfillment", "wf_aw_shipping", "kpi_aw_sales",
                                     "kpi_aw_gross_margin", "kpi_aw_on_time_delivery"],
@@ -607,7 +604,7 @@ def build_adventureworks_twin(
 
     return Twin(
         version=VersionInfo(
-            twin_version=f"adventureworks-{as_of.isoformat()}",
+            twin_version=twin_version or f"adventureworks-{as_of.isoformat()}",
             settings_version=1,
             prompt_version="real-v1",
             model_id="none",
