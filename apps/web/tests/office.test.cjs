@@ -6,11 +6,96 @@ const vm = require('node:vm');
 const ts = require('typescript');
 function load(name, globals = {}) {
   const exports={};
-  const {outputText}=ts.transpileModule(readFileSync(resolve(__dirname,'../lib',name),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}});
+  const {outputText}=ts.transpileModule(readFileSync(resolve(__dirname,'../lib',name),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}});
   vm.runInNewContext(outputText,{exports,...globals}); return exports;
 }
 const {reconcileSlots,officePosition}=load('office-layout.ts');
 const {mergeRunEvents,boardParticipants}=load('run-events.ts');
+const {buildDepartmentSimulation,applyDecisionPackage}=load('simulation-view.ts',{require:()=>({officePosition})});
+const profile=JSON.parse(readFileSync(resolve(__dirname,'../../../data/organization_profile.json'),'utf8'));
+const baseline=buildDepartmentSimulation(profile);
+const impact=(overrides={})=>({affected_department:baseline[0].departmentId,affected_entity:'wf_test',polarity:'harm',severity:4,first_effect_day:30,peak_effect_day:60,confidence:0.8,metric:'capacity_loss',magnitude:0.5,unit:'ratio',direction:'decrease',...overrides});
+
+// Render the scene's component tree and execute its frame callbacks with real Three meshes.
+// This catches missing ripple geometry or animation wiring without requiring a WebGL device.
+function officeHarness(props={}, loading=false) {
+  const React=require('react'), THREE=require('three'), frames=[];
+  const imports={
+    react:{...React,useRef:value=>({current:value}),useState:value=>[value,()=>{}],useEffect:()=>{},useMemo:fn=>fn()},
+    '@react-three/fiber':{Canvas:()=>null,useFrame:fn=>frames.push(fn)},
+    '@react-three/drei':{useProgress:()=>({active:loading})},
+    './office-furnishings':{},'@/lib/office-layout':{officePosition},
+  };
+  const {OfficeScene}=load('../components/office-scene.tsx',{require:name=>imports[name]??require(name)});
+  const tree=OfficeScene({day:30,departments:applyDecisionPackage(baseline,null,{impacts:[impact()]}),showImpacts:true,...props});
+  function find(node,predicate) {
+    if(Array.isArray(node)) return node.flatMap(child=>find(child,predicate));
+    if(!node || typeof node!=='object') return [];
+    return [...(predicate(node)?[node]:[]),...find(node.props?.children,predicate)];
+  }
+  const world=find(tree,node=>node.type?.name==='World')[0];
+  const rendered=world.type({...world.props,reducedMotion:props.reducedMotion??false});
+  const workstations=find(rendered,node=>node.type?.name==='Workstation');
+  const ripples=workstations.flatMap(node=>find(node.type(node.props),child=>child.type?.name==='ImpactRipples'));
+  const rings=ripples.flatMap(node=>find(node.type(node.props),child=>child.type==='mesh').map(element=>{
+    const mesh=new THREE.Mesh(undefined,new THREE.MeshBasicMaterial());
+    element.props.ref(mesh);
+    const material=find(element,child=>child.type==='meshBasicMaterial')[0];
+    mesh.material.color.set(material.props.color);
+    return {mesh,element,material};
+  }));
+  return {tree,find,rings,step:delta=>frames.forEach(fn=>fn({},delta))};
+}
+
+test('selected result preserves impact timing, strength, and polarity even for the source team',()=>{
+  const pkg={brief:{candidate_interventions:[{target_entity_id:baseline[0].departmentId}]} };
+  const views=applyDecisionPackage(baseline,pkg,{impacts:[impact()]});
+  assert.equal(views[0].startsAt,30); assert.equal(views[0].strength,0.8);
+  assert.equal(views[0].tone,'negative');
+  const benefit=applyDecisionPackage(baseline,pkg,{impacts:[impact({polarity:'benefit'})]});
+  assert.equal(benefit[0].tone,'positive');
+  assert.equal(applyDecisionPackage(baseline,null,{impacts:[]})[0].startsAt,Infinity);
+});
+
+test('ripples appear at first effect, persist after peak, and disappear before it or without a result',()=>{
+  assert.equal(officeHarness({day:29}).rings.length,0);
+  assert.equal(officeHarness({day:30}).rings.length,3);
+  assert.equal(officeHarness({day:365}).rings.length,3);
+  assert.equal(officeHarness({day:-1}).rings.length,0);
+  assert.equal(officeHarness({departments:baseline}).rings.length,0);
+  assert.equal(officeHarness({showImpacts:false}).rings.length,0);
+  assert.equal(officeHarness({board:true}).rings.length,0);
+});
+
+test('ripple meshes expand and fade; reduced motion keeps visible stationary impact rings',()=>{
+  const scene=officeHarness();scene.step(0);
+  const before=scene.rings.map(({mesh})=>[mesh.scale.x,mesh.material.opacity]);
+  scene.step(0.1);
+  scene.rings.forEach(({mesh,element,material},index)=>{
+    assert.ok(mesh.scale.x>before[index][0]);
+    assert.ok(mesh.material.opacity<before[index][1]);
+    assert.equal(mesh.material.color.getHexString(),'df776c');
+    assert.ok(element.props.position[1]>0.03,'rings sit above workstation platforms');
+    assert.equal(material.props.depthWrite,false);
+  });
+  const reduced=officeHarness({reducedMotion:true});reduced.step(0);
+  const stationary=reduced.rings.map(({mesh})=>[mesh.scale.x,mesh.material.opacity]);
+  reduced.step(10);
+  assert.deepEqual(reduced.rings.map(({mesh})=>[mesh.scale.x,mesh.material.opacity]),stationary);
+  assert.ok(stationary.every(([,opacity])=>opacity>0));
+  const weak=officeHarness({reducedMotion:true,departments:applyDecisionPackage(baseline,null,{impacts:[impact({severity:1})]})});weak.step(0);
+  assert.ok(reduced.rings[2].mesh.scale.x>weak.rings[2].mesh.scale.x);
+  assert.ok(reduced.rings[0].mesh.material.opacity>weak.rings[0].mesh.material.opacity);
+});
+
+test('office loading, empty, and failed scene states retain accessible explanations',()=>{
+  const loading=officeHarness({},true);
+  assert.equal(loading.find(loading.tree,node=>node.props?.role==='status')[0].props.children,'Loading office…');
+  const empty=officeHarness({departments:[]});assert.equal(empty.rings.length,0);
+  assert.ok(empty.find(empty.tree,node=>typeof node.props?.children==='string' && node.props.children.startsWith('No departments configured')).length);
+  const boundary=new empty.tree.type(empty.tree.props);boundary.state={failed:true};
+  assert.equal(boundary.render().props.role,'alert');
+});
 test('department positions survive reorder, removal and addition; 24 unique slots per page',()=>{
   const ids=Array.from({length:24},(_,i)=>`dept_${i}`);
   const initial=reconcileSlots({},ids);

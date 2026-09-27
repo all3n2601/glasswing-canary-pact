@@ -36,7 +36,11 @@ class StoredUser:
 class Storage(Protocol):
     def save_twin(self, twin: Twin, *, active: bool = True) -> None: ...
 
-    def load_active_twin(self) -> Twin | None: ...
+    def load_active_twin(self, organization_id: str | None = None) -> Twin | None: ...
+
+    def organization_ids(self) -> list[str]: ...
+
+    def user_organization(self, user_id: str) -> str | None: ...
 
     def load_twin_version(self, version: str) -> Twin | None: ...
 
@@ -54,7 +58,7 @@ class Storage(Protocol):
 
     def save_decision(self, decision: HumanDecision) -> None: ...
 
-    def create_user(self, user: UserPublic, password_hash: str) -> None: ...
+    def create_user(self, user: UserPublic, password_hash: str, organization_id: str | None = None) -> None: ...
 
     def user_by_email(self, email: str) -> StoredUser | None: ...
 
@@ -92,6 +96,11 @@ class FileStorage:
                 "CREATE TABLE IF NOT EXISTS twins (twin_version TEXT PRIMARY KEY, organization_id TEXT NOT NULL, "
                 "twin_json TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL)"
             )
+            db.execute("CREATE TABLE IF NOT EXISTS organizations (organization_id TEXT PRIMARY KEY, twin_version TEXT NOT NULL)")
+            db.execute("CREATE TABLE IF NOT EXISTS memberships (user_id TEXT PRIMARY KEY, organization_id TEXT NOT NULL)")
+            db.execute("INSERT OR IGNORE INTO organizations SELECT organization_id, twin_version FROM twins WHERE active = 1")
+            db.execute("INSERT OR IGNORE INTO memberships SELECT users.user_id, twins.organization_id "
+                       "FROM users CROSS JOIN twins WHERE twins.active = 1")
 
     def _users(self) -> sqlite3.Connection:
         return sqlite3.connect(self.users_path)
@@ -101,22 +110,41 @@ class FileStorage:
 
     def save_twin(self, twin: Twin, *, active: bool = True) -> None:
         with self._users() as db:
-            if active:
+            default = db.execute("SELECT organization_id FROM twins WHERE active = 1 LIMIT 1").fetchone()
+            default_active = active and (default is None or default[0] == twin.organization.id)
+            existing = db.execute("SELECT organization_id FROM twins WHERE twin_version = ?", (twin.version.twin_version,)).fetchone()
+            if existing and existing[0] != twin.organization.id:
+                raise ValueError("Twin version belongs to another organization")
+            if default_active:
                 db.execute("UPDATE twins SET active = 0")
             db.execute(
                 "INSERT INTO twins VALUES (?, ?, ?, ?, ?) "
                 "ON CONFLICT(twin_version) DO UPDATE SET organization_id=excluded.organization_id, "
                 "twin_json=excluded.twin_json, active=excluded.active, created_at=excluded.created_at",
-                (twin.version.twin_version, twin.organization.id, twin.model_dump_json(), int(active),
+                (twin.version.twin_version, twin.organization.id, twin.model_dump_json(), int(default_active),
                  twin.version.created_at.isoformat()),
             )
+            if active:
+                db.execute("INSERT INTO organizations VALUES (?, ?) ON CONFLICT(organization_id) "
+                           "DO UPDATE SET twin_version=excluded.twin_version", (twin.organization.id, twin.version.twin_version))
 
-    def load_active_twin(self) -> Twin | None:
+    def load_active_twin(self, organization_id: str | None = None) -> Twin | None:
         with self._users() as db:
-            row = db.execute(
+            row = db.execute("SELECT twin_json FROM twins JOIN organizations USING(twin_version) "
+                             "WHERE organizations.organization_id = ?", (organization_id,)).fetchone() if organization_id else db.execute(
                 "SELECT twin_json FROM twins WHERE active = 1 ORDER BY created_at DESC LIMIT 1"
             ).fetchone()
         return Twin.model_validate_json(row[0]) if row else None
+
+    def organization_ids(self) -> list[str]:
+        with self._users() as db:
+            return [row[0] for row in db.execute("SELECT organization_id FROM organizations ORDER BY organization_id")]
+
+    def user_organization(self, user_id: str) -> str | None:
+        with self._users() as db:
+            row = db.execute("SELECT organization_id FROM memberships WHERE user_id = ?", (user_id,)).fetchone()
+            row = row or db.execute("SELECT organization_id FROM twins WHERE active = 1 LIMIT 1").fetchone()
+        return row[0] if row else None
 
     def load_twin_version(self, version: str) -> Twin | None:
         with self._users() as db:
@@ -152,12 +180,17 @@ class FileStorage:
     def save_decision(self, decision: HumanDecision) -> None:
         pass
 
-    def create_user(self, user: UserPublic, password_hash: str) -> None:
+    def create_user(self, user: UserPublic, password_hash: str, organization_id: str | None = None) -> None:
         try:
             with self._users() as db:
+                if organization_id and not db.execute("SELECT 1 FROM organizations WHERE organization_id = ?", (organization_id,)).fetchone():
+                    raise ValueError("Organization not found")
                 db.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?)",
                            (user.user_id, user.email, user.display_name, user.role.value, password_hash,
                             user.created_at.isoformat()))
+                org_id = organization_id or self.user_organization(user.user_id)
+                if org_id:
+                    db.execute("INSERT INTO memberships VALUES (?, ?)", (user.user_id, org_id))
         except sqlite3.IntegrityError as exc:
             raise DuplicateEmail(user.email) from exc
 
@@ -203,9 +236,14 @@ POSTGRES_TABLES = [
     "CREATE TABLE IF NOT EXISTS canary_revoked_tokens (token_id TEXT PRIMARY KEY, expires_at TIMESTAMPTZ NOT NULL)",
     "CREATE TABLE IF NOT EXISTS canary_twins (twin_version TEXT PRIMARY KEY, organization_id TEXT NOT NULL, "
     "twin JSONB NOT NULL, active BOOLEAN NOT NULL DEFAULT false, created_at TIMESTAMPTZ NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS canary_organizations (organization_id TEXT PRIMARY KEY, twin_version TEXT NOT NULL REFERENCES canary_twins(twin_version))",
+    "CREATE TABLE IF NOT EXISTS canary_memberships (user_id TEXT PRIMARY KEY REFERENCES canary_users(user_id), organization_id TEXT NOT NULL REFERENCES canary_organizations(organization_id))",
+    "INSERT INTO canary_organizations SELECT organization_id, twin_version FROM canary_twins WHERE active = true ON CONFLICT DO NOTHING",
+    "INSERT INTO canary_memberships SELECT canary_users.user_id, canary_twins.organization_id "
+    "FROM canary_users CROSS JOIN canary_twins WHERE canary_twins.active = true ON CONFLICT DO NOTHING",
 ]
 POSTGRES_TABLE_NAMES = ["canary_runs", "canary_events", "canary_packages", "canary_decisions", "canary_users",
-                        "canary_revoked_tokens", "canary_twins"]
+                        "canary_revoked_tokens", "canary_twins", "canary_organizations", "canary_memberships"]
 DEFAULT_SCHEMA = "canary"
 # Supabase's Data API serves anon and authenticated; those roles (and PUBLIC) get nothing here. Row-level security
 # with no policies denies every row to them as well, while the API's own owner or pooler role bypasses it.
@@ -223,7 +261,7 @@ BEGIN
                                current_schema(), api_role);
             END IF;
             FOREACH table_name IN ARRAY ARRAY['canary_runs', 'canary_events', 'canary_packages', 'canary_decisions',
-                                              'canary_users', 'canary_revoked_tokens', 'canary_twins'] LOOP
+                                              'canary_users', 'canary_revoked_tokens', 'canary_twins', 'canary_organizations', 'canary_memberships'] LOOP
                 EXECUTE format('REVOKE ALL ON TABLE %I.%I FROM %I', current_schema(), table_name, api_role);
             END LOOP;
             EXECUTE format('REVOKE ALL ON SEQUENCE %I.canary_decisions_id_seq FROM %I', current_schema(), api_role);
@@ -281,20 +319,40 @@ class PostgresStorage:
 
         # Activation and snapshot insertion must succeed or roll back together.
         with self.pool.connection() as conn, conn.transaction():
-            if active:
+            # Serialize activation so two first inserts cannot both become the default.
+            conn.execute("LOCK TABLE canary_twins IN SHARE ROW EXCLUSIVE MODE")
+            default = conn.execute("SELECT organization_id FROM canary_twins WHERE active = true LIMIT 1").fetchone()
+            default_active = active and (default is None or default[0] == twin.organization.id)
+            existing = conn.execute("SELECT organization_id FROM canary_twins WHERE twin_version = %s", (twin.version.twin_version,)).fetchone()
+            if existing and existing[0] != twin.organization.id:
+                raise ValueError("Twin version belongs to another organization")
+            if default_active:
                 conn.execute("UPDATE canary_twins SET active = false WHERE active = true")
             conn.execute(
                 "INSERT INTO canary_twins (twin_version, organization_id, twin, active, created_at) "
                 "VALUES (%s, %s, %s, %s, %s) ON CONFLICT (twin_version) DO UPDATE SET "
                 "organization_id = EXCLUDED.organization_id, twin = EXCLUDED.twin, "
                 "active = EXCLUDED.active, created_at = EXCLUDED.created_at",
-                (twin.version.twin_version, twin.organization.id, Jsonb(twin.model_dump(mode="json")), active,
+                (twin.version.twin_version, twin.organization.id, Jsonb(twin.model_dump(mode="json")), default_active,
                  twin.version.created_at),
             )
+            if active:
+                conn.execute("INSERT INTO canary_organizations VALUES (%s, %s) ON CONFLICT(organization_id) "
+                             "DO UPDATE SET twin_version=EXCLUDED.twin_version", (twin.organization.id, twin.version.twin_version))
 
-    def load_active_twin(self) -> Twin | None:
-        rows = self._run("SELECT twin FROM canary_twins WHERE active = true ORDER BY created_at DESC LIMIT 1")
+    def load_active_twin(self, organization_id: str | None = None) -> Twin | None:
+        rows = self._run("SELECT twin FROM canary_twins JOIN canary_organizations USING(twin_version) "
+                         "WHERE canary_organizations.organization_id = %s", (organization_id,)) if organization_id else self._run(
+                             "SELECT twin FROM canary_twins WHERE active = true ORDER BY created_at DESC LIMIT 1")
         return Twin.model_validate(rows[0][0]) if rows else None
+
+    def organization_ids(self) -> list[str]:
+        return [row[0] for row in self._run("SELECT organization_id FROM canary_organizations ORDER BY organization_id")]
+
+    def user_organization(self, user_id: str) -> str | None:
+        rows = self._run("SELECT organization_id FROM canary_memberships WHERE user_id = %s", (user_id,))
+        rows = rows or self._run("SELECT organization_id FROM canary_twins WHERE active = true LIMIT 1")
+        return rows[0][0] if rows else None
 
     def load_twin_version(self, version: str) -> Twin | None:
         rows = self._run("SELECT twin FROM canary_twins WHERE twin_version = %s", (version,))
@@ -339,12 +397,19 @@ class PostgresStorage:
         self._run("INSERT INTO canary_decisions (run_id, package_id, decision, decided_at) VALUES (%s, %s, %s, %s)",
                   (decision.run_id, decision.package_id, Jsonb(decision.model_dump(mode="json")), decision.decided_at))
 
-    def create_user(self, user: UserPublic, password_hash: str) -> None:
+    def create_user(self, user: UserPublic, password_hash: str, organization_id: str | None = None) -> None:
         from psycopg.errors import UniqueViolation
 
         try:
-            self._run("INSERT INTO canary_users VALUES (%s, %s, %s, %s, %s, %s)",
-                      (user.user_id, user.email, user.display_name, user.role.value, password_hash, user.created_at))
+            with self.pool.connection() as conn, conn.transaction():
+                if organization_id and not conn.execute("SELECT 1 FROM canary_organizations WHERE organization_id = %s", (organization_id,)).fetchone():
+                    raise ValueError("Organization not found")
+                conn.execute("INSERT INTO canary_users VALUES (%s, %s, %s, %s, %s, %s)",
+                             (user.user_id, user.email, user.display_name, user.role.value, password_hash, user.created_at))
+                default = conn.execute("SELECT organization_id FROM canary_twins WHERE active = true LIMIT 1").fetchone()
+                org_id = organization_id or (default[0] if default else None)
+                if org_id:
+                    conn.execute("INSERT INTO canary_memberships VALUES (%s, %s)", (user.user_id, org_id))
         except UniqueViolation as exc:
             raise DuplicateEmail(user.email) from exc
 

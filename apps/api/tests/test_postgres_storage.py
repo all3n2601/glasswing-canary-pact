@@ -108,3 +108,10 @@ def test_postgres_tables_are_private(pg) -> None:
                 "OR has_table_privilege(%s, %s, 'UPDATE') OR has_table_privilege(%s, %s, 'DELETE')",
                 (role, f"{schema}.{name}") * 4)
             assert granted == [(False,)], (role, name)
+
+
+def test_postgres_organization_isolation(pg, monkeypatch):
+    from test_organizations import exercise_organizations
+
+    _, backend = pg
+    exercise_organizations(backend, monkeypatch)

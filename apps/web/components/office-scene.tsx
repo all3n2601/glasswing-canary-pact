@@ -3,7 +3,7 @@
 import { ContactShadows, Line, OrbitControls, RoundedBox, useGLTF, useProgress } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Component, Suspense, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
-import { Group, Mesh, MeshStandardMaterial, Vector3 } from "three";
+import { Group, Mesh, MeshBasicMaterial, MeshStandardMaterial, Vector3 } from "three";
 import { DeskFurniture, MeetingTable, OfficeChair, OfficeEnvironment } from "./office-furnishings";
 import { officePosition } from "@/lib/office-layout";
 import type { DepartmentSimulationView } from "@/lib/simulation-view";
@@ -108,7 +108,29 @@ function CameraFocus({target, resetKey, board, wide, reducedMotion}: {target?: [
   return null;
 }
 
-function Workstation({department, day, active, selected, onSelect, reducedMotion, labels}: {labels: RefObject<Map<string, HTMLDivElement>>; department: DepartmentSceneMarker; day: number; active: boolean; selected: boolean; onSelect?: (id: string) => void; reducedMotion: boolean}) {
+function ImpactRipples({department, reducedMotion}: {department: DepartmentSceneMarker; reducedMotion: boolean}) {
+  const rings = useRef<Array<Mesh | null>>([]);
+  const elapsed = useRef(characterSeed(department.departmentId) % 31 / 10);
+  const strength = Math.max(0, Math.min(1, department.strength));
+  useFrame((_, delta) => {
+    if (!reducedMotion) elapsed.current += delta;
+    rings.current.forEach((ring, index) => {
+      if (!ring || !(ring.material instanceof MeshBasicMaterial)) return;
+      const phase = reducedMotion ? index / 3 : (elapsed.current / 2.8 + index / 3) % 1;
+      const radius = 1.9 + phase * (0.9 + strength);
+      ring.scale.setScalar(radius);
+      ring.material.opacity = (0.45 + strength * 0.5) * (1 - phase);
+    });
+  });
+  return <group name={`impact-ripples-${department.departmentId}`}>
+    {[0, 1, 2].map(index => <mesh key={index} ref={mesh => {rings.current[index] = mesh;}} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.075 + index * 0.002, 0]} raycast={() => null}>
+      <ringGeometry args={[0.92, 1, 64]} />
+      <meshBasicMaterial color={tones[department.tone]} transparent opacity={0} depthWrite={false} toneMapped={false} />
+    </mesh>)}
+  </group>;
+}
+
+function Workstation({department, day, active, selected, onSelect, reducedMotion, labels, showImpacts}: {labels: RefObject<Map<string, HTMLDivElement>>; department: DepartmentSceneMarker; day: number; active: boolean; selected: boolean; onSelect?: (id: string) => void; reducedMotion: boolean; showImpacts: boolean}) {
   const closed = department.label.startsWith("Closed") && day >= department.startsAt;
   const color = day >= department.startsAt ? tones[department.tone] : tones.neutral;
   const accent = wardrobe[characterSeed(department.departmentId) % wardrobe.length];
@@ -118,6 +140,8 @@ function Workstation({department, day, active, selected, onSelect, reducedMotion
       <meshStandardMaterial color={selected ? "#b8cec5" : hovered ? "#c8d8d0" : "#d2d7d0"} roughness={0.85} />
     </RoundedBox>
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}><ringGeometry args={[1.65, 1.73, 48]} /><meshBasicMaterial color={color} transparent opacity={selected || day >= department.startsAt ? 0.8 : 0.22} /></mesh>
+    {showImpacts && day >= 0 && Number.isFinite(department.startsAt) && day >= department.startsAt && department.strength > 0
+      ? <ImpactRipples department={department} reducedMotion={reducedMotion} /> : null}
     {!closed ? <>
       <DeskFurniture accent={accent} active={active} reducedMotion={reducedMotion}/>
       <group position={[0,0,1.12]} rotation={[0,Math.PI,0]}><OfficeChair color={accent}/><Representative identity={department.departmentId} position={[0,0,0]} active={active} reducedMotion={reducedMotion}/></group>
@@ -132,7 +156,7 @@ const illustrationDepartments: DepartmentSceneMarker[] = ["Finance","Engineering
   departmentId:`illustration_${name}`,name,label:"Illustrative department",tone:"neutral",position:officePosition(index*2),strength:0,startsAt:Infinity,
 }));
 
-function World({day, interactive = true, analyzingDepartmentIds, departments, selectedDepartmentId, onDepartmentSelect, board, participants, onParticipantSelect, resetKey, reducedMotion, dependencyPaths, labels, evening}: OfficeProps & {evening: boolean; reducedMotion: boolean; labels: RefObject<Map<string, HTMLDivElement>>}) {
+function World({day, interactive = true, analyzingDepartmentIds, departments, selectedDepartmentId, onDepartmentSelect, board, participants, onParticipantSelect, resetKey, reducedMotion, dependencyPaths, labels, evening, showImpacts = false}: OfficeProps & {evening: boolean; reducedMotion: boolean; labels: RefObject<Map<string, HTMLDivElement>>}) {
   const floorSize = board ? 18 : departments?.some(d=>Math.abs(d.position[0])>12 || Math.abs(d.position[2])>12) ? 38 : 28;
   const selected = departments?.find(d => d.departmentId === selectedDepartmentId);
   return <>
@@ -146,7 +170,7 @@ function World({day, interactive = true, analyzingDepartmentIds, departments, se
       const angle=index*Math.PI/3;
       return <group key={index} position={[Math.sin(angle)*3.85,0,Math.cos(angle)*3.85]} rotation={[0,angle+Math.PI,0]}><OfficeChair/></group>;
     }) : null}
-    {!board ? departments?.map(d => <Workstation key={d.departmentId} department={d} day={day} active={Boolean(analyzingDepartmentIds?.includes(d.departmentId))} selected={d.departmentId === selectedDepartmentId} onSelect={onDepartmentSelect} reducedMotion={reducedMotion} labels={labels} />) : null}
+    {!board ? departments?.map(d => <Workstation key={d.departmentId} department={d} day={day} active={Boolean(analyzingDepartmentIds?.includes(d.departmentId))} selected={d.departmentId === selectedDepartmentId} onSelect={onDepartmentSelect} reducedMotion={reducedMotion} labels={labels} showImpacts={showImpacts} />) : null}
     {!board && dependencyPaths?.map((path, index) => {
       const points = path.map(id => departments?.find(d => d.departmentId === id)?.position).filter((p): p is [number, number, number] => Boolean(p));
       return points.length > 1 ? <Line key={index} points={points.map(p => [p[0], 0.35, p[2]])} color="#b97561" lineWidth={2} dashed dashSize={0.3} gapSize={0.15} /> : null;
@@ -171,6 +195,7 @@ function World({day, interactive = true, analyzingDepartmentIds, departments, se
 interface OfficeProps {
   day: number; interactive?: boolean; departments?: DepartmentSceneMarker[]; selectedDepartmentId?: string;
   analyzingDepartmentIds?: string[];
+  showImpacts?: boolean;
   showAllDepartmentLabels?: boolean; onDepartmentSelect?: (id: string) => void; board?: boolean;
   participants?: OfficeParticipant[]; onParticipantSelect?: (key: string) => void; resetKey?: number; dependencyPaths?: string[][];
 }

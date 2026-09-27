@@ -87,13 +87,11 @@ export function applyDecisionPackage(baseline: DepartmentSimulationView[], decis
     const summary = selectedResult ? undefined : summaries.get(department.departmentId);
     if (!summary && departmentImpacts.length === 0) return department;
     const severity = Math.max(summary?.severity ?? 0, ...departmentImpacts.map((impact) => impact.severity));
-    const tone: DepartmentImpactTone = sourceDepartments.has(department.departmentId)
-      ? "source"
-      : departmentImpacts.some((impact) => impact.polarity === "harm")
-        ? "negative"
-        : departmentImpacts.some((impact) => impact.polarity === "benefit")
-          ? "positive"
-          : "neutral";
+    const tone: DepartmentImpactTone = departmentImpacts.some((impact) => impact.polarity === "harm")
+      ? "negative"
+      : departmentImpacts.some((impact) => impact.polarity === "benefit")
+        ? "positive"
+        : sourceDepartments.has(department.departmentId) ? "source" : "neutral";
     const confidences = departmentImpacts.map((impact) => impact.confidence);
     const path = departmentImpacts.map((impact) => impact.dependency_path ?? []).sort((left, right) => right.length - left.length)[0] ?? [];
 

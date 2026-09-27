@@ -81,6 +81,7 @@ app = FastAPI(
     description="Organizational decision simulation and blast-radius API.",
 )
 app.include_router(auth.router)
+app.add_middleware(auth.OrganizationSessionMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -99,6 +100,11 @@ def _run(run_id: str) -> Run:
     run = runtime.bus.get(run_id)
     if run is None:
         raise HTTPException(status_code=404, detail="Run not found")
+    organization_id = runtime.organization_scope.get()
+    if organization_id is not None:
+        snapshot = storage.current().load_twin_version(run.state.baseline_twin_version)
+        if snapshot is None or snapshot.organization.id != organization_id:
+            raise HTTPException(status_code=404, detail="Run not found")
     return run
 
 
@@ -375,7 +381,9 @@ def run_perspectives(run_id: str) -> list[AgentAssessment]:
 
 @app.websocket("/runs/{run_id}/events")
 async def run_events(websocket: WebSocket, run_id: str) -> None:
-    if runtime.bus.get(run_id) is None:
+    try:
+        _run(run_id)
+    except HTTPException:
         await websocket.close(code=4404)
         return
     await websocket.accept()

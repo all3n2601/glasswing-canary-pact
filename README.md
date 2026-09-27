@@ -166,6 +166,21 @@ company JSON fixture. Every imported
 department receives a clearly labeled demo context pack with an owned workflow, operating knowledge,
 an outcome KPI, and traceable staffing evidence so cross-department scenarios can be exercised.
 
+To add Northstar as a second organization and create its login, run this once against the configured
+database (the command refuses to replace an existing organization or account):
+
+```bash
+uv run --env-file .env python -m canary_api.provision --twin data/synthetic_company.json --snippets data/artifacts/snippets.json --email admin@northstar.example --display-name "Northstar Admin" --role approver
+```
+
+The command prints a randomly generated password once; only its salted hash is stored. It loads the
+complete validated fixture, including department profiles, dependencies, documents, evidence and
+pressures. Each account's server-side membership selects its organization's active twin. Existing
+accounts remain with the original organization; self-service sign-up creates viewers there. With
+multiple organizations, company and run endpoints require authentication, including WebSockets
+(Bearer header). Cross-organization run access returns 404. New snapshots update only their owning
+organization, and the original organization remains the default. Shared API payloads are unchanged.
+
 Decision runs need live model access: set `CANARY_ALLOW_LIVE=true` and a Sciforium key
 (`SCIFORIUM_API_KEY`). Without `CANARY_ALLOW_LIVE=true` the API refuses decision runs with a 503;
 without a working key the agents fail and are reported as failed, never answered from recorded advice.

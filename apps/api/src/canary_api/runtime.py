@@ -3,6 +3,7 @@ import os
 from threading import RLock
 from functools import cache
 from pathlib import Path
+from contextvars import ContextVar
 
 from agent_orchestration import AgentLLM, DecisionIntake
 from agent_orchestration.llm import structured_output_mode, thinking_enabled
@@ -26,6 +27,7 @@ thinking_error: str | None = None
 _twin: Twin | None = None
 _stub_twin: Twin | None = None
 twin_lock = RLock()
+organization_scope: ContextVar[str | None] = ContextVar("organization_scope", default=None)
 
 
 SNIPPETS_PATH = DATA_DIR / "artifacts" / "snippets.json"
@@ -46,6 +48,12 @@ def seed_twin() -> Twin:
 
 def twin() -> Twin:
     global _twin, _stub_twin
+    organization_id = organization_scope.get()
+    if organization_id is not None:
+        stored = storage.current().load_active_twin(organization_id)
+        if stored is None:
+            raise EngineNotReady("The account's organization has no active company twin")
+        return engine_port.build_twin(stored)
     if engine_port.twin_impl() == "stub":
         # The stub twin never touches storage, so offline runs cannot pick up a saved real twin.
         if _stub_twin is None:
@@ -70,8 +78,12 @@ def twin() -> Twin:
 def activate_twin(value: Twin) -> None:
     """Persist and activate a validated company twin for subsequent requests and runs."""
     global _twin
+    organization_id = organization_scope.get()
+    if organization_id is not None and value.organization.id != organization_id:
+        raise ValueError("Cannot change another organization's company twin")
     storage.current().save_twin(value, active=True)
-    _twin = value
+    if organization_id is None:
+        _twin = value
 
 
 @cache

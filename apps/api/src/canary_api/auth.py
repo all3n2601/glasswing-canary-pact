@@ -15,6 +15,9 @@ from typing import Any
 from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import ValidationError
+from starlette.types import ASGIApp, Scope, Receive, Send
+from starlette.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 
 from contracts_py.api import AuthToken, LoginRequest, SignupRequest, UserPublic, UserRole
 
@@ -64,7 +67,8 @@ class UserStore:
     def path(self) -> Path | None:
         return self.backend.users_path if isinstance(self.backend, FileStorage) else None
 
-    def create(self, signup: SignupRequest, role: UserRole = UserRole.viewer) -> UserPublic:
+    def create(self, signup: SignupRequest, role: UserRole = UserRole.viewer,
+               organization_id: str | None = None) -> UserPublic:
         user = UserPublic(
             user_id=f"usr_{uuid.uuid4().hex[:16]}",
             email=signup.email.lower(),
@@ -72,7 +76,7 @@ class UserStore:
             role=role,
             created_at=datetime.now(timezone.utc),
         )
-        self.backend.create_user(user, hash_password(signup.password))
+        self.backend.create_user(user, hash_password(signup.password), organization_id)
         return user
 
     def get(self, user_id: str) -> UserPublic | None:
@@ -169,6 +173,51 @@ def signer() -> TokenSigner:
 
 
 _signer: dict[str, Any] = {}
+
+
+class OrganizationSessionMiddleware:
+    """Bind HTTP and WebSocket work to server-owned account membership.
+
+    Existing single-company demos retain their public read endpoints. As soon as
+    a second organization exists, all company/run endpoints require a session.
+    The client cannot choose its organization through request parameters.
+    """
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        from canary_api import runtime
+
+        public = scope.get("path", "") in {"/health", "/docs", "/openapi.json", "/redoc"} or scope.get("path", "").startswith("/auth/")
+        if scope["type"] not in {"http", "websocket"} or public or scope.get("method") == "OPTIONS":
+            await self.app(scope, receive, send)
+            return
+
+        def resolve() -> tuple[bool, str | None]:
+            backend = storage.current()
+            if len(backend.organization_ids()) < 2:
+                return True, None
+            header = dict(scope.get("headers", [])).get(b"authorization", b"").decode()
+            scheme, _, token = header.partition(" ")
+            claims = signer().verify(token) if scheme.lower() == "bearer" else None
+            user = store().get(str(claims.get("user_id"))) if claims else None
+            org_id = backend.user_organization(user.user_id) if user else None
+            return bool(user and org_id), org_id
+
+        allowed, org_id = await run_in_threadpool(resolve)
+        if not allowed:
+            if scope["type"] == "websocket":
+                await send({"type": "websocket.close", "code": 4401})
+            else:
+                await JSONResponse({"detail": "Not authenticated"}, status_code=401,
+                                   headers={"WWW-Authenticate": "Bearer"})(scope, receive, send)
+            return
+        token = runtime.organization_scope.set(org_id)
+        try:
+            await self.app(scope, receive, send)
+        finally:
+            runtime.organization_scope.reset(token)
 
 
 def seed_demo_approver() -> UserPublic | None:
