@@ -77,6 +77,15 @@ def load_twin(twin_path: Any, snippets_path: Any = None) -> Twin:
     return stub_twin()
 
 
+def build_twin(data: Twin | dict[str, Any], snippets: dict[str, str] | None = None) -> Twin:
+    # The stub computes nothing: it only returns a validated copy, overlaying any snippets by evidence id.
+    twin = data.model_copy(deep=True) if isinstance(data, Twin) else Twin.model_validate(data)
+    for evidence in twin.evidence:
+        if snippets and evidence.id in snippets:
+            evidence.snippet = snippets[evidence.id]
+    return twin
+
+
 def validate_twin(twin: Twin) -> list[ValidationIssue]:
     return []
 

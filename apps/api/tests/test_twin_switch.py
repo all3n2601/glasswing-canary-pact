@@ -9,7 +9,7 @@ from canary_api.stubs import engine as stub_engine
 from canary_api.stubs import twin as stub_twin_module
 from contracts_py.decision import DecisionBrief
 
-TWIN_FUNCTIONS = ["load_twin", "validate_twin", "build_agent_view", "reachable_departments", "list_dependencies",
+TWIN_FUNCTIONS = ["load_twin", "build_twin", "validate_twin", "build_agent_view", "reachable_departments", "list_dependencies",
                   "to_role_level", "document_is_stale", "aggregate_domain_graph", "department_detail",
                   "clone_with_edges", "widen_uncertainty"]
 ENGINE_FUNCTIONS = ["quick_impact", "simulate", "compare_futures", "optimize", "blast_radius", "check_result"]
@@ -111,3 +111,22 @@ def test_real_twin_loads_the_fixture(monkeypatch) -> None:
     ids = {e.id for e in twin.entities}
     assert {i.target_entity_id for i in brief.candidate_interventions} <= ids
     assert set(brief.active_pressure_ids or []) <= {p.id for p in twin.pressures}
+
+
+def test_stub_build_twin_never_calls_company_twin(monkeypatch) -> None:
+    def forbidden(*args, **kwargs):
+        raise AssertionError("the stub twin path must not reach company_twin")
+
+    monkeypatch.setattr(company_twin, "build_twin", forbidden)
+    monkeypatch.setenv("TWIN_IMPL", "stub")
+    source = stub_engine.load_twin(None)
+    built = engine_port.build_twin(source.model_dump(mode="json"), {source.evidence[0].id: "overlaid"})
+    assert built.organization.id == source.organization.id
+    assert built.evidence[0].snippet == "overlaid"
+
+
+def test_real_build_twin_goes_through_company_twin(monkeypatch) -> None:
+    seen = []
+    monkeypatch.setattr(company_twin, "build_twin", lambda data, snippets=None: seen.append(snippets) or "built")
+    monkeypatch.setenv("TWIN_IMPL", "real")
+    assert engine_port.build_twin({"x": 1}) == "built" and seen == [None]

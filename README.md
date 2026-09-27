@@ -154,8 +154,9 @@ Important environment variables (see `.env.example`; names only here):
 - `DATABASE_URL`, `CANARY_DB_SCHEMA`: optional Postgres (tables live in a private `canary` schema).
 
 LLM modes are chosen per run with `POST /decisions?llm_mode=mock|replay|live`. The default is
-`replay`, which answers from the recorded cache and falls back to mock answers, recording that in
-the package's assumptions, when the cache is empty. Every successful live answer is written to the
+`live` when `CANARY_ALLOW_LIVE` is `true` and `replay` otherwise. Replay answers from the recorded
+cache; when the cache holds nothing for that decision the run uses mock answers and says so in the
+package's assumptions. Every successful live answer is written to the
 cache (`data/artifacts/llm_cache`, or `CANARY_LLM_CACHE_DIR`).
 
 Offline demo with no model or database: start the API and replay the recorded run.
