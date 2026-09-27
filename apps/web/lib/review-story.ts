@@ -2,6 +2,35 @@ import type { AgentAssessment, DecisionBrief, DecisionPackage, Event, HumanDecis
 
 export const REVIEW_STAGES = ["Proposal", "Findings", "Challenge", "Response", "Recalculation", "Decision"] as const;
 
+// A bounded reading order for recorded findings, not a risk score or a new recommendation.
+export function decisionHighlights(assessments: AgentAssessment[], pkg: DecisionPackage) {
+  const latest = new Map<string, AgentAssessment>();
+  const planId = pkg.recommendation?.plan_id;
+  for (const assessment of assessments) {
+    if (assessment.pass_type === "challenge" || assessment.status !== "ok" || !assessment.output) continue;
+    // An inaction recommendation has no plan; its concerns still describe the proposed change.
+    if (planId && assessment.plan_id !== planId) continue;
+    const previous = latest.get(assessment.agent_id);
+    if (previous?.pass_type === "response" && assessment.pass_type !== "response") continue;
+    latest.set(assessment.agent_id, assessment);
+  }
+  const seen = new Set<string>();
+  const risks = [...latest.values()].flatMap(assessment => {
+    const finding = [...(assessment.output?.act_now_view.failure_modes ?? [])]
+      .sort((a, b) => b.severity - a.severity)
+      .find(item => item.text.trim() && !seen.has(item.text.trim()));
+    if (!finding) return [];
+    seen.add(finding.text.trim());
+    return [{assessment, finding}];
+  }).sort((a, b) => b.finding.severity - a.finding.severity).slice(0, 3);
+  const questions = [...new Set([
+    ...risks.flatMap(({assessment}) => (assessment.output?.questions ?? []).slice(0, 1).map(q => q.text)),
+    ...(pkg.missing_information ?? []).map(q => q.text),
+    ...(pkg.open_questions ?? []),
+  ].filter(text => text?.trim()))].slice(0, 3);
+  return {risks, questions};
+}
+
 export function reviewSnapshot(events: Event[], fallbackPackage?: DecisionPackage | null) {
   const assessments = new Map<string, AgentAssessment>();
   const issues = new Map<string, ReviewIssue>();

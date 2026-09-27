@@ -6,6 +6,8 @@ import { ArrowLeft, BookOpenText, Building2, Check, ChevronDown, ChevronRight, C
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+import { useAuth } from "@/components/auth-provider";
+import { DepartmentChange } from "@/components/department-change";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +31,9 @@ const emptyContextDraft: DepartmentContextItemCreate = { entity_type: "workflow"
 import { saveOrganizationProfile } from "@/lib/organization-profile";
 
 export function OrganizationSettings({ profile, agentSkills }: { profile: OrganizationProfile; agentSkills: AgentSkillFile[] }) {
+  const { user } = useAuth();
+  const [addingDepartment, setAddingDepartment] = useState(false);
+  const [departmentAdded, setDepartmentAdded] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("general");
   const [organization, setOrganization] = useState(profile.organization);
   const [departments, setDepartments] = useState(profile.departments);
@@ -135,6 +140,11 @@ export function OrganizationSettings({ profile, agentSkills }: { profile: Organi
 
               {activeTab === "departments" ? (
                 <div className="pt-8">
+                  <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-xs text-zinc-500">Manage the departments in your company baseline.</p>
+                    <Button disabled={saving || contextSaving} onClick={() => { setDepartmentAdded(null); setAddingDepartment(true); }} className="bg-zinc-950 text-white hover:bg-zinc-800"><Plus />Add department</Button>
+                  </div>
+                  {departmentAdded ? <p role="status" className="mb-4 rounded-xl bg-emerald-50 p-3 text-xs text-emerald-800">{departmentAdded} added to the company baseline.</p> : null}
                   <div className="grid grid-cols-3 gap-2 sm:gap-3">
                     <DepartmentSummaryCard label="Departments" value={String(departments.length)} detail={`${agentSkills.length} agent files`} />
                     <DepartmentSummaryCard label="Total operating scale" value={String(departmentTotals.headcount)} detail={`${formatCompactCurrency(departmentTotals.budget)} annual budget`} />
@@ -197,7 +207,7 @@ export function OrganizationSettings({ profile, agentSkills }: { profile: Organi
                         {selectedDepartmentSkill ? <details className="group border-t border-zinc-200"><summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-[10px] font-semibold text-zinc-600 marker:hidden"><span>Review {selectedDepartmentSkill.display_name} guidance</span><ChevronDown className="size-4 text-zinc-400 transition-transform group-open:rotate-180" /></summary><div className="max-h-[340px] overflow-y-auto border-t border-zinc-200 bg-white px-5 py-5"><SkillContent content={selectedDepartmentSkill.content} /></div></details> : <div className="border-t border-zinc-200 px-4 py-4 text-[10px] leading-5 text-zinc-500">No department-specific agent file is mapped to this profile. The simulation will surface the missing perspective instead of inventing advice.</div>}
                       </div>
                     </div>
-                  </div> : <div className="mt-5 rounded-3xl border border-dashed border-zinc-300 p-10 text-center"><Users className="mx-auto size-6 text-zinc-300" /><h2 className="mt-3 text-sm font-semibold">No departments configured</h2><p className="mx-auto mt-2 max-w-sm text-[11px] leading-5 text-zinc-500">Run organization setup to add the departments that should participate in simulations.</p><Button asChild variant="outline" className="mt-4 border-zinc-200"><Link href="/onboarding">Run setup <ChevronRight /></Link></Button></div>}
+                  </div> : <div className="mt-5 rounded-3xl border border-dashed border-zinc-300 p-10 text-center"><Users className="mx-auto size-6 text-zinc-300" /><h2 className="mt-3 text-sm font-semibold">No departments configured</h2><p className="mx-auto mt-2 max-w-sm text-[11px] leading-5 text-zinc-500">Use Add department above to create your first department.</p></div>}
 
                   {organizationWideSkills.length ? <div className="mt-6 border-t border-zinc-100 pt-6"><div className="flex items-end justify-between gap-4"><div><h2 className="text-sm font-semibold">Organization-wide agents</h2><p className="mt-1 text-[10px] text-zinc-500">Cross-functional perspectives used when the decision requires them.</p></div><Badge variant="outline" className="border-zinc-200 bg-zinc-50 text-[9px] text-zinc-500">{organizationWideSkills.length}</Badge></div><div className="mt-3 grid gap-2 sm:grid-cols-2">{organizationWideSkills.map((skill) => <AgentSkillCard key={skill.agent_id} skill={skill} />)}</div></div> : null}
                 </div>
@@ -210,6 +220,14 @@ export function OrganizationSettings({ profile, agentSkills }: { profile: Organi
           </section>
         </div>
       </div>
+      {addingDepartment ? <DepartmentChange baselineOnly profile={{...profile, twin_version:twinVersion, organization, departments, settings}} user={user} onClose={() => setAddingDepartment(false)} onSaved={(updated) => {
+        const added = updated.departments.filter(department => !departments.some(existing => existing.department_id === department.department_id));
+        setTwinVersion(updated.twin_version);
+        setDepartments(current => [...current, ...added]);
+        setOrganization(current => ({...current, total_headcount_fte:updated.organization.total_headcount_fte, total_annual_budget_usd:updated.organization.total_annual_budget_usd}));
+        if (added[0]) { setSelectedDepartmentId(added[0].department_id); setDepartmentAdded(added[0].name); }
+        setSaved(false);
+      }} /> : null}
     </main>
   );
 }

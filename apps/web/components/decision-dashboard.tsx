@@ -45,7 +45,7 @@ function LiveRunPanel({ run, teamNames }: { run: RunState | null; teamNames: str
   const phaseIndex = run ? runPhases.findIndex((phase) => phase.status === run.status) : -1;
   const phase = phaseIndex >= 0 ? runPhases[phaseIndex] : null;
   const completed = run?.assessment_ids?.length ?? 0;
-  return <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="absolute left-3 top-[158px] z-20 w-[min(390px,calc(100%-24px))] rounded-2xl border border-white/95 bg-white/90 p-4 shadow-[0_12px_45px_rgb(40_55_50/.12)] backdrop-blur-xl sm:left-5 sm:top-[88px]">
+  return <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} aria-label="Live simulation" className="pointer-events-auto min-h-0 w-full max-w-[390px] overflow-y-auto rounded-2xl border border-white/95 bg-white/90 p-4 shadow-[0_12px_45px_rgb(40_55_50/.12)] backdrop-blur-xl">
     <div className="flex items-start justify-between gap-4"><div><span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-blue-600">Live simulation</span><h2 className="mt-1 text-sm font-semibold">{phase?.label ?? "Starting live analysis"}</h2><p className="mt-1 text-[10px] text-zinc-500">{completed} live assessment{completed === 1 ? "" : "s"} received</p></div><LoaderCircle className="mt-1 size-5 shrink-0 animate-spin text-blue-600" /></div>
     <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-zinc-100"><motion.div className="h-full rounded-full bg-blue-600" animate={{ width: `${Math.max(5, ((phaseIndex + 1) / runPhases.length) * 100)}%` }} /></div>
     <div className="mt-4"><span className="text-[9px] font-semibold uppercase tracking-[0.13em] text-zinc-400">Affected teams</span><div className="mt-2 flex max-h-24 flex-wrap gap-1.5 overflow-y-auto">{teamNames.map((name, index) => <span key={`${name}-${index}`} className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-[10px] font-medium text-blue-800"><Check className="size-3" />{name}</span>)}</div></div>
@@ -340,14 +340,22 @@ export function DecisionDashboard({ profile: initialProfile }: { profile: Organi
         </div>
       </header>
 
-      <div className={`absolute inset-x-3 top-[88px] z-20 flex justify-center transition-[right] sm:inset-x-auto sm:justify-end ${selectedDepartment ? "lg:right-[460px]" : "sm:right-5"}`}>
-        <div className="grid w-full max-w-[570px] grid-cols-3 gap-2">
-          {(viewMode === "board" ? [] : metrics).map((metric) => { const Icon = metric.icon; return <motion.div key={metric.label} layout className="flex min-w-0 items-center gap-2 rounded-2xl border border-white/95 bg-white/88 p-2 shadow-[0_10px_35px_rgb(40_55_50/.09)] backdrop-blur-xl sm:gap-3 sm:p-2.5"><span className={`grid size-9 shrink-0 place-items-center rounded-xl sm:size-10 ${metric.tone}`}><Icon className="size-4" /></span><div className="min-w-0"><strong className="block truncate text-xs sm:text-sm">{metric.value}</strong><span className="block truncate text-[8px] text-zinc-500 sm:text-[9px]">{metric.label}</span></div></motion.div>; })}
+      {/* Keep overlays in flow so wrapped controls never cover metrics or live progress. */}
+      {viewMode !== "board" ? <div className={`pointer-events-none absolute inset-x-3 top-[88px] bottom-40 z-20 flex flex-col items-start gap-3 sm:inset-x-5 ${selectedDepartment ? "lg:right-[460px]" : ""}`}>
+        <div aria-label="Simulation metrics" className="pointer-events-auto grid w-full max-w-[570px] shrink-0 grid-cols-3 gap-2 self-end">
+          {metrics.map((metric) => { const Icon = metric.icon; return <motion.div key={metric.label} layout className="flex min-w-0 items-center gap-2 rounded-2xl border border-white/95 bg-white/88 p-2 shadow-[0_10px_35px_rgb(40_55_50/.09)] backdrop-blur-xl sm:gap-3 sm:p-2.5"><span className={`grid size-9 shrink-0 place-items-center rounded-xl sm:size-10 ${metric.tone}`}><Icon className="size-4" /></span><div className="min-w-0"><strong className="block truncate text-xs sm:text-sm">{metric.value}</strong><span className="block truncate text-[8px] text-zinc-500 sm:text-[9px]">{metric.label}</span></div></motion.div>; })}
         </div>
-      </div>
-
-      {simulationError && !composerOpen ? <p role="alert" className="absolute top-24 left-5 z-30 max-w-sm rounded-xl bg-red-50 p-3 text-xs text-red-700">{simulationError}</p> : null}
-      {submitting && viewMode === "office" ? <LiveRunPanel run={runState} teamNames={assessingTeamNames} /> : null}
+        <div role="group" aria-label="Department and scenario controls" className="pointer-events-auto flex shrink-0 flex-wrap gap-2 self-start">
+          <select aria-label="Select department" className="max-w-48 rounded-xl border bg-white/95 px-3 py-2 text-xs" value={selectedDepartmentId ?? ""} onChange={e=>{setSelectedDepartmentId(e.target.value || null);if(e.target.value)setOfficePage(Math.floor(slots.current[e.target.value]/24));}}><option value="">Explore {departments.length} departments</option>{departments.map(d=><option key={d.departmentId} value={d.departmentId}>{d.name}</option>)}</select>
+          {selectedDepartmentId && !runId ? <button className="rounded-xl border bg-white/95 px-3 py-2 text-xs" onClick={()=>setChangeOpen(true)}>Change department</button>:null}
+          <button className="rounded-xl border bg-white/95 px-3 py-2 text-xs" onClick={()=>{setSelectedDepartmentId(null);setResetCamera(k=>k+1);}}>Reset camera</button>
+          {officePages>1 ? <select aria-label="Office page" className="rounded-xl border bg-white p-2 text-xs" value={officePage} onChange={e=>setOfficePage(Number(e.target.value))}>{Array.from({length:officePages},(_,i)=><option key={i} value={i}>Office {i+1} of {officePages}</option>)}</select>:null}
+          {results.length ? <select aria-label="Compare scenario" className="max-w-60 rounded-xl border bg-white/95 p-2 text-xs" value={resultId} onChange={e=>{setResultId(e.target.value);setRunning(false);}}><option value="baseline">Baseline company</option>{results.map(r=><option key={r.result_id} value={r.result_id}>{r.future.replaceAll("_", " ")} · {r.plan_id ?? (r.future === "inaction" ? "no action" : "preview")}</option>)}</select>:null}
+          {preview ? <span className="rounded-xl bg-amber-50 p-2 text-xs text-amber-900">Deterministic preview · agent review not run</span>:null}
+        </div>
+        {simulationError && !composerOpen ? <p role="alert" className="pointer-events-auto shrink-0 max-w-sm rounded-xl bg-red-50 p-3 text-xs text-red-700">{simulationError}</p> : null}
+        {submitting && viewMode === "office" ? <LiveRunPanel run={runState} teamNames={assessingTeamNames} /> : null}
+      </div> : simulationError && !composerOpen ? <p role="alert" className="absolute top-24 left-5 z-30 max-w-sm rounded-xl bg-red-50 p-3 text-xs text-red-700">{simulationError}</p> : null}
 
       {viewMode === "board" ? null : submitting ? null : !hasStarted ? (
         <div className={`absolute bottom-5 left-1/2 z-20 w-[min(560px,calc(100%-24px))] -translate-x-1/2 rounded-2xl border border-white/95 bg-white/88 p-3 shadow-[0_12px_45px_rgb(40_55_50/.1)] backdrop-blur-xl sm:flex sm:items-center sm:justify-between sm:gap-4 sm:px-4 ${selectedDepartment ? "lg:left-[calc(50%-220px)]" : ""}`}>
@@ -367,17 +375,6 @@ export function DecisionDashboard({ profile: initialProfile }: { profile: Organi
         </Card>
       )}
 
-      <div className="absolute left-3 top-[158px] z-20 flex max-w-[calc(100%-24px)] flex-wrap gap-2 sm:left-5 sm:top-[168px]">
-        {viewMode !== "board" ? <>
-          <select aria-label="Select department" className="max-w-48 rounded-xl border bg-white/95 px-3 py-2 text-xs" value={selectedDepartmentId ?? ""} onChange={e=>{setSelectedDepartmentId(e.target.value || null);if(e.target.value)setOfficePage(Math.floor(slots.current[e.target.value]/24));}}><option value="">Explore {departments.length} departments</option>{departments.map(d=><option key={d.departmentId} value={d.departmentId}>{d.name}</option>)}</select>
-          <button className="rounded-xl border bg-white/95 px-3 py-2 text-xs" onClick={()=>{setSelectedDepartmentId(null);setChangeOpen(true);}} disabled={submitting || Boolean(runId)}>Add department</button>
-          {selectedDepartmentId && !runId ? <button className="rounded-xl border bg-white/95 px-3 py-2 text-xs" onClick={()=>setChangeOpen(true)}>Change department</button>:null}
-          <button className="rounded-xl border bg-white/95 px-3 py-2 text-xs" onClick={()=>{setSelectedDepartmentId(null);setResetCamera(k=>k+1);}}>Reset camera</button>
-          {officePages>1 ? <select aria-label="Office page" className="rounded-xl border bg-white p-2 text-xs" value={officePage} onChange={e=>setOfficePage(Number(e.target.value))}>{Array.from({length:officePages},(_,i)=><option key={i} value={i}>Office {i+1} of {officePages}</option>)}</select>:null}
-          {results.length ? <select aria-label="Compare scenario" className="max-w-60 rounded-xl border bg-white/95 p-2 text-xs" value={resultId} onChange={e=>{setResultId(e.target.value);setRunning(false);}}><option value="baseline">Baseline company</option>{results.map(r=><option key={r.result_id} value={r.result_id}>{r.future.replaceAll("_", " ")} · {r.plan_id ?? (r.future === "inaction" ? "no action" : "preview")}</option>)}</select>:null}
-          {preview ? <span className="rounded-xl bg-amber-50 p-2 text-xs text-amber-900">Deterministic preview · agent review not run</span>:null}
-        </>:null}
-      </div>
       <div className={`absolute left-3 z-20 flex flex-wrap items-center gap-2 sm:left-5 ${viewMode === "board" ? "bottom-4" : "bottom-28 sm:bottom-24"}`}>
         <Button className="border-white bg-white/90 text-zinc-700 shadow-lg backdrop-blur hover:bg-white" variant="outline" size="sm" onClick={() => { setSelectedDepartmentId(null); setViewMode((current) => current === "office" ? "graph" : "office"); }}>{viewMode === "office" ? <Share2 /> : <LayoutGrid />}{viewMode === "office" ? "Dependency map" : "Office view"}</Button>
         {viewMode === "office" ? <Button className="border-white bg-white/90 text-zinc-700 shadow-lg backdrop-blur hover:bg-white" variant="outline" size="sm" onClick={() => setSelectedDepartmentId(selectedDepartmentId ?? departments[0]?.departmentId ?? null)}><MapIcon />Explore departments</Button> : null}

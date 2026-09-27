@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { DecisionPackage, Event } from "@canary-pact/contracts/generated";
-import { REVIEW_STAGES, reviewSnapshot } from "@/lib/review-story";
+import { REVIEW_STAGES, decisionHighlights, reviewSnapshot } from "@/lib/review-story";
 import { formatCompactCurrency } from "@/lib/formatters";
 
 const name = (value: string) => value.replaceAll("_", " ").replace(/\b\w/g, c => c.toUpperCase());
@@ -12,14 +12,14 @@ const descriptions = [
   "Specific objections test the assumptions behind those positions.",
   "Affected departments answer linked objections once. A reply records a position, not consensus.",
   "Validated dependencies feed the engine. These values come from the recorded calculations.",
-  "Review the recommendation alongside the remaining concerns. A human makes the final decision.",
+  "The trade-off, the main risks, and what to check before you commit.",
 ];
 
 export function ReviewStory({events, complete, decisionPackage, onEvidence}: {
   events: Event[]; complete: boolean; decisionPackage?: DecisionPackage | null; onEvidence?: (id: string) => void;
 }) {
   const snapshot = useMemo(() => reviewSnapshot(events, decisionPackage), [events, decisionPackage]);
-  const [selected, setSelected] = useState<number | null>(() => complete ? 0 : null);
+  const [selected, setSelected] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
   const stage = selected ?? snapshot.stage;
   useEffect(() => {
@@ -40,6 +40,9 @@ export function ReviewStory({events, complete, decisionPackage, onEvidence}: {
   const pkg = snapshot.decisionPackage;
   const recommendation = pkg?.recommendation;
   const selectedRow = pkg?.futures.rows.find(row => row.result_id === recommendation?.result_id);
+  const highlights = pkg ? decisionHighlights(snapshot.assessments, pkg) : null;
+  const needsReview = Boolean(pkg?.open_questions?.length || pkg?.missing_perspectives?.length || pkg?.missing_information?.length || highlights?.risks.length || pkg?.critical_risks?.length);
+  const recommendationLabel = recommendation?.action === "do_not_proceed" ? "Do not proceed" : recommendation?.action === "delay" ? "Delay" : recommendation?.future === "inaction" ? "Keep the current plan unchanged" : recommendation?.future === "alternative" ? "Consider the alternative plan" : recommendation?.future === "delay" ? "Delay the change" : "Act now";
   const empty = (text: string) => <p role="status" className="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-5 text-sm text-zinc-600">{text}</p>;
   return <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-zinc-200 bg-white shadow-sm" aria-label="Decision story">
     <nav className="grid grid-cols-3 gap-1 border-b p-2 lg:grid-cols-6" aria-label="Review stages">
@@ -48,8 +51,8 @@ export function ReviewStory({events, complete, decisionPackage, onEvidence}: {
         <span className={`grid size-5 shrink-0 place-items-center rounded-full text-[10px] ${stage === index ? "bg-white/20" : "bg-zinc-100"}`}>{index + 1}</span>{label}
       </button>)}
     </nav>
-    <div className="min-h-0 flex-1 overflow-y-auto p-5 md:p-6">
-      <div className="mb-5"><p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-700">{complete ? "Recorded review" : "Live review"} · Stage {stage + 1} of 6</p>
+    <div className="min-h-0 flex-1 overflow-y-auto p-4">
+      <div className={stage === 5 ? "sr-only" : "mb-5"}><p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-700">{complete ? "Recorded review" : "Live review"} · Stage {stage + 1} of 6</p>
         <h2 className="mt-1 text-2xl font-semibold tracking-tight">{REVIEW_STAGES[stage]}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-500">{descriptions[stage]}</p></div>
       {snapshot.failure ? <p role="alert" className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">Run failed: {snapshot.failure}. Received findings remain available.</p> : null}
       <div className="space-y-4 text-sm leading-6">
@@ -91,10 +94,35 @@ export function ReviewStory({events, complete, decisionPackage, onEvidence}: {
         </> : empty("No act-now calculations are available in the event history.")}
       </>}
       {stage === 5 && (pkg ? <>
-        <article className="rounded-xl bg-emerald-950 p-5 text-white"><p className="text-xs font-medium text-emerald-200">Engine recommendation · {recommendation ? name(recommendation.future) : "Unavailable"}</p><h3 className="mt-2 text-xl font-medium">{recommendation?.headline ?? "No recommendation was produced."}</h3>{selectedRow ? <p className="mt-3">{formatCompactCurrency(selectedRow.net_value_p50_usd)} net value · {selectedRow.feasible ? "Within modeled constraints" : "Not feasible"}</p> : null}</article>
-        {pkg.open_questions?.length ? <details open><summary className="cursor-pointer font-semibold">Open concerns · {pkg.open_questions.length}</summary><ul className="mt-3 space-y-2">{pkg.open_questions.map((q,i) => <li key={i} className="rounded-lg bg-amber-50 p-3">{q}</li>)}</ul></details> : <p>No open concerns were supplied in the package. This does not establish certainty.</p>}
+        <article className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">Your next step</p>
+          <h3 className="mt-1 text-xl font-semibold">{!recommendation || !selectedRow ? "Request a complete analysis" : !selectedRow.feasible ? "Rework the plan before approval" : needsReview ? "Review the risks before acting" : "Review the recommendation for approval"}</h3>
+          <p className="mt-1 text-sm text-zinc-700">{needsReview ? "Resolve the checks below or request a revised scenario; savings alone do not establish safety." : "Confirm the assumptions and operational readiness. A human makes the final decision."}</p>
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-amber-200 pt-3 text-xs">
+            <span>Model recommendation: <strong>{recommendation ? recommendationLabel : "Unavailable"}</strong></span>
+            {selectedRow ? <span><strong>{formatCompactCurrency(selectedRow.net_value_p50_usd)}</strong> modeled net value over {pkg.brief.horizon_days} days · {selectedRow.feasible ? "Passes modeled constraints" : "Fails modeled constraints"}</span> : null}
+          </div>
+          <p className="mt-1 text-xs text-zinc-500">Point estimate; unmeasured effects may change the outcome.</p>
+        </article>
+        <div>
+          <h3 className="font-semibold">What could go wrong</h3>
+          <p className="text-xs text-zinc-500">Department concerns about the proposed change. These are not quantified predictions.</p>
+          {highlights?.risks.length ? <div className="mt-2 grid items-start gap-2 lg:grid-cols-3">{highlights.risks.map(({assessment, finding}) => <details key={assessment.assessment_id} className="group rounded-xl border p-3">
+            <summary className="cursor-pointer list-none"><span className="text-xs font-semibold text-amber-800">{name(assessment.agent_id)}</span><p className="mt-1 line-clamp-3 text-sm leading-5 group-open:hidden">{finding.text}</p><span className="mt-2 block text-xs text-emerald-800 group-open:hidden">Read concern & evidence →</span></summary>
+            <p className="mt-2 text-sm leading-5">{finding.text}</p>
+            <p className="mt-2 text-xs text-zinc-500">{assessment.pass_type === "response" ? "After challenge" : "Initial assessment"} · Confidence {Math.round((assessment.output?.confidence ?? 0) * 100)}%</p>
+            {sources(finding.evidence_refs)}{!finding.evidence_refs?.length ? <p className="mt-2 text-xs text-amber-800">No source attached to this concern.</p> : null}
+          </details>)}</div> : <p className="mt-2 text-sm text-zinc-500">No department risk summaries are available. Missing findings do not establish that there is no risk.</p>}
+          {pkg.critical_risks?.length ? <details className="mt-2 rounded-xl border p-3"><summary className="cursor-pointer text-sm font-medium">Engine-reported critical risks · {pkg.critical_risks.length}</summary>{pkg.critical_risks.map(impact => <div key={impact.impact_id} className="mt-3"><p>{name(impact.metric)} · {name(impact.affected_entity)} · First effect day {impact.first_effect_day}</p><p className="text-xs">{impact.magnitude} {impact.unit} · {impact.direction} · {impact.polarity}</p>{sources(impact.evidence_refs)}</div>)}</details> : null}
+        </div>
+        {highlights?.questions.length ? <div><h3 className="font-semibold">Before you decide</h3><ol className="mt-2 grid items-start gap-2 lg:grid-cols-3">{highlights.questions.map((question, i) => <li key={i} className="rounded-lg bg-zinc-50 p-3"><details className="group"><summary className="cursor-pointer list-none"><span className="text-xs font-medium text-zinc-500">Check {i + 1} · Expand</span><span className="mt-1 line-clamp-3 text-sm leading-5 group-open:hidden">{question}</span></summary><p className="mt-1 text-sm leading-5">{question}</p></details></li>)}</ol></div> : null}
+        <details className="rounded-xl border p-3"><summary className="cursor-pointer font-semibold">Full review & calculation · {pkg.open_questions?.length ?? 0} open concerns</summary>
+          <p className="mt-3">{recommendation?.headline ?? "No recommendation was produced."}</p>
+          {pkg.assumptions?.length ? <details className="mt-3"><summary className="cursor-pointer font-medium">Calculation assumptions</summary><ul className="mt-2 space-y-2">{pkg.assumptions.map((text,i) => <li key={i}>{text}</li>)}</ul></details> : null}
+          {pkg.open_questions?.length ? <ul className="mt-3 space-y-2">{pkg.open_questions.map((q,i) => <li key={i} className="rounded-lg bg-amber-50 p-3">{q}</li>)}</ul> : <p className="mt-2">No open concerns were supplied. This does not establish certainty.</p>}
+        </details>
         {pkg.missing_perspectives?.length ? <p className="text-amber-800">Missing perspectives: {pkg.missing_perspectives.map(name).join(", ")}</p> : null}
-        <p className="rounded-xl border p-4 font-medium">{snapshot.humanDecision ? `Human decision recorded: ${name(snapshot.humanDecision.decision)}. ${snapshot.humanDecision.notes || "No organizational changes were executed."}` : "Human approval is required. Review the evidence and remaining uncertainty before approving, rejecting, or requesting another scenario."}</p>
+        <p className="text-xs text-zinc-500">{snapshot.humanDecision ? `Human decision recorded: ${name(snapshot.humanDecision.decision)}. ${snapshot.humanDecision.notes || "No organizational changes were executed."}` : "Human approval required. This review does not execute organizational changes."}</p>
       </> : empty(complete ? "This run has no final decision package." : "The engine is preparing the decision package."))}
       </div>
     </div>
