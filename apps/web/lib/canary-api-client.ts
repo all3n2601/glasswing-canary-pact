@@ -40,7 +40,26 @@ export class CanaryApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+function transientReadError(error: unknown): boolean {
+  return error instanceof TypeError
+    || (error instanceof DOMException && error.name === "TimeoutError")
+    || (error instanceof CanaryApiError && [408, 429, 502, 503, 504].includes(error.status));
+}
+
+function pause(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const abort = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", abort);
+      reject(signal?.reason ?? new DOMException("Canceled", "AbortError"));
+    };
+    const timer = setTimeout(() => { signal?.removeEventListener("abort", abort); resolve(); }, ms);
+    signal?.addEventListener("abort", abort, { once: true });
+    if (signal?.aborted) abort();
+  });
+}
+
+async function requestOnce<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_ROOT}${path}`, {
     ...init,
     cache: "no-store",
@@ -56,6 +75,23 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
   if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
+}
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  // A lost response to a write may still have created a run. Only reads are safe to retry.
+  if (init?.method && init.method !== "GET") return requestOnce<T>(path, init);
+  for (let attempt = 0; ; attempt++) {
+    init?.signal?.throwIfAborted();
+    const timeout = AbortSignal.timeout(15_000);
+    const signal = init?.signal ? AbortSignal.any([init.signal, timeout]) : timeout;
+    try {
+      return await requestOnce<T>(path, { ...init, signal });
+    } catch (error) {
+      init?.signal?.throwIfAborted();
+      if (attempt >= 2 || !transientReadError(error)) throw error;
+      await pause(1000 * 2 ** attempt, init?.signal ?? undefined);
+    }
+  }
 }
 
 export const canaryApi = {
@@ -105,19 +141,34 @@ export async function waitForPackage(
   signal?: AbortSignal,
 ): Promise<DecisionPackage> {
   const deadline = Date.now() + timeoutMs;
+  const timeout = AbortSignal.timeout(timeoutMs);
+  const pollingSignal = signal ? AbortSignal.any([signal, timeout]) : timeout;
+  let failures = 0;
   while (Date.now() < deadline) {
     signal?.throwIfAborted();
-    const state = await canaryApi.run(runId,signal);
+    let state: RunState;
+    try {
+      state = await canaryApi.run(runId, pollingSignal);
+      signal?.throwIfAborted();
+      onState?.(state);
+      if (state.status === "failed") throw new CanaryApiError(500, "The simulation run failed.");
+      if (state.package_id) return await canaryApi.package(runId, pollingSignal);
+      failures = 0;
+    } catch (error) {
+      signal?.throwIfAborted();
+      if (timeout.aborted) break;
+      if (!transientReadError(error)) throw error;
+      // Transport/auth-service outages do not mean the backend's existing run failed.
+      failures++;
+    }
     signal?.throwIfAborted();
-    onState?.(state);
-    if (state.status === "failed") throw new CanaryApiError(500, "The simulation run failed.");
-    if (state.package_id) return canaryApi.package(runId,signal);
-    await new Promise<void>((resolve, reject) => {
-      const abort = () => {clearTimeout(timer);reject(signal?.reason ?? new DOMException("Canceled", "AbortError"));};
-      const timer = setTimeout(() => {signal?.removeEventListener("abort",abort);resolve();},250);
-      signal?.addEventListener("abort",abort,{once:true});
-      if (signal?.aborted) abort();
-    });
+    try {
+      await pause(Math.min(15_000, 1000 * 2 ** Math.min(failures, 4), Math.max(0, deadline - Date.now())), pollingSignal);
+    } catch (error) {
+      signal?.throwIfAborted();
+      if (timeout.aborted) break;
+      throw error;
+    }
   }
   throw new CanaryApiError(504, "The simulation did not finish in time.");
 }

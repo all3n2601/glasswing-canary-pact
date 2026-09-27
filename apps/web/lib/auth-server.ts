@@ -5,12 +5,14 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import { cache } from "react";
+import { API_URL, readBackend } from "./canary-api-transport";
 
 export const AUTH_COOKIE = "canary_session";
 
-const API_URL = process.env.CANARY_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
 export async function callAuthApi(path: string, init?: RequestInit): Promise<Response> {
+  if (path === "/me" && (!init?.method || init.method === "GET") && !init?.signal) {
+    return readBackend(`/auth${path}`, { Accept: "application/json", ...init?.headers });
+  }
   return fetch(`${API_URL}/auth${path}`, {
     ...init,
     cache: "no-store",

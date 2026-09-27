@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { apiUnavailable, authToken, getSession } from "@/lib/auth-server";
-
-const API_URL = process.env.CANARY_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+import { API_URL } from "@/lib/canary-api-transport";
 
 const ALLOWED_PATHS = [
   /^health$/,
