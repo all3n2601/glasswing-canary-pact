@@ -1,9 +1,13 @@
+import json
 import re
 
+from canary_api.paths import REPLAYS_DIR
 from canary_api.stubs import engine, results
+from canary_api.stubs.run import stub_run_events
 from canary_api.stubs.twin import sample_brief, stub_twin, workforce_brief
 from contracts_py.decision import CandidatePlan
 from contracts_py.enums import Future
+from contracts_py.events import EventLog, EventType
 
 PERSON_TOKEN = re.compile(r"\bpt_[a-z0-9_]+")
 
@@ -44,6 +48,14 @@ def test_briefs_only_reference_twin_ids() -> None:
     for brief in (sample_brief(), workforce_brief()):
         assert {i.target_entity_id for i in brief.candidate_interventions} <= entities
         assert set(brief.active_pressure_ids or []) <= pressures
+        EventLog(stub_run_events(brief, "run_x"))
+
+
+def test_sample_run_is_the_vendor_story_without_person_tokens() -> None:
+    text = (REPLAYS_DIR / "sample_run.json").read_text()
+    log = EventLog.model_validate(json.loads(text))
+    assert log.root[0].type is EventType.run_created and log.root[0].payload.decision_id == "dec_vendor_reduction"
+    assert not PERSON_TOKEN.search(text)
     assert not PERSON_TOKEN.search(stub_twin().model_dump_json())
 
 

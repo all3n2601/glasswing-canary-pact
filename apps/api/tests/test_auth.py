@@ -119,9 +119,15 @@ def test_viewer_is_403_and_approver_decides_as_themselves(client) -> None:
 
 
 @pytest.mark.parametrize("path", ["/health", "/company", "/organization", "/organization/settings",
-                                  "/organization/profile", "/departments", "/documents"])
+                                  "/organization/profile", "/departments", "/documents", "/replays"])
 def test_read_endpoints_stay_open(client, path) -> None:
     assert client.get(path).status_code == 200
+
+
+def test_replay_and_websocket_stay_open(client) -> None:
+    run_id = client.post("/replays/sample_run/play?speed=4").json()["run_id"]
+    with client.websocket_connect(f"/runs/{run_id}/events") as ws:
+        assert ws.receive_json()["sequence"] == 1
 
 
 def test_password_hashes_never_leave_the_server(client) -> None:

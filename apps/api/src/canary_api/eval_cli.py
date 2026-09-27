@@ -1,4 +1,4 @@
-"""Entry point for live-agent ablation evaluations."""
+"""Entry point for the ablation evals: `uv run python -m canary_api.eval_cli --mode mock|replay|live`."""
 
 from agent_orchestration import evals
 

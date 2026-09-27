@@ -16,11 +16,12 @@ from canary_api.paths import DATA_DIR
 
 log = logging.getLogger(__name__)
 bus = EventBus()
-# Set once at startup; live runs are refused while it holds an error.
+# Set once at startup; live runs are refused while it holds an error, mock and replay are unaffected.
 structured_output_error: str | None = None
 # Set once at startup; every run is refused while it holds an error, since each run calls simulate.
 sim_mode_error: str | None = None
 _twin: Twin | None = None
+_stub_twin: Twin | None = None
 
 
 SNIPPETS_PATH = DATA_DIR / "artifacts" / "snippets.json"
@@ -40,7 +41,12 @@ def seed_twin() -> Twin:
 
 
 def twin() -> Twin:
-    global _twin
+    global _twin, _stub_twin
+    if engine_port.twin_impl() == "stub":
+        # The stub twin never touches storage, so offline runs cannot pick up a saved real twin.
+        if _stub_twin is None:
+            _stub_twin = engine_port.load_twin(DATA_DIR / "synthetic_company.json")
+        return _stub_twin
     if _twin is None:
         backend = storage.current()
         stored = backend.load_active_twin()
@@ -66,8 +72,16 @@ def settings() -> OrganizationSettings:
     return _settings(twin().organization.id)
 
 
+def llm_cache_dir() -> Path:
+    return Path(os.environ.get("CANARY_LLM_CACHE_DIR", DATA_DIR / "artifacts" / "llm_cache"))
+
+
+def cache_is_empty(cache_dir: Path) -> bool:
+    return not cache_dir.is_dir() or next(cache_dir.rglob("*.json"), None) is None
+
+
 def build_llm(run_settings: OrganizationSettings) -> AgentLLM:
-    return AgentLLM(run_settings)
+    return AgentLLM(run_settings, cache_dir=llm_cache_dir())
 
 
 def check_structured_output() -> str | None:

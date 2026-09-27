@@ -135,7 +135,7 @@ def run_with_fake_orchestrator(monkeypatch, fake) -> str:
     run_id = "run_fake_" + hashlib.sha256(fake.__name__.encode()).hexdigest()[:8]
     twin = runtime.twin()
     runtime.bus.create_run(run_id, "dec_vendor_reduction", twin.version.twin_version)
-    asyncio.run(runs.orchestrate(run_id, sample_brief(), twin, runtime.settings()))
+    asyncio.run(runs.orchestrate(run_id, sample_brief(), twin, runtime.settings(), "mock"))
     return run_id
 
 
