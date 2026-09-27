@@ -10,7 +10,6 @@ from contracts_py.enums import Future
 from contracts_py.twin import Organization, OrganizationSettings
 
 GraphLevel = Literal["entity", "domain"]
-ReplaySpeed = Literal[1, 2, 4]
 
 
 class HealthResponse(Strict):
@@ -63,18 +62,6 @@ class FuturesRequest(Strict):
 
 class OptimizeRequest(Strict):
     brief: DecisionBrief
-
-
-class ReplayInfo(Strict):
-    name: str
-    decision_id: ID | None = None
-    event_count: int = Field(ge=0)
-
-
-class ReplayStarted(Strict):
-    run_id: ID
-    name: str
-    speed: ReplaySpeed
 
 
 # Named apart from twin.DepartmentSummary so the generated schema and TypeScript names stay unqualified.

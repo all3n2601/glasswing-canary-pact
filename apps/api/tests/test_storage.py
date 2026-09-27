@@ -4,7 +4,8 @@ from datetime import datetime, timezone
 
 import pytest
 
-from canary_api import auth, storage
+from canary_api import auth, engine_port, storage
+from canary_api.paths import DATA_DIR
 from canary_api.events import EventBus
 from canary_api.storage import FileStorage
 
@@ -53,6 +54,15 @@ def test_file_backend_rejects_duplicate_email(tmp_path) -> None:
     with pytest.raises(storage.DuplicateEmail):
         backend.create_user(user.model_copy(update={"user_id": "usr_b"}), "scrypt$y")
     assert backend.user_by_id("usr_a") == user and backend.user_by_email("a@example.com").password_hash == "scrypt$x"
+
+
+def test_file_backend_round_trips_the_active_company_twin(tmp_path) -> None:
+    backend = FileStorage(tmp_path)
+    twin = engine_port.load_twin(DATA_DIR / "synthetic_company.json")
+
+    assert backend.load_active_twin() is None
+    backend.save_twin(twin)
+    assert backend.load_active_twin() == twin
 
 
 class SlowFileStorage(FileStorage):

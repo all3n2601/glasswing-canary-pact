@@ -140,9 +140,12 @@ def test_128_portfolios_run_in_under_5_seconds():
     assert time.perf_counter() - started < 5
 
 
-def test_only_vendor_briefs_are_searched():
-    with pytest.raises(NotImplementedError):
-        optimize(TWIN, WORKFORCE)
+def test_non_vendor_briefs_evaluate_the_single_proposed_plan():
+    comparison = optimize(TWIN, WORKFORCE)
+    assert comparison.evaluated_count == 1
+    assert comparison.naive.intervention_ids == [item.id for item in WORKFORCE.candidate_interventions]
+    assert not comparison.naive.result.feasible
+    assert comparison.recommended is None
 
 
 def test_vendor_entities_carry_the_exit_and_migration_costs_the_engine_charges():

@@ -22,6 +22,7 @@ def pg(monkeypatch):
     backend = PostgresStorage(URL, schema)  # type: ignore[arg-type]
     monkeypatch.setattr(storage, "_current", backend)
     monkeypatch.setattr(runtime, "bus", EventBus())
+    monkeypatch.setattr(runtime, "_twin", None)
     try:
         yield schema, backend
     finally:
@@ -39,11 +40,11 @@ def wait_for(client, run_id: str, status: str) -> None:
 
 def test_postgres_backend_end_to_end(client, pg, monkeypatch) -> None:
     from api_auth_helpers import signup_and_login
+    from real_data import sample_brief
 
     from canary_api import auth, runtime, storage
     from canary_api.events import EventBus
     from canary_api.storage import PostgresStorage
-    from canary_api.stubs.twin import sample_brief
 
     schema, backend = pg
     assert auth.store().backend is backend
@@ -56,9 +57,10 @@ def test_postgres_backend_end_to_end(client, pg, monkeypatch) -> None:
     assert client.get("/auth/me", headers=viewer).status_code == 401
 
     _, approver = signup_and_login(client, role="approver", display_name="Pg approver")
-    run_id = client.post("/decisions?llm_mode=mock", headers=approver,
+    run_id = client.post("/decisions", headers=approver,
                          json=sample_brief().model_dump(mode="json")).json()["run_id"]
     wait_for(client, run_id, "awaiting_approval")
+    assert backend.load_active_twin() is not None
     package = client.get(f"/runs/{run_id}/package")
     package_hash = hashlib.sha256(package.content).hexdigest()
     decision = client.post(f"/runs/{run_id}/decision", headers=approver,

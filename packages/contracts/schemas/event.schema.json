@@ -61,8 +61,6 @@
         "status": {
           "enum": [
             "ok",
-            "replayed",
-            "fallback_cached",
             "unavailable",
             "invalid"
           ],

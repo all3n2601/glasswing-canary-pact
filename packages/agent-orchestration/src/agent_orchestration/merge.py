@@ -215,7 +215,7 @@ def merge(agent_id: str, result: LLMResult, *, context: AgentContext, pass_type:
     """Applies the section 7 merge rules; scenario_ids maps "act_now" and "inaction" to scenario IDs."""
     assessment_id = f"asm_{context.run_id}_{agent_id}"
     origin = Origin.challenger if pass_type == "challenge" else Origin.agent
-    merger = _Merger(agent_id, context, assessment_id, scenario_ids, origin, stale=result.status == "fallback_cached")
+    merger = _Merger(agent_id, context, assessment_id, scenario_ids, origin, stale=False)
     merger.report.errors.extend(result.errors)
     output = challenge = None
     if isinstance(result.output, AgentOutput):

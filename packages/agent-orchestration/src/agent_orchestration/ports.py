@@ -1,4 +1,4 @@
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
 
 from contracts_py.decision import CandidatePlan, DecisionBrief, Intervention, Scenario
 from contracts_py.engine import BlastRadius, FutureComparison, PortfolioComparison, SimulationResult, VendorOverlap
@@ -33,7 +33,13 @@ class EnginePort(Protocol):
 
     def reachable_departments(self, twin: Twin, source_entity_ids: list[str], max_hops: int = 4) -> list[str]: ...
 
-    def list_dependencies(self, twin: Twin, entity_id: str, direction: str, max_depth: int) -> list[Edge]: ...
+    def list_dependencies(
+        self,
+        twin: Twin,
+        entity_id: str,
+        direction: Literal["in", "out", "both"],
+        max_depth: int,
+    ) -> list[Edge]: ...
 
     def to_role_level(self, obj: Any, twin: Twin) -> Any: ...
 

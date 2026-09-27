@@ -6,9 +6,9 @@ from datetime import timedelta
 
 import pytest
 from api_auth_helpers import signup_and_login
+from real_data import sample_brief
 
 from canary_api import auth, runtime
-from canary_api.stubs.twin import sample_brief
 from contracts_py.api import AuthToken, UserPublic
 
 
@@ -92,7 +92,7 @@ def test_post_decisions_requires_a_token(client) -> None:
 
 
 def await_package(client, headers: dict[str, str]) -> tuple[str, str]:
-    run_id = client.post("/decisions?llm_mode=mock", headers=headers,
+    run_id = client.post("/decisions", headers=headers,
                          json=sample_brief().model_dump(mode="json")).json()["run_id"]
     deadline = time.monotonic() + 10
     while client.get(f"/runs/{run_id}").json()["status"] != "awaiting_approval":
@@ -119,15 +119,9 @@ def test_viewer_is_403_and_approver_decides_as_themselves(client) -> None:
 
 
 @pytest.mark.parametrize("path", ["/health", "/company", "/organization", "/organization/settings",
-                                  "/organization/profile", "/departments", "/documents", "/replays"])
+                                  "/organization/profile", "/departments", "/documents"])
 def test_read_endpoints_stay_open(client, path) -> None:
     assert client.get(path).status_code == 200
-
-
-def test_replay_and_websocket_stay_open(client) -> None:
-    run_id = client.post("/replays/sample_run/play?speed=4").json()["run_id"]
-    with client.websocket_connect(f"/runs/{run_id}/events") as ws:
-        assert ws.receive_json()["sequence"] == 1
 
 
 def test_password_hashes_never_leave_the_server(client) -> None:

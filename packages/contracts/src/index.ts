@@ -114,7 +114,7 @@ export interface OrganizationSettings {
   always_protected_entity_ids: string[];
   require_human_approval: true;
   anonymize_people: true;
-  llm_mode: "live" | "replay" | "mock";
+  llm_mode: "live";
   doc_staleness_days: number;
 }
 

@@ -148,11 +148,11 @@ def test_same_inputs_give_byte_identical_results_and_leave_the_baseline_alone():
     assert TWIN.model_dump_json() == before
 
 
-def test_only_act_now_quick_is_implemented_and_plans_must_match():
-    with pytest.raises(NotImplementedError):
-        simulate(TWIN, VENDOR, scenario(), plan("beacon", "echo"), "full")
-    with pytest.raises(NotImplementedError):
-        simulate(TWIN, VENDOR, scenario(None, Future.inaction), None, "quick")
+def test_full_and_inaction_futures_are_implemented_and_quick_plans_must_match():
+    full = simulate(TWIN, VENDOR, scenario(), plan("beacon", "echo"), "full")
+    assert full.mode == "full" and full.future is Future.act_now
+    inaction = simulate(TWIN, VENDOR, scenario(None, Future.inaction), None, "quick")
+    assert inaction.future is Future.inaction and inaction.intervention_ids == []
     with pytest.raises(ValueError):
         simulate(TWIN, VENDOR, scenario("plan_other"), plan("beacon", "echo"), "quick")
     with pytest.raises(ValueError):

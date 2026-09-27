@@ -40,9 +40,8 @@ from agent_orchestration.prompts import assemble
 from agent_orchestration.roster import CHALLENGER, PROMPT_VERSION, ROSTER, model_tier
 from agent_orchestration.router import route_agents
 
-FAILED_STATUSES = {"fallback_cached", "unavailable", "invalid"}
-# A fallback answer came from a different prompt, so its department counts as unheard.
-MISSING_STATUSES = {"fallback_cached", "unavailable", "invalid"}
+FAILED_STATUSES = {"unavailable", "invalid"}
+MISSING_STATUSES = {"unavailable", "invalid"}
 PLAN_SOURCE = {"naive": "naive", "recommended": "optimizer", "alternative": "enumerated"}
 
 
@@ -154,6 +153,8 @@ class _Run:
         scenario = self.scenario(future, plan)
         result = self.engine.simulate(twin, self.brief, scenario, plan if scenario.plan_id else None, self.sim_mode,
                                       settings=self.settings)
+        leveled = self.engine.to_role_level(result, twin)
+        result = leveled if isinstance(leveled, SimulationResult) else SimulationResult.model_validate(leveled)
         self.check(result, twin)
         where = {"scenario_id": scenario.scenario_id, "future": future}
         self.publish(EventType.simulation_completed, result, actor="engine", **where)
@@ -186,8 +187,7 @@ class _Run:
         assessment = outcome.assessment
         if assessment.status in FAILED_STATUSES:
             reason = "; ".join(assessment.validation.errors) or assessment.status
-            self.publish(EventType.agent_failed, AgentFailed(agent_id=agent_id, reason=reason,
-                                                             fallback_used=assessment.status == "fallback_cached"),
+            self.publish(EventType.agent_failed, AgentFailed(agent_id=agent_id, reason=reason, fallback_used=False),
                          actor=agent_id)
         self.publish(EventType.agent_completed, assessment, actor=agent_id)
         return outcome

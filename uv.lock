@@ -154,6 +154,8 @@ source = { editable = "packages/simulation-engine" }
 dependencies = [
     { name = "canary-company-twin" },
     { name = "canary-contracts" },
+    { name = "networkx", version = "3.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "networkx", version = "3.7", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "pydantic" },
 ]
 
@@ -161,6 +163,7 @@ dependencies = [
 requires-dist = [
     { name = "canary-company-twin", editable = "packages/company-twin" },
     { name = "canary-contracts", editable = "packages/contracts-py" },
+    { name = "networkx", specifier = ">=3.4" },
     { name = "pydantic", specifier = ">=2.10" },
 ]
 

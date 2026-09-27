@@ -81,8 +81,8 @@ The implementation must preserve these ideas from the main plan:
 - Mitigation re-simulation
 - Item-level counterfactuals
 - Sensitivity-based missing-question selection
-- Saved run events and deterministic replay
-- Mock-first parallel development
+- Persisted run events and audit history
+- Live-only agent suggestions with explicit unavailable states
 - Frozen JSON contracts in Hour 0
 - A planted ground-truth graph for evaluation
 - Explicit honest limitations
@@ -270,7 +270,7 @@ Agents may identify potential impacts, challenge assumptions, extract dependenci
 15. Mitigation engine
 16. Sensitivity and missing-question selector
 17. Explanation and decision-package generator
-18. Event stream, replay, and audit log
+18. Event stream, run-state restoration, and audit log
 19. Web dashboard
 
 ### 5.3 Recommended hackathon stack
@@ -666,7 +666,6 @@ async def run_decision(brief: DecisionBrief) -> DecisionPackage:
         question=question,
         mitigated=mitigated,
     )
-    run.save_replay()
     return package
 ```
 
@@ -727,7 +726,7 @@ Tools are read-only except submission of structured hypotheses and assessments.
 - Convert unsupported facts into hypotheses.
 - Require evidence references for factual dependency claims.
 - Retry once after validation failure.
-- Fall back to a cached assessment if the retry fails.
+- Mark the assessment unavailable if the retry fails.
 
 ### 10.5 Agent context management
 
@@ -743,7 +742,6 @@ Tools are read-only except submission of structured hypotheses and assessments.
 An agent failure must never block the deterministic engine.
 
 - Mark the agent assessment unavailable.
-- Use cached output if the demo is in replay or fallback mode.
 - Surface the missing perspective in the final package.
 - Increase uncertainty for dependencies owned by that department.
 - Continue if hard constraints can still be evaluated.
@@ -917,7 +915,6 @@ Ask only the top question during the demo.
 - `POST /api/runs/{id}/decision`
 - `GET /api/runs/{id}/recommendation`
 - `GET /api/audit`
-- `GET /api/replays`
 
 ### 12.2 Run lifecycle
 
@@ -952,7 +949,7 @@ Emit typed events for:
 - recommendation completed;
 - human decision recorded.
 
-Persist events in sequence so the same run can be replayed exactly.
+Persist events in sequence so run history and audit state can be restored exactly.
 
 ### 12.4 LLM wrapper
 
@@ -964,10 +961,9 @@ One wrapper owns:
 - retry with backoff;
 - concurrency semaphore;
 - token budget;
-- prompt and response logging;
+- prompt metadata and response metrics;
 - response validation;
-- mock mode;
-- cached fallback mode.
+- explicit unavailable results when live calls fail.
 
 No application module calls a provider SDK directly.
 
@@ -1153,7 +1149,7 @@ Create `cache/sample_run.json` containing the complete expected event stream for
 1. Engine replaces the quick-impact stub.
 2. Agent assessments feed the real event ledger.
 3. Backend streams real events.
-4. Frontend swaps replay source for live source.
+4. Frontend consumes the live run event source.
 5. Full vendor run is saved as `golden_run.json`.
 6. Workforce proof reuses the same contracts and UI.
 
@@ -1169,7 +1165,7 @@ Create `cache/sample_run.json` containing the complete expected event stream for
 - Freeze seven vendors totaling $8B.
 - Freeze the $2B objective and hard constraints.
 - Freeze workforce scenario entities and expected stranded workflows.
-- Create `sample_run.json`.
+- Prepare the live-provider test configuration.
 - Assign directory ownership.
 
 ### Phase 1 — Build the company twin
@@ -1206,7 +1202,7 @@ Create `cache/sample_run.json` containing the complete expected event stream for
 - Implement tools and structured outputs.
 - Validate and merge assessments.
 - Add challenger pass.
-- Add timeout, retry, token budget, mock mode, and fallback.
+- Add timeout, retry, token budget, and missing-perspective handling.
 
 ### Phase 4 — Build futures and uncertainty
 
@@ -1239,11 +1235,11 @@ Create `cache/sample_run.json` containing the complete expected event stream for
 - Implement stranded-workflow rules.
 - Add role-level privacy rules.
 - Run the same orchestration and blast-radius pipeline.
-- Save the workforce golden replay.
+- Verify the workforce scenario with live department agents.
 
 ### Phase 7 — Build frontend and resilience
 
-**Exit condition:** both scenarios play end-to-end live and offline.
+**Exit condition:** both scenarios run end-to-end with live agents and surface provider failures honestly.
 
 - Build twin map.
 - Build decision composer.
@@ -1252,7 +1248,6 @@ Create `cache/sample_run.json` containing the complete expected event stream for
 - Build futures comparison.
 - Build decision package and audit view.
 - Add one-click reset.
-- Add replay mode.
 - Record backup video.
 
 ---
@@ -1272,7 +1267,7 @@ Create `cache/sample_run.json` containing the complete expected event stream for
 - Twin owner: dataset, graph, clone, validation.
 - Engine owner: overlap, change operators, constraints.
 - Agent/backend owner: LLM wrapper, Pydantic models, orchestrator skeleton.
-- Frontend owner: application shell and replay-driven twin graph.
+- Frontend owner: application shell and live-event-driven twin graph.
 
 ### Build block 2
 
@@ -1299,7 +1294,7 @@ Create `cache/sample_run.json` containing the complete expected event stream for
 ### Final block
 
 - Test seeded results.
-- Test offline replay.
+- Test live-agent failure and missing-perspective handling.
 - Fix only correctness and demo blockers.
 - Record backup video.
 - Write submission and rehearse.
@@ -1322,7 +1317,7 @@ Never cut:
 - naive-versus-recommended comparison;
 - traceable blast radius;
 - workforce stranded-workflow proof;
-- replay fallback;
+- explicit unavailable-agent handling;
 - human approval.
 
 ---
@@ -1333,7 +1328,7 @@ Never cut:
 |---|---|---|
 | Twin/data owner | Dataset, graph, evidence, cloning, views, knowledge model, graph evaluation | `data/`, `twin/`, `eval/graph_eval.py` |
 | Engine owner | Changes, overlap, propagation, futures, constraints, optimization, forecast, mitigations, sensitivity | `engine/`, engine tests |
-| Agent/backend owner | LLM wrapper, agents, orchestration, APIs, events, replay, audit | `agents/`, `orchestration/`, `backend/`, `llm/` |
+| Agent/backend owner | LLM wrapper, agents, orchestration, APIs, events, run restoration, audit | `agents/`, `orchestration/`, `backend/`, `llm/` |
 | Frontend/product owner | UX, graph, blast radius, futures, decision package, demo, pitch, submission | `frontend/`, product fixtures, demo assets |
 
 The team integrates through frozen contracts. `main` must remain runnable. Merge small changes frequently.
@@ -1397,7 +1392,7 @@ The team integrates through frozen contracts. `main` must remain runnable. Merge
 ### 19.6 Demo tests
 
 - Live run completes twice from reset.
-- Offline replay completes twice with network disabled.
+- A forced live-agent failure surfaces the missing perspective without substituting recorded advice.
 - Browser refresh restores the selected run.
 - The UI works at projector resolution.
 - Every figure shown can be traced to a result or labeled assumption.
@@ -1409,13 +1404,13 @@ The team integrates through frozen contracts. `main` must remain runnable. Merge
 
 | Failure | Behavior |
 |---|---|
-| Model timeout | Retry once, then use cached agent result and mark fallback |
-| Malformed agent JSON | Validate, repair safe fields, retry once, then fallback |
+| Model timeout | Retry once, then mark the agent unavailable |
+| Malformed agent JSON | Validate, repair safe fields, retry once, then mark unavailable |
 | Missing department assessment | Continue, increase uncertainty, surface missing perspective |
 | Constraint engine error | Fail closed; do not recommend the plan |
 | Live event disconnect | Reconnect from last sequence number |
 | Frontend refresh | Reload run state and replay remaining events |
-| Provider outage | Use `golden_run.json` |
+| Provider outage | Continue deterministic calculations, surface missing perspectives, and withhold unsupported suggestions |
 | Invalid decision brief | Return field-level validation errors |
 | No feasible plan | Explain violated constraints and show closest alternatives |
 | Incomplete evidence | Label hypothesis and ask for verification |
@@ -1462,7 +1457,7 @@ Record for every model call:
 - input/output token counts;
 - latency;
 - validation failures;
-- fallback use.
+- unavailable status and validation errors.
 
 Record for every decision:
 
@@ -1489,7 +1484,6 @@ Record for every decision:
 - Department-agent first pass: under 60 seconds wall time with bounded parallelism
 - Final full simulation: under 10 seconds for top alternatives
 - Complete live run: under 2 minutes
-- Offline replay: configurable 30–90 seconds
 
 ### Controls
 
@@ -1497,9 +1491,7 @@ Record for every decision:
 - Per-agent tool-call limit
 - Per-call timeout
 - Per-run token ceiling
-- Development mock mode
 - Cached fixed prompt prefixes
-- Golden-run replay
 
 ---
 
@@ -1510,7 +1502,7 @@ Record for every decision:
 | Agent orchestration exceeds available time | High | High | Dynamic routing, one challenge round, frozen schemas, cached outputs |
 | Agents hallucinate dependencies | Medium | High | Evidence requirement, unknown-ID rejection, deterministic validation |
 | Results look hard-coded | Medium | High | Compute 128 portfolios, expose constraints, add AI graph-extraction evaluation |
-| Live model is slow or unavailable | Medium | Critical | Mock mode, golden replay, backup video |
+| Live model is slow or unavailable | Medium | Critical | Bounded retry, missing-perspective state, deterministic results, backup video |
 | Vendor assumptions are challenged | High | Medium | Show assumptions, confidence, sensitivity, and synthetic labels |
 | Workforce scenario appears like a layoff recommender | Medium | High | Role/workflow-level output only; no named-person ranking |
 | Contract drift blocks integration | Medium | High | Freeze schemas in Hour 0 and add contract tests |
@@ -1566,7 +1558,7 @@ The project is complete for the hackathon only when:
 - the workforce scenario detects both stranded workflows;
 - one mitigation is re-simulated;
 - every important claim has evidence or an assumption label;
-- a complete run can be replayed offline;
+- live agent failures are surfaced without substituting recorded advice;
 - the user must approve or reject the recommendation;
 - the demo has been rehearsed successfully at least three times.
 
@@ -1663,13 +1655,13 @@ This backlog is the build order. A task is complete only when its acceptance che
 
 | ID | Task | Owner | Depends on | Acceptance check |
 |---|---|---|---|---|
-| D-01 | Implement model wrapper and mock mode | Agent/backend | A-02 | Mock and one live structured call validate |
+| D-01 | Implement live model wrapper | Agent/backend | A-02 | One live structured call validates |
 | D-02 | Implement deterministic phase state machine | Agent/backend | D-01, B-04 | Run phases progress and persist in order |
 | D-03 | Implement dynamic agent routing | Agent/backend | B-05, D-02 | Vendor and workforce scenarios route different agent sets |
 | D-04 | Implement department prompts and tools | Agent/backend | D-01, C-03 | Agents can inspect evidence and call quick simulation |
 | D-05 | Validate and merge assessments | Agent/backend | D-04 | Unknown IDs rejected; valid impacts enter ledger |
 | D-06 | Implement one challenger pass | Agent/backend | D-05 | Planted overlooked dependency is surfaced |
-| D-07 | Add timeout, retry, fallback, and budgets | Agent/backend | D-01–D-06 | Forced provider failure still completes run |
+| D-07 | Add timeout, retry, unavailable states, and budgets | Agent/backend | D-01–D-06 | Forced provider failure surfaces a missing perspective |
 
 ### Milestone E — Futures and decision intelligence
 
@@ -1683,14 +1675,14 @@ This backlog is the build order. A task is complete only when its acceptance che
 | E-06 | Implement missing-fact selector | Engine | E-03 | Planted sensitive unknown ranks first |
 | E-07 | Implement mitigation re-simulation | Engine | C-07, E-03 | Knowledge transfer or data migration changes feasibility |
 
-### Milestone F — Backend and replay
+### Milestone F — Backend and audit history
 
 | ID | Task | Owner | Depends on | Acceptance check |
 |---|---|---|---|---|
 | F-01 | Implement run and decision APIs | Agent/backend | D-02, C-06 | API creates run and returns stable IDs |
 | F-02 | Implement typed event stream | Agent/backend | F-01 | Events arrive in sequence and validate |
 | F-03 | Persist runs and audit decisions | Agent/backend | F-02 | Refresh restores complete run and approval record |
-| F-04 | Implement replay source | Agent/backend | F-02, A-05 | Saved run replays without model access |
+| F-04 | Restore persisted run state | Agent/backend | F-02, A-05 | Refresh restores run and audit history without re-running agents |
 | F-05 | Add one-click reset | Agent/backend + frontend | F-04 | Demo returns to baseline in one action |
 
 ### Milestone G — Product experience
@@ -1703,7 +1695,7 @@ This backlog is the build order. A task is complete only when its acceptance che
 | G-04 | Futures comparison | Frontend | E-01–E-04 | Act, inaction, delay, and alternatives compare consistently |
 | G-05 | Decision package | Frontend | E-05–E-07 | Recommendation, assumptions, mitigation, and rollback visible |
 | G-06 | Workforce proof | Frontend | C-07, E-07 | Stranded workflows and mitigated state are unmistakable |
-| G-07 | Offline golden replay | Frontend | F-04 | Full pitch path succeeds with network disabled |
+| G-07 | Missing-agent state | Frontend | F-04 | Provider failure is visible and no recorded suggestion is substituted |
 
 ### Milestone H — Evaluation and delivery
 
@@ -1778,7 +1770,7 @@ Required:
 Required:
 
 - Live run succeeds
-- Offline replay succeeds
+- Missing live-agent perspectives are surfaced without fallback advice
 - One-click reset succeeds
 - Backup video exists
 - Final README and submission are complete

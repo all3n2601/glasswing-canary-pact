@@ -1,7 +1,7 @@
 "use client";
 
-import type { DecisionBrief, DecisionDraft, RunState, UserPublic } from "@canary-pact/contracts/generated";
-import { Check, ChevronLeft, ChevronRight, LoaderCircle, Mic, MicOff, Play, RotateCcw, X } from "lucide-react";
+import type { DecisionBrief, DecisionDraft, UserPublic } from "@canary-pact/contracts/generated";
+import { ChevronLeft, ChevronRight, LoaderCircle, Mic, MicOff, Play, X } from "lucide-react";
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
@@ -21,42 +21,15 @@ interface SpeechRecognitionLike {
 }
 
 type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
-type AnalysisMode = "live" | "replay" | "mock";
-
-const runPhases: Array<{ status: RunState["status"]; label: string }> = [
-  { status: "validating", label: "Validate brief" },
-  { status: "building_futures", label: "Build futures" },
-  { status: "optimizing", label: "Check quantified feasibility" },
-  { status: "running_agents", label: "Run every department" },
-  { status: "propagating", label: "Trace blast radius" },
-  { status: "challenging", label: "Challenge assumptions" },
-  { status: "comparing_futures", label: "Compare futures" },
-  { status: "mitigating", label: "Test mitigations" },
-  { status: "generating_package", label: "Build decision package" },
-  { status: "awaiting_approval", label: "Ready for review" },
-];
-
-function RunProgress({ run }: { run: RunState }) {
-  const activeIndex = runPhases.findIndex((phase) => phase.status === run.status);
-  const effectiveIndex = run.status === "completed" ? runPhases.length : Math.max(0, activeIndex);
-  return <div className="mt-7">
-    <div className="flex items-center justify-between gap-4"><div><Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">Live run</Badge><h2 className="mt-3 text-2xl font-semibold tracking-[-.04em]">Every department is assessing the proposal.</h2></div><LoaderCircle className="size-6 shrink-0 animate-spin text-blue-600" /></div>
-    <ol className="mt-6 grid gap-2 sm:grid-cols-2">{runPhases.map((phase, index) => { const complete = index < effectiveIndex || run.status === "completed"; const active = phase.status === run.status; return <li key={phase.status} className={`flex items-center gap-3 rounded-xl border px-3 py-2.5 text-xs ${active ? "border-blue-300 bg-blue-50 text-blue-800" : complete ? "border-emerald-100 bg-emerald-50 text-emerald-800" : "border-zinc-200 text-zinc-400"}`}><span className={`grid size-6 shrink-0 place-items-center rounded-full ${active ? "bg-blue-600 text-white" : complete ? "bg-emerald-600 text-white" : "bg-zinc-100"}`}>{complete ? <Check className="size-3.5" /> : index + 1}</span><span className="font-semibold">{phase.label}</span></li>; })}</ol>
-  </div>;
-}
-
-export function DecisionComposer({ user, submitting, run, error, onClose, onSubmit, onReplay }: {
+export function DecisionComposer({ user, submitting, error, onClose, onSubmit }: {
   user: UserPublic | null;
   submitting: boolean;
-  run: RunState | null;
   error: string | null;
   onClose: () => void;
-  onSubmit: (brief: DecisionBrief, mode: AnalysisMode) => Promise<void>;
-  onReplay: () => Promise<void>;
+  onSubmit: (brief: DecisionBrief, assessingDepartmentIds: string[]) => Promise<void>;
 }) {
   const [prompt, setPrompt] = useState("");
   const [horizonDays, setHorizonDays] = useState(365);
-  const [mode, setMode] = useState<AnalysisMode>("mock");
   const [draft, setDraft] = useState<DecisionDraft | null>(null);
   const [drafting, setDrafting] = useState(false);
   const [draftError, setDraftError] = useState<string | null>(null);
@@ -97,7 +70,7 @@ export function DecisionComposer({ user, submitting, run, error, onClose, onSubm
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!user || prompt.trim().length < 10) return;
-    if (draft) { await onSubmit(draft.brief, mode); return; }
+    if (draft) { await onSubmit(draft.brief, draft.assessing_department_ids ?? []); return; }
     setDrafting(true);
     setDraftError(null);
     try {
@@ -117,7 +90,7 @@ export function DecisionComposer({ user, submitting, run, error, onClose, onSubm
     <div role="dialog" aria-modal="true" aria-labelledby="decision-title" className="my-auto w-full max-w-[760px] rounded-[28px] border border-white bg-white p-5 shadow-[0_30px_100px_rgb(0_0_0/.24)] sm:p-7">
       <div className="flex items-start justify-between gap-4"><div><span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-blue-600">Decision composer</span><h1 id="decision-title" className="mt-2 text-3xl font-semibold tracking-[-0.045em]">What decision is the company considering?</h1><p className="mt-2 max-w-xl text-xs leading-5 text-zinc-500">Describe any proposed company decision. The backend will resolve known entities, create a reviewable brief, and ask every department to assess its exposure.</p></div><Button variant="ghost" size="icon" disabled={submitting} className="shrink-0 text-zinc-400" onClick={onClose} aria-label="Close decision composer"><X /></Button></div>
 
-      {run && submitting ? <RunProgress run={run} /> : <form className="mt-7 space-y-6" onSubmit={(event) => void submit(event)}>
+      <form className="mt-7 space-y-6" onSubmit={(event) => void submit(event)}>
         {!user ? <div className="flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between"><div><strong className="text-sm text-amber-950">Sign in to create a decision run</strong><p className="mt-1 text-[11px] text-amber-900/70">Decision drafts and runs are tied to a workspace identity.</p></div><Button asChild className="shrink-0 bg-zinc-950 text-white"><Link href="/login?next=/simulate">Sign in <ChevronRight /></Link></Button></div> : null}
 
         {draft ? <div className="space-y-4">
@@ -131,10 +104,10 @@ export function DecisionComposer({ user, submitting, run, error, onClose, onSubm
           <label><span className="mb-2 block text-[11px] font-semibold text-zinc-600">Assessment horizon</span><select value={horizonDays} onChange={(event) => setHorizonDays(Number(event.target.value))} className="h-11 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm"><option value={90}>90 days</option><option value={180}>180 days</option><option value={365}>365 days</option><option value={730}>2 years</option></select></label>
         </>}
 
-        <div className="grid gap-4 border-t border-zinc-100 pt-5 sm:grid-cols-[1fr_auto] sm:items-end"><label><span className="mb-2 block text-[10px] font-semibold text-zinc-500">Department analysis</span><select value={mode} onChange={(event) => setMode(event.target.value as AnalysisMode)} className="h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-xs sm:w-60"><option value="mock">Offline deterministic agents</option><option value="replay">Recorded agents with fallback</option><option value="live">Live department agents</option></select></label><div className="flex flex-col-reverse gap-2 sm:flex-row"><Button type="button" variant="outline" disabled={submitting || drafting} onClick={() => void onReplay()}><RotateCcw />Run saved demo</Button><Button type="submit" disabled={!user || prompt.trim().length < 10 || submitting || drafting} className="bg-zinc-950 px-5 text-white hover:bg-zinc-800">{submitting || drafting ? <LoaderCircle className="animate-spin" /> : draft ? <Play className="fill-current" /> : null}{drafting ? "Interpreting…" : submitting ? "Starting…" : draft ? "Run all departments" : "Review decision"}</Button></div></div>
+        <div className="flex flex-col gap-4 border-t border-zinc-100 pt-5 sm:flex-row sm:items-end sm:justify-between"><div><span className="block text-[10px] font-semibold text-zinc-500">Department analysis</span><p className="mt-1 text-[11px] text-zinc-600">Live department agents only. Unavailable agents are reported as missing perspectives.</p></div><Button type="submit" disabled={!user || prompt.trim().length < 10 || submitting || drafting} className="bg-zinc-950 px-5 text-white hover:bg-zinc-800">{submitting || drafting ? <LoaderCircle className="animate-spin" /> : draft ? <Play className="fill-current" /> : null}{drafting ? "Interpreting…" : submitting ? "Starting…" : draft ? "Run live departments" : "Review decision"}</Button></div>
         {draft ? <Button type="button" variant="ghost" className="-mt-3 text-zinc-500" onClick={() => setDraft(null)}><ChevronLeft />Back to edit</Button> : null}
         {draftError || error ? <p role="alert" className="rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs text-rose-700">{draftError ?? error}</p> : null}
-      </form>}
+      </form>
     </div>
   </div>;
 }

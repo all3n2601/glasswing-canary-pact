@@ -34,6 +34,20 @@ const tones: Record<DepartmentImpactTone, string> = {
   neutral: "#71717a",
 };
 
+const builtInDeskDepartmentIds = new Set([
+  "dept_finance",
+  "dept_engineering",
+  "dept_ai_data",
+  "dept_product",
+  "dept_operations",
+  "dept_sales",
+  "dept_customer",
+  "dept_customer_success",
+]);
+
+const namedWorkstationIds = ["dept_marketing", "dept_people", "dept_compliance"];
+const genericWorkstationCount = 6;
+
 function enableShadows(object: Object3D) {
   object.traverse((child) => {
     if (child instanceof Mesh) {
@@ -179,17 +193,34 @@ function PulseField({ impact, day, selected, showAllLabels, onSelect }: { impact
   );
 }
 
-function OfficeWorld({ day }: { day: number }) {
+function OfficeWorld({ day, departments }: { day: number; departments: DepartmentSceneMarker[] }) {
   const { scene } = useGLTF("/assets/3d/office.glb");
   const office = useMemo(() => {
     const copy = scene.clone(true);
+    const departmentIds = new Set(departments.map((department) => department.departmentId));
+    const genericDepartmentCount = departments.filter((department) => (
+      !builtInDeskDepartmentIds.has(department.departmentId) && !namedWorkstationIds.includes(department.departmentId)
+    )).length;
+
     agentRoutes.forEach(({ id }) => {
       const originalAgent = copy.getObjectByName(`agent_${id}`);
       if (originalAgent) originalAgent.visible = false;
     });
+    namedWorkstationIds.forEach((departmentId) => {
+      const workstation = copy.getObjectByName(`workstation_${departmentId}`);
+      if (!workstation) return;
+      workstation.visible = departmentIds.has(departmentId);
+      workstation.scale.setScalar(1);
+    });
+    for (let index = 0; index < genericWorkstationCount; index += 1) {
+      const workstation = copy.getObjectByName(`workstation_extra_${String(index + 1).padStart(2, "0")}`);
+      if (!workstation) continue;
+      workstation.visible = index < genericDepartmentCount;
+      workstation.scale.setScalar(1);
+    }
     enableShadows(copy);
     return copy;
-  }, [scene]);
+  }, [departments, scene]);
 
   return (
     <>
@@ -208,7 +239,7 @@ function Scene({ day, interactive, departments, selectedDepartmentId, showAllDep
       <ambientLight intensity={1.15} />
       <hemisphereLight color="#fffdf7" groundColor="#cbd5d1" intensity={0.8} />
       <directionalLight position={[10, 18, 8]} intensity={1.75} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} shadow-bias={-0.0003} />
-      <OfficeWorld day={day} />
+      <OfficeWorld day={day} departments={departments} />
       {departments.map((impact) => <PulseField key={impact.departmentId} impact={impact} day={day} selected={selectedDepartmentId === impact.departmentId} showAllLabels={showAllDepartmentLabels} onSelect={onDepartmentSelect} />)}
       <ContactShadows position={[0, -0.21, 0]} opacity={0.18} scale={34} blur={2.8} far={12} />
       {interactive ? <OrbitControls makeDefault enablePan={false} minPolarAngle={0.62} maxPolarAngle={1.12} minDistance={18} maxDistance={35} target={[0, 0, 0]} /> : null}

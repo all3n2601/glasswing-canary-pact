@@ -1,5 +1,14 @@
+from .adventureworks import build_adventureworks_twin, fetch_adventureworks
 from .documents import document_is_stale
-from .graph import build_graph, downstream_paths, list_dependencies, reachable_departments
+from .graph import (
+    affected_departments,
+    blast_set,
+    build_graph,
+    downstream_paths,
+    list_dependencies,
+    reachable_departments,
+    upstream_paths,
+)
 from .loader import load_company_twin, load_twin
 from .models import (
     AgentView,
@@ -40,6 +49,9 @@ __all__ = [
     "entity_map",
     "build_graph",
     "downstream_paths",
+    "upstream_paths",
+    "affected_departments",
+    "blast_set",
     "list_dependencies",
     "reachable_departments",
     "load_company_twin",
@@ -55,4 +67,6 @@ __all__ = [
     "aggregate_domain_graph",
     "department_detail",
     "document_is_stale",
+    "build_adventureworks_twin",
+    "fetch_adventureworks",
 ]

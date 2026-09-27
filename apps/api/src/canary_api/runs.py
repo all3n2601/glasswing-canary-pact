@@ -5,23 +5,18 @@ import logging
 import os
 import re
 import uuid
-from pathlib import Path
-from typing import Any, Callable, Coroutine, Literal
+from typing import Any, Callable, Coroutine
 
 from agent_orchestration import run_decision
 from pydantic import BaseModel
 
-from contracts_py.api import ReplayInfo
 from contracts_py.decision import DecisionBrief
 from contracts_py.enums import Future, RunStatus
-from contracts_py.events import Event, EventLog, EventType, PhaseChanged, RunFailed
+from contracts_py.events import EventType, PhaseChanged, RunFailed
 from contracts_py.package import find_person_tokens
 from contracts_py.twin import OrganizationSettings, Twin
 
 from canary_api import engine_port, runtime
-from canary_api.paths import REPLAYS_DIR
-
-LlmMode = Literal["mock", "replay", "live"]
 log = logging.getLogger(__name__)
 
 _tasks: set[asyncio.Task[None]] = set()
@@ -29,10 +24,6 @@ _tasks: set[asyncio.Task[None]] = set()
 
 def new_run_id() -> str:
     return f"run_{uuid.uuid4().hex[:12]}"
-
-
-def step_seconds(speed: int = 1) -> float:
-    return float(os.environ.get("CANARY_REPLAY_STEP_SECONDS", "0.5")) / speed
 
 
 def apply_settings_defaults(brief: DecisionBrief, settings: OrganizationSettings) -> DecisionBrief:
@@ -60,37 +51,8 @@ def _spawn(coro: Coroutine[Any, Any, None]) -> None:
     task.add_done_callback(_tasks.discard)
 
 
-def rewrite_run_ids(value: Any, run_id: str) -> Any:
-    if isinstance(value, dict):
-        return {k: run_id if k == "run_id" and isinstance(v, str) else rewrite_run_ids(v, run_id) for k, v in value.items()}
-    if isinstance(value, list):
-        return [rewrite_run_ids(item, run_id) for item in value]
-    return value
-
-
-async def play(run_id: str, events: list[Event], delay: float) -> None:
-    try:
-        for event in events:
-            payload = rewrite_run_ids(event.payload.model_dump(mode="json"), run_id)
-            runtime.bus.publish(run_id, event.type, payload, actor=event.actor, scenario_id=event.scenario_id,
-                                future=event.future)
-            await asyncio.sleep(delay)
-    except Exception as exc:
-        fail_run(run_id, str(exc))
-
-
 def live_allowed() -> bool:
     return os.environ.get("CANARY_ALLOW_LIVE", "").strip().lower() == "true"
-
-
-def resolve_llm_settings(settings: OrganizationSettings, llm_mode: LlmMode | None) -> tuple[OrganizationSettings, bool]:
-    mode = llm_mode or settings.llm_mode
-    # An empty replay cache would mark every agent unavailable, so the run falls back to mock answers.
-    fell_back = mode == "replay" and runtime.cache_is_empty(runtime.llm_cache_dir())
-    return settings.model_copy(update={"llm_mode": "mock" if fell_back else mode}), fell_back
-
-
-MOCK_FALLBACK_ASSUMPTION = "Agents ran in mock mode: no recorded answers were available"
 ENGINE_EVENTS = {
     EventType.impact_computed,
     EventType.simulation_completed,
@@ -184,57 +146,23 @@ class ThreadEmitter:
         ))
 
 
-async def orchestrate(run_id: str, brief: DecisionBrief, twin: Twin, settings: OrganizationSettings,
-                      llm_mode: LlmMode | None) -> None:
+async def orchestrate(run_id: str, brief: DecisionBrief, twin: Twin, settings: OrganizationSettings) -> None:
     loop = asyncio.get_running_loop()
     try:
-        run_settings, fell_back = resolve_llm_settings(settings, llm_mode)
-        emit = ThreadEmitter(run_id, loop, twin, [MOCK_FALLBACK_ASSUMPTION] if fell_back else [])
+        emit = ThreadEmitter(run_id, loop, twin)
         # AgentLLM.model_label is a property, which pyright treats as not matching the LLMClient attribute.
-        llm: Any = runtime.build_llm(run_settings)
+        llm: Any = runtime.build_llm(settings)
         extra: dict[str, Any] = {"should_stop": emit.cancelled} if _accepts_should_stop() else {}
-        await asyncio.to_thread(run_decision, brief, engine=engine_port, settings=run_settings, llm=llm, emit=emit,
+        await asyncio.to_thread(run_decision, brief, engine=engine_port, settings=settings, llm=llm, emit=emit,
                                 run_id=run_id, twin=twin, **extra)
     except Exception as exc:
         await asyncio.sleep(0)
         fail_run(run_id, str(exc))
 
 
-def start_run(brief: DecisionBrief, llm_mode: LlmMode | None = None) -> str:
+def start_run(brief: DecisionBrief) -> str:
     twin = runtime.twin()
     run_id = new_run_id()
     runtime.bus.create_run(run_id, brief.decision_id, twin.version.twin_version)
-    _spawn(orchestrate(run_id, brief, twin, runtime.settings(), llm_mode))
-    return run_id
-
-
-def replay_path(name: str) -> Path | None:
-    candidates = {p.stem: p for p in REPLAYS_DIR.glob("*.json")}
-    return candidates.get(name)
-
-
-def load_replay(name: str) -> EventLog | None:
-    path = replay_path(name)
-    if path is None:
-        return None
-    return EventLog.model_validate_json(path.read_text())
-
-
-def list_replays() -> list[ReplayInfo]:
-    infos = []
-    for path in sorted(REPLAYS_DIR.glob("*.json")):
-        log = EventLog.model_validate_json(path.read_text())
-        first = log.root[0] if log.root else None
-        decision_id = first.payload.decision_id if first and isinstance(first.payload, DecisionBrief) else None
-        infos.append(ReplayInfo(name=path.stem, decision_id=decision_id, event_count=len(log.root)))
-    return infos
-
-
-def play_replay(log: EventLog, speed: int) -> str:
-    events = log.root
-    first = events[0].payload if events else None
-    decision_id = first.decision_id if isinstance(first, DecisionBrief) else "dec_replay"
-    run_id = new_run_id()
-    runtime.bus.create_run(run_id, decision_id, runtime.twin().version.twin_version)
-    _spawn(play(run_id, events, step_seconds(speed)))
+    _spawn(orchestrate(run_id, brief, twin, runtime.settings()))
     return run_id

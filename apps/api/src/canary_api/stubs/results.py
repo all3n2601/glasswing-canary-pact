@@ -388,58 +388,6 @@ def inaction_blast_radius(run_id: str, decision_id: str) -> BlastRadius:
     return _blast(run_id, decision_id, inaction_result(run_id, decision_id), "Do nothing", "inaction")
 
 
-def _metrics(agent_id: str) -> CallMetrics:
-    return CallMetrics(model_id="replay", prompt_version="stub", prompt_hash=f"stub_{agent_id}", latency_ms=0,
-                       input_tokens=0, output_tokens=0)
-
-
-AGENT_NOTES = {
-    "finance": ("Removing BeaconIQ and EchoMarket clears the $2B gross goal.",
-                "Apex and Echo renewal uplifts keep adding cost.", ["vendor_beacon", "vendor_echo"]),
-    "ai_data": ("ds_account_intel must be migrated before EchoMarket is removed.",
-                "Flux usage keeps growing.", ["ds_account_intel", "vendor_echo"]),
-    "sales": ("Account planning loses its EchoMarket input; pipeline falls about 1.2%.",
-              "No pipeline change.", ["wf_account_planning", "kpi_pipeline"]),
-    "compliance": ("KYC screening keeps ds_corporate_linkage because ApexData stays.",
-                   "No control change.", ["ctl_kyc_screening", "ds_corporate_linkage"]),
-    "operations": ("Billing reconciliation needs two qualified owners after the change.",
-                   "Reconciliation hazard persists.", ["wf_billing_recon"]),
-}
-
-
-def assessment(run_id: str, agent_id: str) -> AgentAssessment:
-    if agent_id == "challenger":
-        return AgentAssessment(
-            assessment_id=f"asm_{run_id}_{agent_id}", run_id=run_id, plan_id=RECOMMENDED_PLAN, agent_id=agent_id,
-            pass_type="challenge", status="replayed",
-            challenge=ChallengerOutput(
-                missed_dependencies=[ProposedDependency(
-                    source="wf_vendor_reconciliation", target="ds_account_intel", relation=Relation.CONSUMES,
-                    rationale="The workflow map says Account intelligence also feeds Vendor reconciliation.",
-                    evidence_refs=["ev_echo_account_intel_feed"], confidence=0.8)],
-                inaction_underestimated=[Finding(text="The Echo renewal uplift lands on day 120.",
-                                                 entity_ids=["vendor_echo"], severity=3,
-                                                 evidence_refs=["ev_echo_msa_clause_9"])],
-                confidence=0.7,
-            ),
-            metrics=_metrics(agent_id), created_at=STUB_TIME,
-        )
-    act, inaction, ids = AGENT_NOTES[agent_id]
-    return AgentAssessment(
-        assessment_id=f"asm_{run_id}_{agent_id}", run_id=run_id, plan_id=RECOMMENDED_PLAN, agent_id=agent_id,
-        pass_type="first_pass", status="replayed",
-        output=AgentOutput(
-            affected_entities=ids,
-            act_now_view=FutureView(summary=act, failure_modes=[Finding(text=act, entity_ids=ids, severity=3)]),
-            inaction_view=FutureView(summary=inaction,
-                                     failure_modes=[Finding(text=inaction, entity_ids=ids, severity=2)]),
-            assumptions=["Stub assessment."],
-            confidence=0.7,
-        ),
-        metrics=_metrics(agent_id), created_at=STUB_TIME,
-    )
-
-
 def vendor_overlaps(decision_id: str) -> list[VendorOverlap]:
     if decision_id != VENDOR_DECISION:
         return []

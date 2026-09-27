@@ -10,25 +10,40 @@ from contracts_py.twin import OrganizationSettings, Twin
 
 from canary_api import engine_port
 from canary_api.events import EventBus
+from canary_api import storage
+from canary_api.engine_port import EngineNotReady
 from canary_api.paths import DATA_DIR
 
 log = logging.getLogger(__name__)
 bus = EventBus()
-# Set once at startup; live runs are refused while it holds an error, mock and replay are unaffected.
+# Set once at startup; live runs are refused while it holds an error.
 structured_output_error: str | None = None
 # Set once at startup; every run is refused while it holds an error, since each run calls simulate.
 sim_mode_error: str | None = None
-_twins: dict[str, Twin] = {}
+_twin: Twin | None = None
 
 
 def twin() -> Twin:
-    impl = engine_port.twin_impl()
-    if impl not in _twins:
-        snippets = DATA_DIR / "artifacts" / "snippets.json"
-        _twins[impl] = engine_port.load_twin(
-            DATA_DIR / "synthetic_company.json", snippets if snippets.is_file() else None
-        )
-    return _twins[impl]
+    global _twin
+    if _twin is None:
+        backend = storage.current()
+        _twin = backend.load_active_twin()
+        if _twin is None:
+            seed_path = Path(os.environ.get("CANARY_TWIN_SEED_PATH") or DATA_DIR / "synthetic_company.json")
+            try:
+                seed = engine_port.load_twin(seed_path)
+            except Exception as exc:
+                raise EngineNotReady(
+                    f"No active company twin exists and seed loading failed: {type(exc).__name__}"
+                ) from exc
+            errors = [issue for issue in engine_port.validate_twin(seed) if issue.severity == "error"]
+            if errors:
+                raise EngineNotReady(f"Company twin seed failed validation: {errors[0].message}")
+            backend.save_twin(seed, active=True)
+            _twin = backend.load_active_twin()
+        if _twin is None:
+            raise EngineNotReady("No active company twin exists in the configured database")
+    return _twin
 
 
 @cache
@@ -40,16 +55,8 @@ def settings() -> OrganizationSettings:
     return _settings(twin().organization.id)
 
 
-def llm_cache_dir() -> Path:
-    return Path(os.environ.get("CANARY_LLM_CACHE_DIR", DATA_DIR / "artifacts" / "llm_cache"))
-
-
-def cache_is_empty(cache_dir: Path) -> bool:
-    return not cache_dir.is_dir() or next(cache_dir.rglob("*.json"), None) is None
-
-
 def build_llm(run_settings: OrganizationSettings) -> AgentLLM:
-    return AgentLLM(run_settings, cache_dir=llm_cache_dir())
+    return AgentLLM(run_settings)
 
 
 def check_structured_output() -> str | None:

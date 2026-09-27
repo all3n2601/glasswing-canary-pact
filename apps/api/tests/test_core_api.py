@@ -5,7 +5,7 @@ import pytest
 from api_auth_helpers import auth_headers
 from pydantic import TypeAdapter
 
-from contracts_py.api import DecisionCreated, DecisionDraft, HealthResponse, OrganizationProfileView, ReplayInfo, ReplayStarted
+from contracts_py.api import DecisionCreated, DecisionDraft, HealthResponse, OrganizationProfileView
 from contracts_py.engine import FutureComparison, PortfolioComparison, SimulationResult
 from contracts_py.enums import RunStatus
 from contracts_py.events import EventType, PhaseChanged, RunState
@@ -55,14 +55,13 @@ def wait_for_status(client, run_id: str, status: RunStatus, timeout: float = 5.0
         ("/documents", list[Document]),
         ("/documents?department_id=dept_operations&doc_type=runbook&status=outdated", list[Document]),
         ("/documents/doc_billing_recon_runbook", Document),
-        ("/replays", list[ReplayInfo]),
     ],
 )
 def test_get_endpoints_match_contracts(client, path, model) -> None:
     validate(model, client.get(path))
 
 
-def test_stub_twin_shape(client) -> None:
+def test_real_twin_shape(client) -> None:
     twin = validate(Twin, client.get("/company"))
     departments = [e for e in twin.entities if e.type == "department"]
     assert len(departments) == 9
@@ -76,7 +75,8 @@ def test_stub_twin_shape(client) -> None:
     assert len(vendors) == 7 and sum(vendors.values()) == 8_000_000_000
     assert len([e for e in twin.edges if e.id.startswith("ch_")]) == 25
     assert {e.document_id for e in twin.evidence} <= {d.id for d in twin.documents}
-    assert all(e.type != "person_token" for e in twin.entities)
+    people = [e for e in twin.entities if e.type == "person_token"]
+    assert people and all(e.id.startswith("pt_") and e.role_id for e in people)
 
 
 def test_settings_are_contract_defaults(client) -> None:
@@ -90,8 +90,7 @@ def test_missing_ids_are_404(client) -> None:
     assert client.get("/departments/vendor_apex").status_code == 404
     assert client.get("/documents/doc_nope").status_code == 404
     assert client.get("/runs/run_nope").status_code == 404
-    assert client.post("/replays/nope/play").status_code == 404
-    assert client.post("/replays/sample_run/play?speed=3").status_code == 422
+    assert client.get("/replays").status_code == 404
 
 
 def test_simulate_endpoints_match_contracts(client, brief_json) -> None:
@@ -136,12 +135,12 @@ def test_prompt_decision_drafts_and_runs_every_department(client) -> None:
     assert all(i.params.get("prompt_generated") is True for i in draft.brief.candidate_interventions)
 
     run_id = validate(DecisionCreated, client.post(
-        "/decisions?llm_mode=mock", headers=headers, json=draft.brief.model_dump(mode="json")
+        "/decisions", headers=headers, json=draft.brief.model_dump(mode="json")
     )).run_id
     state = wait_for_status(client, run_id, RunStatus.awaiting_approval)
     assert len(state.assessment_ids) >= 11
     package = validate(DecisionPackage, client.get(f"/runs/{run_id}/package"))
-    assert len(package.department_impacts) == 9
+    assert package.department_impacts == []
     assert package.recommendation is None
     assert any("unquantified" in assumption.lower() for assumption in package.assumptions)
 
@@ -172,16 +171,6 @@ def test_package_before_ready_is_409(client) -> None:
                        json={"decision": "approve", "decided_by": "x", "package_hash": "0" * 64}).status_code == 409
 
 
-def test_replay_play_creates_new_run(client) -> None:
-    started = validate(ReplayStarted, client.post("/replays/sample_run/play?speed=4"))
-    assert started.speed == 4
-    state = wait_for_status(client, started.run_id, RunStatus.awaiting_approval)
-    assert state.run_id == started.run_id
-    assert state.scenario_ids
-    package = validate(DecisionPackage, client.get(f"/runs/{started.run_id}/package"))
-    assert package.run_id == started.run_id
-
-
 def test_organization_profile_lists_all_departments(client) -> None:
     profile = validate(OrganizationProfileView, client.get("/organization/profile"))
     twin = validate(Twin, client.get("/company"))
@@ -189,7 +178,7 @@ def test_organization_profile_lists_all_departments(client) -> None:
     assert len(profile.departments) == 9
     operations = next(d for d in profile.departments if d.department_id == "dept_operations")
     assert (operations.name, operations.actual_fte, operations.annual_budget_usd, operations.utilisation) == (
-        "Operations", 5_200, 6_000_000_000, 1.12
+        "Operations", 5_800, 3_100_000_000, 1.12
     )
     assert all(d.enabled for d in profile.departments)
     assert profile.settings.organization_id == twin.organization.id

@@ -12,6 +12,7 @@ testpaths = [
   "apps/api/tests",
   "packages/contracts-py/tests",
   "packages/company-twin/tests",
+  "packages/simulation-engine/tests",
   "packages/agent-orchestration/tests",
   "packages/simulation-engine/tests",
 ]

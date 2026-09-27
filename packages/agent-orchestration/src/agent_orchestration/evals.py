@@ -195,7 +195,7 @@ def run_eval(*, engine: EnginePort, twin: Twin, brief: DecisionBrief, settings: 
     rows: list[dict[str, Any]] = []
     for config in configs or list(CONFIGS):
         for index in range(1, runs + 1):
-            llm = llm_factory(run_settings) if llm_factory else AgentLLM(run_settings, cache_dir=cache_dir)
+            llm = llm_factory(run_settings) if llm_factory else AgentLLM(run_settings)
             recorder = _Recorder()
             row: dict[str, Any] = {"config": config, "run": index, "engine_impl": engine_impl, "twin_impl": twin_impl,
                                    "llm_mode": llm_mode}
@@ -243,7 +243,7 @@ def format_table(aggregates: list[dict[str, Any]]) -> str:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the decision pipeline ablations and write measured metrics.")
-    parser.add_argument("--mode", choices=["mock", "replay", "live"], default="mock")
+    parser.add_argument("--mode", choices=["live"], default="live")
     parser.add_argument("--runs", type=int, default=1)
     parser.add_argument("--out", type=Path, default=None)
     return parser
@@ -251,14 +251,16 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None, *, engine: EnginePort, twin: Twin, brief: DecisionBrief,
          settings: OrganizationSettings, engine_impl: str, twin_impl: str = "unknown",
-         cache_dir: Path | None = None) -> int:
+         cache_dir: Path | None = None,
+         llm_factory: Callable[[OrganizationSettings], LLMClient] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.runs < 1:
         raise SystemExit("--runs must be at least 1")
     if args.mode == "live" and os.environ.get("CANARY_ALLOW_LIVE", "").strip().lower() != "true":
         raise SystemExit("--mode live is disabled; set CANARY_ALLOW_LIVE=true to allow paid model calls")
     report = run_eval(engine=engine, twin=twin, brief=brief, settings=settings, llm_mode=args.mode, runs=args.runs,
-                      engine_impl=engine_impl, twin_impl=twin_impl, cache_dir=cache_dir)
+                      engine_impl=engine_impl, twin_impl=twin_impl, cache_dir=cache_dir,
+                      llm_factory=llm_factory)
     paths = write_outputs(report, args.out or default_out_dir())
     print(format_table(report.aggregates))
     if not report.planted_keys:
@@ -268,6 +270,6 @@ def main(argv: list[str] | None = None, *, engine: EnginePort, twin: Twin, brief
 
 
 if __name__ == "__main__":
-    print("evals needs an injected engine and twin; run: uv run python -m canary_api.eval_cli --mode mock",
+    print("evals needs an injected engine and twin; run: uv run python -m canary_api.eval_cli --mode live",
           file=sys.stderr)
     raise SystemExit(2)

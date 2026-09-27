@@ -66,8 +66,20 @@ def optimize(twin: Twin, brief: DecisionBrief, *, settings: OrganizationSettings
              run_id: str = "run_adhoc") -> PortfolioComparison:
     """Evaluate every portfolio of ``brief``'s candidate interventions and pick naive and recommended."""
     if brief.decision_type is not DecisionType.vendor_consolidation:
-        raise NotImplementedError(f"optimize searches vendor_consolidation briefs only; {brief.decision_type.value} "
-                                  "briefs evaluate a single plan (schema X5)")
+        settings = settings or OrganizationSettings()
+        result = _run(twin, brief, NAIVE_PLAN_ID, brief.candidate_interventions, settings, run_id)
+        proposed = Portfolio(
+            plan_id=NAIVE_PLAN_ID,
+            intervention_ids=result.intervention_ids,
+            rank=1 if result.feasible else None,
+            result=result,
+        )
+        return PortfolioComparison(
+            evaluated_count=1,
+            naive=proposed,
+            recommended=proposed if result.feasible else None,
+            alternatives=[],
+        )
     settings = settings or OrganizationSettings()
     candidates = brief.candidate_interventions
     results: dict[frozenset[str], SimulationResult] = {}

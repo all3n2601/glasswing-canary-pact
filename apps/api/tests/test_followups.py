@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 from api_auth_helpers import auth_headers
+from real_data import sample_brief
 from fastapi.testclient import TestClient
 
 from canary_api import auth, runs, runtime, storage
@@ -134,9 +135,7 @@ def run_with_fake_orchestrator(monkeypatch, fake) -> str:
     run_id = "run_fake_" + hashlib.sha256(fake.__name__.encode()).hexdigest()[:8]
     twin = runtime.twin()
     runtime.bus.create_run(run_id, "dec_vendor_reduction", twin.version.twin_version)
-    from canary_api.stubs.twin import sample_brief
-
-    asyncio.run(runs.orchestrate(run_id, sample_brief(), twin, runtime.settings(), "mock"))
+    asyncio.run(runs.orchestrate(run_id, sample_brief(), twin, runtime.settings()))
     return run_id
 
 
@@ -164,10 +163,8 @@ def test_should_stop_is_not_passed_to_an_older_run_decision(monkeypatch) -> None
 
 
 def test_decision_without_decided_by_is_accepted(client) -> None:
-    from canary_api.stubs.twin import sample_brief
-
     headers = auth_headers(client)
-    run_id = client.post("/decisions?llm_mode=mock", headers=headers,
+    run_id = client.post("/decisions", headers=headers,
                          json=sample_brief().model_dump(mode="json")).json()["run_id"]
     deadline = time.monotonic() + 10
     while client.get(f"/runs/{run_id}").json()["status"] != "awaiting_approval":

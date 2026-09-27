@@ -77,13 +77,13 @@ The evidence that this goes wrong is public:
 The pieces live in:
 
 ```text
-apps/api                     FastAPI service: runs, events, WebSocket, replay, auth, storage
+apps/api                     FastAPI service: runs, events, WebSocket, auth, storage
 apps/web                     Next.js dashboard
 packages/contracts-py        Pydantic contracts (source of the JSON Schemas and TypeScript types)
 packages/contracts           Generated JSON Schemas and TypeScript types
 packages/agent-orchestration Agents, prompts, router, merge rules, orchestrator, eval harness
 packages/company-twin        Twin loader, validation, graph queries, role-level views
-packages/simulation-engine   Deterministic engine (in progress; see below)
+packages/simulation-engine   Deterministic simulation, optimization and blast-radius engine
 data/                        Synthetic Northstar twin and the two scenario briefs
 ```
 
@@ -96,22 +96,16 @@ Real today:
   synthetic.
 - **Two scenario briefs:** `data/vendor_scenario.json` (consolidate seven data vendors) and
   `data/workforce_scenario.json` (eliminate eight roles behind two critical workflows).
-- **Live LLM agents** on DeepSeek V4.1 Flash, served through Sciforium's OpenAI-compatible API,
-  with structured output, one retry, a timeout and a replay cache.
+- **Live LLM agents** served through Sciforium's OpenAI-compatible API, with structured output,
+  one retry and a timeout. Agent failures are surfaced; recorded advice is never substituted.
 - **The orchestration, routing, merge and validation rules,** and the person-token guard.
 - **Authentication:** sign-up creates viewers; only an approver can record a decision. There is
   one demo approver, created from environment variables at startup.
 - **Storage:** files and SQLite by default, or Postgres when `DATABASE_URL` is set.
-- **Replay and the eval harness.**
+- **A live-agent eval harness.**
 
-Mocked today:
+Synthetic today:
 
-- **The simulation engine's money values.** `simulation_engine` has `check_result`,
-  `quick_impact`, `optimize`, `blast_radius` and quick-mode `simulate` so far. Until
-  `compare_futures` and the inaction and delay futures land, the demo runs on the stub engine,
-  which returns fixed constants from `apps/api/src/canary_api/stubs/`. Every
-  package built on them says so in its assumptions ("Stub engine output: fixed constants,
-  expected-value mode."). This README will be updated when the engine lands.
 - **The company.** Northstar Technologies is synthetic, and so are its documents and evidence.
 
 Measured agent ablations can be produced with `uv run python -m canary_api.eval_cli`, which writes
@@ -136,32 +130,28 @@ pnpm dev:web    # Next.js on http://localhost:3000
 
 Important environment variables (see `.env.example`; names only here):
 
-- `ENGINE_IMPL` and `TWIN_IMPL`: `stub` or `real`. The twin follows the engine unless set.
-  `TWIN_IMPL=real` with the default stub engine runs the real Northstar twin.
+The API reads its active, versioned company twin from storage. The deterministic simulation engine runs
+directly against that record. Company twins, run events, decision packages, users, and approvals use
+PostgreSQL when `DATABASE_URL` is configured; the test/local fallback uses files and SQLite under `runs/`.
+The AdventureWorks importer streams Microsoft's public CSV source into memory and persists only the
+validated twin in the database; it does not generate a local company JSON fixture.
+
 - `SCIFORIUM_API_KEY`, `SCIFORIUM_BASE_URL`, `MODEL_STRONG`, `MODEL_FAST`: live model access.
-- `CANARY_ALLOW_LIVE`: must be `true` before a run may use `llm_mode=live`.
+- `CANARY_ALLOW_LIVE`: must be `true` before a decision run may call live agents.
 - `CANARY_STRUCTURED_OUTPUT`: `auto` (default), `json_schema` or `function_calling`.
+- `CANARY_SIM_MODE`: `full` (default) or `quick`.
 - `CANARY_AUTH_SECRET`: token signing secret. If blank, tokens reset on every restart.
 - `CANARY_DEMO_APPROVER_EMAIL`, `CANARY_DEMO_APPROVER_PASSWORD`: create the demo approver.
 - `DATABASE_URL`, `CANARY_DB_SCHEMA`: optional Postgres (tables live in a private `canary` schema).
-
-LLM modes are chosen per run with `POST /decisions?llm_mode=mock|replay|live`. The default is
-`replay`, which answers from the recorded cache and falls back to mock answers, recording that in
-the package's assumptions, when the cache is empty.
-
-Offline demo with no model or database: start the API and replay the recorded run.
-
-```bash
-curl -X POST "http://localhost:8000/replays/sample_run/play?speed=2"
-# then watch ws://localhost:8000/runs/<run_id>/events or GET /runs/<run_id>/package
-```
 
 Tests and checks:
 
 ```bash
 uv run pytest -q
 pnpm typecheck
-uv run python -m canary_api.eval_cli --mode mock   # or replay; live needs CANARY_ALLOW_LIVE=true and makes paid model calls
+pnpm test
+pnpm build
+uv run python -m canary_api.eval_cli --mode live  # needs CANARY_ALLOW_LIVE=true and makes paid model calls
 ```
 
 The Postgres tests run only when `CANARY_TEST_DATABASE_URL` is set; they use a throwaway schema.

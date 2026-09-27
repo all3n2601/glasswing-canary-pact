@@ -22,8 +22,6 @@ const ALLOWED_PATHS = [
   /^runs\/[A-Za-z0-9_-]+\/package$/,
   /^runs\/[A-Za-z0-9_-]+\/decision$/,
   /^simulate\/(quick|futures|optimize)$/,
-  /^replays$/,
-  /^replays\/[A-Za-z0-9_-]+\/play$/,
 ];
 
 function allowed(path: string) {

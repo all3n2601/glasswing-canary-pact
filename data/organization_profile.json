@@ -56,7 +56,7 @@
     "always_protected_entity_ids": [],
     "require_human_approval": true,
     "anonymize_people": true,
-    "llm_mode": "replay",
+    "llm_mode": "live",
     "doc_staleness_days": 365
   }
 }

@@ -40,14 +40,22 @@ const fixedPositions: Record<string, [number, number, number]> = {
 };
 
 function fallbackPosition(index: number): [number, number, number] {
-  const angle = (index * Math.PI) / 4;
-  return [Math.cos(angle) * 10.5, 0.08, Math.sin(angle) * 7.4];
+  const positions: Array<[number, number, number]> = [
+    [-10.4, 0.08, -3.1],
+    [-10.4, 0.08, 3.1],
+    [10.4, 0.08, -3.1],
+    [10.4, 0.08, 3.1],
+    [-4.4, 0.08, -0.3],
+    [4.4, 0.08, 3.25],
+  ];
+  return positions[index % positions.length];
 }
 
 export function buildDepartmentSimulation(profile: OrganizationProfile): DepartmentSimulationView[] {
+  let fallbackIndex = 0;
   return profile.departments
     .filter((department) => department.enabled)
-    .map((department, index) => ({
+    .map((department) => ({
       departmentId: department.department_id,
       name: department.name,
       mission: department.mission,
@@ -55,7 +63,7 @@ export function buildDepartmentSimulation(profile: OrganizationProfile): Departm
       annualBudgetUsd: department.annual_budget_usd,
       utilisation: department.utilisation,
       maturityLevel: department.maturity_level,
-      position: fixedPositions[department.department_id] ?? fallbackPosition(index - Object.keys(fixedPositions).length),
+      position: fixedPositions[department.department_id] ?? fallbackPosition(fallbackIndex++),
       tone: "neutral",
       label: "No material impact",
       strength: 0.25,

@@ -20,8 +20,6 @@ import type {
   PortfolioComparison,
   Pressure,
   QuickSimulateRequest,
-  ReplayInfo,
-  ReplayStarted,
   RunState,
   SimulationResult,
   Twin,
@@ -66,8 +64,8 @@ export const canaryApi = {
   department: (departmentId: string) => request<DepartmentDetail>(`/departments/${encodeURIComponent(departmentId)}`),
   documents: (query = "") => request<Document[]>(`/documents${query ? `?${query}` : ""}`),
   document: (documentId: string) => request<Document>(`/documents/${encodeURIComponent(documentId)}`),
-  createDecision: (brief: DecisionBrief, llmMode?: "live" | "replay" | "mock") =>
-    request<DecisionCreated>(`/decisions${llmMode ? `?llm_mode=${llmMode}` : ""}`, { method: "POST", body: JSON.stringify(brief) }),
+  createDecision: (brief: DecisionBrief) =>
+    request<DecisionCreated>("/decisions", { method: "POST", body: JSON.stringify(brief) }),
   draftDecision: (input: DecisionPromptRequest) =>
     request<DecisionDraft>("/decisions/draft", { method: "POST", body: JSON.stringify(input) }),
   run: (runId: string) => request<RunState>(`/runs/${encodeURIComponent(runId)}`),
@@ -76,13 +74,11 @@ export const canaryApi = {
   quickSimulate: (input: QuickSimulateRequest) => request<SimulationResult>("/simulate/quick", { method: "POST", body: JSON.stringify(input) }),
   compareFutures: (input: FuturesRequest) => request<FutureComparison>("/simulate/futures", { method: "POST", body: JSON.stringify(input) }),
   optimize: (input: OptimizeRequest) => request<PortfolioComparison>("/simulate/optimize", { method: "POST", body: JSON.stringify(input) }),
-  replays: () => request<ReplayInfo[]>("/replays"),
-  playReplay: (name: string, speed: 1 | 2 | 4 = 4) => request<ReplayStarted>(`/replays/${encodeURIComponent(name)}/play?speed=${speed}`, { method: "POST" }),
 };
 
 export async function waitForPackage(
   runId: string,
-  timeoutMs = 30_000,
+  timeoutMs = 300_000,
   onState?: (state: RunState) => void,
 ): Promise<DecisionPackage> {
   const deadline = Date.now() + timeoutMs;

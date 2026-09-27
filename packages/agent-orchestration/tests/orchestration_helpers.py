@@ -31,20 +31,23 @@ class SpyEngine:
 
 
 class ScriptedLLM:
-    """Mock LLM with per-agent overrides returning a fixed output or status."""
+    """Test-only LLM with per-agent overrides and minimal valid live-shaped outputs."""
 
     model_label = "scripted"
 
     def __init__(self, settings: OrganizationSettings, overrides: dict[str, Callable[[AgentContext], LLMResult]]):
-        self.base = AgentLLM(settings)
         self.overrides = overrides
 
     def call(self, agent_id: str, messages: list[dict[str, str]], output_model: type[BaseModel], *,
              prompt_version: str, context: AgentContext, fast: bool = False) -> LLMResult:
         if agent_id in self.overrides:
             return self.overrides[agent_id](context)
-        return self.base.call(agent_id, messages, output_model, prompt_version=prompt_version, context=context,
-                              fast=fast)
+        data = {"confidence": 0.5} if output_model.__name__ == "ChallengerOutput" else {
+            "act_now_view": {"summary": "Test assessment."},
+            "inaction_view": {"summary": "Test baseline."},
+            "confidence": 0.5,
+        }
+        return LLMResult(output_model.model_validate(data), "ok", metrics(agent_id))
 
 
 def metrics(agent_id: str = "x") -> CallMetrics:

@@ -4,21 +4,18 @@ import logging
 import os
 import time
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any, Callable, Literal, Protocol
 
 from contracts_py.agents import AgentContext, CallMetrics
 from contracts_py.twin import OrganizationSettings
 from pydantic import BaseModel, ValidationError
 
-from agent_orchestration.mock import mock_output
-
 log = logging.getLogger(__name__)
 
 DEFAULT_BASE_URL = "https://api.sciforium.com/v1"
 StructuredOutput = Literal["auto", "json_schema", "function_calling"]
 STRUCTURED_OUTPUT_MODES: tuple[str, ...] = ("auto", "json_schema", "function_calling")
-AssessmentStatus = Literal["ok", "replayed", "fallback_cached", "unavailable", "invalid"]
+AssessmentStatus = Literal["ok", "unavailable", "invalid"]
 Messages = list[dict[str, str]]
 
 
@@ -46,7 +43,8 @@ class LLMResult:
 
 
 class LLMClient(Protocol):
-    model_label: str
+    @property
+    def model_label(self) -> str: ...
 
     def call(self, agent_id: str, messages: Messages, output_model: type[BaseModel], *, prompt_version: str,
              context: AgentContext, fast: bool = False) -> LLMResult: ...
@@ -135,32 +133,20 @@ def prompt_hash(model_id: str, prompt_version: str, messages: Messages, output_m
                 run_id: str | None = None) -> str:
     rendered = json.dumps(messages, sort_keys=True)
     if run_id:
-        # Scenario and result IDs embed the run ID; masking it lets a new run replay an earlier one.
+        # Scenario and result IDs embed the run ID; masking it keeps equivalent prompts comparable.
         rendered = rendered.replace(run_id, "run_id")
     payload = json.dumps([model_id, prompt_version, rendered, output_model.model_json_schema()], sort_keys=True)
     return hashlib.sha256(payload.encode()).hexdigest()
 
 
-def default_cache_dir() -> Path:
-    configured = os.environ.get("CANARY_LLM_CACHE_DIR")
-    if configured:
-        return Path(configured)
-    from agent_orchestration.prompts import find_repo_root
-
-    return find_repo_root() / "data" / "artifacts" / "llm_cache"
-
-
 class AgentLLM:
-    def __init__(self, settings: OrganizationSettings, *, cache_dir: Path | None = None,
-                 live_call: LiveCall = sciforium_call) -> None:
+    def __init__(self, settings: OrganizationSettings, *, live_call: LiveCall = sciforium_call) -> None:
         self.settings = settings
-        self.mode = settings.llm_mode
-        self.cache_dir = cache_dir or default_cache_dir()
         self.live_call = live_call
 
     @property
     def model_label(self) -> str:
-        return self.model_id() or self.model_id(fast=True) or self.mode
+        return self.model_id() or self.model_id(fast=True) or "live"
 
     def model_id(self, fast: bool = False) -> str | None:
         if fast:
@@ -196,18 +182,11 @@ class AgentLLM:
         digest = prompt_hash(model_id, prompt_version, messages, output_model, context.run_id)
         metrics = CallMetrics(model_id=model_id, prompt_version=prompt_version, prompt_hash=digest, latency_ms=0,
                               input_tokens=0, output_tokens=0)
-        if self.mode == "mock":
-            metrics.model_id = "mock"
-            return LLMResult(mock_output(output_model, context), "ok", metrics)
-        decision_id = context.brief.decision_id
-        if self.mode == "replay":
-            result = self._from_cache(agent_id, decision_id, digest, output_model, metrics, [])
-        else:
-            result = self._live(agent_id, decision_id, model_id, digest, messages, output_model, metrics)
+        result = self._live(agent_id, model_id, messages, output_model, metrics)
         result.errors = [*notes, *result.errors]
         return result
 
-    def _live(self, agent_id: str, decision_id: str, model_id: str, digest: str, messages: Messages, output_model: type[BaseModel],
+    def _live(self, agent_id: str, model_id: str, messages: Messages, output_model: type[BaseModel],
               metrics: CallMetrics) -> LLMResult:
         # Resolved before the attempts so a misconfigured mode fails loudly instead of looking like an outage.
         structured_output = self.structured_output()
@@ -230,45 +209,11 @@ class AgentLLM:
                 attempt_messages = [*messages, {"role": "user", "content":
                                     f"Your previous output failed validation:\n{exc}\nReturn a corrected output."}]
                 continue
-            except Exception as exc:  # network, auth or timeout: fall back to the cache
+            except Exception as exc:  # network, auth, configuration, or timeout
                 errors.append(f"live call failed: {exc}")
-                return self._from_cache(agent_id, decision_id, digest, output_model, metrics, errors, retries=attempt)
+                metrics.latency_ms = int((time.monotonic() - started) * 1000)
+                return LLMResult(None, "unavailable", metrics, retries=attempt, errors=errors)
             metrics.latency_ms = int((time.monotonic() - started) * 1000)
             metrics.input_tokens, metrics.output_tokens = reply.input_tokens, reply.output_tokens
-            self._write_cache(agent_id, decision_id, digest, model_id, metrics.prompt_version, output)
             return LLMResult(output, "ok", metrics, retries=attempt, errors=errors)
         return LLMResult(None, "invalid", metrics, retries=1, errors=errors)
-
-    def _agent_dir(self, agent_id: str) -> Path:
-        return self.cache_dir / agent_id
-
-    def _write_cache(self, agent_id: str, decision_id: str, digest: str, model_id: str, prompt_version: str, output: BaseModel) -> None:
-        path = self._agent_dir(agent_id) / f"{digest}.json"
-        path.parent.mkdir(parents=True, exist_ok=True)
-        record = {"agent_id": agent_id, "decision_id": decision_id, "model_id": model_id, "prompt_version": prompt_version,
-                  "prompt_hash": digest, "output": output.model_dump(mode="json")}
-        path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-
-    def _fallback(self, agent_id: str, decision_id: str) -> Path | None:
-        folder = self._agent_dir(agent_id)
-        candidates = []
-        for path in folder.glob("*.json") if folder.is_dir() else []:
-            record = json.loads(path.read_text(encoding="utf-8"))
-            if record.get("agent_id") == agent_id and record.get("decision_id") == decision_id:
-                candidates.append(path)
-        return max(candidates, key=lambda p: p.stat().st_mtime, default=None)
-
-    def _from_cache(self, agent_id: str, decision_id: str, digest: str, output_model: type[BaseModel],
-                    metrics: CallMetrics, errors: list[str], retries: int = 0) -> LLMResult:
-        exact = self._agent_dir(agent_id) / f"{digest}.json"
-        if exact.is_file():
-            path, status = exact, "replayed"
-        else:
-            fallback = self._fallback(agent_id, decision_id)
-            if fallback is None:
-                return LLMResult(None, "unavailable", metrics, retries,
-                                 [*errors, f"no cached answer for {agent_id} on {decision_id}"])
-            path, status = fallback, "fallback_cached"
-            errors = [*errors, f"cache miss for {digest}; using {path.stem}"]
-        record = json.loads(path.read_text(encoding="utf-8"))
-        return LLMResult(output_model.model_validate(record["output"]), status, metrics, retries, errors)  # type: ignore[arg-type]

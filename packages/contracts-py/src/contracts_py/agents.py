@@ -191,7 +191,7 @@ class AgentAssessment(Strict):
     plan_id: ID | None = None
     agent_id: ID
     pass_type: Literal["first_pass", "challenge"]
-    status: Literal["ok", "replayed", "fallback_cached", "unavailable", "invalid"]
+    status: Literal["ok", "unavailable", "invalid"]
     output: AgentOutput | None = None
     challenge: ChallengerOutput | None = None
     accepted_impacts: list[Impact] = Field(default_factory=list)

@@ -39,7 +39,7 @@ def test_route_uses_reachability_and_types(brief, people_brief, twin, settings) 
 
 
 def test_route_respects_enabled_agents_but_keeps_mandatory(brief, twin) -> None:
-    settings = OrganizationSettings(llm_mode="mock", enabled_agent_ids=["engineering"])
+    settings = OrganizationSettings(llm_mode="live", enabled_agent_ids=["engineering"])
     routed = route_agents(brief, twin=twin, engine=stub_engine, settings=settings)
     assert routed == ["finance", "engineering", "compliance"]
 

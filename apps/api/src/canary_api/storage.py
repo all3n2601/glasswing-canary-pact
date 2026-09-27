@@ -1,4 +1,4 @@
-"""Persistence for runs, users and revoked tokens: files and SQLite by default, Postgres when DATABASE_URL says so."""
+"""Persistence for twins, runs, users, and tokens; Postgres is used when configured."""
 
 import json
 import logging
@@ -15,6 +15,7 @@ from typing import Any, Callable, Protocol
 from contracts_py.api import UserPublic
 from contracts_py.events import Event, RunState
 from contracts_py.package import DecisionPackage, HumanDecision
+from contracts_py.twin import Twin
 
 log = logging.getLogger(__name__)
 
@@ -33,6 +34,10 @@ class StoredUser:
 
 
 class Storage(Protocol):
+    def save_twin(self, twin: Twin, *, active: bool = True) -> None: ...
+
+    def load_active_twin(self) -> Twin | None: ...
+
     def append_event(self, event: Event) -> None: ...
 
     def read_events(self, run_id: str) -> list[Event]: ...
@@ -68,7 +73,7 @@ def _user(user_id: str, email: str, display_name: str, role: str, created_at: An
 
 
 class FileStorage:
-    """Run events and state as files under the runs directory; users and revoked tokens in SQLite."""
+    """Test/local backend: run files plus SQLite users, tokens, and company twins."""
 
     def __init__(self, root: Path) -> None:
         self.root = root
@@ -81,12 +86,35 @@ class FileStorage:
                 "display_name TEXT NOT NULL, role TEXT NOT NULL, password_hash TEXT NOT NULL, created_at TEXT NOT NULL)"
             )
             db.execute("CREATE TABLE IF NOT EXISTS revoked_tokens (token_id TEXT PRIMARY KEY, expires_at TEXT NOT NULL)")
+            db.execute(
+                "CREATE TABLE IF NOT EXISTS twins (twin_version TEXT PRIMARY KEY, organization_id TEXT NOT NULL, "
+                "twin_json TEXT NOT NULL, active INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL)"
+            )
 
     def _users(self) -> sqlite3.Connection:
         return sqlite3.connect(self.users_path)
 
     def _dir(self, run_id: str) -> Path:
         return self.root / run_id
+
+    def save_twin(self, twin: Twin, *, active: bool = True) -> None:
+        with self._users() as db:
+            if active:
+                db.execute("UPDATE twins SET active = 0")
+            db.execute(
+                "INSERT INTO twins VALUES (?, ?, ?, ?, ?) "
+                "ON CONFLICT(twin_version) DO UPDATE SET organization_id=excluded.organization_id, "
+                "twin_json=excluded.twin_json, active=excluded.active, created_at=excluded.created_at",
+                (twin.version.twin_version, twin.organization.id, twin.model_dump_json(), int(active),
+                 twin.version.created_at.isoformat()),
+            )
+
+    def load_active_twin(self) -> Twin | None:
+        with self._users() as db:
+            row = db.execute(
+                "SELECT twin_json FROM twins WHERE active = 1 ORDER BY created_at DESC LIMIT 1"
+            ).fetchone()
+        return Twin.model_validate_json(row[0]) if row else None
 
     def append_event(self, event: Event) -> None:
         with (self._dir(event.run_id) / "events.jsonl").open("a") as handle:
@@ -166,9 +194,11 @@ POSTGRES_TABLES = [
     "CREATE TABLE IF NOT EXISTS canary_users (user_id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, "
     "display_name TEXT NOT NULL, role TEXT NOT NULL, password_hash TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL)",
     "CREATE TABLE IF NOT EXISTS canary_revoked_tokens (token_id TEXT PRIMARY KEY, expires_at TIMESTAMPTZ NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS canary_twins (twin_version TEXT PRIMARY KEY, organization_id TEXT NOT NULL, "
+    "twin JSONB NOT NULL, active BOOLEAN NOT NULL DEFAULT false, created_at TIMESTAMPTZ NOT NULL)",
 ]
 POSTGRES_TABLE_NAMES = ["canary_runs", "canary_events", "canary_packages", "canary_decisions", "canary_users",
-                        "canary_revoked_tokens"]
+                        "canary_revoked_tokens", "canary_twins"]
 DEFAULT_SCHEMA = "canary"
 # Supabase's Data API serves anon and authenticated; those roles (and PUBLIC) get nothing here. Row-level security
 # with no policies denies every row to them as well, while the API's own owner or pooler role bypasses it.
@@ -186,7 +216,7 @@ BEGIN
                                current_schema(), api_role);
             END IF;
             FOREACH table_name IN ARRAY ARRAY['canary_runs', 'canary_events', 'canary_packages', 'canary_decisions',
-                                              'canary_users', 'canary_revoked_tokens'] LOOP
+                                              'canary_users', 'canary_revoked_tokens', 'canary_twins'] LOOP
                 EXECUTE format('REVOKE ALL ON TABLE %I.%I FROM %I', current_schema(), table_name, api_role);
             END LOOP;
             EXECUTE format('REVOKE ALL ON SEQUENCE %I.canary_decisions_id_seq FROM %I', current_schema(), api_role);
@@ -238,6 +268,24 @@ class PostgresStorage:
         with self.pool.connection() as conn:
             cursor = conn.execute(query, params)  # type: ignore[arg-type]
             return cursor.fetchall() if cursor.description else []
+
+    def save_twin(self, twin: Twin, *, active: bool = True) -> None:
+        from psycopg.types.json import Jsonb
+
+        if active:
+            self._run("UPDATE canary_twins SET active = false WHERE active = true")
+        self._run(
+            "INSERT INTO canary_twins (twin_version, organization_id, twin, active, created_at) "
+            "VALUES (%s, %s, %s, %s, %s) ON CONFLICT (twin_version) DO UPDATE SET "
+            "organization_id = EXCLUDED.organization_id, twin = EXCLUDED.twin, "
+            "active = EXCLUDED.active, created_at = EXCLUDED.created_at",
+            (twin.version.twin_version, twin.organization.id, Jsonb(twin.model_dump(mode="json")), active,
+             twin.version.created_at),
+        )
+
+    def load_active_twin(self) -> Twin | None:
+        rows = self._run("SELECT twin FROM canary_twins WHERE active = true ORDER BY created_at DESC LIMIT 1")
+        return Twin.model_validate(rows[0][0]) if rows else None
 
     def append_event(self, event: Event) -> None:
         from psycopg.types.json import Jsonb
