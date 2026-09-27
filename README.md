@@ -67,7 +67,10 @@ The evidence that this goes wrong is public:
    contradict an engine impact are rejected. A validated new dependency is added to a copy of the
    twin, and the run is simulated and optimized again. Agents never supply numbers.
 7. **Engine.** Deterministic code computes savings, costs, pressure costs, constraint results,
-   risk scores and blast radius for each future. All engine and twin calls go through one module,
+   risk scores and blast radius for each future. It also re-simulates a plan with mitigations
+   (`mitigate`: reassign an owner, document a runbook, add a replacement feed) and ranks the
+   missing facts most likely to change the recommendation (`missing_questions`); both are being
+   wired into the decision package. All engine and twin calls go through one module,
    `apps/api/src/canary_api/engine_port.py`.
 8. **Decision package.** The recommendation, the futures comparison, naive and recommended
    portfolios, both blast radii, critical risks, assumptions and open questions. An approver
@@ -91,29 +94,50 @@ data/                        Synthetic Northstar twin and the two scenario brief
 
 Real today:
 
-- **The Northstar twin**, `data/synthetic_company.json`: 155 entities, 119 edges, 35 evidence
+- **The Northstar twin**, `data/synthetic_company.json`: 156 entities, 121 edges, 36 evidence
   records and 30 documents, loaded and validated by `packages/company-twin`. The company is
   synthetic.
 - **Two scenario briefs:** `data/vendor_scenario.json` (consolidate seven data vendors) and
-  `data/workforce_scenario.json` (eliminate eight roles behind two critical workflows).
+  `data/workforce_scenario.json` (eliminate eight staff roles behind two critical workflows).
 - **Live LLM agents** served through Sciforium's OpenAI-compatible API, with structured output,
   one retry and a timeout. Agent failures are surfaced; recorded advice is never substituted.
 - **The deterministic engine,** `packages/simulation-engine`: `simulate` for every future (act now,
   do nothing, wait), `quick_impact`, `compare_futures`, `optimize`, `blast_radius`,
-  `vendor_overlap` and `check_result`. Full mode falls back to expected value (p10 = p50 = p90)
-  until Monte Carlo sampling lands; quick mode reports point values without percentiles.
+  `vendor_overlap`, `check_result`, `mitigate` and `missing_questions`. Full mode falls back to
+  expected value (p10 = p50 = p90) until Monte Carlo sampling lands; quick mode reports point
+  values without percentiles. Mitigations and missing-fact questions are computed by the engine and
+  are being wired into the decision package; the UI does not show them yet.
+- **The vendor story.** Removing BeaconIQ and EchoMarket is the recommended plan. The dependency the
+  challenger is meant to find (EchoMarket's account intelligence also feeds vendor reconciliation, a
+  SOX control input) raises that plan's risk and calls for a mitigation, migrating EchoMarket's
+  account intelligence to another feed before EchoMarket is terminated; it does not make the plan
+  infeasible. What can change the recommendation is a missing fact: whether EchoMarket keeps its
+  history after termination. If it does not, the sales constraint fails and a different pair of
+  vendors wins.
+- **The workforce story.** Removing the eight staff roles outright is infeasible: two critical
+  workflows lose every qualified owner. With the mitigations (backup owners and runbooks) the plan
+  becomes conditionally feasible, with workflow and knowledge coverage restored.
+- **AdventureWorks support** is a pure function in `packages/company-twin` that turns Microsoft's
+  public AdventureWorks tables into a twin. It has no downloader; the tables must be fetched and
+  parsed separately.
 - **The orchestration, routing, merge and validation rules,** and the person-token guard.
 - **Authentication:** sign-up creates viewers; only an approver can record a decision. There is
   one demo approver, created from environment variables at startup.
 - **Storage:** files and SQLite by default, or Postgres when `DATABASE_URL` is set.
 - **A live-agent eval harness.**
 
-Synthetic or not yet built:
+Synthetic, not yet built, or known gaps:
 
 - **The company.** Northstar Technologies is synthetic, and so are its documents and evidence.
-- **Uncertainty ranges.** Every value is an expected value until Monte Carlo sampling lands.
+- **Uncertainty ranges.** Every value is an expected value (p10 = p50 = p90) until Monte Carlo
+  sampling lands.
+- **Owner capacity.** When a mitigation reassigns a workflow to a new owner, that owner's capacity
+  to take on the work is not modelled.
+- **Replacement feed cost.** The CinderSignals feed that replaces EchoMarket's account intelligence
+  carries a one-time cost but no recurring cost.
 
-Measured agent ablations can be produced with `uv run python -m canary_api.eval_cli`, which writes
+Measured agent ablations need live model access: `CANARY_ALLOW_LIVE=true uv run python -m
+canary_api.eval_cli --mode live` runs every configuration against the live agents and writes
 `data/artifacts/eval/ablation.csv`.
 
 ## Running it
@@ -136,10 +160,15 @@ pnpm dev:web    # Next.js on http://localhost:3000
 The API reads its active, versioned company twin from storage. The deterministic simulation engine runs
 directly against that record. Company twins, run events, decision packages, users, and approvals use
 PostgreSQL when `DATABASE_URL` is configured; the test/local fallback uses files and SQLite under `runs/`.
-The AdventureWorks importer streams Microsoft's public CSV source into memory and persists only the
-validated twin in the database; it does not generate a local company JSON fixture. Every imported
+The AdventureWorks importer is a pure tables-to-twin function: it has no downloader and reads no
+files, so the tables must be fetched and parsed before it is called, and it does not generate a local
+company JSON fixture. Every imported
 department receives a clearly labeled demo context pack with an owned workflow, operating knowledge,
 an outcome KPI, and traceable staffing evidence so cross-department scenarios can be exercised.
+
+Decision runs need live model access: set `CANARY_ALLOW_LIVE=true` and a Sciforium key
+(`SCIFORIUM_API_KEY`). Without `CANARY_ALLOW_LIVE=true` the API refuses decision runs with a 503;
+without a working key the agents fail and are reported as failed, never answered from recorded advice.
 
 Important environment variables (see `.env.example`; names only here):
 
@@ -201,3 +230,12 @@ Every commit on `dev` is also dated during the event.
 ## Team
 
 Adhithyan (Adhithyan245), Hemnaath (hemnaath04), M A Allen Febi, Mithuna Murugesh.
+
+## Disclaimer
+
+Canary Pact is an independent hackathon project. It is not affiliated with, endorsed by, or
+sponsored by any company, agency or regulator named here. Historical facts and figures come
+from the public sources cited. Alternative scenarios are illustrative model outputs based on
+those public figures, not statements of fact, predictions or findings about any company or
+person. Company names identify the subject only. No individual personal data is used; people
+appear only as roles. Not legal, financial or investment advice.
