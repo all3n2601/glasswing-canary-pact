@@ -150,6 +150,7 @@ def build_adventureworks_twin(
     ``tables`` maps every name in ``ADVENTUREWORKS_TABLES`` to its parsed rows
     (header-less, as in Microsoft's install script).  The result depends only on
     the arguments: ``twin_version`` defaults to ``adventureworks-<created_at date>``.
+    Derived DepartmentProfile fields are left for ``company_twin.build_twin`` to compute.
     """
     missing = [name for name in ADVENTUREWORKS_TABLES if name not in tables]
     if missing:
@@ -581,26 +582,6 @@ def build_adventureworks_twin(
                  snippet=f"{len(sales_headers)} sales orders and {len(sales_details)} lines determine commercial KPIs.",
                  synthetic=False),
     ]
-
-    current_document_coverage = {
-        entity_id
-        for document in documents
-        if document.status is DocumentStatus.current
-        for entity_id in document.covers_entity_ids
-    }
-    for profile in profiles:
-        owned = [entity for entity in entities if entity.department_id == profile.department_id]
-        profile.owned_entity_ids = [entity.id for entity in owned]
-        profile.critical_workflow_ids = [
-            entity.id for entity in owned
-            if entity.type is EntityType.workflow and entity.criticality in {Criticality.high, Criticality.critical}
-        ]
-        profile.kpi_ids = [entity.id for entity in owned if entity.type is EntityType.kpi]
-        profile.document_ids = [document.id for document in documents if document.department_id == profile.department_id]
-        covered = sum(workflow_id in current_document_coverage for workflow_id in profile.critical_workflow_ids)
-        profile.documentation_coverage = (
-            covered / len(profile.critical_workflow_ids) if profile.critical_workflow_ids else 1.0
-        )
 
     return Twin(
         version=VersionInfo(
