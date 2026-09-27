@@ -1,13 +1,16 @@
 import json
 import logging
+from collections import Counter
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from contracts_py.decision import Intervention
+from contracts_py.enums import InterventionKind, MitigationType
 from contracts_py.twin import ValidationIssue
 
 from .documents import documented_workflow_ids
-from .models import CompanyTwin, EntityType, Twin
+from .models import CompanyTwin, EntityType, Twin, entity_map
 from .validate import validate_twin
 
 log = logging.getLogger(__name__)
@@ -19,8 +22,20 @@ DOCUMENTED_PCT_DISAGREEMENT_TOLERANCE = 0.05
 MAX_OVERLAY_SNIPPET_LENGTH = 300
 
 
+# The entity types a catalogued mitigation may target; other mitigation types only need an existing target.
+MITIGATION_TARGET_TYPES = {
+    MitigationType.reassign_owner: {EntityType.workflow},
+    MitigationType.document_runbook: {EntityType.workflow, EntityType.knowledge_asset},
+    MitigationType.add_replacement_feed: {EntityType.dataset},
+}
+
+
 def default_fixture_path() -> Path:
     return Path(__file__).resolve().parents[4] / "data" / "synthetic_company.json"
+
+
+def default_mitigation_catalog_path() -> Path:
+    return default_fixture_path().parent / "mitigations.json"
 
 
 class TwinValidationError(ValueError):
@@ -162,3 +177,47 @@ def load_twin(twin_path: str | Path, snippets_path: str | Path | None = None) ->
     """
     snippets = json.loads(Path(snippets_path).read_text()) if snippets_path is not None else None
     return _prepare(json.loads(Path(twin_path).read_text()), snippets)
+
+
+def _check_reference(entry: Intervention, field: str, entity_id: Any, types: set[EntityType],
+                     ents: Mapping[str, Any]) -> None:
+    entity = ents.get(entity_id) if isinstance(entity_id, str) else None
+    allowed = " or ".join(sorted(t.value for t in types))
+    if entity is None:
+        raise ValueError(f"mitigation {entry.id}: {field} {entity_id!r} is not in the twin")
+    if entity.type not in types:
+        raise ValueError(f"mitigation {entry.id}: {field} {entity_id} is a {entity.type.value}, expected {allowed}")
+
+
+def load_mitigation_catalog(path: str | Path | None = None, twin: Twin | None = None) -> list[Intervention]:
+    """Load the mitigation catalog (plan E-07, section 11.8): a JSON array of ``contracts_py`` interventions.
+
+    ``path`` defaults to ``data/mitigations.json``. Every entry must be a mitigation (with its
+    explicit ``one_time_cost_usd``) and IDs must be unique. With ``twin`` given, each entry's
+    ``target_entity_id``, ``new_owner_id`` (a role) and ``params.replacement_vendor_id`` (a vendor)
+    must exist in it with the right entity type (``MITIGATION_TARGET_TYPES`` for the target).
+    Raises ``ValueError`` (a ``pydantic.ValidationError`` for an entry that is not an intervention).
+    """
+    catalog_path = Path(path) if path else default_mitigation_catalog_path()
+    raw = json.loads(catalog_path.read_text())
+    if not isinstance(raw, list):
+        raise ValueError(f"{catalog_path}: the mitigation catalog must be a JSON array of interventions")
+    entries = [Intervention.model_validate(item) for item in raw]
+    actions = [e.id for e in entries if e.kind is not InterventionKind.mitigation]
+    if actions:
+        raise ValueError(f"{catalog_path}: catalog entries must be mitigations, not actions: {actions}")
+    repeated = sorted(i for i, n in Counter(e.id for e in entries).items() if n > 1)
+    if repeated:
+        raise ValueError(f"{catalog_path}: mitigation ids must be unique, repeated: {repeated}")
+    if twin is not None:
+        ents = entity_map(twin)
+        all_types = set(EntityType)
+        for entry in entries:
+            _check_reference(entry, "target_entity_id", entry.target_entity_id,
+                             MITIGATION_TARGET_TYPES.get(entry.type, all_types), ents)
+            if entry.new_owner_id is not None:
+                _check_reference(entry, "new_owner_id", entry.new_owner_id, {EntityType.role}, ents)
+            if "replacement_vendor_id" in entry.params:
+                _check_reference(entry, "params.replacement_vendor_id", entry.params["replacement_vendor_id"],
+                                 {EntityType.vendor}, ents)
+    return entries

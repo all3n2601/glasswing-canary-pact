@@ -2,14 +2,22 @@
 
 Covers: load_twin with and without a snippets file, documented_pct derivation and its
 disagreement warning, invalid references failing with readable validate_twin errors, and
-every critical edge on the real fixture carrying evidence and a confidence score.
+every critical edge on the real fixture carrying evidence and a confidence score, and the
+mitigation catalog loader (plan E-07) checking kinds, unique ids and twin references.
 """
 
 from __future__ import annotations
 
 import json
 
-from company_twin.loader import default_fixture_path, load_twin
+import pytest
+
+from company_twin.loader import (
+    default_fixture_path,
+    default_mitigation_catalog_path,
+    load_mitigation_catalog,
+    load_twin,
+)
 from company_twin.validate import validate_twin
 
 
@@ -184,3 +192,54 @@ def test_story_gaps_lower_documentation_coverage_of_the_owning_departments():
     for workflow in ("wf_billing_recon", "wf_financial_close"):
         assert coverage[ents[workflow].department_id] < 1.0
     assert "wf_invoicing" in documented  # a current SOP with no undocumented knowledge behind it counts
+
+
+CATALOG = [
+    {"id": "mit_close_backup", "kind": "mitigation", "type": "reassign_owner", "target_entity_id": "wf_financial_close",
+     "new_owner_id": "role_controller", "duration_days": 20, "one_time_cost_usd": 15000, "rationale": "Train a backup"},
+    {"id": "mit_lineage_runbook", "kind": "mitigation", "type": "document_runbook",
+     "target_entity_id": "kn_warehouse_lineage", "one_time_cost_usd": 8000, "params": {"documented_pct": 0.8},
+     "rationale": "Write down the lineage"},
+    {"id": "mit_account_feed", "kind": "mitigation", "type": "add_replacement_feed",
+     "target_entity_id": "ds_account_intel", "one_time_cost_usd": 250000,
+     "params": {"replacement_vendor_id": "vendor_apex"}, "rationale": "Move the feed to Apex"},
+]
+
+
+def _write_catalog(tmp_path, entries) -> str:
+    path = tmp_path / "mitigations.json"
+    path.write_text(json.dumps(entries))
+    return str(path)
+
+
+def test_mitigation_catalog_loads_and_checks_references_against_the_twin(tmp_path):
+    twin = load_twin(default_fixture_path())
+    catalog = load_mitigation_catalog(_write_catalog(tmp_path, CATALOG), twin)
+    assert [m.id for m in catalog] == ["mit_close_backup", "mit_lineage_runbook", "mit_account_feed"]
+    assert catalog[0].new_owner_id == "role_controller" and catalog[2].one_time_cost_usd == 250000
+    assert load_mitigation_catalog(_write_catalog(tmp_path, CATALOG)) == catalog
+    assert default_mitigation_catalog_path() == default_fixture_path().parent / "mitigations.json"
+
+
+@pytest.mark.parametrize(("change", "message"), [
+    ({"kind": "action", "type": "remove_roles"}, "must be mitigations"),
+    ({"target_entity_id": "wf_missing"}, "target_entity_id 'wf_missing' is not in the twin"),
+    ({"new_owner_id": "role_missing"}, "new_owner_id 'role_missing' is not in the twin"),
+    ({"target_entity_id": "kn_warehouse_lineage"}, "is a knowledge_asset, expected workflow"),
+    ({"new_owner_id": "role_controller", "target_entity_id": "wf_billing_recon", "id": "mit_account_feed"},
+     "must be unique"),
+])
+def test_mitigation_catalog_rejects_bad_entries(tmp_path, change, message):
+    twin = load_twin(default_fixture_path())
+    entries = [{**CATALOG[0], **change}, *CATALOG[1:]]
+    with pytest.raises(ValueError, match=message):
+        load_mitigation_catalog(_write_catalog(tmp_path, entries), twin)
+
+
+def test_mitigation_catalog_checks_the_replacement_vendor_type(tmp_path):
+    twin = load_twin(default_fixture_path())
+    entries = [*CATALOG[:2], {**CATALOG[2], "params": {"replacement_vendor_id": "role_controller"}}]
+    with pytest.raises(ValueError, match="replacement_vendor_id role_controller is a role, expected vendor"):
+        load_mitigation_catalog(_write_catalog(tmp_path, entries), twin)
+    with pytest.raises(ValueError, match="JSON array"):
+        load_mitigation_catalog(_write_catalog(tmp_path, {"mitigations": CATALOG}), twin)
