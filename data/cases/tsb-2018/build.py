@@ -28,7 +28,7 @@ SOURCES = {
     "fca_notice": "https://www.fca.org.uk/publication/final-notices/tsb-bank-plc-2022.pdf",
     "fca_press": "https://www.fca.org.uk/news/press-releases/tsb-fined-48m-operational-resilience-failings",
     "pra_press": "https://www.bankofengland.co.uk/news/2022/december/tsb-fined-for-operational-resilience-failings",
-    "savings": "https://www.computerweekly.com/news/2240242809/Sabadell-to-migrate-TSB-IT-to-proprietary-banking-platform-with-450m-sweetener",
+    "savings": "https://www.grupbancsabadell.com/corp/files/1454335686414/en_offer_doc_offer_document.pdf",  # Banco Sabadell offer document for TSB, p16
     "charges": "https://www.computing.co.uk/feature/3070358/tsb-pins-gbp330m-cost-on-it-meltdown-as-it-posts-gbp115m-annual-loss",
     "ara2018": "https://www.tsb.co.uk/content/dam/tsb-public/documents/investors/financial-results-and-reports/2018/tsb-banking-group-ara-2018.pdf",
     "fx": "https://www.federalreserve.gov/releases/g5a/20190102/",
@@ -215,7 +215,7 @@ def build_entities(budgets, ftes):
             geographies=["UK", "ES", "other"], history_years=0, freshness_days=1, accuracy=0.8,
             permitted_uses=["platform_components"], evidence_refs=["ev_tsb_fourth_parties"]),
     ]
-    prov("vendor_lbg.annual_cost_usd", saving, "sourced", "savings",
+    prov("vendor_lbg.annual_cost_usd", saving, "modeled", "savings",
          "Expected net saving GBP 160M a year (Sabadell 2015 offer) used as the recurring cost the plan stops; net of the new provider's run cost")
     prov("vendor_lbg.migration_cost_usd", 0, "modeled", "savings", "Migration build treated as sunk: funded by LBG's GBP 450M contribution (sourced)")
     prov("vendor_lbg.retains_history_after_termination", "null (unknown at decision time)", "modeled", "fca_notice",
