@@ -1577,7 +1577,7 @@ export interface DecisionPackage {
 export interface Recommendation {
   plan_id?: string | null;
   future: Future;
-  action?: "proceed" | "do_not_proceed" | "delay";
+  action?: "proceed" | "proceed_with_mitigations" | "do_not_proceed" | "delay";
   result_id: string;
   headline: string;
   claims?: Claim[];
