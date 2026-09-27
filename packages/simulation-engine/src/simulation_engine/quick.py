@@ -25,7 +25,8 @@ from .propagation import DELAYED_AFTER_DAYS, Propagation, impact_id, impact_ledg
 from .risk import risk_score
 from .value import price_harms, value_breakdown
 
-QUICK_ASSUMPTION = "Quick mode: midpoint edge strengths and point values; pressures are priced by compare_futures"
+QUICK_ASSUMPTION = ("Quick mode: midpoint edge strengths; every value is a point estimate; baseline pressures are "
+                    "priced by simulate")
 
 
 def _savings_impacts(applied: AppliedScenario, interventions: list[Intervention], *, decision_id: str,
@@ -58,8 +59,8 @@ def _priced(impacts: list[Impact], by_impact: dict[str, int]) -> list[Impact]:
 
 def evaluate(twin: Twin, interventions: list[Intervention], *, brief: DecisionBrief | None,
              settings: OrganizationSettings, run_id: str, scenario_id: str, result_id: str,
-             plan_id: str | None = None) -> SimulationResult:
-    """One act-now quick evaluation of ``interventions`` on a clone of ``twin``."""
+             plan_id: str | None = None, future: Future = Future.act_now) -> SimulationResult:
+    """One quick evaluation of ``interventions`` on a clone of ``twin``, without baseline pressures."""
     horizon = brief.horizon_days if brief else settings.default_horizon_days
     decision_id = brief.decision_id if brief else "dec_adhoc"
     constraints = brief.constraints if brief else []
@@ -85,7 +86,7 @@ def evaluate(twin: Twin, interventions: list[Intervention], *, brief: DecisionBr
 
     assumptions = [QUICK_ASSUMPTION, *applied.assumptions]
     if applied.termination_cost_usd or applied.migration_cost_usd:
-        assumptions.append(f"transition_cost_usd includes ${applied.termination_cost_usd:,} vendor termination and "
+        assumptions.append(f"transition_cost_usd includes ${applied.termination_cost_usd:,} termination and "
                            f"${applied.migration_cost_usd:,} migration")
     if priced.displaced_work_usd:
         assumptions.append(f"added_cost_usd includes ${priced.displaced_work_usd:,} displaced work: harmed workflows "
@@ -105,7 +106,7 @@ def evaluate(twin: Twin, interventions: list[Intervention], *, brief: DecisionBr
 
     departments = sorted({i.affected_department for i in impacts if i.affected_department})
     return SimulationResult(
-        result_id=result_id, run_id=run_id, scenario_id=scenario_id, future=Future.act_now, plan_id=plan_id,
+        result_id=result_id, run_id=run_id, scenario_id=scenario_id, future=future, plan_id=plan_id,
         mode="quick", intervention_ids=[i.id for i in interventions], value=value, goal_met=met,
         constraint_results=results, impacts=impacts, workflow_coverage=coverage,
         risk=risk_score(metrics, impacts, goal_missed=brief is not None and not met, constraints=constraints,

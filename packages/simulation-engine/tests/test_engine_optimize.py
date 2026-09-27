@@ -63,7 +63,8 @@ def test_v4_recommended_is_beacon_plus_echo_ranked_first_with_every_line_separat
     v = result.value
     assert v.gross_savings_usd == 2_300_000_000
     assert v.transition_cost_usd == 220_000_000
-    assert "$90,000,000 vendor termination and $130,000,000 migration" in " ".join(result.assumptions)
+    assert "$90,000,000 termination and $130,000,000 migration" in " ".join(result.assumptions)
+    assert (result.value.termination_cost_usd, result.value.migration_cost_usd) == (90_000_000, 130_000_000)
     assert 100_000_000 <= v.added_cost_usd <= 140_000_000
     assert v.expected_business_loss_usd == 0
     assert 1_900_000_000 <= v.net_value_usd <= 2_000_000_000
@@ -146,6 +147,18 @@ def test_non_vendor_briefs_evaluate_the_single_proposed_plan():
     assert comparison.naive.intervention_ids == [item.id for item in WORKFORCE.candidate_interventions]
     assert not comparison.naive.result.feasible
     assert comparison.recommended is None
+
+
+def test_the_single_non_vendor_plan_is_plan_naive_and_recommended_only_when_feasible():
+    comparison = optimize(TWIN, WORKFORCE, run_id="run_opt")
+    assert comparison.naive.plan_id == "plan_naive" and comparison.alternatives == []
+    assert comparison.naive.rank is None and check_result(comparison, TWIN) == []
+
+    safe = WORKFORCE.model_copy(update={"constraints": []})
+    relaxed = optimize(TWIN, safe, run_id="run_opt")
+    assert relaxed.recommended is not None and relaxed.recommended.plan_id == "plan_naive"
+    assert relaxed.recommended.rank == 1
+    assert check_result(relaxed, TWIN) == []
 
 
 def test_vendor_entities_carry_the_exit_and_migration_costs_the_engine_charges():
