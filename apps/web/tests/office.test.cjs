@@ -7,7 +7,7 @@ const ts = require('typescript');
 function load(name, globals = {}) {
   const exports={};
   const {outputText}=ts.transpileModule(readFileSync(resolve(__dirname,'../lib',name),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}});
-  vm.runInNewContext(outputText,{exports,...globals}); return exports;
+  vm.runInNewContext(outputText,{exports,AbortSignal,DOMException,TypeError,...globals}); return exports;
 }
 const {reconcileSlots,officePosition}=load('office-layout.ts');
 const {mergeRunEvents,boardParticipants}=load('run-events.ts');
@@ -172,4 +172,85 @@ test('canceling between run polls removes the pending timer',async()=>{
   });
   await assert.rejects(waitForPackage('run_a',1000,undefined,controller.signal),{name:'AbortError'});
   assert.equal(calls,1);assert.equal(polls,1);assert.equal(canceled,1);
+});
+
+function recoveryClient(fetch, onPause=()=>{}) {
+  let now=0;
+  return load('canary-api-client.ts',{
+    fetch,
+    Date:class extends Date {static now(){return now;}},
+    setTimeout:(callback,ms)=>{now+=ms;onPause(ms);queueMicrotask(callback);return 1;},
+    clearTimeout:()=>{},
+  });
+}
+
+test('a temporary auth outage during profile loading recovers without another run',async()=>{
+  let calls=0;
+  const {canaryApi}=recoveryClient(async(url)=>{
+    assert.match(url,/office-profile$/);
+    return ++calls===1
+      ? Response.json({detail:'Authentication is temporarily unavailable.'},{status:503})
+      : Response.json({twin_version:'frozen_baseline'});
+  });
+  assert.equal((await canaryApi.officeProfile('run_a')).twin_version,'frozen_baseline');
+  assert.equal(calls,2);
+});
+
+test('event history retries network failures with the same cursor',async()=>{
+  let calls=0;
+  const {canaryApi}=recoveryClient(async(url)=>{
+    assert.match(url,/run_a\/event-log\?after_sequence=42$/);
+    if (++calls===1) throw new TypeError('NetworkError when attempting to fetch resource.');
+    return Response.json({events:[],next_sequence:42,has_more:false,terminal:true});
+  });
+  assert.equal((await canaryApi.eventLog('run_a',42)).next_sequence,42);
+  assert.equal(calls,2);
+});
+
+test('run polling survives exhausted read retries and a temporary package outage',async()=>{
+  let reads=0, packages=0;
+  const states=[], pauses=[];
+  const {waitForPackage}=recoveryClient(async(url)=>{
+    if (url.endsWith('/package')) {
+      if (++packages===1) throw new TypeError('Connection lost');
+      return Response.json({package_id:'pkg_a'});
+    }
+    assert.equal(url,'/api/canary/runs/run_a');
+    if (++reads<=3) return Response.json({detail:'Authentication is temporarily unavailable.'},{status:503});
+    return Response.json(reads===4 ? {status:'running_agents'} : {status:'awaiting_approval',package_id:'pkg_a'});
+  },ms=>pauses.push(ms));
+  assert.equal((await waitForPackage('run_a',30000,state=>states.push(state.status))).package_id,'pkg_a');
+  assert.deepEqual(states,['running_agents','awaiting_approval']);
+  assert.equal(reads,5);assert.equal(packages,2);
+  assert.ok(pauses.every(ms=>ms>=1000),'status polling must not hammer auth four times a second');
+});
+
+test('writes, expired sessions, missing runs, and actual failed runs are not retried',async()=>{
+  for (const status of [401,404]) {
+    let calls=0;
+    const {canaryApi}=recoveryClient(async()=>{calls++;return Response.json({detail:'Unavailable'},{status});});
+    await assert.rejects(canaryApi.run('run_a'),error=>error.status===status);
+    assert.equal(calls,1);
+  }
+  let writes=0;
+  const write=recoveryClient(async()=>{writes++;throw new TypeError('Response lost after accepting the run');});
+  await assert.rejects(write.canaryApi.createDecision({}),/Response lost/);
+  assert.equal(writes,1);
+  let reads=0;
+  const failed=recoveryClient(async()=>{reads++;return Response.json({status:'failed'});});
+  await assert.rejects(failed.waitForPackage('run_a'),/simulation run failed/);
+  assert.equal(reads,1);
+});
+
+test('persistent outages respect the polling deadline',async()=>{
+  const {waitForPackage}=recoveryClient(async()=>Response.json({detail:'Offline'},{status:503}));
+  await assert.rejects(waitForPackage('run_a',5000),error=>error.status===504);
+});
+
+test('switching runs cancels a transient-error retry before it makes another request',async()=>{
+  const controller=new AbortController();
+  let calls=0;
+  const {canaryApi}=recoveryClient(async()=>{calls++;throw new TypeError('Offline');},()=>controller.abort());
+  await assert.rejects(canaryApi.eventLog('old_run',12,controller.signal),{name:'AbortError'});
+  assert.equal(calls,1);
 });
