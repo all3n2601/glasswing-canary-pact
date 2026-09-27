@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Callable, Coroutine, Literal
 
 from agent_orchestration import run_decision
+from agent_orchestration.llm import cache_has_decision
 from pydantic import BaseModel
 
 from contracts_py.api import ReplayInfo
@@ -83,10 +84,20 @@ def live_allowed() -> bool:
     return os.environ.get("CANARY_ALLOW_LIVE", "").strip().lower() == "true"
 
 
-def resolve_llm_settings(settings: OrganizationSettings, llm_mode: LlmMode | None) -> tuple[OrganizationSettings, bool]:
-    mode = llm_mode or settings.llm_mode
-    # An empty replay cache would mark every agent unavailable, so the run falls back to mock answers.
-    fell_back = mode == "replay" and runtime.cache_is_empty(runtime.llm_cache_dir())
+def default_llm_mode() -> LlmMode:
+    # Live is the default only where live calls are allowed; each live agent still falls back to the cache.
+    return "live" if live_allowed() else "replay"
+
+
+def resolve_llm_settings(settings: OrganizationSettings, llm_mode: LlmMode | None,
+                         decision_id: str | None = None) -> tuple[OrganizationSettings, bool]:
+    mode = llm_mode or default_llm_mode()
+    # With no recorded answers for this decision every agent would be unavailable, so it runs on mock answers.
+    cache_dir = runtime.llm_cache_dir()
+    if decision_id is None:
+        fell_back = mode == "replay" and runtime.cache_is_empty(cache_dir)
+    else:
+        fell_back = mode == "replay" and not cache_has_decision(cache_dir, decision_id)
     return settings.model_copy(update={"llm_mode": "mock" if fell_back else mode}), fell_back
 
 
@@ -188,7 +199,7 @@ async def orchestrate(run_id: str, brief: DecisionBrief, twin: Twin, settings: O
                       llm_mode: LlmMode | None) -> None:
     loop = asyncio.get_running_loop()
     try:
-        run_settings, fell_back = resolve_llm_settings(settings, llm_mode)
+        run_settings, fell_back = resolve_llm_settings(settings, llm_mode, brief.decision_id)
         emit = ThreadEmitter(run_id, loop, twin, [MOCK_FALLBACK_ASSUMPTION] if fell_back else [])
         # AgentLLM.model_label is a property, which pyright treats as not matching the LLMClient attribute.
         llm: Any = runtime.build_llm(run_settings)

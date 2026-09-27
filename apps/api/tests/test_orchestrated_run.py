@@ -132,7 +132,7 @@ def test_empty_replay_cache_falls_back_to_mock_with_a_package_assumption(client,
     # Live tests write their answers to the shared cache, so this one points at an empty directory.
     monkeypatch.setenv("CANARY_LLM_CACHE_DIR", str(tmp_path / "empty_cache"))
     assert runtime.cache_is_empty(runtime.llm_cache_dir())
-    run_id = client.post("/decisions", headers=auth_headers(client), json=brief_json).json()["run_id"]
+    run_id = client.post("/decisions?llm_mode=replay", headers=auth_headers(client), json=brief_json).json()["run_id"]
     wait_for(client, run_id, "awaiting_approval")
     events = runtime.bus.runs[run_id].events
     assert events[0].type is EventType.run_created
@@ -145,9 +145,9 @@ def test_empty_replay_cache_falls_back_to_mock_with_a_package_assumption(client,
 
 def test_replay_with_cached_answers_stays_in_replay(monkeypatch, tmp_path) -> None:
     (tmp_path / "finance").mkdir()
-    (tmp_path / "finance" / "abc.json").write_text(json.dumps({"agent_id": "finance"}))
+    (tmp_path / "finance" / "abc.json").write_text(json.dumps({"agent_id": "finance", "decision_id": "dec_a"}))
     monkeypatch.setenv("CANARY_LLM_CACHE_DIR", str(tmp_path))
-    resolved, fell_back = runs.resolve_llm_settings(OrganizationSettings(), None)
+    resolved, fell_back = runs.resolve_llm_settings(OrganizationSettings(), "replay", "dec_a")
     assert (resolved.llm_mode, fell_back) == ("replay", False)
     assert runtime.build_llm(resolved).cache_dir == tmp_path
     live, fell_back = runs.resolve_llm_settings(OrganizationSettings(), "live")

@@ -210,7 +210,7 @@ async def create_decision(brief: DecisionBrief, llm_mode: runs.LlmMode | None = 
         raise HTTPException(status_code=422, detail=exc.errors(include_url=False)) from exc
     if runtime.sim_mode_error:
         raise HTTPException(status_code=503, detail=f"Decision runs are disabled: {runtime.sim_mode_error}")
-    if (llm_mode or runtime.settings().llm_mode) == "live":
+    if (llm_mode or runs.default_llm_mode()) == "live":
         if not runs.live_allowed():
             raise HTTPException(status_code=403, detail="llm_mode=live is disabled; set CANARY_ALLOW_LIVE=true to allow it")
         if runtime.structured_output_error:
