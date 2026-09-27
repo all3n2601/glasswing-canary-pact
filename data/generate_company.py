@@ -622,7 +622,7 @@ doc("doc_cs_runbook", "Customer onboarding and escalation runbook", "runbook",
     summary="Onboarding steps and escalation paths for enterprise accounts.")
 
 doc("doc_sop_financial_close", "Monthly financial close SOP", "sop", department_id="dept_finance",
-    status="current", covers=["wf_financial_close", "kn_warehouse_lineage"],
+    status="current", covers=["wf_financial_close"],
     owner_role_id="role_controller",
     summary="Monthly close steps; defers warehouse-lineage questions to the Data Platform Lead.")
 evi("ev_sop_financial_close_lineage", "workflow_map", "doc_sop_financial_close",

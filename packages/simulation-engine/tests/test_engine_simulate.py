@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 import pytest
 from contracts_py.decision import ENGINE_METRICS, CandidatePlan, DecisionBrief, Intervention, Scenario
-from contracts_py.enums import ActionType, EntityType, Future, InterventionKind
+from contracts_py.enums import ActionType, DocumentStatus, EntityType, Future, InterventionKind
 from contracts_py.twin import OrganizationSettings, RiskWeights
 
 from company_twin import load_twin
@@ -225,19 +225,33 @@ def test_utilisation_above_one_makes_a_cut_remove_more_capacity():
         pytest.approx(0.1)
 
 
-def test_documentation_coverage_downgrades_stranded_workflows_one_severity_level():
+def test_only_documented_stranded_workflows_in_documented_departments_are_downgraded():
     result = quick_impact(TWIN, WORKFORCE.candidate_interventions, brief=WORKFORCE)
     stranded = {c.workflow_id for c in result.workflow_coverage if c.stranded}
     assert {"wf_financial_close", "wf_billing_recon"} <= stranded
     harms = [i for i in result.impacts if i.affected_entity in stranded and i.polarity.value == "harm"]
-    assert harms and all("documentation coverage" in " ".join(i.assumptions) for i in harms)
-    undocumented = TWIN.model_copy(deep=True)
-    for p in undocumented.department_profiles:
+    # The story gaps count: the outdated runbook and the undocumented lineage soften nothing.
+    assert harms and not any("documentation coverage" in " ".join(i.assumptions) for i in harms)
+    assert downgrade_documented(harms, result.workflow_coverage, TWIN) == harms
+
+    documented = TWIN.model_copy(deep=True)
+    for d in documented.documents:
+        if d.id == "doc_billing_recon_runbook":
+            d.status, d.last_reviewed = DocumentStatus.current, documented.version.as_of_date
+    for e in documented.entities:
+        if e.id == "kn_billing_exception":
+            e.documented_pct = 0.9
+    for p in documented.department_profiles:
+        p.documentation_coverage = 1.0
+    lowered = downgrade_documented(harms, result.workflow_coverage, documented)
+    recon = [n for n, i in enumerate(harms) if i.affected_entity == "wf_billing_recon"]
+    assert recon and all(lowered[n].severity == max(1, harms[n].severity - 1) for n in recon if harms[n].severity > 1)
+    assert all("documentation coverage" in " ".join(lowered[n].assumptions) for n in recon if harms[n].severity > 1)
+    close = [n for n, i in enumerate(harms) if i.affected_entity == "wf_financial_close"]
+    assert all(lowered[n] == harms[n] for n in close)  # kn_warehouse_lineage is still undocumented
+    for p in documented.department_profiles:
         p.documentation_coverage = 0.0
-    kept = downgrade_documented(harms, result.workflow_coverage, undocumented)
-    assert [i.severity for i in kept] == [i.severity for i in harms]
-    lowered = downgrade_documented(harms, result.workflow_coverage, TWIN)
-    assert [i.severity for i in lowered] == [max(1, i.severity - 1) for i in harms]
+    assert downgrade_documented(harms, result.workflow_coverage, documented) == harms
 
 
 def test_workflow_coverage_follows_rule_11():

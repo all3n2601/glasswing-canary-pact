@@ -1,5 +1,5 @@
 from .adventureworks import build_adventureworks_twin, fetch_adventureworks
-from .documents import document_is_stale
+from .documents import document_is_stale, documented_workflow_ids
 from .graph import (
     affected_departments,
     blast_set,
@@ -9,7 +9,7 @@ from .graph import (
     reachable_departments,
     upstream_paths,
 )
-from .loader import load_company_twin, load_twin
+from .loader import TwinValidationError, build_twin, load_company_twin, load_twin
 from .models import (
     AgentView,
     CompanyTwin,
@@ -67,6 +67,9 @@ __all__ = [
     "aggregate_domain_graph",
     "department_detail",
     "document_is_stale",
+    "documented_workflow_ids",
+    "build_twin",
+    "TwinValidationError",
     "build_adventureworks_twin",
     "fetch_adventureworks",
 ]
