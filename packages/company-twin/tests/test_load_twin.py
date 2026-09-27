@@ -105,3 +105,82 @@ def test_fixture_passes_validate_twin_with_zero_errors():
     issues = validate_twin(twin)
     errors = [i for i in issues if i.severity == "error"]
     assert not errors, errors
+
+
+# ---- build_twin: in-memory input (plan B-01, B-04), e.g. a twin loaded from the database ----
+
+def _fixture_data() -> dict:
+    return json.loads(default_fixture_path().read_text())
+
+
+def test_build_twin_from_a_mapping_matches_load_twin_and_validates():
+    from company_twin import build_twin
+
+    built = build_twin(_fixture_data())
+    assert built.model_dump_json() == load_twin(default_fixture_path()).model_dump_json()
+    assert [i for i in validate_twin(built) if i.severity == "error"] == []
+
+
+def test_build_twin_does_not_mutate_its_input_and_is_idempotent():
+    from company_twin import build_twin
+
+    source = load_twin(default_fixture_path())
+    before = source.model_dump_json()
+    once = build_twin(source)
+    assert source.model_dump_json() == before
+    # A twin built before it was persisted builds to the same twin after it is loaded again.
+    assert build_twin(json.loads(once.model_dump_json())).model_dump_json() == once.model_dump_json()
+
+
+def test_build_twin_derives_every_profile_field_from_the_twin_itself():
+    from company_twin import build_twin
+
+    data = _fixture_data()
+    for profile in data["department_profiles"]:
+        for field in ("owned_entity_ids", "critical_workflow_ids", "kpi_ids", "document_ids"):
+            profile[field] = []
+        profile["documentation_coverage"] = 0.0
+    built = build_twin(data)
+    reference = load_twin(default_fixture_path())
+    assert [p.model_dump() for p in built.department_profiles] == [p.model_dump() for p in reference.department_profiles]
+    assert all(p.owned_entity_ids for p in built.department_profiles)
+
+
+def test_build_twin_overlays_snippets_before_persistence():
+    from company_twin import build_twin
+
+    evidence_id = _fixture_data()["evidence"][0]["id"]
+    built = build_twin(_fixture_data(), {evidence_id: "FINAL WORDING", "ev_not_in_twin": "ignored"})
+    assert next(e for e in built.evidence if e.id == evidence_id).snippet == "FINAL WORDING"
+    assert build_twin(_fixture_data(), None).model_dump_json() == build_twin(_fixture_data()).model_dump_json()
+
+
+def test_build_twin_raises_readable_errors_for_an_invalid_twin():
+    import pytest
+    from company_twin import TwinValidationError, build_twin
+
+    data = _fixture_data()
+    data["edges"][0]["target"] = "ent_missing"
+    with pytest.raises(TwinValidationError) as raised:
+        build_twin(data)
+    assert raised.value.issues and all(i.severity == "error" for i in raised.value.issues)
+    assert "ent_missing" in str(raised.value)
+
+
+def test_story_gaps_lower_documentation_coverage_of_the_owning_departments():
+    from company_twin import documented_workflow_ids, entity_map
+
+    twin = load_twin(default_fixture_path())
+    ents = entity_map(twin)
+    coverage = {p.department_id: p.documentation_coverage for p in twin.department_profiles}
+    documented = documented_workflow_ids(twin)
+    # wf_billing_recon's only runbook is outdated; wf_financial_close's SOP defers to kn_warehouse_lineage,
+    # which is 20% documented and covered by no runbook or SOP.
+    assert "wf_billing_recon" not in documented and "wf_financial_close" not in documented
+    assert all(d.status.value != "current" for d in twin.documents
+               if d.doc_type.value in ("runbook", "sop") and "wf_billing_recon" in d.covers_entity_ids)
+    assert not any("kn_warehouse_lineage" in d.covers_entity_ids for d in twin.documents
+                   if d.doc_type.value in ("runbook", "sop"))
+    for workflow in ("wf_billing_recon", "wf_financial_close"):
+        assert coverage[ents[workflow].department_id] < 1.0
+    assert "wf_invoicing" in documented  # a current SOP with no undocumented knowledge behind it counts

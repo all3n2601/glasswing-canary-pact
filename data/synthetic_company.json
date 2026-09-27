@@ -5105,8 +5105,7 @@
       "status": "current",
       "sensitivity": "general",
       "covers_entity_ids": [
-        "wf_financial_close",
-        "kn_warehouse_lineage"
+        "wf_financial_close"
       ],
       "framework_refs": [],
       "summary": "Monthly close steps; defers warehouse-lineage questions to the Data Platform Lead.",

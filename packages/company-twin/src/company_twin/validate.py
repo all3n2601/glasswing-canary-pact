@@ -14,7 +14,6 @@ from __future__ import annotations
 
 from contracts_py.twin import ValidationIssue
 
-from .loader import load_company_twin
 from .models import EntityType, Relation, Twin
 
 # schema v2.2.0 section 5.3 "Required fields by type", now including the 2.1.1 additions
@@ -225,6 +224,8 @@ def validate_twin(twin: Twin) -> list[ValidationIssue]:
 
 
 def main() -> int:
+    from .loader import load_company_twin  # the CLI only; the loader itself validates through this module
+
     twin = load_company_twin()
     issues = validate_twin(twin)
     errors = [i for i in issues if i.severity == "error"]
