@@ -60,6 +60,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     auth.seed_demo_approver()
     auth.warn_if_no_approver()
     runtime.check_structured_output()
+    runtime.check_sim_mode()
     try:
         yield
     finally:
@@ -207,6 +208,8 @@ async def create_decision(brief: DecisionBrief, llm_mode: runs.LlmMode | None = 
         brief = runs.apply_settings_defaults(brief, runtime.settings())
     except ValidationError as exc:
         raise HTTPException(status_code=422, detail=exc.errors(include_url=False)) from exc
+    if runtime.sim_mode_error:
+        raise HTTPException(status_code=503, detail=f"Decision runs are disabled: {runtime.sim_mode_error}")
     if (llm_mode or runtime.settings().llm_mode) == "live":
         if not runs.live_allowed():
             raise HTTPException(status_code=403, detail="llm_mode=live is disabled; set CANARY_ALLOW_LIVE=true to allow it")

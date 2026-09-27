@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from contracts_py.decision import CandidatePlan, DecisionBrief, Intervention, Scenario
-from contracts_py.engine import BlastRadius, FutureComparison, PortfolioComparison, SimulationResult
+from contracts_py.engine import BlastRadius, FutureComparison, PortfolioComparison, SimulationResult, VendorOverlap
 from contracts_py.enums import EntityType, Sensitivity
 from contracts_py.twin import (
     AgentView,
@@ -84,6 +84,10 @@ def optimize(twin: Twin, brief: DecisionBrief, *, settings: OrganizationSettings
 
 def blast_radius(result: SimulationResult, twin: Twin) -> BlastRadius:
     return _resolve(ENGINE_MODULE, "blast_radius")(result, twin)
+
+
+def vendor_overlap(twin: Twin, vendor_ids: list[str]) -> list[VendorOverlap]:
+    return _resolve(ENGINE_MODULE, "vendor_overlap")(twin, vendor_ids)
 
 
 def check_result(obj: Any, twin: Twin) -> list[ValidationIssue]:
