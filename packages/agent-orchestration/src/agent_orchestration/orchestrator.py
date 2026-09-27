@@ -120,6 +120,7 @@ class _Run:
         self.scenarios: dict[tuple[Future, str | None], Scenario] = {}
         self.engine_issues: list[str] = []
         self.emitted_plans: set[str] = set()
+        self.compared_alternatives: list[str] = []
         self.rejected_plans: set[str] = set()
         self.should_stop = should_stop
         self.cancelled = False
@@ -213,6 +214,13 @@ class _Run:
                          actor=agent_id)
         self.publish(EventType.agent_completed, assessment, actor=agent_id)
         return outcome
+
+    def compare_alternatives(self, portfolio: PortfolioComparison, plan: CandidatePlan) -> list[CandidatePlan]:
+        """The optimizer's feasible alternatives, or at least its first-listed one, so futures compare real options."""
+        options = [(p, item) for p, item in self.plans(portfolio)
+                   if p.source == "enumerated" and p.plan_id != plan.plan_id]
+        feasible = [p for p, item in options if item.result.feasible]
+        return feasible or [p for p, _ in options[:1]]
 
     def plans(self, portfolio: PortfolioComparison) -> list[tuple[CandidatePlan, Portfolio]]:
         entries = [("naive", portfolio.naive)]
@@ -384,8 +392,10 @@ class _Run:
             twin = self.engine.widen_uncertainty(twin, departments)
         futures = _unique([f.value for f in [Future.act_now, Future.inaction, *self.brief.futures]])
         results = {Future(f): self.simulate(twin, Future(f), plan) for f in futures if f != Future.alternative}
-        comparison = self.engine.compare_futures(twin, self.brief, plan, alternatives=[], settings=self.settings,
-                                                 run_id=self.run_id)
+        alternatives = self.compare_alternatives(state["portfolio"], plan)
+        self.compared_alternatives = [a.plan_id for a in alternatives]
+        comparison = self.engine.compare_futures(twin, self.brief, plan, alternatives=alternatives,
+                                                 settings=self.settings, run_id=self.run_id)
         self.check(comparison, twin)
         self.publish(EventType.futures_compared, comparison, actor="engine")
         blasts = {}
@@ -463,7 +473,23 @@ class _Run:
         return questions
 
     @staticmethod
-    def mitigated_recommendation(mitigations: list[MitigationComparison], best: Any) -> Recommendation | None:
+    def _entity_name(twin: Twin, entity_id: str) -> str:
+        return next((e.name for e in twin.entities if e.id == entity_id), entity_id)
+
+    def _describe_action(self, action: Intervention, twin: Twin, removed: set[str]) -> str:
+        target = self._entity_name(twin, action.target_entity_id)
+        replacement = action.params.get("replacement_vendor_id")
+        if action.type == "add_replacement_feed" and replacement:
+            # The vendor the plan removes that currently provides this feed: one edge lookup, no traversal.
+            source = next((self._entity_name(twin, e.source) for e in twin.edges
+                           if e.target == action.target_entity_id and e.source in removed and e.relation.value == "PROVIDES"),
+                          None)
+            origin = f" from {source}" if source else ""
+            return f"Migrate {target}{origin} to {self._entity_name(twin, str(replacement))}"
+        return f"{str(action.type).replace('_', ' ').capitalize()} for {target}"
+
+    def mitigated_recommendation(self, state: RunGraphState, mitigations: list[MitigationComparison],
+                                 best: Any) -> Recommendation | None:
         """A feasible mitigated plan wins when the engine's own net value beats the best unmitigated row."""
         winner = None
         for comparison in mitigations:
@@ -474,17 +500,33 @@ class _Run:
                 winner = comparison
         if winner is None:
             return None
-        after = winner.after
-        versus = f", versus {best.net_value_p50_usd:,} USD for {best.label}" if best is not None else ""
-        count = f"{len(winner.actions)} mitigation{'s' if len(winner.actions) != 1 else ''}"
-        headline = (f"Proceed with {count}: {winner.plan_id_after} is feasible with a net "
-                    f"value of {after.value.net_value_usd:,} USD{versus}.")
-        claims = [Claim(text=note, source="calculation", ref=after.result_id)
-                  for note in after.assumptions if note.startswith("Conditionally feasible")]
-        claims += [Claim(text=f"Mitigation {a.id}: {a.type} on {a.target_entity_id}", source="calculation", ref=a.id)
-                   for a in winner.actions]
-        claims += [Claim(text=f"Restores {entity_id}", source="calculation", ref=entity_id)
-                   for entity_id in winner.restored_entity_ids]
+        twin, before, after = state["twin"], winner.before, winner.after
+        plans = self.plans_by_id(state)
+        parent = plans.get(winner.plan_id_before)
+        removed = {i.target_entity_id for i in self.brief.candidate_interventions
+                   if parent and i.id in parent.intervention_ids}
+        steps = [self._describe_action(a, twin, removed) for a in winner.actions]
+        restored = [self._entity_name(twin, e) for e in winner.restored_entity_ids]
+        conditions = [n for n in after.assumptions if n.startswith("Conditionally feasible")]
+        if not winner.feasible_before:
+            # The engine only says feasible under conditions here, so the headline says exactly that.
+            # The engine's full condition list is the first claim; the headline keeps its framing.
+            headline = (f"Proceed with mitigations: {winner.plan_id_after} is conditionally feasible with coverage "
+                        f"restored for {', '.join(restored)}.")
+        else:
+            headline = (f"{'; '.join(steps)} first, then proceed. Restores {', '.join(restored)}; engine risk "
+                        f"{before.risk.score:.1f} ({before.risk.level.value}) before, "
+                        f"{after.risk.score:.1f} ({after.risk.level.value}) after.")
+        claims = [Claim(text=note, source="calculation", ref=after.result_id) for note in conditions]
+        claims += [Claim(text=f"{step} ({a.id}: {a.type} on {a.target_entity_id})", source="calculation", ref=a.id)
+                   for step, a in zip(steps, winner.actions)]
+        claims += [Claim(text=f"Restores {name}", source="calculation", ref=entity_id)
+                   for name, entity_id in zip(restored, winner.restored_entity_ids)]
+        claims.append(Claim(text=f"Engine risk score {before.risk.score:.1f} ({before.risk.level.value}) before "
+                                 f"mitigation, {after.risk.score:.1f} ({after.risk.level.value}) after",
+                            source="calculation", ref=after.result_id))
+        claims.append(Claim(text=f"Engine net value with mitigations: {after.value.net_value_usd:,} USD",
+                            source="calculation", ref=after.result_id))
         return Recommendation(plan_id=winner.plan_id_after, future=Future.act_now, action="proceed_with_mitigations",
                               result_id=after.result_id, headline=headline, claims=claims)
 
@@ -526,7 +568,7 @@ class _Run:
             recommendation = Recommendation(plan_id=best.plan_id, future=best.future, result_id=best.result_id,
                                             headline=comparison.headline, claims=claims)
         mitigations = state.get("mitigations", [])
-        recommendation = self.mitigated_recommendation(mitigations, best) or recommendation
+        recommendation = self.mitigated_recommendation(state, mitigations, best) or recommendation
         missing = self.missing_information(state, recommendation)
         assessments = [o.assessment for o in state["outcomes"]]
         # The engine's most valuable missing fact leads; agent questions and review concerns follow.

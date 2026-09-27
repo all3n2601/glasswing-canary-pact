@@ -5,7 +5,7 @@ from canary_api.engine_port import EngineNotReady
 from canary_api.paths import DATA_DIR
 from canary_api.stubs import engine as stub_engine
 from canary_api.stubs import results
-from contracts_py.decision import DecisionBrief, Intervention
+from contracts_py.decision import CandidatePlan, DecisionBrief, Intervention
 from contracts_py.engine import MissingQuestion, MitigationComparison
 from contracts_py.enums import Future, Polarity, RunStatus
 from contracts_py.events import EventType
@@ -15,7 +15,8 @@ from agent_orchestration.orchestrator import _Run
 from orchestration_helpers import NOW, Recorder, ScriptedLLM, SpyEngine
 
 FEED = Intervention(id="mit_feed", kind="mitigation", type="add_replacement_feed", target_entity_id="ds_account_intel",
-                    one_time_cost_usd=30_000, duration_days=60, rationale="Replace the unique feed first.")
+                    one_time_cost_usd=30_000, duration_days=60, params={"replacement_vendor_id": "vendor_cinder"},
+                    rationale="Replace the unique feed first.")
 QUESTION = MissingQuestion(question_id="q_history", text="Does EchoMarket keep our records after termination?",
                            uncertain_input="vendor_echo.retains_history_after_termination",
                            current_assumption="unknown", answer_type="boolean",
@@ -106,7 +107,11 @@ def test_feasible_mitigated_plan_that_beats_the_best_row_is_recommended(brief, t
     assert recommendation.action == "proceed_with_mitigations" and recommendation.future is Future.act_now
     winner = package.mitigations[0]
     assert (recommendation.plan_id, recommendation.result_id) == (winner.plan_id_after, winner.after.result_id)
-    assert f"{winner.after.value.net_value_usd:,} USD" in recommendation.headline
+    # The stub's naive plan is infeasible before mitigation, so the engine's conditional framing is used.
+    assert not winner.feasible_before
+    assert "conditionally feasible with coverage restored" in recommendation.headline
+    assert recommendation.claims[0].text.startswith("Conditionally feasible")
+    assert "beats" not in recommendation.headline and "doing nothing" not in recommendation.headline.lower()
     refs = [c.ref for c in recommendation.claims]
     assert "mit_feed" in refs and {"ds_account_intel", "wf_account_planning"} <= set(refs)
     assert all(c.source == "calculation" for c in recommendation.claims)
@@ -189,3 +194,62 @@ def test_real_engine_vendor_top_question_is_echo_history(settings, monkeypatch) 
     top = package.missing_information[0]
     assert top.uncertain_input == "vendor_echo.retains_history_after_termination"
     assert package.open_questions[0] == top.text
+
+
+def test_already_feasible_plan_leads_with_the_mitigation_and_engine_risk(brief, twin, settings) -> None:
+    class FeasibleBefore(Mitigating):
+        def mitigate(self, twin, brief, plan, actions, **kwargs):
+            comparison = super().mitigate(twin, brief, plan, actions, **kwargs)
+            before = comparison.before.model_copy(update={"feasible": True})
+            return comparison.model_copy(update={"before": before, "feasible_before": True})
+
+    package, _ = run(brief, twin, settings, FeasibleBefore())
+    recommendation, winner = package.recommendation, package.mitigations[0]
+    assert recommendation.action == "proceed_with_mitigations"
+    assert recommendation.headline.startswith("Migrate Account intelligence")
+    assert "first, then proceed" in recommendation.headline
+    assert f"{winner.before.risk.score:.1f} ({winner.before.risk.level.value}) before" in recommendation.headline
+    assert f"{winner.after.risk.score:.1f} ({winner.after.risk.level.value}) after" in recommendation.headline
+
+
+def test_compare_futures_gets_feasible_alternatives_or_the_first_one() -> None:
+    portfolio = results.portfolio_comparison("run_test", "dec_vendor_reduction")
+    naive = portfolio.naive
+    feasible = naive.model_copy(update={"plan_id": "plan_alt_ok", "result": naive.result.model_copy(
+        update={"feasible": True})})
+    blocked = naive.model_copy(update={"plan_id": "plan_alt_blocked", "result": naive.result.model_copy(
+        update={"feasible": False})})
+    runner = _Run.__new__(_Run)
+    plan = CandidatePlan(plan_id="plan_under_review", label="x", intervention_ids=[], source="optimizer")
+    both = portfolio.model_copy(update={"alternatives": [blocked, feasible]})
+    assert [p.plan_id for p in runner.compare_alternatives(both, plan)] == ["plan_alt_ok"]
+    only_blocked = portfolio.model_copy(update={"alternatives": [blocked]})
+    assert [p.plan_id for p in runner.compare_alternatives(only_blocked, plan)] == ["plan_alt_blocked"]
+    assert runner.compare_alternatives(portfolio.model_copy(update={"alternatives": []}), plan) == []
+
+
+def test_real_engine_vendor_passes_its_feasible_alternative_and_migrates_first(settings, monkeypatch) -> None:
+    monkeypatch.setenv("ENGINE_IMPL", "real")
+    monkeypatch.setenv("TWIN_IMPL", "real")
+    brief, twin, engine = _real("vendor_scenario.json")
+    spy = SpyEngine()
+    spy.__class__ = type("RealSpy", (SpyEngine,), {"__getattr__": lambda self, name: _spy(self, engine, name)})
+    package, _ = run(brief, twin, settings, spy)
+    compared = [kwargs for name, kwargs in spy.kwargs if name == "compare_futures"]
+    feasible = [a.plan_id for a in package.portfolios.alternatives if a.result.feasible]
+    assert feasible and [p.plan_id for p in compared[-1]["alternatives"]] == feasible
+    assert any(r.future is Future.alternative for r in package.futures.rows)
+    recommendation = package.recommendation
+    assert recommendation.action == "proceed_with_mitigations"
+    assert recommendation.headline.startswith("Migrate Account intelligence from EchoMarket")
+
+
+def _spy(self, engine, name):
+    function = getattr(engine, name)
+
+    def wrapper(*args, **kwargs):
+        self.calls.append((name, args))
+        self.__dict__.setdefault("kwargs", []).append((name, kwargs))
+        return function(*args, **kwargs)
+
+    return wrapper
