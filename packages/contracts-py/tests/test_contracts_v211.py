@@ -264,3 +264,18 @@ def test_value_breakdown_optional_cost_split() -> None:
             ValueBreakdown.model_validate(breakdown(**bad))
     with pytest.raises(ValidationError, match="does not equal components"):
         ValueBreakdown.model_validate(breakdown(net_value_usd=1, monthly_net_usd=[1], migration_cost_usd=10))
+
+
+def test_recommendation_action_and_optional_plan() -> None:
+    from contracts_py.package import Recommendation
+
+    base = {"future": "act_now", "result_id": "res_a", "headline": "h"}
+    assert Recommendation.model_validate(base | {"plan_id": "plan_a"}).action == "proceed"
+    assert Recommendation.model_validate(base | {"plan_id": "plan_a", "future": "delay"}).action == "delay"
+    nothing = Recommendation.model_validate(base | {"future": "inaction"})
+    assert (nothing.action, nothing.plan_id) == ("do_not_proceed", None)
+    assert Recommendation.model_validate(nothing.model_dump()) == nothing
+    with pytest.raises(ValidationError, match="does not match future"):
+        Recommendation.model_validate(base | {"plan_id": "plan_a", "action": "do_not_proceed"})
+    with pytest.raises(ValidationError, match="no plan"):
+        Recommendation.model_validate(base)

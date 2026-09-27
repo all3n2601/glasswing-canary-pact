@@ -372,10 +372,15 @@ class _Run:
         comparison, act_now, blasts = state["comparison"], state["results"][Future.act_now], state["blasts"]
         best = comparison.rows[comparison.best_row_index] if comparison.best_row_index is not None else None
         recommendation = None
-        if best is not None and best.plan_id is not None:
+        if best is not None:
             claims = [Claim(text=comparison.headline, source="calculation", ref=comparison.comparison_id)]
-            claims += [Claim(text=c.explanation, source="calculation", ref=c.constraint_id)
-                       for c in act_now.constraint_results]
+            if best.plan_id is not None:
+                claims += [Claim(text=c.explanation, source="calculation", ref=c.constraint_id)
+                           for c in act_now.constraint_results]
+            else:
+                # Doing nothing wins: the act-now plan's broken constraints are the reasons, in the engine's words.
+                claims += [Claim(text=c.explanation, source="calculation", ref=c.constraint_id)
+                           for c in act_now.constraint_results if not c.passed]
             claims += [Claim(text=f"{e.source} {e.relation.value} {e.target}", source="agent_validated",
                              ref=e.evidence_refs[0]) for e in state.get("new_edges", []) if e.evidence_refs]
             recommendation = Recommendation(plan_id=best.plan_id, future=best.future, result_id=best.result_id,

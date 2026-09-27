@@ -3164,13 +3164,31 @@
       "additionalProperties": false,
       "properties": {
         "plan_id": {
-          "maxLength": 80,
-          "pattern": "^[a-z][a-z0-9_]*$",
-          "title": "Plan Id",
-          "type": "string"
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Plan Id"
         },
         "future": {
           "$ref": "#/$defs/Future"
+        },
+        "action": {
+          "default": "proceed",
+          "enum": [
+            "proceed",
+            "do_not_proceed",
+            "delay"
+          ],
+          "title": "Action",
+          "type": "string"
         },
         "result_id": {
           "maxLength": 80,
@@ -3191,7 +3209,6 @@
         }
       },
       "required": [
-        "plan_id",
         "future",
         "result_id",
         "headline"

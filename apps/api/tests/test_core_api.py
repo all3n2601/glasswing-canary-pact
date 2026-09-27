@@ -141,7 +141,10 @@ def test_prompt_decision_drafts_and_runs_every_department(client) -> None:
     assert len(state.assessment_ids) >= 11
     package = validate(DecisionPackage, client.get(f"/runs/{run_id}/package"))
     assert package.department_impacts == []
-    assert package.recommendation is None
+    # The engine breaks an all-zero tie toward inaction, so the package recommends doing nothing in its words.
+    recommendation = package.recommendation
+    assert recommendation is not None and recommendation.action == "do_not_proceed"
+    assert recommendation.plan_id is None and recommendation.headline == package.futures.headline
     assert any("unquantified" in assumption.lower() for assumption in package.assumptions)
 
 
