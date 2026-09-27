@@ -48,11 +48,11 @@ from contracts_py.enums import (
     Polarity,
     Relation,
 )
-from contracts_py.twin import Entity, Twin
+from contracts_py.twin import Twin
 
 from company_twin import documented_workflow_ids
 
-from .interventions import Seed
+from .interventions import Seed, role_of
 from .propagation import DELAYED_AFTER_DAYS, constraint_refs, impact_id, severity
 
 OWNER_RELATIONS = {Relation.OWNS, Relation.BACKS_UP}
@@ -69,16 +69,6 @@ class Holding:
     capacity_fte: float
 
 
-def _role_of(entity: Entity | None) -> str | None:
-    if entity is None:
-        return None
-    if entity.type is EntityType.role:
-        return entity.id
-    if entity.type is EntityType.person_token:
-        return entity.role_id
-    return None
-
-
 def _holdings(twin: Twin, relations: set[Relation]) -> dict[str, dict[str, Holding]]:
     """Target ID -> role ID -> strongest holding, for roles with capacity left."""
     ents = {e.id: e for e in twin.entities}
@@ -86,7 +76,7 @@ def _holdings(twin: Twin, relations: set[Relation]) -> dict[str, dict[str, Holdi
     for edge in twin.edges:
         if edge.relation not in relations:
             continue
-        role_id = _role_of(ents.get(edge.source))
+        role_id = role_of(ents.get(edge.source))
         role = ents.get(role_id or "")
         if role is None or (role.capacity_fte is not None and role.capacity_fte <= 0):
             continue
