@@ -141,6 +141,7 @@ Important environment variables (see `.env.example`; names only here):
 - `SCIFORIUM_API_KEY`, `SCIFORIUM_BASE_URL`, `MODEL_STRONG`, `MODEL_FAST`: live model access.
 - `CANARY_ALLOW_LIVE`: must be `true` before a run may use `llm_mode=live`.
 - `CANARY_STRUCTURED_OUTPUT`: `auto` (default), `json_schema` or `function_calling`.
+- `CANARY_SIM_MODE`: `full` (default) or `quick`; use `quick` with `ENGINE_IMPL=real` until full mode lands.
 - `CANARY_AUTH_SECRET`: token signing secret. If blank, tokens reset on every restart.
 - `CANARY_DEMO_APPROVER_EMAIL`, `CANARY_DEMO_APPROVER_PASSWORD`: create the demo approver.
 - `DATABASE_URL`, `CANARY_DB_SCHEMA`: optional Postgres (tables live in a private `canary` schema).
