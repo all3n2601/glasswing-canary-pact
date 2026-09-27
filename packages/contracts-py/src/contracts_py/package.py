@@ -63,6 +63,10 @@ class Recommendation(Strict):
     result_id: ID
     headline: str
     claims: list[Claim] = Field(default_factory=list)
+    # With proceed_with_mitigations, plan_id and result_id stay on the assessed plan and its futures row;
+    # these point at the engine's mitigated plan and its after-mitigation result.
+    mitigated_plan_id: ID | None = None
+    mitigated_result_id: ID | None = None
 
     @model_validator(mode="after")
     def derive_action(self) -> "Recommendation":
