@@ -14,6 +14,7 @@ from contracts_py.twin import OrganizationSettings, RiskWeights
 from company_twin import load_twin
 from company_twin.loader import default_fixture_path
 from simulation_engine import (
+    ScenarioMetrics,
     apply_interventions,
     blast_radius,
     check_result,
@@ -120,6 +121,31 @@ def test_rule_12_hard_failures_make_the_plan_infeasible_with_reasons_and_soft_on
 
     naive.feasible = True
     assert 12 in {i.rule for i in check_result(naive, TWIN)}
+
+
+def test_customer_impact_counts_only_harm_that_reaches_a_customer_segment():
+    # Regression: cutting the eight finance and billing roles reported 95.73% customer impact, which was
+    # wf_billing_recon's own capacity loss read as a share of customers because the workflow is customer-facing.
+    result = quick_impact(TWIN, WORKFORCE.candidate_interventions, brief=WORKFORCE)
+    ents = {e.id: e for e in TWIN.entities}
+    recon = max(i.magnitude for i in result.impacts if i.unit == "ratio" and i.affected_entity == "wf_billing_recon")
+    assert recon > 0.9 and ents["wf_billing_recon"].customer_facing
+    customer = next(c for c in result.constraint_results if c.metric == "customer_impact_pct")
+    assert customer.value == 0.0 and customer.passed and customer.impact_ids == []
+    assert all("c_customer" not in i.constraint_refs for i in result.impacts
+               if ents[i.affected_entity].type is not EntityType.customer_segment)
+
+
+def test_customer_impact_is_the_arr_weighted_share_of_segments_lost():
+    harm = next(i for i in run("beacon", "echo").impacts if i.unit == "ratio" and i.polarity.value == "harm")
+    hit = harm.model_copy(update={"impact_id": "imp_seg_enterprise_loss", "affected_entity": "seg_enterprise",
+                                  "magnitude": 0.1})
+    arr = {e.id: e.arr_usd for e in TWIN.entities if e.type is EntityType.customer_segment}
+    metrics = ScenarioMetrics(TWIN, [hit], run("beacon", "echo").value, [])
+    assert metrics.metric("customer_impact_pct").value == pytest.approx(round(10 * arr["seg_enterprise"]
+                                                                              / sum(arr.values()), 4))
+    assert metrics.metric("customer_impact_pct", "seg_enterprise").value == pytest.approx(10.0)
+    assert metrics.metric("customer_impact_pct", "seg_midmarket").value == 0.0
 
 
 def test_rule_10_risk_has_five_components_weighted_by_settings_and_equals_their_sum():

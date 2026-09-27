@@ -265,7 +265,7 @@ def constraint_refs(entity: Entity, constraints: list[Constraint]) -> list[str]:
             case "revenue_impact_pct":
                 hit = entity.id == c.scope_entity_id if c.scope_entity_id else entity.type is EntityType.kpi
             case "customer_impact_pct":
-                hit = entity.type is EntityType.customer_segment or bool(entity.customer_facing)
+                hit = entity.type is EntityType.customer_segment
             case "stranded_workflows":
                 hit = entity.type is EntityType.workflow
             case "critical_systems_degraded":

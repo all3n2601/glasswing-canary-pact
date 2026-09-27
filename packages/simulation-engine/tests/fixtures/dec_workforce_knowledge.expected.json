@@ -574,7 +574,7 @@
     }
    ],
    "outcome": {
-    "headline": "Net value -$989.37M, risk high (70.9), infeasible (2 failed checks)",
+    "headline": "Net value -$989.37M, risk high (50.9), infeasible (1 failed checks)",
     "net_value_usd": -989365878,
     "risk_level": "high"
    },
@@ -831,7 +831,7 @@
   "best_row_index": 1,
   "comparison_id": "cmp_run_acceptance_plan_naive",
   "decision_id": "dec_workforce_knowledge",
-  "headline": "Acting now is worth $732.14M less than doing nothing; waiting 90 days saves $199.94M. As planned it is infeasible (2 failed checks). Values are point estimates, not simulated ranges; p_better_than_inaction is a yes/no comparison, not a probability.",
+  "headline": "Acting now is worth $732.14M less than doing nothing; waiting 90 days saves $199.94M. As planned it is infeasible (1 failed checks). Values are point estimates, not simulated ranges; p_better_than_inaction is a yes/no comparison, not a probability.",
   "reference_result_id": "res_run_acceptance_inaction_none",
   "rows": [
    {
@@ -861,7 +861,7 @@
     "p_better_than_inaction": 0.0,
     "plan_id": "plan_naive",
     "result_id": "res_run_acceptance_act_now_plan_naive",
-    "risk_score": 70.8718
+    "risk_score": 50.8718
    },
    {
     "breakeven_day": null,
@@ -919,7 +919,7 @@
     "p_better_than_inaction": 0.0,
     "plan_id": "plan_naive",
     "result_id": "res_run_acceptance_delay_plan_naive",
-    "risk_score": 70.8718
+    "risk_score": 50.8718
    }
   ],
   "run_id": "run_acceptance"
@@ -980,16 +980,14 @@
      },
      {
       "constraint_id": "c_customer",
-      "explanation": "customer_impact_pct is 95.73% (wf_billing_recon); it must be <= 2.00%, so the hard constraint fails",
+      "explanation": "customer_impact_pct is 0.00%; it must be <= 2.00%, so the hard constraint passes",
       "hard": true,
-      "impact_ids": [
-       "imp_wf_billing_recon_loss"
-      ],
+      "impact_ids": [],
       "metric": "customer_impact_pct",
       "operator": "<=",
-      "passed": false,
+      "passed": true,
       "threshold": 2.0,
-      "value": 95.731
+      "value": 0.0
      }
     ],
     "feasible": false,
@@ -1615,8 +1613,7 @@
       "category": "operational",
       "confidence": 0.81,
       "constraint_refs": [
-       "c_stranded",
-       "c_customer"
+       "c_stranded"
       ],
       "decision_id": "dec_workforce_knowledge",
       "dependency_path": [
@@ -1696,8 +1693,7 @@
       "category": "operational",
       "confidence": 0.729,
       "constraint_refs": [
-       "c_stranded",
-       "c_customer"
+       "c_stranded"
       ],
       "decision_id": "dec_workforce_knowledge",
       "dependency_path": [
@@ -1742,8 +1738,7 @@
       "category": "ownership",
       "confidence": 0.9,
       "constraint_refs": [
-       "c_stranded",
-       "c_customer"
+       "c_stranded"
       ],
       "decision_id": "dec_workforce_knowledge",
       "dependency_path": [
@@ -1871,20 +1866,19 @@
     "plan_id": "plan_naive",
     "pressures_triggered": [],
     "rejection_reasons": [
-     "c_stranded: stranded_workflows is 2 (wf_billing_recon, wf_financial_close); it must be == 0, so the hard constraint fails",
-     "c_customer: customer_impact_pct is 95.73% (wf_billing_recon); it must be <= 2.00%, so the hard constraint fails"
+     "c_stranded: stranded_workflows is 2 (wf_billing_recon, wf_financial_close); it must be == 0, so the hard constraint fails"
     ],
     "result_id": "res_run_acceptance_act_now_plan_naive",
     "risk": {
      "components": {
       "capability_workflow": 25.0,
       "compliance_control": 0.0,
-      "customer_revenue": 20.0,
+      "customer_revenue": 0.0,
       "execution_uncertainty": 0.8718,
       "financial": 25.0
      },
      "level": "high",
-     "score": 70.8718,
+     "score": 50.8718,
      "settings_version": 1
     },
     "run_id": "run_acceptance",
@@ -2022,16 +2016,14 @@
    },
    {
     "constraint_id": "c_customer",
-    "explanation": "customer_impact_pct is 95.73% (wf_billing_recon); it must be <= 2.00%, so the hard constraint fails",
+    "explanation": "customer_impact_pct is 0.00%; it must be <= 2.00%, so the hard constraint passes",
     "hard": true,
-    "impact_ids": [
-     "imp_wf_billing_recon_loss"
-    ],
+    "impact_ids": [],
     "metric": "customer_impact_pct",
     "operator": "<=",
-    "passed": false,
+    "passed": true,
     "threshold": 2.0,
-    "value": 95.731
+    "value": 0.0
    }
   ],
   "feasible": false,
@@ -2657,8 +2649,7 @@
     "category": "operational",
     "confidence": 0.81,
     "constraint_refs": [
-     "c_stranded",
-     "c_customer"
+     "c_stranded"
     ],
     "decision_id": "dec_workforce_knowledge",
     "dependency_path": [
@@ -2738,8 +2729,7 @@
     "category": "operational",
     "confidence": 0.729,
     "constraint_refs": [
-     "c_stranded",
-     "c_customer"
+     "c_stranded"
     ],
     "decision_id": "dec_workforce_knowledge",
     "dependency_path": [
@@ -2784,8 +2774,7 @@
     "category": "ownership",
     "confidence": 0.9,
     "constraint_refs": [
-     "c_stranded",
-     "c_customer"
+     "c_stranded"
     ],
     "decision_id": "dec_workforce_knowledge",
     "dependency_path": [
@@ -2913,20 +2902,19 @@
   "plan_id": null,
   "pressures_triggered": [],
   "rejection_reasons": [
-   "c_stranded: stranded_workflows is 2 (wf_billing_recon, wf_financial_close); it must be == 0, so the hard constraint fails",
-   "c_customer: customer_impact_pct is 95.73% (wf_billing_recon); it must be <= 2.00%, so the hard constraint fails"
+   "c_stranded: stranded_workflows is 2 (wf_billing_recon, wf_financial_close); it must be == 0, so the hard constraint fails"
   ],
   "result_id": "res_run_acceptance_quick_a2e7584e3e04",
   "risk": {
    "components": {
     "capability_workflow": 25.0,
     "compliance_control": 0.0,
-    "customer_revenue": 20.0,
+    "customer_revenue": 0.0,
     "execution_uncertainty": 0.8718,
     "financial": 25.0
    },
    "level": "high",
-   "score": 70.8718,
+   "score": 50.8718,
    "settings_version": 1
   },
   "run_id": "run_acceptance",
@@ -3066,16 +3054,14 @@
     },
     {
      "constraint_id": "c_customer",
-     "explanation": "customer_impact_pct is 95.73% (wf_billing_recon); it must be <= 2.00%, so the hard constraint fails",
+     "explanation": "customer_impact_pct is 0.00%; it must be <= 2.00%, so the hard constraint passes",
      "hard": true,
-     "impact_ids": [
-      "imp_wf_billing_recon_loss"
-     ],
+     "impact_ids": [],
      "metric": "customer_impact_pct",
      "operator": "<=",
-     "passed": false,
+     "passed": true,
      "threshold": 2.0,
-     "value": 95.731
+     "value": 0.0
     }
    ],
    "feasible": false,
@@ -3701,8 +3687,7 @@
      "category": "operational",
      "confidence": 0.81,
      "constraint_refs": [
-      "c_stranded",
-      "c_customer"
+      "c_stranded"
      ],
      "decision_id": "dec_workforce_knowledge",
      "dependency_path": [
@@ -3782,8 +3767,7 @@
      "category": "operational",
      "confidence": 0.729,
      "constraint_refs": [
-      "c_stranded",
-      "c_customer"
+      "c_stranded"
      ],
      "decision_id": "dec_workforce_knowledge",
      "dependency_path": [
@@ -3828,8 +3812,7 @@
      "category": "ownership",
      "confidence": 0.9,
      "constraint_refs": [
-      "c_stranded",
-      "c_customer"
+      "c_stranded"
      ],
      "decision_id": "dec_workforce_knowledge",
      "dependency_path": [
@@ -4081,20 +4064,19 @@
     }
    ],
    "rejection_reasons": [
-    "c_stranded: stranded_workflows is 2 (wf_billing_recon, wf_financial_close); it must be == 0, so the hard constraint fails",
-    "c_customer: customer_impact_pct is 95.73% (wf_billing_recon); it must be <= 2.00%, so the hard constraint fails"
+    "c_stranded: stranded_workflows is 2 (wf_billing_recon, wf_financial_close); it must be == 0, so the hard constraint fails"
    ],
    "result_id": "res_run_acceptance_act_now_plan_naive",
    "risk": {
     "components": {
      "capability_workflow": 25.0,
      "compliance_control": 0.0,
-     "customer_revenue": 20.0,
+     "customer_revenue": 0.0,
      "execution_uncertainty": 0.8718,
      "financial": 25.0
     },
     "level": "high",
-    "score": 70.8718,
+    "score": 50.8718,
     "settings_version": 1
    },
    "run_id": "run_acceptance",
@@ -4233,16 +4215,14 @@
     },
     {
      "constraint_id": "c_customer",
-     "explanation": "customer_impact_pct is 95.73% (wf_billing_recon); it must be <= 2.00%, so the hard constraint fails",
+     "explanation": "customer_impact_pct is 0.00%; it must be <= 2.00%, so the hard constraint passes",
      "hard": true,
-     "impact_ids": [
-      "imp_wf_billing_recon_loss"
-     ],
+     "impact_ids": [],
      "metric": "customer_impact_pct",
      "operator": "<=",
-     "passed": false,
+     "passed": true,
      "threshold": 2.0,
-     "value": 95.731
+     "value": 0.0
     }
    ],
    "feasible": false,
@@ -4868,8 +4848,7 @@
      "category": "operational",
      "confidence": 0.81,
      "constraint_refs": [
-      "c_stranded",
-      "c_customer"
+      "c_stranded"
      ],
      "decision_id": "dec_workforce_knowledge",
      "dependency_path": [
@@ -4949,8 +4928,7 @@
      "category": "operational",
      "confidence": 0.729,
      "constraint_refs": [
-      "c_stranded",
-      "c_customer"
+      "c_stranded"
      ],
      "decision_id": "dec_workforce_knowledge",
      "dependency_path": [
@@ -4995,8 +4973,7 @@
      "category": "ownership",
      "confidence": 0.9,
      "constraint_refs": [
-      "c_stranded",
-      "c_customer"
+      "c_stranded"
      ],
      "decision_id": "dec_workforce_knowledge",
      "dependency_path": [
@@ -5248,20 +5225,19 @@
     }
    ],
    "rejection_reasons": [
-    "c_stranded: stranded_workflows is 2 (wf_billing_recon, wf_financial_close); it must be == 0, so the hard constraint fails",
-    "c_customer: customer_impact_pct is 95.73% (wf_billing_recon); it must be <= 2.00%, so the hard constraint fails"
+    "c_stranded: stranded_workflows is 2 (wf_billing_recon, wf_financial_close); it must be == 0, so the hard constraint fails"
    ],
    "result_id": "res_run_acceptance_delay_plan_naive",
    "risk": {
     "components": {
      "capability_workflow": 25.0,
      "compliance_control": 0.0,
-     "customer_revenue": 20.0,
+     "customer_revenue": 0.0,
      "execution_uncertainty": 0.8718,
      "financial": 25.0
     },
     "level": "high",
-    "score": 70.8718,
+    "score": 50.8718,
     "settings_version": 1
    },
    "run_id": "run_acceptance",

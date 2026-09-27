@@ -4,7 +4,10 @@ Each engine-computable metric is read from the scenario's harm impacts (losses i
 
 - annual_savings_usd, net_value_usd: the ``ValueBreakdown`` gross and net.
 - revenue_impact_pct: ``100 * loss`` on the constraint's ``scope_entity_id``, else the largest KPI loss.
-- customer_impact_pct: ``100 *`` the largest loss on a customer segment or customer-facing entity.
+- customer_impact_pct: the ARR-weighted share (0-100) of customer segments lost,
+  ``100 * sum(arr * loss) / sum(arr)`` over the segments in scope (equal weights when a segment has
+  no ARR). Only harm that reaches a segment counts: a customer-facing workflow's own capacity loss
+  is not a share of customers.
 - compliance_controls_broken: mandatory controls with loss >= ``BROKEN_LOSS``.
 - stranded_workflows: reported workflows left below their minimum qualified owners.
 - critical_systems_degraded: critical systems with any reported loss.
@@ -44,7 +47,9 @@ class ScenarioMetrics:
                  coverage: list[WorkflowCoverage]) -> None:
         self.twin = twin
         self.ents = {e.id: e for e in twin.entities}
-        self.harms = [(i, self.ents[i.affected_entity]) for i in impacts if i.polarity is Polarity.harm]
+        # Losses only: priced pressure impacts carry dollars, not a share, and must never read as one.
+        self.harms = [(i, self.ents[i.affected_entity]) for i in impacts
+                      if i.polarity is Polarity.harm and i.unit == "ratio"]
         self.value = value
         self.coverage = coverage
 
@@ -56,6 +61,18 @@ class ScenarioMetrics:
             return Metric(0.0)
         worst = max(harms, key=lambda pair: (pair[0].magnitude, pair[1].id))[0]
         return Metric(round(100 * worst.magnitude, 4), [worst.impact_id], [worst.affected_entity])
+
+    def _customer_share(self, scope: str | None) -> Metric:
+        segments = sorted((e for e in self.ents.values() if e.type is EntityType.customer_segment
+                           and scope in (None, e.id)), key=lambda e: e.id)
+        harms = self._harms(scope, lambda e: e.type is EntityType.customer_segment)
+        if not segments or not harms:
+            return Metric(0.0)
+        weighted = all((e.arr_usd or 0) > 0 for e in segments)
+        weight = {e.id: float(e.arr_usd) if weighted else 1.0 for e in segments}  # type: ignore[arg-type]
+        lost = sum(i.magnitude * weight[e.id] for i, e in harms)
+        return Metric(round(100 * lost / sum(weight.values()), 4), [i.impact_id for i, _ in harms],
+                      [e.id for _, e in harms])
 
     def _count(self, harms: list[tuple[Impact, Entity]]) -> Metric:
         return Metric(float(len(harms)), [i.impact_id for i, _ in harms], [e.id for _, e in harms])
@@ -84,8 +101,7 @@ class ScenarioMetrics:
             case "revenue_impact_pct":
                 return self._largest_pct(self._harms(scope, lambda e: scope is not None or e.type is EntityType.kpi))
             case "customer_impact_pct":
-                return self._largest_pct(self._harms(scope, lambda e: e.type is EntityType.customer_segment
-                                                     or bool(e.customer_facing)))
+                return self._customer_share(scope)
             case "compliance_controls_broken":
                 return self._count([(i, e) for i, e in self._harms(scope, lambda e: e.type is EntityType.control
                                                                    and bool(e.mandatory))
