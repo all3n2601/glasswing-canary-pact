@@ -1,4 +1,4 @@
-from .adventureworks import build_adventureworks_twin, fetch_adventureworks
+from .adventureworks import ADVENTUREWORKS_TABLES, build_adventureworks_twin
 from .documents import document_is_stale, documented_workflow_ids
 from .graph import (
     affected_departments,
@@ -71,5 +71,5 @@ __all__ = [
     "build_twin",
     "TwinValidationError",
     "build_adventureworks_twin",
-    "fetch_adventureworks",
+    "ADVENTUREWORKS_TABLES",
 ]
