@@ -20,7 +20,7 @@ from contracts_py.twin import OrganizationSettings, Twin
 
 from .constraints import ScenarioMetrics, evaluate_constraints, goal_met, rejection_reasons
 from .interventions import AppliedScenario, apply_interventions
-from .knowledge import downgrade_documented, workflow_coverage
+from .knowledge import downgrade_documented, knowledge_coverage, knowledge_impacts, workflow_coverage
 from .propagation import DELAYED_AFTER_DAYS, Propagation, impact_id, impact_ledger, propagate
 from .risk import risk_score
 from .value import price_harms, value_breakdown
@@ -69,10 +69,16 @@ def evaluate(twin: Twin, interventions: list[Intervention], *, brief: DecisionBr
     losses = propagate(applied.twin, applied.losses, settings=settings)
     gains = (propagate(applied.twin, applied.gains, settings=settings, coverage_share=False) if applied.gains
              else Propagation(effects={}, iterations=0, converged=True))
-    coverage = workflow_coverage(twin, applied.twin)
+    knowledge = knowledge_coverage(twin, applied.twin)
+    coverage = workflow_coverage(twin, applied.twin, knowledge)
     harms = impact_ledger(applied.twin, losses, decision_id=decision_id, scenario_id=scenario_id,
                           polarity=Polarity.harm, constraints=constraints, horizon_days=horizon)
     harms = downgrade_documented(harms, coverage, applied.twin)
+    # Knowledge-loss impacts are reported, not priced or measured: the propagated capacity loss already is.
+    lost_knowledge = downgrade_documented(
+        knowledge_impacts(twin, knowledge, applied.losses, decision_id=decision_id, scenario_id=scenario_id,
+                          constraints=constraints),
+        coverage, applied.twin)
     priced = price_harms(applied.twin, harms, horizon)
     impacts = [
         *_savings_impacts(applied, interventions, decision_id=decision_id, scenario_id=scenario_id),
@@ -83,6 +89,7 @@ def evaluate(twin: Twin, interventions: list[Intervention], *, brief: DecisionBr
     start_day = min((i.start_day for i in interventions), default=0)
     value = value_breakdown(applied, priced, start_day=start_day, horizon_days=horizon)
     metrics = ScenarioMetrics(applied.twin, impacts, value, coverage)
+    impacts += lost_knowledge
 
     assumptions = [QUICK_ASSUMPTION, *applied.assumptions]
     if applied.termination_cost_usd or applied.migration_cost_usd:
@@ -108,7 +115,7 @@ def evaluate(twin: Twin, interventions: list[Intervention], *, brief: DecisionBr
     return SimulationResult(
         result_id=result_id, run_id=run_id, scenario_id=scenario_id, future=future, plan_id=plan_id,
         mode="quick", intervention_ids=[i.id for i in interventions], value=value, goal_met=met,
-        constraint_results=results, impacts=impacts, workflow_coverage=coverage,
+        constraint_results=results, impacts=impacts, workflow_coverage=coverage, knowledge_coverage=knowledge,
         risk=risk_score(metrics, impacts, goal_missed=brief is not None and not met, constraints=constraints,
                         settings=settings),
         affected_department_ids=departments, feasible=feasible, rejection_reasons=reasons, assumptions=assumptions,

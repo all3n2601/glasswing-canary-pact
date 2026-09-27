@@ -117,13 +117,13 @@
     {"id": "ds_geo_risk", "description": "Geographic and macroeconomic risk: provided by Granite, Delta. 2.1.1 (CR3) intended attribute_group: \"geo_risk\""}
   ],
   "workflows": [
-    {"id": "wf_billing_recon", "description": "Billing reconciliation: critical, min_qualified_owners 2, documented_pct 0.35; owned/backed only by workforce roles (A-04 acceptance). 2.1.1 (CR4) intended exception_documented_pct: ~0.1, the exception path is effectively undocumented, reported separately from documented_pct (plan 19.3, W-3)"},
+    {"id": "wf_billing_recon", "description": "Billing reconciliation: critical, min_qualified_owners 1, documented_pct 0.35; owned/backed only by workforce roles (A-04 acceptance). 2.1.1 (CR4) intended exception_documented_pct: ~0.1, the exception path is effectively undocumented, reported separately from documented_pct (plan 19.3, W-3)"},
     {"id": "wf_invoicing", "description": "Invoice generation and dispatch: critical, supports kpi_gross_margin"},
     {"id": "wf_incident_mgmt", "description": "Incident response and on-call: high, owned by role_sre"},
     {"id": "wf_soc2_evidence", "description": "SOC 2 audit-evidence collection: high, supports kpi_soc2_coverage"},
     {"id": "wf_customer_onboarding", "description": "Customer onboarding: medium"},
     {"id": "wf_data_refresh", "description": "Data pipeline refresh: high"},
-    {"id": "wf_financial_close", "description": "Monthly financial close: critical, min_qualified_owners 2, depends on kn_warehouse_lineage; owned/backed only by workforce roles (A-04 acceptance)"},
+    {"id": "wf_financial_close", "description": "Monthly financial close: critical, min_qualified_owners 1, depends on kn_warehouse_lineage; owned/backed only by workforce roles (A-04 acceptance)"},
     {"id": "wf_lead_scoring", "description": "Lead scoring (Sales): consumes ds_firmographics and ds_contact_data"},
     {"id": "wf_campaign_targeting", "description": "Campaign targeting (Marketing): consumes ds_firmographics, ds_intent_signals, ds_market_intel"},
     {"id": "wf_account_planning", "description": "Account planning (Sales): consumes ds_market_intel and ds_account_intel (its only visible consumer on the base twin)"},
