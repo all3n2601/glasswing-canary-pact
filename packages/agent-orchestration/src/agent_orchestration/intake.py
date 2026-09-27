@@ -84,13 +84,20 @@ Rules:
   treat unspecified headcount as FTE or use remove_roles to remove an entire role group for a partial cut.
 - Missing amounts stay null. Qualitative decisions are valid assessments, not requests for invented numbers.
 - A requested spending reduction is annual_savings_usd; use gross unless the user explicitly asks for net value.
-- Convert explicit protections into engine constraints. Do not turn words such as Sales or Compliance into action
+- Convert explicit protections into engine constraints. A constraint limits harm, it never describes the plan:
+  never write a constraint that requires capacity loss, broken controls, stranded workflows, degraded systems or
+  customer or revenue impact to be at least or exactly a positive value. Do not turn words such as Sales or Compliance into action
   targets unless the user explicitly proposes changing those entities.
 - If a requested threshold is qualitative, use the safest literal interpretation supported by the engine and state
   the interpretation in assumptions or warnings.
 - Include every directly proposed action and no speculative action.
 - Keep rationale factual and traceable to the user's request.
 """
+
+
+# Metrics where a larger value is worse; a protection on them caps the value from above.
+HARM_METRICS = {"revenue_impact_pct", "customer_impact_pct", "compliance_controls_broken", "stranded_workflows",
+                "critical_systems_degraded", "max_capacity_loss_pct"}
 
 
 ACTION_TARGET_TYPES: dict[ActionType, set[EntityType]] = {
@@ -228,6 +235,16 @@ def _to_draft(proposal: IntakeProposal, *, prompt: str, twin: Twin, created_by: 
             params=params,
             rationale=item.rationale,
         ))
+    kept = []
+    for item in proposal.constraints:
+        if item.metric in HARM_METRICS and item.hard and (item.operator == ">=" or (item.operator == "==" and item.threshold > 0)):
+            # A hard constraint on a harm metric only protects when it caps the harm; one that demands harm would make
+            # every future, including doing nothing, infeasible. Drop it and say so rather than silently keeping it.
+            scope = f" on {item.scope_entity_id}" if item.scope_entity_id else ""
+            warnings.append(f"Ignored a constraint that required {item.metric}{scope} {item.operator} {item.threshold:g}: "
+                            "constraints limit harm and do not describe the change itself.")
+            continue
+        kept.append(item)
     constraints = [
         Constraint(
             id=f"c_intake_{_slug(item.metric)}_{index + 1}",
@@ -239,7 +256,7 @@ def _to_draft(proposal: IntakeProposal, *, prompt: str, twin: Twin, created_by: 
             scope_entity_id=item.scope_entity_id,
             description=item.description,
         )
-        for index, item in enumerate(proposal.constraints)
+        for index, item in enumerate(kept)
     ]
     digest = hashlib.sha256(prompt.encode()).hexdigest()[:12]
     brief = DecisionBrief(

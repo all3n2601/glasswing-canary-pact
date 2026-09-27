@@ -181,3 +181,28 @@ def test_partial_role_removal_does_not_remove_the_entire_role_group(twin) -> Non
     assert action.type is ActionType.reduce_capacity
     applied = apply_interventions(twin, [action])
     assert entity_map(applied.twin)[role.id].capacity_fte == 8
+
+
+def test_constraints_that_demand_harm_are_dropped_with_a_warning(twin) -> None:
+    bad = proposal()
+    bad["constraints"] += [
+        {"metric": "max_capacity_loss_pct", "operator": "==", "threshold": 100, "unit": "percent", "hard": True,
+         "scope_entity_id": "vendor_beacon", "description": "Exit the vendor completely."},
+        {"metric": "customer_impact_pct", "operator": ">=", "threshold": 5, "unit": "percent", "hard": True,
+         "description": "Move every customer."},
+        {"metric": "max_capacity_loss_pct", "operator": "<=", "threshold": 20, "unit": "percent", "hard": True,
+         "description": "Keep capacity loss within 20%."},
+    ]
+    draft = intake(ScriptedLive(bad)).draft(PROMPT, twin=twin, created_by="usr_test")
+
+    kept = {(c.metric, c.operator, c.threshold) for c in draft.brief.constraints}
+    assert kept == {("compliance_controls_broken", "==", 0), ("critical_coverage_pct", ">=", 100),
+                    ("max_capacity_loss_pct", "<=", 20)}
+    assert sum("Ignored a constraint" in w for w in draft.warnings) == 2
+
+
+def test_protective_constraints_are_kept_unchanged(twin) -> None:
+    draft = intake(ScriptedLive(proposal())).draft(PROMPT, twin=twin, created_by="usr_test")
+
+    assert len(draft.brief.constraints) == 2
+    assert not any("Ignored a constraint" in w for w in draft.warnings)
