@@ -134,11 +134,11 @@ class ValueBreakdown(Strict):
     p50_net_value_usd: USD | None = None
     p90_net_value_usd: USD | None = None
     # Optional detail the engine may report; not terms of the net value formula below.
-    termination_cost_usd: float | None = Field(
+    termination_cost_usd: USD | None = Field(
         default=None, ge=0, description="Contract termination fees paid to exit vendors or projects.")
-    migration_cost_usd: float | None = Field(
+    migration_cost_usd: USD | None = Field(
         default=None, ge=0, description="One-time cost of moving work or data onto a replacement.")
-    displaced_work_cost_usd: float | None = Field(
+    displaced_work_cost_usd: USD | None = Field(
         default=None, ge=0, description="Cost of work pushed onto remaining teams by the change.")
 
     @model_validator(mode="after")

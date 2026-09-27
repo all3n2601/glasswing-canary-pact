@@ -1,3 +1,4 @@
+import logging
 import operator
 import os
 import threading
@@ -64,6 +65,7 @@ class RunGraphState(TypedDict, total=False):
     package: DecisionPackage
 
 
+log = logging.getLogger(__name__)
 SIM_MODES = ("full", "quick")
 
 
@@ -347,8 +349,9 @@ class _Run:
             return []
         try:
             return self.engine.vendor_overlap(twin, vendor_ids)
-        except ValueError as exc:
-            # Overlap is supporting detail; a bad vendor id is reported instead of failing the whole run.
+        except Exception as exc:
+            # Overlap is supporting detail (bad vendor id, engine not ready); report it, never fail the run for it.
+            log.warning("vendor_overlap failed for run %s: %s", self.run_id, type(exc).__name__)
             self.engine_issues.append(f"Engine vendor_overlap: {exc}")
             return []
 

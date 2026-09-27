@@ -2154,7 +2154,7 @@
           "anyOf": [
             {
               "minimum": 0,
-              "type": "number"
+              "type": "integer"
             },
             {
               "type": "null"
@@ -2168,7 +2168,7 @@
           "anyOf": [
             {
               "minimum": 0,
-              "type": "number"
+              "type": "integer"
             },
             {
               "type": "null"
@@ -2182,7 +2182,7 @@
           "anyOf": [
             {
               "minimum": 0,
-              "type": "number"
+              "type": "integer"
             },
             {
               "type": "null"

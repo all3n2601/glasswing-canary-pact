@@ -121,3 +121,26 @@ def test_engine_port_vendor_overlap_follows_engine_impl(monkeypatch) -> None:
     assert engine_port.vendor_overlap(twin, ["vendor_apex", "vendor_beacon"]) == stub_engine.vendor_overlap(
         twin, ["vendor_apex", "vendor_beacon"]) != []
     assert engine_port.vendor_overlap(twin, ["vendor_apex"]) == []
+
+
+def test_invalid_sim_mode_blocks_all_runs_at_startup(client, brief_json, monkeypatch, caplog) -> None:
+    monkeypatch.setenv("CANARY_SIM_MODE", "turbo")
+    monkeypatch.setattr(storage, "close", lambda: None)
+
+    async def start_and_stop() -> None:
+        async with lifespan(app):
+            pass
+
+    try:
+        with caplog.at_level(logging.ERROR, logger="canary_api.runtime"):
+            asyncio.run(start_and_stop())
+        assert "decision runs disabled" in caplog.text and "CANARY_SIM_MODE" in caplog.text
+        monkeypatch.setenv("CANARY_ALLOW_LIVE", "true")
+        for mode in ("mock", "live"):
+            denied = client.post(f"/decisions?llm_mode={mode}", headers=auth_headers(client), json=brief_json)
+            assert denied.status_code == 503
+            assert "CANARY_SIM_MODE must be one of full, quick" in denied.json()["detail"]
+    finally:
+        monkeypatch.delenv("CANARY_SIM_MODE", raising=False)
+        runtime.check_sim_mode()
+    assert runtime.sim_mode_error is None

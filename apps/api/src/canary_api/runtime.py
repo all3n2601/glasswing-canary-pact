@@ -5,6 +5,7 @@ from pathlib import Path
 
 from agent_orchestration import AgentLLM
 from agent_orchestration.llm import structured_output_mode
+from agent_orchestration.orchestrator import simulation_mode
 from contracts_py.twin import OrganizationSettings, Twin
 
 from canary_api import engine_port
@@ -15,6 +16,8 @@ log = logging.getLogger(__name__)
 bus = EventBus()
 # Set once at startup; live runs are refused while it holds an error, mock and replay are unaffected.
 structured_output_error: str | None = None
+# Set once at startup; every run is refused while it holds an error, since each run calls simulate.
+sim_mode_error: str | None = None
 _twins: dict[str, Twin] = {}
 
 
@@ -58,3 +61,14 @@ def check_structured_output() -> str | None:
         structured_output_error = str(exc)
         log.error("live runs disabled: %s", exc)
     return structured_output_error
+
+
+def check_sim_mode() -> str | None:
+    global sim_mode_error
+    try:
+        simulation_mode()
+        sim_mode_error = None
+    except ValueError as exc:
+        sim_mode_error = str(exc)
+        log.error("decision runs disabled: %s", exc)
+    return sim_mode_error

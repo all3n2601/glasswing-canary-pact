@@ -256,10 +256,11 @@ def test_knowledge_coverage_rejects_negative_capacity() -> None:
 def test_value_breakdown_optional_cost_split() -> None:
     plain = ValueBreakdown.model_validate(breakdown())
     assert (plain.termination_cost_usd, plain.migration_cost_usd, plain.displaced_work_cost_usd) == (None, None, None)
-    split = ValueBreakdown.model_validate(breakdown(termination_cost_usd=50_000, migration_cost_usd=120_000.5,
+    split = ValueBreakdown.model_validate(breakdown(termination_cost_usd=50_000, migration_cost_usd=120_000,
                                                    displaced_work_cost_usd=0))
-    assert split.net_value_usd == plain.net_value_usd and split.migration_cost_usd == 120_000.5
-    with pytest.raises(ValidationError):
-        ValueBreakdown.model_validate(breakdown(termination_cost_usd=-1))
+    assert split.net_value_usd == plain.net_value_usd and split.migration_cost_usd == 120_000
+    for bad in ({"termination_cost_usd": -1}, {"migration_cost_usd": 120_000.5}):
+        with pytest.raises(ValidationError):
+            ValueBreakdown.model_validate(breakdown(**bad))
     with pytest.raises(ValidationError, match="does not equal components"):
         ValueBreakdown.model_validate(breakdown(net_value_usd=1, monthly_net_usd=[1], migration_cost_usd=10))

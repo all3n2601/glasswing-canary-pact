@@ -1,4 +1,7 @@
+import logging
+
 import pytest
+from canary_api.engine_port import EngineNotReady
 from canary_api.stubs import results
 from contracts_py.enums import ActionType
 
@@ -27,15 +30,25 @@ def test_no_vendor_actions_means_no_overlap_call(people_brief, twin, settings) -
     assert package.vendor_overlaps == [] and "vendor_overlap" not in engine.names()
 
 
-class OverlapRejects(SpyEngine):
+class OverlapRaises(SpyEngine):
+    def __init__(self, error: Exception) -> None:
+        super().__init__()
+        self.error = error
+
     def vendor_overlap(self, twin, vendor_ids):
-        raise ValueError("vendor_apex is not a vendor in the twin")
+        raise self.error
 
 
-def test_engine_overlap_error_is_reported_not_fatal(brief, twin, settings) -> None:
-    package = run(brief, twin, settings, OverlapRejects())
+@pytest.mark.parametrize("error", [
+    ValueError("vendor_apex is not a vendor in the twin"),
+    EngineNotReady("ENGINE_IMPL=real but simulation_engine.vendor_overlap does not exist yet"),
+])
+def test_engine_overlap_error_is_reported_not_fatal(brief, twin, settings, error, caplog) -> None:
+    with caplog.at_level(logging.WARNING, logger="agent_orchestration.orchestrator"):
+        package = run(brief, twin, settings, OverlapRaises(error))
     assert package.vendor_overlaps == []
-    assert "Engine vendor_overlap: vendor_apex is not a vendor in the twin" in package.assumptions
+    assert f"Engine vendor_overlap: {error}" in package.assumptions
+    assert type(error).__name__ in caplog.text
 
 
 @pytest.mark.parametrize(("value", "expected"), [(None, "full"), ("quick", "quick"), ("full", "full")])
