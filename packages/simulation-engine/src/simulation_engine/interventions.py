@@ -3,6 +3,12 @@
 Each ``ActionType`` becomes a graph edit on a scenario clone of the twin, plus the direct
 effects the propagation starts from and the money lines it moves. Agents and the UI never edit
 edges; they only pick interventions. The baseline twin is never mutated (plan B-04).
+
+Department profiles shape capacity cuts (schema v2.2.0 section 5.11, CORE):
+
+- a department-level ``reduce_capacity`` saves at most ``budget * (1 - fixed_cost_pct)``;
+- the capacity a cut removes is ``cut_pct * max(1, utilisation)`` of the cut department (or the
+  cut role's department), so cutting an overstretched team hurts more than proportionally.
 """
 
 from __future__ import annotations
@@ -13,7 +19,7 @@ from contracts_py.decision import Intervention
 from contracts_py.enums import ActionType, EntityType, InterventionKind, Relation
 from contracts_py.twin import Entity, Twin
 
-from company_twin import clone, entity_map
+from company_twin import entity_map
 
 DAYS_PER_YEAR = 365
 PERSON_TOKEN_RELATIONS = {Relation.OWNS, Relation.KNOWS, Relation.BACKS_UP}
@@ -35,10 +41,23 @@ class AppliedScenario:
     gains: dict[str, Seed] = field(default_factory=dict)
     gross_savings_usd: int = 0
     transition_cost_usd: int = 0
+    # The vendor share of transition_cost_usd, kept apart so the plan's separate lines can be shown.
+    termination_cost_usd: int = 0
+    migration_cost_usd: int = 0
     added_cost_usd: int = 0
     rebound_cost_usd: int = 0
     savings_by_intervention: dict[str, int] = field(default_factory=dict)
     assumptions: list[str] = field(default_factory=list)
+
+
+def scenario_copy(twin: Twin) -> Twin:
+    """A scenario clone: fresh entity objects and a fresh edge list over the shared, unmutated rest.
+
+    Operators only reassign scalar entity fields and replace ``twin.edges``, so copying the
+    entities shallowly isolates the baseline at a fraction of a deep copy's cost (128 portfolios
+    are evaluated per optimize call).
+    """
+    return twin.model_copy(update={"entities": [e.model_copy() for e in twin.entities], "edges": list(twin.edges)})
 
 
 def _require(entity: Entity, types: set[EntityType], intervention: Intervention) -> None:
@@ -78,6 +97,8 @@ def _remove_vendor(s: AppliedScenario, i: Intervention, target: Entity) -> None:
     saved = target.annual_cost_usd or 0
     s.gross_savings_usd += saved
     s.savings_by_intervention[i.id] = saved
+    s.termination_cost_usd += target.one_time_exit_cost_usd or 0
+    s.migration_cost_usd += target.migration_cost_usd or 0
     s.transition_cost_usd += (target.one_time_exit_cost_usd or 0) + (target.migration_cost_usd or 0)
     target.annual_cost_usd = 0
     _seed(s.losses, target.id, 1.0, i.start_day, i.id)
@@ -94,10 +115,20 @@ def _change_capacity(s: AppliedScenario, i: Intervention, target: Entity, sign: 
     if target.type is not EntityType.role and target.type is not EntityType.department and target.annual_cost_usd:
         target.annual_cost_usd = round(target.annual_cost_usd * (1 + sign * share))
     if sign < 0:
+        profiles = {p.department_id: p for p in s.twin.department_profiles}
+        department_id = target.id if target.type is EntityType.department else target.department_id
+        profile = profiles.get(department_id or "")
+        if profile is not None and target.type is EntityType.department:
+            cap = round(profile.budget.annual_budget_usd * (1 - profile.budget.fixed_cost_pct))
+            if moved > cap:
+                s.assumptions.append(f"{i.id}: savings capped at ${cap:,} by {department_id} fixed_cost_pct "
+                                     f"{profile.budget.fixed_cost_pct}")
+                moved = cap
+        utilisation = max(1.0, profile.staffing.utilisation) if profile is not None else 1.0
         s.gross_savings_usd += moved
         s.savings_by_intervention[i.id] = moved
         for entity in affected:
-            _seed(s.losses, entity.id, share, i.start_day, i.id)
+            _seed(s.losses, entity.id, min(1.0, share * utilisation), i.start_day, i.id)
     else:
         s.added_cost_usd += moved
         for entity in affected:
@@ -169,7 +200,7 @@ def apply_interventions(twin: Twin, interventions: list[Intervention], *, horizo
 
     Mitigations (``kind == mitigation``) are re-simulated by ``mitigate`` (plan E-07) and are rejected here.
     """
-    scenario = AppliedScenario(twin=clone(twin))
+    scenario = AppliedScenario(twin=scenario_copy(twin))
     ents = entity_map(scenario.twin)
     for i in interventions:
         if i.kind is InterventionKind.mitigation:

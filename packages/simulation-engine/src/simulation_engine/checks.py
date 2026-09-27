@@ -212,9 +212,11 @@ def _check_portfolios(comparison: PortfolioComparison, twin: Twin) -> list[Valid
                                  [portfolio.plan_id]))
     if comparison.recommended is not None and not comparison.recommended.result.feasible:
         issues.append(_error(12, "the recommended portfolio must be feasible", [comparison.recommended.plan_id]))
-    ranks = [p.rank for p in portfolios if p.rank is not None]
-    if len(ranks) != len(set(ranks)):
-        issues.append(_error(12, "portfolio ranks must be unique", sorted({p.plan_id for p in portfolios})))
+    # The naive plan may be the same portfolio as a ranked one under another ID; it then shares that rank.
+    ranked = {frozenset(p.intervention_ids): p.rank for p in portfolios if p.rank is not None}
+    ranks = list(ranked.values())
+    if len(ranks) != len(set(ranks)) or any(p.rank is not None and not p.result.feasible for p in portfolios):
+        issues.append(_error(12, "portfolio ranks must be unique and given only to feasible portfolios", sorted({p.plan_id for p in portfolios})))
     if comparison.evaluated_count < len({p.plan_id for p in portfolios}):
         issues.append(_error(12, "evaluated_count is smaller than the portfolios returned", []))
     return issues

@@ -436,8 +436,8 @@ WORKFLOWS = [
     ("wf_account_planning", "Account planning", "dept_sales", "medium", 1, 600_000, 0.6, False),
     ("wf_kyc_screening", "KYC screening", "dept_compliance", "critical", 1, 2_000_000, 0.5, False),
     ("wf_vendor_reconciliation", "Vendor reconciliation", "dept_operations", "high", 2, 2_500_000, 0.5, False),
-    ("wf_product_analytics", "Product analytics", "dept_product", "medium", 1, 300_000, 0.6, False),
-    ("wf_risk_monitoring", "Risk monitoring", "dept_operations", "high", 1, 800_000, 0.5, False),
+    ("wf_product_analytics", "Product analytics", "dept_product", "medium", 1, 3_500_000, 0.6, False),
+    ("wf_risk_monitoring", "Risk monitoring", "dept_operations", "high", 1, 6_000_000, 0.5, False),
 ]
 # Workflow knowledge-risk inputs (2.1.1 CR4). The two stranding workflows have thin exception
 # docs and low automation, so removing their owners strands them until a runbook is written.
@@ -789,22 +789,22 @@ edge("e_auditlog_consumed_by_recon", "ds_audit_log", "wf_vendor_reconciliation",
      substitutability=0.3, criticality="medium", evidence_refs=["ev_vendor_recon_inputs"])
 
 # --- vendors PROVIDE datasets (plan section 4.1 / ADHI_BRIEF 4.3) ---
-edge("e_apex_provides_firmographics", "vendor_apex", "ds_firmographics", "PROVIDES", strength=0.8,
+edge("e_apex_provides_firmographics", "vendor_apex", "ds_firmographics", "PROVIDES", strength=0.9,
      substitutability=0.5, evidence_refs=["ev_vendor_dataset_matrix"])
 edge("e_beacon_provides_firmographics", "vendor_beacon", "ds_firmographics", "PROVIDES", strength=0.7,
-     substitutability=0.5, evidence_refs=["ev_vendor_dataset_matrix"])
+     substitutability=0.8, evidence_refs=["ev_vendor_dataset_matrix"])
 edge("e_echo_provides_firmographics", "vendor_echo", "ds_firmographics", "PROVIDES", strength=0.5,
      substitutability=0.6, evidence_refs=["ev_vendor_dataset_matrix"])
-edge("e_apex_provides_contact_data", "vendor_apex", "ds_contact_data", "PROVIDES", strength=0.8,
+edge("e_apex_provides_contact_data", "vendor_apex", "ds_contact_data", "PROVIDES", strength=0.85,
      substitutability=0.4, evidence_refs=["ev_vendor_dataset_matrix"])
 edge("e_beacon_provides_contact_data", "vendor_beacon", "ds_contact_data", "PROVIDES", strength=0.7,
      substitutability=0.4, evidence_refs=["ev_vendor_dataset_matrix"])
 edge("e_apex_provides_corporate_linkage", "vendor_apex", "ds_corporate_linkage", "PROVIDES", strength=0.95,
      substitutability=0.05, criticality="critical", evidence_refs=["ev_vendor_dataset_matrix"])
 edge("e_cinder_provides_intent", "vendor_cinder", "ds_intent_signals", "PROVIDES", strength=0.8,
-     substitutability=0.5, evidence_refs=["ev_vendor_dataset_matrix"])
-edge("e_echo_provides_intent", "vendor_echo", "ds_intent_signals", "PROVIDES", strength=0.6,
-     substitutability=0.5, evidence_refs=["ev_vendor_dataset_matrix"])
+     substitutability=0.75, evidence_refs=["ev_vendor_dataset_matrix"])
+edge("e_echo_provides_intent", "vendor_echo", "ds_intent_signals", "PROVIDES", strength=0.4,
+     substitutability=0.6, evidence_refs=["ev_vendor_dataset_matrix"])
 edge("e_delta_provides_identity", "vendor_delta", "ds_identity_verification", "PROVIDES", strength=0.95,
      substitutability=0.05, criticality="critical", evidence_refs=["ev_vendor_dataset_matrix"])
 edge("e_apex_provides_market_intel", "vendor_apex", "ds_market_intel", "PROVIDES", strength=0.7,
@@ -815,11 +815,11 @@ edge("e_echo_provides_market_intel", "vendor_echo", "ds_market_intel", "PROVIDES
      substitutability=0.4, evidence_refs=["ev_vendor_dataset_matrix"])
 edge("e_echo_provides_account_intel", "vendor_echo", "ds_account_intel", "PROVIDES", strength=0.9,
      substitutability=0.15, criticality="high", evidence_refs=["ev_vendor_dataset_matrix"])
-edge("e_flux_provides_usage", "vendor_flux", "ds_usage", "PROVIDES", strength=0.9, substitutability=0.3,
+edge("e_flux_provides_usage", "vendor_flux", "ds_usage", "PROVIDES", strength=0.9, substitutability=0.1,
      evidence_refs=["ev_vendor_dataset_matrix"])
-edge("e_granite_provides_geo_risk", "vendor_granite", "ds_geo_risk", "PROVIDES", strength=0.8,
-     substitutability=0.4, evidence_refs=["ev_vendor_dataset_matrix"])
-edge("e_delta_provides_geo_risk", "vendor_delta", "ds_geo_risk", "PROVIDES", strength=0.6,
+edge("e_granite_provides_geo_risk", "vendor_granite", "ds_geo_risk", "PROVIDES", strength=0.9,
+     substitutability=0.1, evidence_refs=["ev_vendor_dataset_matrix"])
+edge("e_delta_provides_geo_risk", "vendor_delta", "ds_geo_risk", "PROVIDES", strength=0.3,
      substitutability=0.4, evidence_refs=["ev_vendor_dataset_matrix"])
 
 # --- datasets CONSUMED by workflows / systems (base twin; the planted edge is NOT here) ---
@@ -842,9 +842,9 @@ edge("e_market_intel_consumed_account_planning", "ds_market_intel", "wf_account_
 edge("e_account_intel_consumed_account_planning", "ds_account_intel", "wf_account_planning", "CONSUMES",
      strength=0.8, substitutability=0.2, criticality="high", evidence_refs=["ev_vendor_dataset_matrix"])
 edge("e_usage_consumed_product_analytics", "ds_usage", "wf_product_analytics", "CONSUMES",
-     strength=0.8, substitutability=0.3, criticality="medium")
+     strength=0.9, substitutability=0.1, criticality="medium")
 edge("e_geo_risk_consumed_risk_monitoring", "ds_geo_risk", "wf_risk_monitoring", "CONSUMES",
-     strength=0.7, substitutability=0.4, criticality="medium")
+     strength=0.9, substitutability=0.1, criticality="medium")
 edge("e_market_intel_consumed_ml_scoring", "ds_market_intel", "sys_ml_scoring", "CONSUMES",
      strength=0.5, substitutability=0.5, criticality="medium")
 edge("e_intent_consumed_ml_scoring", "ds_intent_signals", "sys_ml_scoring", "CONSUMES",
@@ -871,7 +871,7 @@ edge("e_cc72_coverage", "ctl_soc2_audit_logging", "kpi_soc2_coverage", "CONTRIBU
      substitutability=0.05, criticality="critical", evidence_refs=["ev_soc2_register_intro"])
 edge("e_leadscoring_pipeline", "wf_lead_scoring", "kpi_pipeline", "CONTRIBUTES_TO", strength=0.7,
      substitutability=0.3, criticality="medium")
-edge("e_campaign_pipeline", "wf_campaign_targeting", "kpi_pipeline", "CONTRIBUTES_TO", strength=0.6,
+edge("e_campaign_pipeline", "wf_campaign_targeting", "kpi_pipeline", "CONTRIBUTES_TO", strength=0.5,
      substitutability=0.3, criticality="medium")
 edge("e_account_planning_retention", "wf_account_planning", "kpi_net_retention", "CONTRIBUTES_TO",
      strength=0.6, substitutability=0.4, criticality="medium")

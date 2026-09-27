@@ -1093,7 +1093,7 @@
       "target": "ds_firmographics",
       "relation": "PROVIDES",
       "label": null,
-      "strength": 0.8,
+      "strength": 0.9,
       "criticality": "medium"
     },
     {
@@ -1120,7 +1120,7 @@
       "target": "ds_contact_data",
       "relation": "PROVIDES",
       "label": null,
-      "strength": 0.8,
+      "strength": 0.85,
       "criticality": "medium"
     },
     {
@@ -1156,7 +1156,7 @@
       "target": "ds_intent_signals",
       "relation": "PROVIDES",
       "label": null,
-      "strength": 0.6,
+      "strength": 0.4,
       "criticality": "medium"
     },
     {
@@ -1219,7 +1219,7 @@
       "target": "ds_geo_risk",
       "relation": "PROVIDES",
       "label": null,
-      "strength": 0.8,
+      "strength": 0.9,
       "criticality": "medium"
     },
     {
@@ -1228,7 +1228,7 @@
       "target": "ds_geo_risk",
       "relation": "PROVIDES",
       "label": null,
-      "strength": 0.6,
+      "strength": 0.3,
       "criticality": "medium"
     },
     {
@@ -1318,7 +1318,7 @@
       "target": "wf_product_analytics",
       "relation": "CONSUMES",
       "label": null,
-      "strength": 0.8,
+      "strength": 0.9,
       "criticality": "medium"
     },
     {
@@ -1327,7 +1327,7 @@
       "target": "wf_risk_monitoring",
       "relation": "CONSUMES",
       "label": null,
-      "strength": 0.7,
+      "strength": 0.9,
       "criticality": "medium"
     },
     {
@@ -1435,7 +1435,7 @@
       "target": "kpi_pipeline",
       "relation": "CONTRIBUTES_TO",
       "label": null,
-      "strength": 0.6,
+      "strength": 0.5,
       "criticality": "medium"
     },
     {

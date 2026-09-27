@@ -2245,7 +2245,7 @@
       "sensitivity": "general",
       "department_id": "dept_product",
       "min_qualified_owners": 1,
-      "failure_cost_per_day_usd": 300000,
+      "failure_cost_per_day_usd": 3500000,
       "documented_pct": 0.6,
       "customer_facing": false,
       "exception_documented_pct": 0.6,
@@ -2262,7 +2262,7 @@
       "sensitivity": "general",
       "department_id": "dept_operations",
       "min_qualified_owners": 1,
-      "failure_cost_per_day_usd": 800000,
+      "failure_cost_per_day_usd": 6000000,
       "documented_pct": 0.5,
       "customer_facing": false,
       "exception_documented_pct": 0.6,
@@ -3168,9 +3168,9 @@
       "source": "vendor_apex",
       "target": "ds_firmographics",
       "relation": "PROVIDES",
-      "strength": 0.8,
+      "strength": 0.9,
       "strength_range": [
-        0.56,
+        0.63,
         1.0
       ],
       "substitutability": 0.5,
@@ -3191,7 +3191,7 @@
         0.49,
         0.91
       ],
-      "substitutability": 0.5,
+      "substitutability": 0.8,
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
@@ -3222,9 +3222,9 @@
       "source": "vendor_apex",
       "target": "ds_contact_data",
       "relation": "PROVIDES",
-      "strength": 0.8,
+      "strength": 0.85,
       "strength_range": [
-        0.56,
+        0.595,
         1.0
       ],
       "substitutability": 0.4,
@@ -3281,7 +3281,7 @@
         0.56,
         1.0
       ],
-      "substitutability": 0.5,
+      "substitutability": 0.75,
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
@@ -3294,12 +3294,12 @@
       "source": "vendor_echo",
       "target": "ds_intent_signals",
       "relation": "PROVIDES",
-      "strength": 0.6,
+      "strength": 0.4,
       "strength_range": [
-        0.42,
-        0.78
+        0.28,
+        0.52
       ],
-      "substitutability": 0.5,
+      "substitutability": 0.6,
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
@@ -3407,7 +3407,7 @@
         0.63,
         1.0
       ],
-      "substitutability": 0.3,
+      "substitutability": 0.1,
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
@@ -3420,12 +3420,12 @@
       "source": "vendor_granite",
       "target": "ds_geo_risk",
       "relation": "PROVIDES",
-      "strength": 0.8,
+      "strength": 0.9,
       "strength_range": [
-        0.56,
+        0.63,
         1.0
       ],
-      "substitutability": 0.4,
+      "substitutability": 0.1,
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
@@ -3438,10 +3438,10 @@
       "source": "vendor_delta",
       "target": "ds_geo_risk",
       "relation": "PROVIDES",
-      "strength": 0.6,
+      "strength": 0.3,
       "strength_range": [
-        0.42,
-        0.78
+        0.21,
+        0.39
       ],
       "substitutability": 0.4,
       "lag_days": 0,
@@ -3606,12 +3606,12 @@
       "source": "ds_usage",
       "target": "wf_product_analytics",
       "relation": "CONSUMES",
-      "strength": 0.8,
+      "strength": 0.9,
       "strength_range": [
-        0.56,
+        0.63,
         1.0
       ],
-      "substitutability": 0.3,
+      "substitutability": 0.1,
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
@@ -3622,12 +3622,12 @@
       "source": "ds_geo_risk",
       "target": "wf_risk_monitoring",
       "relation": "CONSUMES",
-      "strength": 0.7,
+      "strength": 0.9,
       "strength_range": [
-        0.49,
-        0.91
+        0.63,
+        1.0
       ],
-      "substitutability": 0.4,
+      "substitutability": 0.1,
       "lag_days": 0,
       "criticality": "medium",
       "confidence": 0.9,
@@ -3830,10 +3830,10 @@
       "source": "wf_campaign_targeting",
       "target": "kpi_pipeline",
       "relation": "CONTRIBUTES_TO",
-      "strength": 0.6,
+      "strength": 0.5,
       "strength_range": [
-        0.42,
-        0.78
+        0.35,
+        0.65
       ],
       "substitutability": 0.3,
       "lag_days": 0,

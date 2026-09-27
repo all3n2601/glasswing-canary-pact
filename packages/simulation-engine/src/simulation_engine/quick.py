@@ -1,8 +1,10 @@
-"""Quick-mode impact (plan section 11.1; schema v2.2.0 section 7.13).
+"""Quick-mode evaluation (plan section 11.1; schema v2.2.0 sections 7.6, 7.13).
 
-``quick_impact`` is the agents' tool: one deterministic midpoint pass that applies the
-interventions to a scenario clone, propagates their losses and gains, and prices the value lines
-the interventions themselves move. It targets < 100 ms on the full fixture.
+``evaluate`` is the one deterministic midpoint pass behind ``quick_impact`` (the agents' tool),
+``simulate(mode="quick")`` and the optimizer: it applies the interventions to a scenario clone,
+propagates their losses and gains, prices every value line, reports the workflow coverage that
+changed, checks the brief's goal and hard constraints, and scores the risk. It targets < 100 ms
+on the full fixture.
 """
 
 from __future__ import annotations
@@ -11,18 +13,19 @@ import hashlib
 import json
 from datetime import datetime, time, timezone
 
-from contracts_py.decision import DecisionBrief, Goal, Intervention
-from contracts_py.engine import Impact, SimulationResult, ValueBreakdown
+from contracts_py.decision import DecisionBrief, Intervention
+from contracts_py.engine import Impact, SimulationResult
 from contracts_py.enums import ClaimStatus, Direction, Future, ImpactCategory, ImpactLevel, Origin, Polarity
 from contracts_py.twin import OrganizationSettings, Twin
 
+from .constraints import ScenarioMetrics, evaluate_constraints, goal_met, rejection_reasons
 from .interventions import AppliedScenario, apply_interventions
-from .propagation import DELAYED_AFTER_DAYS, impact_id, impact_ledger, propagate
+from .knowledge import downgrade_documented, workflow_coverage
+from .propagation import DELAYED_AFTER_DAYS, Propagation, impact_id, impact_ledger, propagate
 from .risk import risk_score
+from .value import price_harms, value_breakdown
 
-DAYS_PER_MONTH = 30
-QUICK_ASSUMPTION = ("Quick mode: midpoint edge strengths; hard constraints, pressures, and business loss are "
-                    "evaluated by simulate")
+QUICK_ASSUMPTION = "Quick mode: midpoint edge strengths and point values; pressures are priced by compare_futures"
 
 
 def _savings_impacts(applied: AppliedScenario, interventions: list[Intervention], *, decision_id: str,
@@ -48,81 +51,79 @@ def _savings_impacts(applied: AppliedScenario, interventions: list[Intervention]
     return impacts
 
 
-def _monthly_net(gross: int, net: int, start_day: int, horizon_days: int) -> list[int]:
-    """Cumulative net per month: one-off costs land in the start month, savings accrue after it."""
-    months = max(1, horizon_days // DAYS_PER_MONTH)
-    costs = gross - net
-    accrual_days = max(1, months * DAYS_PER_MONTH - start_day)
-    series = []
-    for m in range(1, months):
-        elapsed = min(1.0, max(0, m * DAYS_PER_MONTH - start_day) / accrual_days)
-        series.append(round(gross * elapsed) - (costs if m * DAYS_PER_MONTH > start_day else 0))
-    return [*series, net]
+def _priced(impacts: list[Impact], by_impact: dict[str, int]) -> list[Impact]:
+    return [i.model_copy(update={"value_usd": by_impact[i.impact_id]}) if i.impact_id in by_impact else i
+            for i in impacts]
 
 
-def _goal_met(goal: Goal, value: ValueBreakdown) -> bool | None:
-    if goal.metric == "annual_savings_usd":
-        actual = value.gross_savings_usd if goal.basis == "gross" else value.net_value_usd
-    elif goal.metric == "net_value_usd":
-        actual = value.net_value_usd
-    else:
-        return None
-    return actual >= goal.target if goal.direction == "at_least" else actual <= goal.target
+def evaluate(twin: Twin, interventions: list[Intervention], *, brief: DecisionBrief | None,
+             settings: OrganizationSettings, run_id: str, scenario_id: str, result_id: str,
+             plan_id: str | None = None) -> SimulationResult:
+    """One act-now quick evaluation of ``interventions`` on a clone of ``twin``."""
+    horizon = brief.horizon_days if brief else settings.default_horizon_days
+    decision_id = brief.decision_id if brief else "dec_adhoc"
+    constraints = brief.constraints if brief else []
+
+    applied = apply_interventions(twin, interventions, horizon_days=horizon)
+    losses = propagate(applied.twin, applied.losses, settings=settings)
+    gains = (propagate(applied.twin, applied.gains, settings=settings, coverage_share=False) if applied.gains
+             else Propagation(effects={}, iterations=0, converged=True))
+    coverage = workflow_coverage(twin, applied.twin)
+    harms = impact_ledger(applied.twin, losses, decision_id=decision_id, scenario_id=scenario_id,
+                          polarity=Polarity.harm, constraints=constraints, horizon_days=horizon)
+    harms = downgrade_documented(harms, coverage, applied.twin)
+    priced = price_harms(applied.twin, harms, horizon)
+    impacts = [
+        *_savings_impacts(applied, interventions, decision_id=decision_id, scenario_id=scenario_id),
+        *_priced(harms, {**priced.displaced_by_impact, **priced.loss_by_impact}),
+        *impact_ledger(applied.twin, gains, decision_id=decision_id, scenario_id=scenario_id,
+                       polarity=Polarity.benefit, constraints=constraints, horizon_days=horizon),
+    ]
+    start_day = min((i.start_day for i in interventions), default=0)
+    value = value_breakdown(applied, priced, start_day=start_day, horizon_days=horizon)
+    metrics = ScenarioMetrics(applied.twin, impacts, value, coverage)
+
+    assumptions = [QUICK_ASSUMPTION, *applied.assumptions]
+    if applied.termination_cost_usd or applied.migration_cost_usd:
+        assumptions.append(f"transition_cost_usd includes ${applied.termination_cost_usd:,} vendor termination and "
+                           f"${applied.migration_cost_usd:,} migration")
+    if priced.displaced_work_usd:
+        assumptions.append(f"added_cost_usd includes ${priced.displaced_work_usd:,} displaced work: harmed workflows "
+                           "and systems priced at loss x failure_cost_per_day_usd until the horizon")
+    if not losses.converged or not gains.converged:
+        assumptions.append("propagation hit the iteration cap before converging")
+
+    met, results, reasons, feasible = False, [], [], True
+    if brief is not None:
+        computed = goal_met(brief.goal, value)
+        if computed is None:
+            assumptions.append(f"goal metric {brief.goal.metric} is not computed in quick mode")
+        met = bool(computed)
+        results = evaluate_constraints(constraints, metrics)
+        reasons = rejection_reasons(brief, value, met, results)
+        feasible = not reasons
+
+    departments = sorted({i.affected_department for i in impacts if i.affected_department})
+    return SimulationResult(
+        result_id=result_id, run_id=run_id, scenario_id=scenario_id, future=Future.act_now, plan_id=plan_id,
+        mode="quick", intervention_ids=[i.id for i in interventions], value=value, goal_met=met,
+        constraint_results=results, impacts=impacts, workflow_coverage=coverage,
+        risk=risk_score(metrics, impacts, goal_missed=brief is not None and not met, constraints=constraints,
+                        settings=settings),
+        affected_department_ids=departments, feasible=feasible, rejection_reasons=reasons, assumptions=assumptions,
+        # Stamped from the twin's as-of date so the same inputs give byte-identical output.
+        computed_at=datetime.combine(twin.version.as_of_date, time(), tzinfo=timezone.utc),
+    )
 
 
 def quick_impact(twin: Twin, interventions: list[Intervention], *, brief: DecisionBrief | None = None,
                  settings: OrganizationSettings | None = None, run_id: str = "run_adhoc") -> SimulationResult:
     """Point-estimate impact of ``interventions`` on ``twin``; the baseline twin is never changed.
 
-    Without a brief (schema G3) the result is ``act_now`` with no constraint results,
+    With a brief the goal and every constraint are evaluated and ``feasible`` follows them.
+    Without one (schema G3) the result is ``act_now`` with no constraint results,
     ``goal_met = False`` and ``feasible = True``.
     """
-    settings = settings or OrganizationSettings()
-    horizon = brief.horizon_days if brief else settings.default_horizon_days
-    decision_id = brief.decision_id if brief else "dec_adhoc"
-    scenario_id = f"scn_{run_id}_{Future.act_now.value}_none"
-    constraints = brief.constraints if brief else []
-
-    applied = apply_interventions(twin, interventions, horizon_days=horizon)
-    losses = propagate(applied.twin, applied.losses, settings=settings)
-    gains = propagate(applied.twin, applied.gains, settings=settings, coverage_share=False)
-    impacts = [
-        *_savings_impacts(applied, interventions, decision_id=decision_id, scenario_id=scenario_id),
-        *impact_ledger(applied.twin, losses, decision_id=decision_id, scenario_id=scenario_id,
-                       polarity=Polarity.harm, constraints=constraints, horizon_days=horizon),
-        *impact_ledger(applied.twin, gains, decision_id=decision_id, scenario_id=scenario_id,
-                       polarity=Polarity.benefit, constraints=constraints, horizon_days=horizon),
-    ]
-
-    gross = applied.gross_savings_usd
-    net = gross - applied.transition_cost_usd - applied.added_cost_usd - applied.rebound_cost_usd
-    start_day = min((i.start_day for i in interventions), default=0)
-    value = ValueBreakdown(
-        gross_savings_usd=gross, transition_cost_usd=applied.transition_cost_usd,
-        added_cost_usd=applied.added_cost_usd, rebound_cost_usd=applied.rebound_cost_usd,
-        expected_business_loss_usd=0, pressure_cost_usd=0, avoided_failure_cost_usd=0, net_value_usd=net,
-        monthly_net_usd=_monthly_net(gross, net, start_day, horizon),
-    )
-
-    assumptions = [QUICK_ASSUMPTION, *applied.assumptions]
-    goal_met = False
-    if brief is not None:
-        met = _goal_met(brief.goal, value)
-        if met is None:
-            assumptions.append(f"goal metric {brief.goal.metric} is not priced in quick mode")
-        goal_met = bool(met)
-    if not losses.converged or not gains.converged:
-        assumptions.append("propagation hit the iteration cap before converging")
-
     digest = hashlib.sha256(json.dumps(sorted(i.id for i in interventions)).encode()).hexdigest()[:12]
-    departments = sorted({i.affected_department for i in impacts if i.affected_department})
-    return SimulationResult(
-        result_id=f"res_{run_id}_quick_{digest}", run_id=run_id, scenario_id=scenario_id, future=Future.act_now,
-        mode="quick", intervention_ids=[i.id for i in interventions], value=value, goal_met=goal_met,
-        impacts=impacts,
-        risk=risk_score(applied.twin, impacts, value, goal_missed=brief is not None and not goal_met,
-                        settings=settings),
-        affected_department_ids=departments, feasible=True, assumptions=assumptions,
-        # Stamped from the twin's as-of date so the same inputs give byte-identical output.
-        computed_at=datetime.combine(twin.version.as_of_date, time(), tzinfo=timezone.utc),
-    )
+    return evaluate(twin, interventions, brief=brief, settings=settings or OrganizationSettings(), run_id=run_id,
+                    scenario_id=f"scn_{run_id}_{Future.act_now.value}_none", result_id=f"res_{run_id}_quick_{digest}")

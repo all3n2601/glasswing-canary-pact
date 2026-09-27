@@ -1,52 +1,77 @@
-"""Risk score (plan section 11.7; schema v2.2.0 section 7.5).
+"""Risk score (plan section 11.7; schema v2.2.0 section 7.5, rule 10).
 
 Each component is its weight from ``settings.risk_weights`` times a share in [0, 1], so the
-score is the exact sum of its components:
+score is the exact sum of its components and the level comes from
+``settings.risk_level_thresholds``:
 
-- financial: share of gross savings eaten by the other value lines (transition, added, rebound,
-  business loss, pressure cost); the full weight when the brief's goal is missed.
-- capability_workflow: the largest capacity loss on a workflow, system, role, or knowledge asset.
-- customer_revenue: the largest loss on a KPI, customer segment, or customer-facing entity.
-- compliance_control: the full weight when a mandatory control loses at least
-  ``CONTROL_BROKEN_LOSS``; otherwise the largest loss on any control.
-- execution_uncertainty: the mean ``1 - confidence`` of harm impacts.
+- financial: the full weight when the brief's goal is missed; otherwise the share of gross
+  savings eaten by the other value lines (transition, added, rebound, business loss, pressure).
+- capability_workflow: the largest of: the largest loss on a workflow, system, role, or knowledge
+  asset; ``STRANDED_SHARE`` per stranded workflow; ``STRANDED_SHARE`` per degraded critical system.
+- customer_revenue: for each ``revenue_impact_pct`` / ``customer_impact_pct`` hard or soft
+  constraint with an upper bound, ``value / threshold``; with no such constraint, the largest loss
+  on a KPI, customer segment, or customer-facing entity. The largest share counts.
+- compliance_control: the full weight when a mandatory control is broken (loss >= ``BROKEN_LOSS``);
+  otherwise the largest loss on any control.
+- execution_uncertainty: the mean ``1 - confidence`` of harm impacts plus ``HYPOTHESIS_SHARE`` per
+  impact that is still a hypothesis.
 
 Full mode refines the financial share with the P10/P50 spread (plan E-03).
 """
 
 from __future__ import annotations
 
-from contracts_py.engine import Impact, RiskComponents, RiskScore, ValueBreakdown
-from contracts_py.enums import EntityType, Polarity, RiskLevel
-from contracts_py.twin import OrganizationSettings, Twin
+from contracts_py.decision import Constraint
+from contracts_py.engine import Impact, RiskComponents, RiskScore
+from contracts_py.enums import ClaimStatus, EntityType, Polarity, RiskLevel
+from contracts_py.twin import OrganizationSettings
 
-CONTROL_BROKEN_LOSS = 0.5
+from .constraints import BROKEN_LOSS, ScenarioMetrics
 
+STRANDED_SHARE = 0.5
+HYPOTHESIS_SHARE = 0.1
 CAPABILITY_TYPES = {EntityType.workflow, EntityType.system, EntityType.role, EntityType.knowledge_asset}
 CUSTOMER_TYPES = {EntityType.kpi, EntityType.customer_segment}
+CUSTOMER_METRICS = ("revenue_impact_pct", "customer_impact_pct")
 
 
-def risk_score(twin: Twin, impacts: list[Impact], value: ValueBreakdown, *, goal_missed: bool,
-               settings: OrganizationSettings) -> RiskScore:
-    ents = {e.id: e for e in twin.entities}
-    harms = [(i, ents[i.affected_entity]) for i in impacts if i.polarity is Polarity.harm]
+def _customer_share(metrics: ScenarioMetrics, constraints: list[Constraint]) -> float:
+    bounded = [c for c in constraints if c.metric in CUSTOMER_METRICS and c.operator == "<=" and c.threshold > 0]
+    if bounded:
+        return max(metrics.metric(c.metric, c.scope_entity_id).value / c.threshold for c in bounded)
+    return max((i.magnitude for i, e in metrics.harms if e.type in CUSTOMER_TYPES or e.customer_facing), default=0.0)
+
+
+def risk_score(metrics: ScenarioMetrics, impacts: list[Impact], *, goal_missed: bool,
+               constraints: list[Constraint], settings: OrganizationSettings) -> RiskScore:
     w = settings.risk_weights
+    value = metrics.value
+    harms = metrics.harms
 
     costs = value.gross_savings_usd - value.net_value_usd
-    financial_share = 1.0 if goal_missed else min(1.0, max(0.0, costs / max(value.gross_savings_usd, 1)))
-    capability = max((i.magnitude for i, e in harms if e.type in CAPABILITY_TYPES), default=0.0)
-    customer = max((i.magnitude for i, e in harms if e.type in CUSTOMER_TYPES or e.customer_facing), default=0.0)
+    financial = 1.0 if goal_missed else costs / max(value.gross_savings_usd, 1)
+    capability = max(
+        max((i.magnitude for i, e in harms if e.type in CAPABILITY_TYPES), default=0.0),
+        STRANDED_SHARE * metrics.metric("stranded_workflows").value,
+        STRANDED_SHARE * metrics.metric("critical_systems_degraded").value,
+    )
     controls = [(i.magnitude, bool(e.mandatory)) for i, e in harms if e.type is EntityType.control]
-    broken = any(m >= CONTROL_BROKEN_LOSS and mandatory for m, mandatory in controls)
+    broken = any(m >= BROKEN_LOSS and mandatory for m, mandatory in controls)
     compliance = 1.0 if broken else max((m for m, _ in controls), default=0.0)
-    uncertainty = sum(1 - i.confidence for i, _ in harms) / len(harms) if harms else 0.0
+    harm_impacts = [i for i in impacts if i.polarity is Polarity.harm]
+    hypotheses = sum(1 for i in impacts if i.status is ClaimStatus.hypothesis)
+    uncertainty = (sum(1 - i.confidence for i in harm_impacts) / len(harm_impacts) if harm_impacts else 0.0)
+    uncertainty += HYPOTHESIS_SHARE * hypotheses
+
+    def part(weight: float, share: float) -> float:
+        return round(weight * min(1.0, max(0.0, share)), 4)
 
     components = RiskComponents(
-        financial=round(w.financial * financial_share, 4),
-        capability_workflow=round(w.capability_workflow * min(1.0, capability), 4),
-        customer_revenue=round(w.customer_revenue * min(1.0, customer), 4),
-        compliance_control=round(w.compliance_control * compliance, 4),
-        execution_uncertainty=round(w.execution_uncertainty * uncertainty, 4),
+        financial=part(w.financial, financial),
+        capability_workflow=part(w.capability_workflow, capability),
+        customer_revenue=part(w.customer_revenue, _customer_share(metrics, constraints)),
+        compliance_control=part(w.compliance_control, compliance),
+        execution_uncertainty=part(w.execution_uncertainty, uncertainty),
     )
     score = (components.financial + components.capability_workflow + components.customer_revenue
              + components.compliance_control + components.execution_uncertainty)

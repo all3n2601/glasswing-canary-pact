@@ -100,9 +100,9 @@
         "dept_operations"
       ],
       "coverage": 3,
-      "min_substitutability": 0.4,
+      "min_substitutability": 0.1,
       "replaceable": false,
-      "irreplaceable_flag": false,
+      "irreplaceable_flag": true,
       "replacement_candidates": []
     },
     {
@@ -138,9 +138,9 @@
         "dept_product"
       ],
       "coverage": 3,
-      "min_substitutability": 0.3,
+      "min_substitutability": 0.1,
       "replaceable": false,
-      "irreplaceable_flag": false,
+      "irreplaceable_flag": true,
       "replacement_candidates": []
     }
   ]

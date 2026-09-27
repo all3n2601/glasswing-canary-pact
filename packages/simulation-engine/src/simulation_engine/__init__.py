@@ -1,12 +1,20 @@
+from .blast import blast_radius
 from .checks import check_result
+from .constraints import ScenarioMetrics, evaluate_constraints
 from .interventions import AppliedScenario, Seed, apply_interventions
+from .knowledge import workflow_coverage
+from .optimizer import optimize
 from .overlap import OVERLAP_WEIGHTS, unique_contribution, vendor_overlap
 from .propagation import Effect, Propagation, impact_ledger, propagate
 from .quick import quick_impact
+from .simulate import simulate
 
 __all__ = [
     "check_result",
     "quick_impact",
+    "simulate",
+    "optimize",
+    "blast_radius",
     "vendor_overlap",
     "unique_contribution",
     "OVERLAP_WEIGHTS",
@@ -17,4 +25,7 @@ __all__ = [
     "Propagation",
     "Effect",
     "impact_ledger",
+    "ScenarioMetrics",
+    "evaluate_constraints",
+    "workflow_coverage",
 ]
