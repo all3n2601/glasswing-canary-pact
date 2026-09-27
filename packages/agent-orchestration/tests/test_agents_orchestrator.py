@@ -28,7 +28,7 @@ def run(brief, twin, settings, llm, engine=None):
 
 
 def test_full_mock_run_returns_package_and_exact_phase_order(brief, twin, settings) -> None:
-    package, recorder, engine = run(brief, twin, settings, ScriptedLLM(settings, {}))
+    package, recorder, engine = run(brief, twin, settings, AgentLLM(settings))
     assert isinstance(package, DecisionPackage)
     assert DecisionPackage.model_validate(package.model_dump(mode="json")) == package
     assert recorder.phases() == BASE_PHASES + TAIL_PHASES
@@ -80,7 +80,7 @@ def test_unavailable_agent_is_a_missing_perspective(brief, twin, settings) -> No
 
 
 def test_futures_cover_inaction_and_delay(brief, twin, settings) -> None:
-    _, recorder, _ = run(brief, twin, settings, ScriptedLLM(settings, {}))
+    _, recorder, _ = run(brief, twin, settings, AgentLLM(settings))
     futures = {e.future for e in recorder.of(EventType.simulation_completed)}
     assert futures == {Future.act_now, Future.inaction, Future.delay}
 
@@ -103,6 +103,19 @@ def test_person_tokens_never_leave_the_agent_layer(people_brief, hr_twin, settin
     assert person_tokens(package.model_dump_json()) == []
     assert "Can someone shadow [role]?" in package.open_questions
     assert "clone_with_edges" not in engine.names()
+
+
+def test_fallback_cached_agent_widens_uncertainty(brief, twin, settings) -> None:
+    fallback = lambda context: LLMResult(challenger_with_new_edge(context).output, "fallback_cached",
+                                         metrics("challenger"), errors=["cache miss"])
+    engineering = lambda context: LLMResult(None, "fallback_cached", metrics("engineering"))
+    llm = ScriptedLLM(settings, {"challenger": fallback, "engineering": engineering})
+    package, recorder, engine = run(brief, twin, settings, llm)
+    assert recorder.phases() == BASE_PHASES + TAIL_PHASES
+    assert "clone_with_edges" not in engine.names()
+    assert package.missing_perspectives == ["engineering", "challenger"]
+    widen = [args for name, args in engine.calls if name == "widen_uncertainty"]
+    assert widen[0][1] == ["dept_engineering"]
 
 
 class CountingLLM(AgentLLM):
@@ -217,7 +230,7 @@ def live_run(brief, twin, tmp_path, monkeypatch, **env):
         return LiveReply({"act_now_view": {"summary": "ok"}, "inaction_view": {"summary": "ok"}, "confidence": 0.5})
 
     settings = OrganizationSettings(llm_mode="live")
-    llm = AgentLLM(settings, live_call=live)
+    llm = AgentLLM(settings, cache_dir=tmp_path, live_call=live)
     _, recorder, _ = run(brief, twin, settings, llm)
     metrics_by_agent = {e.payload.agent_id: e.payload for e in recorder.of(EventType.agent_completed)}
     return metrics_by_agent, used

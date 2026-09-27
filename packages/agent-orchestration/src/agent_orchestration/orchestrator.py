@@ -41,8 +41,9 @@ from agent_orchestration.prompts import assemble
 from agent_orchestration.roster import CHALLENGER, PROMPT_VERSION, ROSTER, model_tier
 from agent_orchestration.router import route_agents
 
-FAILED_STATUSES = {"unavailable", "invalid"}
-MISSING_STATUSES = {"unavailable", "invalid"}
+FAILED_STATUSES = {"fallback_cached", "unavailable", "invalid"}
+# A fallback answer came from a different prompt, so its department counts as unheard.
+MISSING_STATUSES = {"fallback_cached", "unavailable", "invalid"}
 PLAN_SOURCE = {"naive": "naive", "recommended": "optimizer", "alternative": "enumerated"}
 
 
@@ -200,7 +201,8 @@ class _Run:
         assessment = outcome.assessment
         if assessment.status in FAILED_STATUSES:
             reason = "; ".join(assessment.validation.errors) or assessment.status
-            self.publish(EventType.agent_failed, AgentFailed(agent_id=agent_id, reason=reason, fallback_used=False),
+            self.publish(EventType.agent_failed, AgentFailed(agent_id=agent_id, reason=reason,
+                                                             fallback_used=assessment.status == "fallback_cached"),
                          actor=agent_id)
         self.publish(EventType.agent_completed, assessment, actor=agent_id)
         return outcome
