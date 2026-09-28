@@ -14,7 +14,10 @@ def context_hops() -> int:
     value = os.environ.get("CANARY_AGENT_CONTEXT_HOPS", "").strip()
     if not value:
         return DEFAULT_CONTEXT_HOPS
-    hops = int(value)
+    try:
+        hops = int(value)
+    except ValueError:
+        raise ValueError(f"CANARY_AGENT_CONTEXT_HOPS must be a whole number, got {value!r}") from None
     if hops < 0:
         raise ValueError(f"CANARY_AGENT_CONTEXT_HOPS must be 0 or more, got {hops}")
     return hops

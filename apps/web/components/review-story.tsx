@@ -42,6 +42,9 @@ export function ReviewStory({events, complete, decisionPackage, onEvidence, embe
   const pkg = snapshot.decisionPackage;
   const recommendation = pkg?.recommendation;
   const selectedRow = pkg?.futures.rows.find(row => row.result_id === recommendation?.result_id);
+  // A mitigated recommendation is judged on the mitigated plan, not the base row it was derived from.
+  const mitigated = recommendation?.mitigated_result_id ? pkg?.mitigations?.find(item => item.after.result_id === recommendation.mitigated_result_id)?.after : undefined;
+  const outcome = mitigated ? {feasible: mitigated.feasible, net: mitigated.value.net_value_usd} : selectedRow ? {feasible: selectedRow.feasible, net: selectedRow.net_value_p50_usd} : undefined;
   const highlights = pkg ? decisionHighlights(snapshot.assessments, pkg) : null;
   const needsReview = Boolean(pkg?.open_questions?.length || pkg?.missing_perspectives?.length || pkg?.missing_information?.length || highlights?.risks.length || pkg?.critical_risks?.length);
   const recommendationLabel = recommendation?.action === "do_not_proceed" ? "Do not proceed" : recommendation?.action === "delay" ? "Delay" : recommendation?.action === "proceed_with_mitigations" ? "Proceed with mitigations" : recommendation?.future === "inaction" ? "Keep the current plan unchanged" : recommendation?.future === "alternative" ? "Consider the alternative plan" : recommendation?.future === "delay" ? "Delay the change" : "Act now";
@@ -98,11 +101,11 @@ export function ReviewStory({events, complete, decisionPackage, onEvidence, embe
       {stage === 5 && (pkg ? <>
         <article className="rounded-xl border border-amber-200 bg-amber-50 p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">Your next step</p>
-          <h3 className="mt-1 text-xl font-semibold">{!recommendation || !selectedRow ? "Request a complete analysis" : !selectedRow.feasible ? "Rework the plan before approval" : needsReview ? "Review the risks before acting" : "Review the recommendation for approval"}</h3>
+          <h3 className="mt-1 text-xl font-semibold">{!recommendation || !outcome ? "Request a complete analysis" : !outcome.feasible ? "Rework the plan before approval" : needsReview ? "Review the risks before acting" : "Review the recommendation for approval"}</h3>
           <p className="mt-1 text-sm text-zinc-700">{needsReview ? "Resolve the checks below or request a revised scenario; savings alone do not establish safety." : "Confirm the assumptions and operational readiness. A human makes the final decision."}</p>
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-amber-200 pt-3 text-xs">
             <span>Model recommendation: <strong>{recommendation ? recommendationLabel : "Unavailable"}</strong></span>
-            {selectedRow ? <span><strong>{formatCompactCurrency(selectedRow.net_value_p50_usd)}</strong> modeled net value over {pkg.brief.horizon_days} days · {selectedRow.feasible ? "Passes modeled constraints" : "Fails modeled constraints"}</span> : null}
+            {outcome ? <span><strong>{formatCompactCurrency(outcome.net)}</strong> modeled net value over {pkg.brief.horizon_days} days{mitigated ? " with mitigations" : ""} · {outcome.feasible ? "Passes modeled constraints" : "Fails modeled constraints"}</span> : null}
           </div>
           <p className="mt-1 text-xs text-zinc-500">Point estimate; unmeasured effects may change the outcome.</p>
         </article>

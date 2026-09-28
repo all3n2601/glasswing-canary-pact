@@ -7,6 +7,7 @@ import queue
 import re
 import sqlite3
 import threading
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -245,6 +246,8 @@ POSTGRES_TABLES = [
 POSTGRES_TABLE_NAMES = ["canary_runs", "canary_events", "canary_packages", "canary_decisions", "canary_users",
                         "canary_revoked_tokens", "canary_twins", "canary_organizations", "canary_memberships"]
 DEFAULT_SCHEMA = "canary"
+POSTGRES_OPEN_ATTEMPTS = 3
+POSTGRES_RETRY_SECONDS = 2.0
 # Supabase's Data API serves anon and authenticated; those roles (and PUBLIC) get nothing here. Row-level security
 # with no policies denies every row to them as well, while the API's own owner or pooler role bypasses it.
 REVOKE_API_ROLES = """
@@ -290,6 +293,9 @@ class PostgresStorage:
         self.pool = ConnectionPool(url, min_size=1, max_size=4, configure=configure, open=False,
                                    kwargs={"prepare_threshold": None}, name="canary")
         with self._bootstrap(url) as conn:
+            # Two API processes starting together would race on CREATE ... IF NOT EXISTS and can fail with a
+            # UniqueViolation; a session advisory lock per schema makes the bootstrap run one at a time.
+            conn.execute("SELECT pg_advisory_lock(hashtext(%s))", (f"canary_bootstrap:{schema}",))
             conn.execute(sql.SQL("CREATE SCHEMA IF NOT EXISTS {}").format(sql.Identifier(schema)))
             conn.execute(search_path)
             for statement in POSTGRES_TABLES:
@@ -452,13 +458,23 @@ def current() -> Storage:
         if _current is None:
             url = database_url()
             if url:
-                try:
-                    _current = PostgresStorage(url, os.environ.get("CANARY_DB_SCHEMA") or DEFAULT_SCHEMA)
-                except Exception as exc:
-                    # Only the exception type is logged: psycopg messages can name the host.
-                    log.warning("DATABASE_URL is set but Postgres could not be opened (%s); FALLING BACK to file "
-                                "storage under the runs directory. Runs and users will not reach the database.",
-                                type(exc).__name__)
+                schema = os.environ.get("CANARY_DB_SCHEMA") or DEFAULT_SCHEMA
+                for attempt in range(1, POSTGRES_OPEN_ATTEMPTS + 1):
+                    try:
+                        _current = PostgresStorage(url, schema)
+                        break
+                    except ValueError:
+                        raise  # a bad schema name is a configuration error, not an outage
+                    except Exception as exc:
+                        # Only the exception type is logged: psycopg messages can name the host.
+                        if attempt < POSTGRES_OPEN_ATTEMPTS:
+                            log.warning("Postgres could not be opened (%s), attempt %d of %d; retrying",
+                                        type(exc).__name__, attempt, POSTGRES_OPEN_ATTEMPTS)
+                            time.sleep(POSTGRES_RETRY_SECONDS * attempt)
+                        else:
+                            log.error("DATABASE_URL is set but Postgres could not be opened after %d attempts (%s); "
+                                      "FALLING BACK to file storage under the runs directory. Runs and users will "
+                                      "not reach the database.", POSTGRES_OPEN_ATTEMPTS, type(exc).__name__)
             if _current is None:
                 from canary_api.paths import runs_dir
 
