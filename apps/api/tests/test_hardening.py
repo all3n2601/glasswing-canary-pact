@@ -190,3 +190,18 @@ def test_engine_port_mitigation_functions_follow_the_switches(monkeypatch) -> No
     monkeypatch.setenv("TWIN_IMPL", "real")
     catalog = engine_port.load_mitigation_catalog()
     assert catalog and all(m.kind == "mitigation" for m in catalog)
+
+
+def test_invalid_context_hops_is_caught_at_startup(monkeypatch) -> None:
+    from canary_api import runtime
+
+    monkeypatch.setattr(runtime, "sim_mode_error", None)
+    monkeypatch.setenv("CANARY_AGENT_CONTEXT_HOPS", "two")
+    try:
+        assert "CANARY_AGENT_CONTEXT_HOPS must be a whole number" in (runtime.check_sim_mode() or "")
+        monkeypatch.setenv("CANARY_AGENT_CONTEXT_HOPS", "-1")
+        assert "CANARY_AGENT_CONTEXT_HOPS must be 0 or more" in (runtime.check_sim_mode() or "")
+    finally:
+        monkeypatch.delenv("CANARY_AGENT_CONTEXT_HOPS", raising=False)
+        runtime.check_sim_mode()
+    assert runtime.sim_mode_error is None

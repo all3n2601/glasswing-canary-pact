@@ -127,3 +127,40 @@ def test_unreachable_database_falls_back_to_files(monkeypatch, caplog, tmp_path)
 
 def test_default_postgres_schema_is_not_public() -> None:
     assert storage.DEFAULT_SCHEMA == "canary"
+
+
+class _FlakyPostgres:
+    """Stands in for PostgresStorage: fails the first `failures` opens, then succeeds."""
+
+    calls = 0
+    failures = 0
+
+    def __init__(self, url, schema):
+        type(self).calls += 1
+        if type(self).calls <= type(self).failures:
+            raise RuntimeError("transient pooler error")
+        self.url, self.schema = url, schema
+
+
+def _fresh_current(monkeypatch, tmp_path, failures):
+    _FlakyPostgres.calls, _FlakyPostgres.failures = 0, failures
+    monkeypatch.setattr(storage, "_current", None)
+    monkeypatch.setattr(storage, "PostgresStorage", _FlakyPostgres)
+    monkeypatch.setattr(storage, "POSTGRES_RETRY_SECONDS", 0)
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:pw@localhost:5432/db")
+    monkeypatch.setenv("CANARY_RUNS_DIR", str(tmp_path))
+    return storage.current()
+
+
+def test_transient_postgres_failures_are_retried_before_falling_back(tmp_path, monkeypatch) -> None:
+    backend = _fresh_current(monkeypatch, tmp_path, failures=storage.POSTGRES_OPEN_ATTEMPTS - 1)
+
+    assert isinstance(backend, _FlakyPostgres)
+    assert _FlakyPostgres.calls == storage.POSTGRES_OPEN_ATTEMPTS
+
+
+def test_persistent_postgres_failure_falls_back_to_files_after_all_attempts(tmp_path, monkeypatch) -> None:
+    backend = _fresh_current(monkeypatch, tmp_path, failures=storage.POSTGRES_OPEN_ATTEMPTS)
+
+    assert isinstance(backend, FileStorage)
+    assert _FlakyPostgres.calls == storage.POSTGRES_OPEN_ATTEMPTS

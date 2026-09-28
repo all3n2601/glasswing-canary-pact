@@ -93,3 +93,15 @@ def client():
 @pytest.fixture
 def brief_json() -> dict:
     return sample_brief().model_dump(mode="json")
+
+
+# Developer shells may export demo settings; tests must not inherit them (a fake live call would then receive
+# arguments it does not accept, or a run would pick up the wrong mode). Tests that need one set it themselves.
+ISOLATED_ENV = ("CANARY_LLM_THINKING", "CANARY_CHALLENGER_THINKING", "CANARY_STRUCTURED_OUTPUT", "CANARY_SIM_MODE",
+                "CANARY_AGENT_CONTEXT_HOPS")
+
+
+@pytest.fixture(autouse=True)
+def isolated_demo_env(monkeypatch):
+    for name in ISOLATED_ENV:
+        monkeypatch.delenv(name, raising=False)

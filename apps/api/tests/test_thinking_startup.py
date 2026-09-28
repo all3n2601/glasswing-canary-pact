@@ -15,6 +15,8 @@ def test_valid_thinking_settings_pass_the_startup_check(monkeypatch) -> None:
 
 
 def test_invalid_thinking_fails_at_startup_and_refuses_live_runs(client, monkeypatch, caplog) -> None:
+    # Restores the module-level error even if an assertion below fails, so later tests are not refused.
+    monkeypatch.setattr(runtime, "thinking_error", None)
     from canary_api.app import app
 
     monkeypatch.setenv("CANARY_LLM_THINKING", "sometimes")

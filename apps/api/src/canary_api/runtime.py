@@ -6,6 +6,7 @@ from pathlib import Path
 from contextvars import ContextVar
 
 from agent_orchestration import AgentLLM, DecisionIntake
+from agent_orchestration.context import context_hops
 from agent_orchestration.llm import structured_output_mode, thinking_enabled
 from agent_orchestration.orchestrator import simulation_mode
 from contracts_py.twin import OrganizationSettings, Twin
@@ -134,6 +135,7 @@ def check_sim_mode() -> str | None:
     global sim_mode_error
     try:
         simulation_mode()
+        context_hops()  # a bad value would otherwise fail every agent's context build mid-run
         sim_mode_error = None
     except ValueError as exc:
         sim_mode_error = str(exc)
